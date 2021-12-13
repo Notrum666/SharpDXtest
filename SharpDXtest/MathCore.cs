@@ -10,12 +10,6 @@ namespace SharpDXtest
     {
         public static Vector2f zero { get { return new Vector2f(); } }
 
-        // x - right, y - forward
-        public static Vector2f right { get { return new Vector2f(1, 0); } }
-        public static Vector2f left { get { return new Vector2f(-1, 0); } }
-        public static Vector2f forward { get { return new Vector2f(0, 1); } }
-        public static Vector2f back { get { return new Vector2f(0, -1); } }
-
         public float x { get; set; }
         public float y { get; set; }
         public Vector2f(float x = 0, float y = 0)
@@ -166,12 +160,6 @@ namespace SharpDXtest
     public struct Vector2
     {
         public static Vector2 zero { get { return new Vector2(); } }
-
-        // x - right, y - forward
-        public static Vector2 right { get { return new Vector2(1, 0); } }
-        public static Vector2 left { get { return new Vector2(-1, 0); } }
-        public static Vector2 forward { get { return new Vector2(0, 1); } }
-        public static Vector2 back { get { return new Vector2(0, -1); } }
 
         public double x { get; set; }
         public double y { get; set; }
