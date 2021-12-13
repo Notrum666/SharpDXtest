@@ -32,7 +32,16 @@ namespace SharpDXtest
     }
     public struct Vector3f
     {
-        // TODO: fill struct
+        public static Vector3f zero { get { return new Vector3f(); } }
+
+        // x - right, y - forward, z - up
+        public static Vector3f right { get { return new Vector3f(1, 0, 0); } }
+        public static Vector3f left { get { return new Vector3f(-1, 0, 0); } }
+        public static Vector3f forward { get { return new Vector3f(0, 1, 0); } }
+        public static Vector3f back { get { return new Vector3f(0, -1, 0); } }
+        public static Vector3f up { get { return new Vector3f(0, 0, 1); } }
+        public static Vector3f down { get { return new Vector3f(0, 0, -1); } }
+
         public float x { get; set; }
         public float y { get; set; }
         public float z { get; set; }
@@ -47,6 +56,155 @@ namespace SharpDXtest
             x = vec.x;
             y = vec.y;
             this.z = z;
+        }
+
+        public static implicit operator Vector3(Vector3f vec) => new Vector3(vec.x, vec.y, vec.z);
+        public static explicit operator Vector3f(Vector3 vec) => new Vector3f((float)vec.x, (float)vec.y, (float)vec.z);
+
+        /// <summary>
+        /// Magnitude of vector. Equals to length()
+        /// </summary>
+        public float magnitude()
+        {
+            return (float)Math.Sqrt(squaredMagnitude());
+        }
+        /// <summary>
+        /// Magnitude of vector without root. Equals to squaredLength()
+        /// </summary>
+        public float squaredMagnitude()
+        {
+            return scalMul(this);
+        }
+        /// <summary>
+        /// Length of vector. Equals to magnitude()
+        /// </summary>
+        public float length()
+        {
+            return magnitude();
+        }
+        /// <summary>
+        /// Length of vector without root. Equals to squaredMagnitude()
+        /// </summary>
+        public float squaredLength()
+        {
+            return squaredMagnitude();
+        }
+        /// <summary>
+        /// Checks if vector small enough to be considered a zero vector
+        /// </summary>
+        public bool isZero()
+        {
+            return squaredMagnitude() < Constants.Epsilon;
+        }
+        public static Vector3f operator +(Vector3f v1, Vector3f v2)
+        {
+            return new Vector3f(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+        }
+        public static Vector3f operator -(Vector3f v1, Vector3f v2)
+        {
+            return new Vector3f(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+        }
+        public static Vector3f operator *(Vector3f vec, float value)
+        {
+            return new Vector3f(vec.x * value, vec.y * value, vec.z * value);
+        }
+        public static Vector3f operator *(float value, Vector3f vec)
+        {
+            return new Vector3f(vec.x * value, vec.y * value, vec.z * value);
+        }
+        public static Vector3f operator /(Vector3f vec, float value)
+        {
+            return new Vector3f(vec.x / value, vec.y / value, vec.z / value);
+        }
+        /// <summary>
+        /// Scalar multiplication
+        /// </summary>
+        public float scalMul(Vector3f vec)
+        {
+            return x * vec.x + y * vec.y + z * vec.z;
+        }
+        /// <summary>
+        /// Scalar multiplication
+        /// </summary>
+        public static float operator *(Vector3f v1, Vector3f v2)
+        {
+            return v1.scalMul(v2);
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public Vector3f vecMul(Vector3f vec)
+        {
+            return new Vector3f(y * vec.z - z * vec.y, x * vec.z - z * vec.x, x * vec.y - y * vec.x);
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public static Vector3f operator %(Vector3f v1, Vector3f v2)
+        {
+            return v1.vecMul(v2);
+        }
+        /// <summary>
+        /// Component multiplication
+        /// </summary>
+        /// <returns>New vector - (x1*x2, y1*y2, z1*z2)</returns>
+        public Vector3f compMul(Vector3f vec)
+        {
+            return new Vector3f(x * vec.x, y * vec.y, z * vec.z);
+        }
+        /// <summary>
+        /// Returns normalized copy of this vector
+        /// </summary>
+        public Vector3f normalized()
+        {
+            return this / magnitude();
+        }
+        /// <summary>
+        /// Normalizes this vector
+        /// </summary>
+        public void normalize()
+        {
+            float magn = magnitude();
+            x /= magn;
+            y /= magn;
+            z /= magn;
+        }
+        /// <summary>
+        /// Checks if vectors same enough to be considered equal
+        /// </summary>
+        public bool equals(Vector3f vec)
+        {
+            return (vec - this).isZero();
+        }
+        /// <summary>
+        /// Projects vector on another vector
+        /// </summary>
+        public Vector3f projectOnVector(Vector3f vec)
+        {
+            if (vec.isZero())
+                return Vector3f.zero;
+            return vec * (this * vec / vec.squaredMagnitude());
+        }
+        /// <summary>
+        /// Projects vector on flat
+        /// </summary>
+        /// <param name="flatNorm">Normal vector to flat (not necessary normalized)</param>
+        /// <returns></returns>
+        public Vector3f projectOnFlat(Vector3f flatNorm)
+        {
+            return this - flatNorm * (this * flatNorm / flatNorm.squaredMagnitude());
+        }
+        /// <summary>
+        /// Checks if vectors are located on parallel lines
+        /// </summary>
+        /// <returns>True if vectors are located on parallel lines, false otherwise</returns>
+        public bool isCollinearTo(Vector3f vec)
+        {
+            return (this % vec).isZero();
+        }
+        public override string ToString()
+        {
+            return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
         }
     }
     public struct Vector3
