@@ -96,9 +96,9 @@ namespace SharpDXtest
             device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFFFFFFFF));
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
 
-            pipeline.UpdateUniform("model", Matrix4f.Identity);
-            pipeline.UpdateUniform("view", Matrix4f.Identity);
-            pipeline.UpdateUniform("proj", Matrix4f.Identity);
+            pipeline.UpdateUniform("model", Matrix4x4f.Identity);
+            pipeline.UpdateUniform("view", Matrix4x4f.Identity);
+            pipeline.UpdateUniform("proj", Matrix4x4f.Identity);
             pipeline.Use();
 
             obj.Render();
