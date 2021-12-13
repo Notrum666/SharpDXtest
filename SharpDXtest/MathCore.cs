@@ -172,6 +172,10 @@ namespace SharpDXtest
         {
             return "(" + x.ToString() + ", " + y.ToString() + ")";
         }
+        public string ToString(string format)
+        {
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ")";
+        }
     }
     public struct Vector2
     {
@@ -336,6 +340,10 @@ namespace SharpDXtest
         public override string ToString()
         {
             return "(" + x.ToString() + ", " + y.ToString() + ")";
+        }
+        public string ToString(string format)
+        {
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ")";
         }
     }
     public struct Vector3f
@@ -530,6 +538,10 @@ namespace SharpDXtest
         {
             return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
         }
+        public string ToString(string format)
+        {
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";
+        }
     }
     public struct Vector3
     {
@@ -719,6 +731,10 @@ namespace SharpDXtest
         {
             return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
         }
+        public string ToString(string format)
+        {
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";
+        }
     }
     public struct Matrix4x4f
     {
@@ -873,6 +889,13 @@ namespace SharpDXtest
                    "| " + v20.ToString() + " " + v21.ToString() + " " + v22.ToString() + " " + v23.ToString() + " |\n" +
                    "| " + v30.ToString() + " " + v31.ToString() + " " + v32.ToString() + " " + v33.ToString() + " |";
         }
+        public string ToString(string format)
+        {
+            return "| " + v00.ToString(format) + " " + v01.ToString(format) + " " + v02.ToString(format) + " " + v03.ToString(format) + " |\n" +
+                   "| " + v10.ToString(format) + " " + v11.ToString(format) + " " + v12.ToString(format) + " " + v13.ToString(format) + " |\n" +
+                   "| " + v20.ToString(format) + " " + v21.ToString(format) + " " + v22.ToString(format) + " " + v23.ToString(format) + " |\n" +
+                   "| " + v30.ToString(format) + " " + v31.ToString(format) + " " + v32.ToString(format) + " " + v33.ToString(format) + " |";
+        }
     }
     public struct Matrix4x4
     {
@@ -1016,6 +1039,13 @@ namespace SharpDXtest
                    "| " + v10.ToString() + " " + v11.ToString() + " " + v12.ToString() + " " + v13.ToString() + " |\n" +
                    "| " + v20.ToString() + " " + v21.ToString() + " " + v22.ToString() + " " + v23.ToString() + " |\n" +
                    "| " + v30.ToString() + " " + v31.ToString() + " " + v32.ToString() + " " + v33.ToString() + " |";
+        }
+        public string ToString(string format)
+        {
+            return "| " + v00.ToString(format) + " " + v01.ToString(format) + " " + v02.ToString(format) + " " + v03.ToString(format) + " |\n" +
+                   "| " + v10.ToString(format) + " " + v11.ToString(format) + " " + v12.ToString(format) + " " + v13.ToString(format) + " |\n" +
+                   "| " + v20.ToString(format) + " " + v21.ToString(format) + " " + v22.ToString(format) + " " + v23.ToString(format) + " |\n" +
+                   "| " + v30.ToString(format) + " " + v31.ToString(format) + " " + v32.ToString(format) + " " + v33.ToString(format) + " |";
         }
     }
     // do NOT ask me about this, i don't give a fuck how this works.
@@ -1188,6 +1218,10 @@ namespace SharpDXtest
         public override string ToString()
         {
             return "(" + w.ToString() + ", " + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
+        }
+        public string ToString(string format)
+        {
+            return "(" + w.ToString(format) + ", " + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";
         }
     }
 }
