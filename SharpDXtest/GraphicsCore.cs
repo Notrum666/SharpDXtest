@@ -23,14 +23,16 @@ namespace SharpDXtest
 
         private static Model obj;
 
+        private static ShaderPipeline pipeline;
+
         public static void Init(Control control)
         {
             InitDirectX(control);
 
             obj = AssetsManager.LoadModelsFile("Assets\\Models\\triangle.obj")["triangle"];
 
-            AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
-                                                        Shader.Create("BaseAssets\\Shaders\\default.fsh")).Use();
+            pipeline = AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
+                                                                   Shader.Create("BaseAssets\\Shaders\\default.fsh"));
 
             device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, control.ClientSize.Width, control.ClientSize.Height, 0.0f, 1.0f));
             device.ImmediateContext.OutputMerger.SetTargets(depthView, renderTarget);
@@ -93,6 +95,11 @@ namespace SharpDXtest
         {
             device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFFFFFFFF));
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
+
+            pipeline.UpdateUniform("model", Matrix4f.Identity);
+            pipeline.UpdateUniform("view", Matrix4f.Identity);
+            pipeline.UpdateUniform("proj", Matrix4f.Identity);
+            pipeline.Use();
 
             obj.Render();
 

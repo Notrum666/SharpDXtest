@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Linq;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
@@ -168,22 +170,99 @@ namespace SharpDXtest
     public abstract class Shader
     {
         public abstract ShaderType Type { get; }
+        protected List<ShaderBuffer> buffers = new List<ShaderBuffer>();
+
         public abstract void Use();
+        public bool hasVariable(string name)
+        {
+            foreach (ShaderBuffer buffer in buffers)
+                foreach (ShaderVariable variable in buffer.variables)
+                    if (variable.name == name)
+                        return true;
+
+            return false;
+        }
+        public void updateUniform(string name, object value)
+        {
+            foreach (ShaderBuffer buffer in buffers)
+                foreach (ShaderVariable variable in buffer.variables)
+                    if (variable.name == name)
+                    {
+                        if (variable.size != Marshal.SizeOf(value))
+                            throw new ArgumentException("Value must be the size of " + variable.size.ToString() + " bytes.");
+                        variable.value = value;
+                        buffer.invalidated = true;
+                        return;
+                    }
+            throw new ArgumentException("Variable does not exists.");
+        }
+        public bool tryUpdateUniform(string name, object value)
+        {
+            foreach (ShaderBuffer buffer in buffers)
+                foreach (ShaderVariable variable in buffer.variables)
+                    if (variable.name == name)
+                    {
+                        if (variable.size != Marshal.SizeOf(value))
+                            return false;
+                        variable.value = value;
+                        buffer.invalidated = true;
+                        return true;
+                    }
+            return false;
+        }
+        protected void generateBuffers(ShaderReflection reflection)
+        {
+            for (int i = 0; i < reflection.Description.ConstantBuffers; i++)
+            {
+                ConstantBuffer buffer = reflection.GetConstantBuffer(i);
+                ShaderBuffer shaderBuffer = new ShaderBuffer();
+                shaderBuffer.buffer = new Buffer(GraphicsCore.CurrentDevice, buffer.Description.Size, ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
+                for (int j = 0; j < buffer.Description.VariableCount; j++)
+                {
+                    ShaderReflectionVariable variable = buffer.GetVariable(j);
+                    shaderBuffer.variables.Add(new ShaderVariable() { name = variable.Description.Name, size = variable.Description.Size, value = null });
+                }
+                buffers.Add(shaderBuffer);
+            }
+        }
+        protected void updateBuffers()
+        {
+            foreach (ShaderBuffer buf in buffers)
+                if (buf.invalidated)
+                {
+                    DataStream stream;
+                    GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.buffer, 0, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out stream);
+                    foreach (ShaderVariable variable in buf.variables)
+                    {
+                        if (variable.value == null)
+                        {
+                            stream.Position += variable.size;
+                            continue;
+                        }
+                        Type type = variable.value.GetType();
+                        IntPtr ptr = stream.PositionPointer;
+                        Marshal.StructureToPtr(variable.value, ptr, true);
+                        stream.Position += variable.size;
+                    }
+                    GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.buffer, 0);
+                    buf.invalidated = false;
+                }
+        }
         public static Shader Create(string path)
         {
             string extension = Path.GetExtension(path);
             switch (extension)
             {
                 case ".vsh":
-                    return new Shader_Vertex(path);
+                    return Create(path, ShaderType.VertexShader);
                 case ".hsh":
-                    return new Shader_Hull(path);
+                    return Create(path, ShaderType.HullShader);
                 case ".dsh":
-                    return new Shader_Domain(path);
+                    return Create(path, ShaderType.DomainShader);
                 case ".gsh":
-                    return new Shader_Geometry(path);
+                    return Create(path, ShaderType.GeometryShader);
                 case ".fsh":
-                    return new Shader_Fragment(path);
+                    return Create(path, ShaderType.FragmentShader);
                 default:
                     throw new ArgumentException("Can't get shader type from extension, consider using other Shader.Create() overload.");
             }
@@ -207,12 +286,25 @@ namespace SharpDXtest
             }
         }
 
-        private Buffer buf;
+        protected class ShaderBuffer
+        {
+            public List<ShaderVariable> variables = new List<ShaderVariable>();
+            public Buffer buffer;
+            public bool invalidated = true;
+        }
+        protected class ShaderVariable
+        {
+            public string name;
+            public int size;
+            public object value;
+        }
+
         private class Shader_Vertex : Shader
         {
             public override ShaderType Type { get => ShaderType.VertexShader; }
             private InputLayout layout;
             private VertexShader shader;
+
             public Shader_Vertex(string path)
             {
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "vs_5_0");
@@ -293,33 +385,15 @@ namespace SharpDXtest
                 }
                 layout = new InputLayout(GraphicsCore.CurrentDevice, bytecode, inputDescription.ToArray());
                 shader = new VertexShader(GraphicsCore.CurrentDevice, bytecode);
-
-                buf = null;
-                for (int i = 0; i < reflection.Description.ConstantBuffers; i++)
-                {
-                    ConstantBuffer buffer = reflection.GetConstantBuffer(i);
-                    buf = new Buffer(GraphicsCore.CurrentDevice, buffer.Description.Size, ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
-                    for (int j = 0; j < buffer.Description.VariableCount; j++)
-                    {
-                        ShaderReflectionVariable variable = buffer.GetVariable(j);
-                    }
-                }
+                generateBuffers(reflection);
             }
             public override void Use()
             {
-                GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.InputLayout = layout;
-                GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.Set(shader);
-                if (buf != null)
-                {
-                    Matrix4f mat = Matrix4f.Identity;
-                    mat.v00 = 0.5f;
-                    mat.v11 = 0.5f;
-                    mat.v30 = 0.5f;
-                    GraphicsCore.CurrentDevice.ImmediateContext.UpdateSubresource(new[] { mat }, buf, 0);
-                    //GraphicsCore.CurrentDevice.ImmediateContext.UpdateSubresource(new[] { Matrix4f.Identity }, buf, 1);
-                    //GraphicsCore.CurrentDevice.ImmediateContext.UpdateSubresource(new[] { Matrix4f.Identity }, buf, 2);
-                    GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetConstantBuffer(0, buf);
-                }
+                DeviceContext context = GraphicsCore.CurrentDevice.ImmediateContext;
+                context.InputAssembler.InputLayout = layout;
+                context.VertexShader.Set(shader);
+                updateBuffers();
+                context.VertexShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Hull : Shader
@@ -328,11 +402,16 @@ namespace SharpDXtest
             private HullShader shader;
             public Shader_Hull(string path)
             {
-                shader = new HullShader(GraphicsCore.CurrentDevice, ShaderBytecode.CompileFromFile(path, "main", "hs_5_0"));
+                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "hs_5_0");
+                ShaderReflection reflection = new ShaderReflection(bytecode);
+                shader = new HullShader(GraphicsCore.CurrentDevice, bytecode);
+                generateBuffers(reflection);
             }
             public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.HullShader.Set(shader);
+                updateBuffers();
+                GraphicsCore.CurrentDevice.ImmediateContext.HullShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Domain : Shader
@@ -341,11 +420,16 @@ namespace SharpDXtest
             private DomainShader shader;
             public Shader_Domain(string path)
             {
-                shader = new DomainShader(GraphicsCore.CurrentDevice, ShaderBytecode.CompileFromFile(path, "main", "ds_5_0"));
+                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "ds_5_0");
+                ShaderReflection reflection = new ShaderReflection(bytecode);
+                shader = new DomainShader(GraphicsCore.CurrentDevice, bytecode);
+                generateBuffers(reflection);
             }
             public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.Set(shader);
+                updateBuffers();
+                GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Geometry : Shader
@@ -354,11 +438,16 @@ namespace SharpDXtest
             private GeometryShader shader;
             public Shader_Geometry(string path)
             {
-                shader = new GeometryShader(GraphicsCore.CurrentDevice, ShaderBytecode.CompileFromFile(path, "main", "gs_5_0"));
+                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "gs_5_0");
+                ShaderReflection reflection = new ShaderReflection(bytecode);
+                shader = new GeometryShader(GraphicsCore.CurrentDevice, bytecode);
+                generateBuffers(reflection);
             }
             public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.Set(shader);
+                updateBuffers();
+                GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Fragment : Shader
@@ -367,11 +456,16 @@ namespace SharpDXtest
             private PixelShader shader;
             public Shader_Fragment(string path)
             {
-                shader = new PixelShader(GraphicsCore.CurrentDevice, ShaderBytecode.CompileFromFile(path, "main", "ps_5_0"));
+                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "ps_5_0");
+                ShaderReflection reflection = new ShaderReflection(bytecode);
+                shader = new PixelShader(GraphicsCore.CurrentDevice, bytecode);
+                generateBuffers(reflection);
             }
             public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.Set(shader);
+                updateBuffers();
+                GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
     }
@@ -392,6 +486,31 @@ namespace SharpDXtest
                 throw new ArgumentException("Vertex shader is required for shader pipeline.");
             if (!shaderTypes.Contains(ShaderType.FragmentShader))
                 throw new ArgumentException("Fragment shader is required for shader pipeline.");
+        }
+        public void UpdateUniform(string name, object value)
+        {
+            bool exists = false;
+            foreach (Shader shader in shaders)
+                if (shader.hasVariable(name))
+                {
+                    shader.updateUniform(name, value);
+                    exists = true;
+                }
+            if (!exists)
+                throw new ArgumentException("Variable does not exists.");
+        }
+        public bool TryUpdateUniform(string name, object value)
+        {
+            bool exists = false;
+            foreach (Shader shader in shaders)
+                if (shader.hasVariable(name))
+                {
+                    shader.tryUpdateUniform(name, value);
+                    exists = true;
+                }
+            if (!exists)
+                return false;
+            return true;
         }
         public void Use()
         {
