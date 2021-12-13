@@ -17,6 +17,15 @@ namespace SharpDXtest
             this.x = x;
             this.y = y;
         }
+        public Vector2f(float[] values)
+        {
+            if (values.Length != 2)
+                throw new Exception("Array length must be 2.");
+
+            x = values[0];
+            y = values[1];
+        }
+
         public static implicit operator Vector3f(Vector2f vec) => new Vector3f(vec);
         public static implicit operator Vector2(Vector2f vec) => new Vector2(vec.x, vec.y);
         public static explicit operator Vector2f(Vector2 vec) => new Vector2f((float)vec.x, (float)vec.y);
@@ -168,6 +177,15 @@ namespace SharpDXtest
             this.x = x;
             this.y = y;
         }
+        public Vector2(double[] values)
+        {
+            if (values.Length != 2)
+                throw new Exception("Array length must be 2.");
+
+            x = values[0];
+            y = values[1];
+        }
+
         public static implicit operator Vector3(Vector2 vec) => new Vector3(vec);
 
         /// <summary>
@@ -332,6 +350,15 @@ namespace SharpDXtest
             x = vec.x;
             y = vec.y;
             this.z = z;
+        }
+        public Vector3f(params float[] values)
+        {
+            if (values.Length != 3)
+                throw new Exception("Array length must be 3.");
+
+            x = values[0];
+            y = values[1];
+            z = values[2];
         }
 
         public static implicit operator Vector3(Vector3f vec) => new Vector3(vec.x, vec.y, vec.z);
@@ -509,6 +536,15 @@ namespace SharpDXtest
             x = vec.x;
             y = vec.y;
             this.z = z;
+        }
+        public Vector3(params double[] values)
+        {
+            if (values.Length != 3)
+                throw new Exception("Array length must be 3.");
+
+            x = values[0];
+            y = values[1];
+            z = values[2];
         }
         /// <summary>
         /// Magnitude of vector. Equals to length()
