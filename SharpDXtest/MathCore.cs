@@ -42,7 +42,7 @@ namespace SharpDXtest
         /// </summary>
         public float squaredMagnitude()
         {
-            return scalMul(this);
+            return dotMul(this);
         }
         /// <summary>
         /// Length of vector. Equals to magnitude()
@@ -88,7 +88,7 @@ namespace SharpDXtest
         /// <summary>
         /// Scalar multiplication
         /// </summary>
-        public float scalMul(Vector2f vec)
+        public float dotMul(Vector2f vec)
         {
             return x * vec.x + y * vec.y;
         }
@@ -97,7 +97,7 @@ namespace SharpDXtest
         /// </summary>
         public static float operator *(Vector2f v1, Vector2f v2)
         {
-            return v1.scalMul(v2);
+            return v1.dotMul(v2);
         }
         /// <summary>
         /// Component multiplication
@@ -145,6 +145,13 @@ namespace SharpDXtest
         public float vecMul(Vector2f vec)
         {
             return x * vec.y - y * vec.x;
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public float cross(Vector2f vec)
+        {
+            return vecMul(vec);
         }
         /// <summary>
         /// Vector multiplication
@@ -200,7 +207,7 @@ namespace SharpDXtest
         /// </summary>
         public double squaredMagnitude()
         {
-            return scalMul(this);
+            return dotMul(this);
         }
         /// <summary>
         /// Length of vector. Equals to magnitude()
@@ -246,7 +253,7 @@ namespace SharpDXtest
         /// <summary>
         /// Scalar multiplication
         /// </summary>
-        public double scalMul(Vector2 vec)
+        public double dotMul(Vector2 vec)
         {
             return x * vec.x + y * vec.y;
         }
@@ -255,7 +262,7 @@ namespace SharpDXtest
         /// </summary>
         public static double operator *(Vector2 v1, Vector2 v2)
         {
-            return v1.scalMul(v2);
+            return v1.dotMul(v2);
         }
         /// <summary>
         /// Component multiplication
@@ -303,6 +310,13 @@ namespace SharpDXtest
         public double vecMul(Vector2 vec)
         {
             return x * vec.y - y * vec.x;
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public double cross(Vector2 vec)
+        {
+            return vecMul(vec);
         }
         /// <summary>
         /// Vector multiplication
@@ -376,7 +390,7 @@ namespace SharpDXtest
         /// </summary>
         public float squaredMagnitude()
         {
-            return scalMul(this);
+            return dotMul(this);
         }
         /// <summary>
         /// Length of vector. Equals to magnitude()
@@ -422,7 +436,7 @@ namespace SharpDXtest
         /// <summary>
         /// Scalar multiplication
         /// </summary>
-        public float scalMul(Vector3f vec)
+        public float dotMul(Vector3f vec)
         {
             return x * vec.x + y * vec.y + z * vec.z;
         }
@@ -431,7 +445,7 @@ namespace SharpDXtest
         /// </summary>
         public static float operator *(Vector3f v1, Vector3f v2)
         {
-            return v1.scalMul(v2);
+            return v1.dotMul(v2);
         }
         /// <summary>
         /// Vector multiplication
@@ -439,6 +453,13 @@ namespace SharpDXtest
         public Vector3f vecMul(Vector3f vec)
         {
             return new Vector3f(y * vec.z - z * vec.y, x * vec.z - z * vec.x, x * vec.y - y * vec.x);
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public Vector3f cross(Vector3f vec)
+        {
+            return vecMul(vec);
         }
         /// <summary>
         /// Vector multiplication
@@ -558,7 +579,7 @@ namespace SharpDXtest
         /// </summary>
         public double squaredMagnitude()
         {
-            return scalMul(this);
+            return dotMul(this);
         }
         /// <summary>
         /// Length of vector. Equals to magnitude()
@@ -604,7 +625,7 @@ namespace SharpDXtest
         /// <summary>
         /// Scalar multiplication
         /// </summary>
-        public double scalMul(Vector3 vec)
+        public double dotMul(Vector3 vec)
         {
             return x * vec.x + y * vec.y + z * vec.z;
         }
@@ -613,7 +634,7 @@ namespace SharpDXtest
         /// </summary>
         public static double operator *(Vector3 v1, Vector3 v2)
         {
-            return v1.scalMul(v2);
+            return v1.dotMul(v2);
         }
         /// <summary>
         /// Vector multiplication
@@ -621,6 +642,13 @@ namespace SharpDXtest
         public Vector3 vecMul(Vector3 vec)
         {
             return new Vector3(y * vec.z - z * vec.y, x * vec.z - z * vec.x, x * vec.y - y * vec.x);
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public Vector3 cross(Vector3 vec)
+        {
+            return vecMul(vec);
         }
         /// <summary>
         /// Vector multiplication
