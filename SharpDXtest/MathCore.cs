@@ -709,27 +709,27 @@ namespace SharpDXtest
             v33 = values[15];
         }
     }
-    public struct Matrix4
+    public struct Matrix4x4
     {
-        public double v00; // [rowIndex, columnIndex]
-        public double v01;
-        public double v02;
-        public double v03;
-        public double v10;
-        public double v11;
-        public double v12;
-        public double v13;
-        public double v20;
-        public double v21;
-        public double v22;
-        public double v23;
-        public double v30;
-        public double v31;
-        public double v32;
-        public double v33;
+        public double v00 { get; set; } // [rowIndex, columnIndex]
+        public double v01 { get; set; }
+        public double v02 { get; set; }
+        public double v03 { get; set; }
+        public double v10 { get; set; }
+        public double v11 { get; set; }
+        public double v12 { get; set; }
+        public double v13 { get; set; }
+        public double v20 { get; set; }
+        public double v21 { get; set; }
+        public double v22 { get; set; }
+        public double v23 { get; set; }
+        public double v30 { get; set; }
+        public double v31 { get; set; }
+        public double v32 { get; set; }
+        public double v33 { get; set; }
 
-        public static Matrix4 Identity { get { return new Matrix4(new double[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }); } }
-        public Matrix4(double[] values)
+        public static Matrix4x4 Identity { get { return new Matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
+        public Matrix4x4(params double[] values)
         {
             if (values.Length != 16)
                 throw new Exception("Array length must be 16.");
@@ -753,50 +753,50 @@ namespace SharpDXtest
         /// <summary>
         /// Returns transposed copy of this matrix
         /// </summary>
-        public Matrix4 transposed()
+        public Matrix4x4 transposed()
         {
-            return new Matrix4(new double[] { v00, v10, v20, v30,
-                                              v01, v11, v21, v31,
-                                              v02, v12, v22, v32,
-                                              v03, v13, v32, v33 });
+            return new Matrix4x4(v00, v10, v20, v30,
+                                 v01, v11, v21, v31,
+                                 v02, v12, v22, v32,
+                                 v03, v13, v32, v33 );
         }
-        public static Matrix4 operator *(Matrix4 m1, Matrix4 m2)
+        public static Matrix4x4 operator *(Matrix4x4 m1, Matrix4x4 m2)
         {
-            return new Matrix4(new double[] { m1.v00*m2.v00+m1.v01*m2.v10+m1.v02*m2.v20+m1.v03*m2.v30,
-                                              m1.v00*m2.v01+m1.v01*m2.v11+m1.v02*m2.v21+m1.v03*m2.v31,
-                                              m1.v00*m2.v02+m1.v01*m2.v12+m1.v02*m2.v22+m1.v03*m2.v32,
-                                              m1.v00*m2.v03+m1.v01*m2.v13+m1.v02*m2.v23+m1.v03*m2.v33,
-
-                                              m1.v10*m2.v00+m1.v11*m2.v10+m1.v12*m2.v20+m1.v13*m2.v30,
-                                              m1.v10*m2.v01+m1.v11*m2.v11+m1.v12*m2.v21+m1.v13*m2.v31,
-                                              m1.v10*m2.v02+m1.v11*m2.v12+m1.v12*m2.v22+m1.v13*m2.v32,
-                                              m1.v10*m2.v03+m1.v11*m2.v13+m1.v12*m2.v23+m1.v13*m2.v33,
-
-                                              m1.v20*m2.v00+m1.v21*m2.v10+m1.v22*m2.v20+m1.v23*m2.v30,
-                                              m1.v20*m2.v01+m1.v21*m2.v11+m1.v22*m2.v21+m1.v23*m2.v31,
-                                              m1.v20*m2.v02+m1.v21*m2.v12+m1.v22*m2.v22+m1.v23*m2.v32,
-                                              m1.v20*m2.v03+m1.v21*m2.v13+m1.v22*m2.v23+m1.v23*m2.v33,
-
-                                              m1.v30*m2.v00+m1.v31*m2.v10+m1.v32*m2.v20+m1.v33*m2.v30,
-                                              m1.v30*m2.v01+m1.v31*m2.v11+m1.v32*m2.v21+m1.v33*m2.v31,
-                                              m1.v30*m2.v02+m1.v31*m2.v12+m1.v32*m2.v22+m1.v33*m2.v32,
-                                              m1.v30*m2.v03+m1.v31*m2.v13+m1.v32*m2.v23+m1.v33*m2.v33 });
+            return new Matrix4x4(m1.v00*m2.v00 + m1.v01*m2.v10 + m1.v02*m2.v20 + m1.v03*m2.v30,
+                                 m1.v00*m2.v01 + m1.v01*m2.v11 + m1.v02*m2.v21 + m1.v03*m2.v31,
+                                 m1.v00*m2.v02 + m1.v01*m2.v12 + m1.v02*m2.v22 + m1.v03*m2.v32,
+                                 m1.v00*m2.v03 + m1.v01*m2.v13 + m1.v02*m2.v23 + m1.v03*m2.v33,
+                                                                                 
+                                 m1.v10*m2.v00 + m1.v11*m2.v10 + m1.v12*m2.v20 + m1.v13*m2.v30,
+                                 m1.v10*m2.v01 + m1.v11*m2.v11 + m1.v12*m2.v21 + m1.v13*m2.v31,
+                                 m1.v10*m2.v02 + m1.v11*m2.v12 + m1.v12*m2.v22 + m1.v13*m2.v32,
+                                 m1.v10*m2.v03 + m1.v11*m2.v13 + m1.v12*m2.v23 + m1.v13*m2.v33,
+                                                                                 
+                                 m1.v20*m2.v00 + m1.v21*m2.v10 + m1.v22*m2.v20 + m1.v23*m2.v30,
+                                 m1.v20*m2.v01 + m1.v21*m2.v11 + m1.v22*m2.v21 + m1.v23*m2.v31,
+                                 m1.v20*m2.v02 + m1.v21*m2.v12 + m1.v22*m2.v22 + m1.v23*m2.v32,
+                                 m1.v20*m2.v03 + m1.v21*m2.v13 + m1.v22*m2.v23 + m1.v23*m2.v33,
+                                                                                 
+                                 m1.v30*m2.v00 + m1.v31*m2.v10 + m1.v32*m2.v20 + m1.v33*m2.v30,
+                                 m1.v30*m2.v01 + m1.v31*m2.v11 + m1.v32*m2.v21 + m1.v33*m2.v31,
+                                 m1.v30*m2.v02 + m1.v31*m2.v12 + m1.v32*m2.v22 + m1.v33*m2.v32,
+                                 m1.v30*m2.v03 + m1.v31*m2.v13 + m1.v32*m2.v23 + m1.v33*m2.v33);
         }
-        public static Matrix4 operator *(Matrix4 mat, double value)
+        public static Matrix4x4 operator *(Matrix4x4 mat, double value)
         {
-            return new Matrix4(new double[] { mat.v00 * value, mat.v01 * value, mat.v02 * value, mat.v03 * value,
-                                              mat.v10 * value, mat.v11 * value, mat.v12 * value, mat.v13 * value,
-                                              mat.v20 * value, mat.v21 * value, mat.v22 * value, mat.v23 * value,
-                                              mat.v30 * value, mat.v31 * value, mat.v32 * value, mat.v33 * value });
+            return new Matrix4x4(mat.v00 * value, mat.v01 * value, mat.v02 * value, mat.v03 * value,
+                                 mat.v10 * value, mat.v11 * value, mat.v12 * value, mat.v13 * value,
+                                 mat.v20 * value, mat.v21 * value, mat.v22 * value, mat.v23 * value,
+                                 mat.v30 * value, mat.v31 * value, mat.v32 * value, mat.v33 * value );
         }
-        public static Matrix4 operator /(Matrix4 mat, double value)
+        public static Matrix4x4 operator /(Matrix4x4 mat, double value)
         {
             if (value == 0)
                 throw new DivideByZeroException();
-            return new Matrix4(new double[] { mat.v00 / value, mat.v01 / value, mat.v02 / value, mat.v03 / value,
-                                              mat.v10 / value, mat.v11 / value, mat.v12 / value, mat.v13 / value,
-                                              mat.v20 / value, mat.v21 / value, mat.v22 / value, mat.v23 / value,
-                                              mat.v30 / value, mat.v31 / value, mat.v32 / value, mat.v33 / value });
+            return new Matrix4x4(mat.v00 / value, mat.v01 / value, mat.v02 / value, mat.v03 / value,
+                                 mat.v10 / value, mat.v11 / value, mat.v12 / value, mat.v13 / value,
+                                 mat.v20 / value, mat.v21 / value, mat.v22 / value, mat.v23 / value,
+                                 mat.v30 / value, mat.v31 / value, mat.v32 / value, mat.v33 / value );
         }
         /// <summary>
         /// Multiplies matrix by vector, where vector represents point in space (vector = (x, y, z, 1))
@@ -816,7 +816,7 @@ namespace SharpDXtest
                                v10 * vec.x + v11 * vec.y + v12 * vec.z,
                                v20 * vec.x + v21 * vec.y + v22 * vec.z);
         }
-        public Matrix4 inversed()
+        public Matrix4x4 inversed()
         {
             double det00 = (v11 * (v22 * v33 - v23 * v32) - v12 * (v21 * v33 - v23 * v31) + v13 * (v21 * v32 - v22 * v31));
             double det01 = (v10 * (v22 * v33 - v23 * v32) - v12 * (v20 * v33 - v23 * v30) + v13 * (v20 * v32 - v22 * v30));
@@ -840,10 +840,10 @@ namespace SharpDXtest
             double det32 = (v00 * (v11 * v23 - v13 * v21) - v01 * (v10 * v23 - v13 * v20) + v03 * (v10 * v21 - v11 * v20));
             double det33 = (v00 * (v11 * v22 - v12 * v21) - v01 * (v10 * v22 - v12 * v20) + v02 * (v10 * v21 - v11 * v20));
 
-            return new Matrix4(new double[] {  det00, -det10,  det20, -det30,
-                                              -det01,  det11, -det21,  det31,
-                                               det02, -det12,  det22, -det32,
-                                              -det03,  det13, -det23,  det33 }) / determinant;
+            return new Matrix4x4( det00, -det10,  det20, -det30,
+                                 -det01,  det11, -det21,  det31,
+                                  det02, -det12,  det22, -det32,
+                                 -det03,  det13, -det23,  det33 ) / determinant;
         }
         public override string ToString()
         {
@@ -982,12 +982,12 @@ namespace SharpDXtest
         /// <summary>
         /// Returns rotation matrix equal to this quaternion
         /// </summary>
-        public Matrix4 toRotationMatrix()
+        public Matrix4x4 toRotationMatrix()
         {
-            return new Matrix4(new double[] { 1-2*(y*y+z*z), 2*(x*y-w*z), 2*(x*z+w*y), 0,
-                                              2*(x*y+w*z), 1-2*(x*x+z*z), 2*(y*z-w*x), 0,
-                                              2*(x*z-w*y), 2*(y*z+w*x), 1-2*(x*x+y*y), 0,
-                                              0, 0, 0, 1 });
+            return new Matrix4x4(1-2*(y*y+z*z),   2*(x*y-w*z),   2*(x*z+w*y), 0,
+                                   2*(x*y+w*z), 1-2*(x*x+z*z),   2*(y*z-w*x), 0,
+                                   2*(x*z-w*y),   2*(y*z+w*x), 1-2*(x*x+y*y), 0,
+                                             0,             0,             0, 1 );
         }
         /// <summary>
         /// Returns quaternion represented by rotation around axis
