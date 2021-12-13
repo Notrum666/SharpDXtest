@@ -20,7 +20,14 @@ namespace SharpDXtest
     }
     public struct Vector2
     {
-        // TODO: fill struct
+        public static Vector2 zero { get { return new Vector2(); } }
+
+        // x - right, y - forward
+        public static Vector2 right { get { return new Vector2(1, 0); } }
+        public static Vector2 left { get { return new Vector2(-1, 0); } }
+        public static Vector2 forward { get { return new Vector2(0, 1); } }
+        public static Vector2 back { get { return new Vector2(0, -1); } }
+
         public double x { get; set; }
         public double y { get; set; }
         public Vector2(double x = 0, double y = 0)
@@ -29,6 +36,142 @@ namespace SharpDXtest
             this.y = y;
         }
         public static implicit operator Vector3(Vector2 vec) => new Vector3(vec);
+
+        /// <summary>
+        /// Magnitude of vector. Equals to length()
+        /// </summary>
+        public double magnitude()
+        {
+            return Math.Sqrt(squaredMagnitude());
+        }
+        /// <summary>
+        /// Magnitude of vector without root. Equals to squaredLength()
+        /// </summary>
+        public double squaredMagnitude()
+        {
+            return scalMul(this);
+        }
+        /// <summary>
+        /// Length of vector. Equals to magnitude()
+        /// </summary>
+        public double length()
+        {
+            return magnitude();
+        }
+        /// <summary>
+        /// Length of vector without root. Equals to squaredMagnitude()
+        /// </summary>
+        public double squaredLength()
+        {
+            return squaredMagnitude();
+        }
+        /// <summary>
+        /// Checks if vector small enough to be considered a zero vector
+        /// </summary>
+        public bool isZero()
+        {
+            return squaredMagnitude() < Constants.Epsilon;
+        }
+        public static Vector2 operator +(Vector2 v1, Vector2 v2)
+        {
+            return new Vector2(v1.x + v2.x, v1.y + v2.y);
+        }
+        public static Vector2 operator -(Vector2 v1, Vector2 v2)
+        {
+            return new Vector2(v1.x - v2.x, v1.y - v2.y);
+        }
+        public static Vector2 operator *(Vector2 vec, double value)
+        {
+            return new Vector2(vec.x * value, vec.y * value);
+        }
+        public static Vector2 operator *(double value, Vector2 vec)
+        {
+            return new Vector2(vec.x * value, vec.y * value);
+        }
+        public static Vector2 operator /(Vector2 vec, double value)
+        {
+            return new Vector2(vec.x / value, vec.y / value);
+        }
+        /// <summary>
+        /// Scalar multiplication
+        /// </summary>
+        public double scalMul(Vector2 vec)
+        {
+            return x * vec.x + y * vec.y;
+        }
+        /// <summary>
+        /// Scalar multiplication
+        /// </summary>
+        public static double operator *(Vector2 v1, Vector2 v2)
+        {
+            return v1.scalMul(v2);
+        }
+        /// <summary>
+        /// Component multiplication
+        /// </summary>
+        /// <returns>New vector - (x1*x2, y1*y2)</returns>
+        public Vector2 compMul(Vector2 vec)
+        {
+            return new Vector2(x * vec.x, y * vec.y);
+        }
+        /// <summary>
+        /// Returns normalized copy of this vector
+        /// </summary>
+        public Vector2 normalized()
+        {
+            return this / magnitude();
+        }
+        /// <summary>
+        /// Normalizes this vector
+        /// </summary>
+        public void normalize()
+        {
+            double magn = magnitude();
+            x /= magn;
+            y /= magn;
+        }
+        /// <summary>
+        /// Checks if vectors same enough to be considered equal
+        /// </summary>
+        public bool equals(Vector2 vec)
+        {
+            return (vec - this).isZero();
+        }
+        /// <summary>
+        /// Projects vector on another vector
+        /// </summary>
+        public Vector2 projectOnVector(Vector2 vec)
+        {
+            if (vec.isZero())
+                return Vector2.zero;
+            return vec * (this * vec / vec.squaredMagnitude());
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public double vecMul(Vector2 vec)
+        {
+            return x * vec.y - y * vec.x;
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public static double operator %(Vector2 v1, Vector2 v2)
+        {
+            return v1.vecMul(v2);
+        }
+        /// <summary>
+        /// Checks if vectors are located on parallel lines
+        /// </summary>
+        /// <returns>True if vectors are located on parallel lines, false otherwise</returns>
+        public bool isCollinearTo(Vector2 vec)
+        {
+            return Math.Abs(this % vec) < Constants.Epsilon;
+        }
+        public override string ToString()
+        {
+            return "(" + x.ToString() + ", " + y.ToString() + ")";
+        }
     }
     public struct Vector3f
     {
