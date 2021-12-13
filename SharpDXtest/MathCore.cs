@@ -668,26 +668,27 @@ namespace SharpDXtest
             return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
         }
     }
-    public struct Matrix4f
+    public struct Matrix4x4f
     {
-        public float v00; // [rowIndex, columnIndex]
-        public float v01;
-        public float v02;
-        public float v03;
-        public float v10;
-        public float v11;
-        public float v12;
-        public float v13;
-        public float v20;
-        public float v21;
-        public float v22;
-        public float v23;
-        public float v30;
-        public float v31;
-        public float v32;
-        public float v33;
-        public static Matrix4f Identity { get { return new Matrix4f(new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }); } }
-        public Matrix4f(float[] values)
+        public float v00 { get; set; } // [rowIndex, columnIndex]
+        public float v01 { get; set; }
+        public float v02 { get; set; }
+        public float v03 { get; set; }
+        public float v10 { get; set; }
+        public float v11 { get; set; }
+        public float v12 { get; set; }
+        public float v13 { get; set; }
+        public float v20 { get; set; }
+        public float v21 { get; set; }
+        public float v22 { get; set; }
+        public float v23 { get; set; }
+        public float v30 { get; set; }
+        public float v31 { get; set; }
+        public float v32 { get; set; }
+        public float v33 { get; set; }
+
+        public static Matrix4x4f Identity { get { return new Matrix4x4f(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1); } }
+        public Matrix4x4f(params float[] values)
         {
             if (values.Length != 16)
                 throw new Exception("Array length must be 16.");
@@ -707,6 +708,118 @@ namespace SharpDXtest
             v31 = values[13];
             v32 = values[14];
             v33 = values[15];
+        }
+
+        public static implicit operator Matrix4x4(Matrix4x4f mat) => new Matrix4x4(mat.v00, mat.v01, mat.v02, mat.v03,
+                                                                                   mat.v10, mat.v11, mat.v12, mat.v13,
+                                                                                   mat.v20, mat.v21, mat.v22, mat.v23,
+                                                                                   mat.v30, mat.v31, mat.v32, mat.v33);
+
+        public static explicit operator Matrix4x4f(Matrix4x4 mat) => new Matrix4x4f((float)mat.v00, (float)mat.v01, (float)mat.v02, (float)mat.v03,
+                                                                                    (float)mat.v10, (float)mat.v11, (float)mat.v12, (float)mat.v13,
+                                                                                    (float)mat.v20, (float)mat.v21, (float)mat.v22, (float)mat.v23,
+                                                                                    (float)mat.v30, (float)mat.v31, (float)mat.v32, (float)mat.v33);
+        /// <summary>
+        /// Returns transposed copy of this matrix
+        /// </summary>
+        public Matrix4x4f transposed()
+        {
+            return new Matrix4x4f(v00, v10, v20, v30,
+                                  v01, v11, v21, v31,
+                                  v02, v12, v22, v32,
+                                  v03, v13, v32, v33);
+        }
+        public static Matrix4x4f operator *(Matrix4x4f m1, Matrix4x4f m2)
+        {
+            return new Matrix4x4f(m1.v00*m2.v00 + m1.v01*m2.v10 + m1.v02*m2.v20 + m1.v03*m2.v30,
+                                  m1.v00*m2.v01 + m1.v01*m2.v11 + m1.v02*m2.v21 + m1.v03*m2.v31,
+                                  m1.v00*m2.v02 + m1.v01*m2.v12 + m1.v02*m2.v22 + m1.v03*m2.v32,
+                                  m1.v00*m2.v03 + m1.v01*m2.v13 + m1.v02*m2.v23 + m1.v03*m2.v33,
+                                  
+                                  m1.v10*m2.v00 + m1.v11*m2.v10 + m1.v12*m2.v20 + m1.v13*m2.v30,
+                                  m1.v10*m2.v01 + m1.v11*m2.v11 + m1.v12*m2.v21 + m1.v13*m2.v31,
+                                  m1.v10*m2.v02 + m1.v11*m2.v12 + m1.v12*m2.v22 + m1.v13*m2.v32,
+                                  m1.v10*m2.v03 + m1.v11*m2.v13 + m1.v12*m2.v23 + m1.v13*m2.v33,
+                                  
+                                  m1.v20*m2.v00 + m1.v21*m2.v10 + m1.v22*m2.v20 + m1.v23*m2.v30,
+                                  m1.v20*m2.v01 + m1.v21*m2.v11 + m1.v22*m2.v21 + m1.v23*m2.v31,
+                                  m1.v20*m2.v02 + m1.v21*m2.v12 + m1.v22*m2.v22 + m1.v23*m2.v32,
+                                  m1.v20*m2.v03 + m1.v21*m2.v13 + m1.v22*m2.v23 + m1.v23*m2.v33,
+                                  
+                                  m1.v30*m2.v00 + m1.v31*m2.v10 + m1.v32*m2.v20 + m1.v33*m2.v30,
+                                  m1.v30*m2.v01 + m1.v31*m2.v11 + m1.v32*m2.v21 + m1.v33*m2.v31,
+                                  m1.v30*m2.v02 + m1.v31*m2.v12 + m1.v32*m2.v22 + m1.v33*m2.v32,
+                                  m1.v30*m2.v03 + m1.v31*m2.v13 + m1.v32*m2.v23 + m1.v33*m2.v33);
+        }
+        public static Matrix4x4f operator *(Matrix4x4f mat, float value)
+        {
+            return new Matrix4x4f(mat.v00 * value, mat.v01 * value, mat.v02 * value, mat.v03 * value,
+                                  mat.v10 * value, mat.v11 * value, mat.v12 * value, mat.v13 * value,
+                                  mat.v20 * value, mat.v21 * value, mat.v22 * value, mat.v23 * value,
+                                  mat.v30 * value, mat.v31 * value, mat.v32 * value, mat.v33 * value);
+        }
+        public static Matrix4x4f operator /(Matrix4x4f mat, float value)
+        {
+            if (value == 0)
+                throw new DivideByZeroException();
+            return new Matrix4x4f(mat.v00 / value, mat.v01 / value, mat.v02 / value, mat.v03 / value,
+                                  mat.v10 / value, mat.v11 / value, mat.v12 / value, mat.v13 / value,
+                                  mat.v20 / value, mat.v21 / value, mat.v22 / value, mat.v23 / value,
+                                  mat.v30 / value, mat.v31 / value, mat.v32 / value, mat.v33 / value);
+        }
+        /// <summary>
+        /// Multiplies matrix by vector, where vector represents point in space (vector = (x, y, z, 1))
+        /// </summary>
+        public Vector3f multByPoint(Vector3f vec)
+        {
+            return new Vector3f(v00 * vec.x + v01 * vec.y + v02 * vec.z + v03,
+                                v10 * vec.x + v11 * vec.y + v12 * vec.z + v13,
+                                v20 * vec.x + v21 * vec.y + v22 * vec.z + v23);
+        }
+        /// <summary>
+        /// Multiplies matrix by vector, where vector represents direction (vector = (x, y, z, 0))
+        /// </summary>
+        public Vector3f multByDirection(Vector3f vec)
+        {
+            return new Vector3f(v00 * vec.x + v01 * vec.y + v02 * vec.z,
+                                v10 * vec.x + v11 * vec.y + v12 * vec.z,
+                                v20 * vec.x + v21 * vec.y + v22 * vec.z);
+        }
+        public Matrix4x4f inversed()
+        {
+            float det00 = (v11 * (v22 * v33 - v23 * v32) - v12 * (v21 * v33 - v23 * v31) + v13 * (v21 * v32 - v22 * v31));
+            float det01 = (v10 * (v22 * v33 - v23 * v32) - v12 * (v20 * v33 - v23 * v30) + v13 * (v20 * v32 - v22 * v30));
+            float det02 = (v10 * (v21 * v33 - v23 * v31) - v11 * (v20 * v33 - v23 * v30) + v13 * (v20 * v31 - v21 * v30));
+            float det03 = (v10 * (v21 * v32 - v22 * v31) - v11 * (v20 * v32 - v22 * v30) + v12 * (v20 * v31 - v21 * v30));
+
+            float determinant = det00 - det01 + det02 - det03;
+            if (determinant == 0)
+                throw new Exception("This matrix is singular. (determinant = 0)");
+
+            float det10 = (v01 * (v22 * v33 - v23 * v32) - v02 * (v21 * v33 - v23 * v31) + v03 * (v21 * v32 - v22 * v31));
+            float det11 = (v00 * (v22 * v33 - v23 * v32) - v02 * (v20 * v33 - v23 * v30) + v03 * (v20 * v32 - v22 * v30));
+            float det12 = (v00 * (v21 * v33 - v23 * v31) - v01 * (v20 * v33 - v23 * v30) + v03 * (v20 * v31 - v21 * v30));
+            float det13 = (v00 * (v21 * v32 - v22 * v31) - v01 * (v20 * v32 - v22 * v30) + v02 * (v20 * v31 - v21 * v30));
+            float det20 = (v01 * (v12 * v33 - v13 * v32) - v02 * (v11 * v33 - v13 * v31) + v03 * (v11 * v32 - v12 * v31));
+            float det21 = (v00 * (v12 * v33 - v13 * v32) - v02 * (v10 * v33 - v13 * v30) + v03 * (v10 * v32 - v12 * v30));
+            float det22 = (v00 * (v11 * v33 - v13 * v31) - v01 * (v10 * v33 - v13 * v30) + v03 * (v10 * v31 - v11 * v30));
+            float det23 = (v00 * (v11 * v32 - v12 * v31) - v01 * (v10 * v32 - v12 * v30) + v02 * (v10 * v31 - v11 * v30));
+            float det30 = (v01 * (v12 * v23 - v13 * v22) - v02 * (v11 * v23 - v13 * v21) + v03 * (v11 * v22 - v12 * v21));
+            float det31 = (v00 * (v12 * v23 - v13 * v22) - v02 * (v10 * v23 - v13 * v20) + v03 * (v10 * v22 - v12 * v20));
+            float det32 = (v00 * (v11 * v23 - v13 * v21) - v01 * (v10 * v23 - v13 * v20) + v03 * (v10 * v21 - v11 * v20));
+            float det33 = (v00 * (v11 * v22 - v12 * v21) - v01 * (v10 * v22 - v12 * v20) + v02 * (v10 * v21 - v11 * v20));
+
+            return new Matrix4x4f( det00, -det10,  det20, -det30,
+                                  -det01,  det11, -det21,  det31,
+                                   det02, -det12,  det22, -det32,
+                                  -det03,  det13, -det23,  det33) / determinant;
+        }
+        public override string ToString()
+        {
+            return "| " + v00.ToString() + " " + v01.ToString() + " " + v02.ToString() + " " + v03.ToString() + " |\n" +
+                   "| " + v10.ToString() + " " + v11.ToString() + " " + v12.ToString() + " " + v13.ToString() + " |\n" +
+                   "| " + v20.ToString() + " " + v21.ToString() + " " + v22.ToString() + " " + v23.ToString() + " |\n" +
+                   "| " + v30.ToString() + " " + v31.ToString() + " " + v32.ToString() + " " + v33.ToString() + " |";
         }
     }
     public struct Matrix4x4
