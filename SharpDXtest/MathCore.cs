@@ -53,14 +53,13 @@ namespace SharpDXtest
     {
         public static Vector3 zero { get { return new Vector3(); } }
 
-        // TODO: switch to x - right, y - forward, z - up
-        // !!!RIGHT-HANDED COORDINATE SYSTEM!!! x - right, y - up, z - forward
+        // x - right, y - forward, z - up
         public static Vector3 right { get { return new Vector3(1, 0, 0); } }
         public static Vector3 left { get { return new Vector3(-1, 0, 0); } }
-        public static Vector3 forward { get { return new Vector3(0, 0, 1); } }
-        public static Vector3 back { get { return new Vector3(0, 0, -1); } }
-        public static Vector3 up { get { return new Vector3(0, 1, 0); } }
-        public static Vector3 down { get { return new Vector3(0, -1, 0); } }
+        public static Vector3 forward { get { return new Vector3(0, 1, 0); } }
+        public static Vector3 back { get { return new Vector3(0, -1, 0); } }
+        public static Vector3 up { get { return new Vector3(0, 0, 1); } }
+        public static Vector3 down { get { return new Vector3(0, 0, -1); } }
 
         public double x { get; set; }
         public double y { get; set; }
