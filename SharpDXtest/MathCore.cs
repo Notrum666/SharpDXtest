@@ -4,7 +4,11 @@ namespace SharpDXtest
 {
     public static class Constants
     {
-        public static double Epsilon = 1e-6;
+        public static float FloatEpsilon = 1e-4f;
+        public static float SqrFloatEpsilon = 1e-7f;
+
+        public static double Epsilon = 1e-7;
+        public static double SqrEpsilon = 1e-14;
     }
     public struct Vector2f
     {
@@ -63,7 +67,7 @@ namespace SharpDXtest
         /// </summary>
         public bool isZero()
         {
-            return squaredMagnitude() < Constants.Epsilon;
+            return squaredMagnitude() < Constants.SqrFloatEpsilon;
         }
         public static Vector2f operator +(Vector2f v1, Vector2f v2)
         {
@@ -166,7 +170,7 @@ namespace SharpDXtest
         /// <returns>True if vectors are located on parallel lines, false otherwise</returns>
         public bool isCollinearTo(Vector2f vec)
         {
-            return Math.Abs(this % vec) < Constants.Epsilon;
+            return Math.Abs(this % vec) < Constants.FloatEpsilon;
         }
         public override string ToString()
         {
@@ -232,7 +236,7 @@ namespace SharpDXtest
         /// </summary>
         public bool isZero()
         {
-            return squaredMagnitude() < Constants.Epsilon;
+            return squaredMagnitude() < Constants.SqrEpsilon;
         }
         public static Vector2 operator +(Vector2 v1, Vector2 v2)
         {
@@ -419,7 +423,7 @@ namespace SharpDXtest
         /// </summary>
         public bool isZero()
         {
-            return squaredMagnitude() < Constants.Epsilon;
+            return squaredMagnitude() < Constants.SqrFloatEpsilon;
         }
         public static Vector3f operator +(Vector3f v1, Vector3f v2)
         {
@@ -612,7 +616,7 @@ namespace SharpDXtest
         /// </summary>
         public bool isZero()
         {
-            return squaredMagnitude() < Constants.Epsilon;
+            return squaredMagnitude() < Constants.SqrEpsilon;
         }
         public static Vector3 operator +(Vector3 v1, Vector3 v2)
         {
