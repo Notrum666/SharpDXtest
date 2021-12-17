@@ -22,6 +22,7 @@ namespace SharpDXtest
         public static Device CurrentDevice { get => device; }
 
         private static Model obj;
+        private static Texture tex;
 
         private static ShaderPipeline pipeline;
 
@@ -33,6 +34,7 @@ namespace SharpDXtest
 
             pipeline = AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
                                                                    Shader.Create("BaseAssets\\Shaders\\default.fsh"));
+            tex = AssetsManager.LoadTexture("BaseAssets\\Textures\\template.png", "default", false);
 
             device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, control.ClientSize.Width, control.ClientSize.Height, 0.0f, 1.0f));
             device.ImmediateContext.OutputMerger.SetTargets(depthView, renderTarget);
@@ -93,13 +95,15 @@ namespace SharpDXtest
         }
         public static void Update()
         {
-            device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFFFFFFFF));
+            device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFF323232));
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
 
             pipeline.UpdateUniform("model", Matrix4x4f.Identity);
             pipeline.UpdateUniform("view", Matrix4x4f.Identity);
             pipeline.UpdateUniform("proj", Matrix4x4f.Identity);
             pipeline.Use();
+
+            tex.Use();
 
             obj.Render();
 

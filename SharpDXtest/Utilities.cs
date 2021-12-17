@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -105,60 +106,81 @@ namespace SharpDXtest
             GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(v_i.Count * 3, 0, 0);
         }
     }
-    //public class Texture
-    //{
-    //    public Bitmap image;
-    //    //public int id;
-    //    public Texture(Bitmap image, bool applyGammaCorrection = false)
-    //    {
-    //        this.image = image;
-    //
-    //        //id = GL.GenTexture();
-    //        //GL.BindTexture(TextureTarget.Texture2D, id);
-    //        //
-    //        //GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, new int[] { (int)TextureMinFilter.Nearest });
-    //        //GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, new int[] { (int)TextureMagFilter.Nearest });
-    //        //GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, new int[] { (int)TextureWrapMode.ClampToBorder });
-    //        //GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, new int[] { (int)TextureWrapMode.ClampToBorder });
-    //
-    //        int height = image.Height;
-    //        int width = image.Width;
-    //        byte[,] data = new byte[height, width * 4];
-    //        Color color;
-    //        for (int i = 0; i < height; i++)
-    //            for (int j = 0; j < width; j++)
-    //            {
-    //                color = image.GetPixel(j, i);
-    //                data[i, j * 4] = color.R;
-    //                data[i, j * 4 + 1] = color.G;
-    //                data[i, j * 4 + 2] = color.B;
-    //                data[i, j * 4 + 3] = color.A;
-    //            }
-    //
-    //        //GL.TexImage2D(TextureTarget.Texture2D, 0, applyGammaCorrection ? PixelInternalFormat.SrgbAlpha : PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data);
-    //
-    //        //GL.BindTexture(TextureTarget.Texture2D, 0);
-    //    }
-    //}
-    //public class Shader
-    //{
-    //    public int id;
-    //    public Dictionary<string, int> locations;
-    //    public Shader(int id)
-    //    {
-    //        this.id = id;
-    //        locations = new Dictionary<string, int>();
-    //        int uniformsCount;
-    //        GL.GetProgram(id, GetProgramParameterName.ActiveUniforms, out uniformsCount);
-    //        for (int i = 0; i < uniformsCount; i++)
-    //        {
-    //            string uniformName = GL.GetActiveUniform(id, i, out _, out _);
-    //            if (uniformName.EndsWith("[0]"))
-    //                uniformName = uniformName.Substring(0, uniformName.Length - 3);
-    //            locations[uniformName] = GL.GetUniformLocation(id, uniformName);
-    //        }
-    //    }
-    //}
+    public class Texture
+    {
+        public Bitmap image;
+        //public int id;
+        private Texture2D texture;
+        private SamplerState samplerState;
+        public Texture(Bitmap image, bool applyGammaCorrection = false)
+        {
+            this.image = image;
+            if (image.PixelFormat != PixelFormat.Format32bppArgb)
+                image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
+            BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+            texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+            {
+                Width = image.Width,
+                Height = image.Height,
+                ArraySize = 1,
+                BindFlags = BindFlags.ShaderResource,
+                Usage = ResourceUsage.Immutable,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = applyGammaCorrection ? Format.B8G8R8A8_UNorm_SRgb : Format.B8G8R8A8_UNorm,
+                MipLevels = 1,
+                OptionFlags = ResourceOptionFlags.None,
+                SampleDescription = new SampleDescription(1, 0)
+            }, new DataRectangle(data.Scan0, data.Stride));
+
+            image.UnlockBits(data);
+
+            samplerState = new SamplerState(GraphicsCore.CurrentDevice, new SamplerStateDescription()
+            {
+                AddressU = TextureAddressMode.Clamp,
+                AddressV = TextureAddressMode.Clamp,
+                AddressW = TextureAddressMode.Clamp,
+                Filter = Filter.Anisotropic,
+                MaximumAnisotropy = 8,
+                MipLodBias = 0,
+                MinimumLod = float.MinValue,
+                MaximumLod = float.MaxValue,
+            });
+
+            //this.image = image;
+            //
+            ////id = GL.GenTexture();
+            ////GL.BindTexture(TextureTarget.Texture2D, id);
+            ////
+            ////GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, new int[] { (int)TextureMinFilter.Nearest });
+            ////GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, new int[] { (int)TextureMagFilter.Nearest });
+            ////GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, new int[] { (int)TextureWrapMode.ClampToBorder });
+            ////GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, new int[] { (int)TextureWrapMode.ClampToBorder });
+            //
+            //int height = image.Height;
+            //int width = image.Width;
+            //byte[,] data = new byte[height, width * 4];
+            //Color color;
+            //for (int i = 0; i < height; i++)
+            //    for (int j = 0; j < width; j++)
+            //    {
+            //        color = image.GetPixel(j, i);
+            //        data[i, j * 4] = color.R;
+            //        data[i, j * 4 + 1] = color.G;
+            //        data[i, j * 4 + 2] = color.B;
+            //        data[i, j * 4 + 3] = color.A;
+            //    }
+            //
+            ////GL.TexImage2D(TextureTarget.Texture2D, 0, applyGammaCorrection ? PixelInternalFormat.SrgbAlpha : PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data);
+            //
+            ////GL.BindTexture(TextureTarget.Texture2D, 0);
+        }
+        public void Use()
+        {
+            GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetSampler(0, samplerState);
+            GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(0, new ShaderResourceView(GraphicsCore.CurrentDevice, texture));
+        }
+    }
     public enum ShaderType
     {
         VertexShader,
@@ -527,7 +549,7 @@ namespace SharpDXtest
     {
         public static Dictionary<string, Model> Models { get; } = new Dictionary<string, Model>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
-        //public static Dictionary<string, Texture> Textures = new Dictionary<string, Texture>();
+        public static Dictionary<string, Texture> Textures = new Dictionary<string, Texture>();
         //public static Dictionary<string, Scene> Scenes = new Dictionary<string, Scene>();
         public static Dictionary<string, Model> LoadModelsFile(string path, float scaleFactor = 1.0f, bool reverse = false)
         {
@@ -656,17 +678,17 @@ namespace SharpDXtest
             ShaderPipelines[shaderPipelineName] = shaderPipeline;
             return shaderPipeline;
         }
-        //public static Texture LoadTexture(string path, string textureName = "", bool applyGammaCorrection = false)
-        //{
-        //    if (textureName == "")
-        //        textureName = Path.GetFileNameWithoutExtension(path);
-        //
-        //    Texture texture = new Texture(new Bitmap(path), applyGammaCorrection);
-        //
-        //    Textures[textureName] = texture;
-        //
-        //    return texture;
-        //}
+        public static Texture LoadTexture(string path, string textureName = "", bool applyGammaCorrection = false)
+        {
+            if (textureName == "")
+                textureName = Path.GetFileNameWithoutExtension(path);
+        
+            Texture texture = new Texture(new Bitmap(path), applyGammaCorrection);
+        
+            Textures[textureName] = texture;
+        
+            return texture;
+        }
         //private struct Reference
         //{
         //    public object obj;

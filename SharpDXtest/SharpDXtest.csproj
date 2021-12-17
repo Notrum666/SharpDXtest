@@ -132,15 +132,22 @@
     <Folder Include="Assets\Scenes\" />
     <Folder Include="Assets\Textures\" />
     <Folder Include="BaseAssets\Components\" />
-    <Folder Include="BaseAssets\Textures\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BaseAssets\Textures\default_white.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="BaseAssets\Shaders\default.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Content Include="BaseAssets\Shaders\default.vsh">
+    <None Include="BaseAssets\Shaders\default.vsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BaseAssets\Textures\template.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
