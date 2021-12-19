@@ -78,6 +78,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BaseAssets\Components\Component.cs" />
+    <Compile Include="BaseAssets\Components\Transform.cs" />
+    <Compile Include="GameObject.cs" />
     <Compile Include="Utilities.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -131,7 +134,6 @@
     <Folder Include="Assets\Components\" />
     <Folder Include="Assets\Scenes\" />
     <Folder Include="Assets\Textures\" />
-    <Folder Include="BaseAssets\Components\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="BaseAssets\Textures\default_white.png">
