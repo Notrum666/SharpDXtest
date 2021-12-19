@@ -4,7 +4,11 @@ namespace SharpDXtest
 {
     public static class Constants
     {
-        public static double Epsilon = 1e-6;
+        public static float FloatEpsilon = 1e-4f;
+        public static float SqrFloatEpsilon = 1e-7f;
+
+        public static double Epsilon = 1e-7;
+        public static double SqrEpsilon = 1e-14;
     }
     public struct Vector2f
     {
@@ -17,6 +21,15 @@ namespace SharpDXtest
             this.x = x;
             this.y = y;
         }
+        public Vector2f(float[] values)
+        {
+            if (values.Length != 2)
+                throw new Exception("Array length must be 2.");
+
+            x = values[0];
+            y = values[1];
+        }
+
         public static implicit operator Vector3f(Vector2f vec) => new Vector3f(vec);
         public static implicit operator Vector2(Vector2f vec) => new Vector2(vec.x, vec.y);
         public static explicit operator Vector2f(Vector2 vec) => new Vector2f((float)vec.x, (float)vec.y);
@@ -33,7 +46,7 @@ namespace SharpDXtest
         /// </summary>
         public float squaredMagnitude()
         {
-            return scalMul(this);
+            return dotMul(this);
         }
         /// <summary>
         /// Length of vector. Equals to magnitude()
@@ -54,7 +67,7 @@ namespace SharpDXtest
         /// </summary>
         public bool isZero()
         {
-            return squaredMagnitude() < Constants.Epsilon;
+            return squaredMagnitude() < Constants.SqrFloatEpsilon;
         }
         public static Vector2f operator +(Vector2f v1, Vector2f v2)
         {
@@ -79,7 +92,7 @@ namespace SharpDXtest
         /// <summary>
         /// Scalar multiplication
         /// </summary>
-        public float scalMul(Vector2f vec)
+        public float dotMul(Vector2f vec)
         {
             return x * vec.x + y * vec.y;
         }
@@ -88,7 +101,7 @@ namespace SharpDXtest
         /// </summary>
         public static float operator *(Vector2f v1, Vector2f v2)
         {
-            return v1.scalMul(v2);
+            return v1.dotMul(v2);
         }
         /// <summary>
         /// Component multiplication
@@ -140,6 +153,13 @@ namespace SharpDXtest
         /// <summary>
         /// Vector multiplication
         /// </summary>
+        public float cross(Vector2f vec)
+        {
+            return vecMul(vec);
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
         public static float operator %(Vector2f v1, Vector2f v2)
         {
             return v1.vecMul(v2);
@@ -150,11 +170,15 @@ namespace SharpDXtest
         /// <returns>True if vectors are located on parallel lines, false otherwise</returns>
         public bool isCollinearTo(Vector2f vec)
         {
-            return Math.Abs(this % vec) < Constants.Epsilon;
+            return Math.Abs(this % vec) < Constants.FloatEpsilon;
         }
         public override string ToString()
         {
             return "(" + x.ToString() + ", " + y.ToString() + ")";
+        }
+        public string ToString(string format)
+        {
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ")";
         }
     }
     public struct Vector2
@@ -168,6 +192,15 @@ namespace SharpDXtest
             this.x = x;
             this.y = y;
         }
+        public Vector2(double[] values)
+        {
+            if (values.Length != 2)
+                throw new Exception("Array length must be 2.");
+
+            x = values[0];
+            y = values[1];
+        }
+
         public static implicit operator Vector3(Vector2 vec) => new Vector3(vec);
 
         /// <summary>
@@ -182,7 +215,7 @@ namespace SharpDXtest
         /// </summary>
         public double squaredMagnitude()
         {
-            return scalMul(this);
+            return dotMul(this);
         }
         /// <summary>
         /// Length of vector. Equals to magnitude()
@@ -203,7 +236,7 @@ namespace SharpDXtest
         /// </summary>
         public bool isZero()
         {
-            return squaredMagnitude() < Constants.Epsilon;
+            return squaredMagnitude() < Constants.SqrEpsilon;
         }
         public static Vector2 operator +(Vector2 v1, Vector2 v2)
         {
@@ -228,7 +261,7 @@ namespace SharpDXtest
         /// <summary>
         /// Scalar multiplication
         /// </summary>
-        public double scalMul(Vector2 vec)
+        public double dotMul(Vector2 vec)
         {
             return x * vec.x + y * vec.y;
         }
@@ -237,7 +270,7 @@ namespace SharpDXtest
         /// </summary>
         public static double operator *(Vector2 v1, Vector2 v2)
         {
-            return v1.scalMul(v2);
+            return v1.dotMul(v2);
         }
         /// <summary>
         /// Component multiplication
@@ -289,6 +322,13 @@ namespace SharpDXtest
         /// <summary>
         /// Vector multiplication
         /// </summary>
+        public double cross(Vector2 vec)
+        {
+            return vecMul(vec);
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
         public static double operator %(Vector2 v1, Vector2 v2)
         {
             return v1.vecMul(v2);
@@ -304,6 +344,10 @@ namespace SharpDXtest
         public override string ToString()
         {
             return "(" + x.ToString() + ", " + y.ToString() + ")";
+        }
+        public string ToString(string format)
+        {
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ")";
         }
     }
     public struct Vector3f
@@ -330,6 +374,15 @@ namespace SharpDXtest
             y = vec.y;
             this.z = z;
         }
+        public Vector3f(params float[] values)
+        {
+            if (values.Length != 3)
+                throw new Exception("Array length must be 3.");
+
+            x = values[0];
+            y = values[1];
+            z = values[2];
+        }
 
         public static implicit operator Vector3(Vector3f vec) => new Vector3(vec.x, vec.y, vec.z);
         public static explicit operator Vector3f(Vector3 vec) => new Vector3f((float)vec.x, (float)vec.y, (float)vec.z);
@@ -346,7 +399,7 @@ namespace SharpDXtest
         /// </summary>
         public float squaredMagnitude()
         {
-            return scalMul(this);
+            return dotMul(this);
         }
         /// <summary>
         /// Length of vector. Equals to magnitude()
@@ -367,7 +420,7 @@ namespace SharpDXtest
         /// </summary>
         public bool isZero()
         {
-            return squaredMagnitude() < Constants.Epsilon;
+            return squaredMagnitude() < Constants.SqrFloatEpsilon;
         }
         public static Vector3f operator +(Vector3f v1, Vector3f v2)
         {
@@ -392,7 +445,7 @@ namespace SharpDXtest
         /// <summary>
         /// Scalar multiplication
         /// </summary>
-        public float scalMul(Vector3f vec)
+        public float dotMul(Vector3f vec)
         {
             return x * vec.x + y * vec.y + z * vec.z;
         }
@@ -401,7 +454,7 @@ namespace SharpDXtest
         /// </summary>
         public static float operator *(Vector3f v1, Vector3f v2)
         {
-            return v1.scalMul(v2);
+            return v1.dotMul(v2);
         }
         /// <summary>
         /// Vector multiplication
@@ -409,6 +462,13 @@ namespace SharpDXtest
         public Vector3f vecMul(Vector3f vec)
         {
             return new Vector3f(y * vec.z - z * vec.y, x * vec.z - z * vec.x, x * vec.y - y * vec.x);
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public Vector3f cross(Vector3f vec)
+        {
+            return vecMul(vec);
         }
         /// <summary>
         /// Vector multiplication
@@ -479,6 +539,10 @@ namespace SharpDXtest
         {
             return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
         }
+        public string ToString(string format)
+        {
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";
+        }
     }
     public struct Vector3
     {
@@ -504,6 +568,15 @@ namespace SharpDXtest
             y = vec.y;
             this.z = z;
         }
+        public Vector3(params double[] values)
+        {
+            if (values.Length != 3)
+                throw new Exception("Array length must be 3.");
+
+            x = values[0];
+            y = values[1];
+            z = values[2];
+        }
         /// <summary>
         /// Magnitude of vector. Equals to length()
         /// </summary>
@@ -516,7 +589,7 @@ namespace SharpDXtest
         /// </summary>
         public double squaredMagnitude()
         {
-            return scalMul(this);
+            return dotMul(this);
         }
         /// <summary>
         /// Length of vector. Equals to magnitude()
@@ -537,7 +610,7 @@ namespace SharpDXtest
         /// </summary>
         public bool isZero()
         {
-            return squaredMagnitude() < Constants.Epsilon;
+            return squaredMagnitude() < Constants.SqrEpsilon;
         }
         public static Vector3 operator +(Vector3 v1, Vector3 v2)
         {
@@ -562,7 +635,7 @@ namespace SharpDXtest
         /// <summary>
         /// Scalar multiplication
         /// </summary>
-        public double scalMul(Vector3 vec)
+        public double dotMul(Vector3 vec)
         {
             return x * vec.x + y * vec.y + z * vec.z;
         }
@@ -571,7 +644,7 @@ namespace SharpDXtest
         /// </summary>
         public static double operator *(Vector3 v1, Vector3 v2)
         {
-            return v1.scalMul(v2);
+            return v1.dotMul(v2);
         }
         /// <summary>
         /// Vector multiplication
@@ -579,6 +652,13 @@ namespace SharpDXtest
         public Vector3 vecMul(Vector3 vec)
         {
             return new Vector3(y * vec.z - z * vec.y, x * vec.z - z * vec.x, x * vec.y - y * vec.x);
+        }
+        /// <summary>
+        /// Vector multiplication
+        /// </summary>
+        public Vector3 cross(Vector3 vec)
+        {
+            return vecMul(vec);
         }
         /// <summary>
         /// Vector multiplication
@@ -648,6 +728,10 @@ namespace SharpDXtest
         public override string ToString()
         {
             return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
+        }
+        public string ToString(string format)
+        {
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";
         }
     }
     public struct Matrix4x4f
@@ -803,6 +887,13 @@ namespace SharpDXtest
                    "| " + v20.ToString() + " " + v21.ToString() + " " + v22.ToString() + " " + v23.ToString() + " |\n" +
                    "| " + v30.ToString() + " " + v31.ToString() + " " + v32.ToString() + " " + v33.ToString() + " |";
         }
+        public string ToString(string format)
+        {
+            return "| " + v00.ToString(format) + " " + v01.ToString(format) + " " + v02.ToString(format) + " " + v03.ToString(format) + " |\n" +
+                   "| " + v10.ToString(format) + " " + v11.ToString(format) + " " + v12.ToString(format) + " " + v13.ToString(format) + " |\n" +
+                   "| " + v20.ToString(format) + " " + v21.ToString(format) + " " + v22.ToString(format) + " " + v23.ToString(format) + " |\n" +
+                   "| " + v30.ToString(format) + " " + v31.ToString(format) + " " + v32.ToString(format) + " " + v33.ToString(format) + " |";
+        }
     }
     public struct Matrix4x4
     {
@@ -946,6 +1037,13 @@ namespace SharpDXtest
                    "| " + v10.ToString() + " " + v11.ToString() + " " + v12.ToString() + " " + v13.ToString() + " |\n" +
                    "| " + v20.ToString() + " " + v21.ToString() + " " + v22.ToString() + " " + v23.ToString() + " |\n" +
                    "| " + v30.ToString() + " " + v31.ToString() + " " + v32.ToString() + " " + v33.ToString() + " |";
+        }
+        public string ToString(string format)
+        {
+            return "| " + v00.ToString(format) + " " + v01.ToString(format) + " " + v02.ToString(format) + " " + v03.ToString(format) + " |\n" +
+                   "| " + v10.ToString(format) + " " + v11.ToString(format) + " " + v12.ToString(format) + " " + v13.ToString(format) + " |\n" +
+                   "| " + v20.ToString(format) + " " + v21.ToString(format) + " " + v22.ToString(format) + " " + v23.ToString(format) + " |\n" +
+                   "| " + v30.ToString(format) + " " + v31.ToString(format) + " " + v32.ToString(format) + " " + v33.ToString(format) + " |";
         }
     }
     // do NOT ask me about this, i don't give a fuck how this works.
@@ -1118,6 +1216,10 @@ namespace SharpDXtest
         public override string ToString()
         {
             return "(" + w.ToString() + ", " + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
+        }
+        public string ToString(string format)
+        {
+            return "(" + w.ToString(format) + ", " + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";
         }
     }
 }
