@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -106,12 +107,34 @@ namespace SharpDXtest
             GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(v_i.Count * 3, 0, 0);
         }
     }
+    public class Sampler
+    {
+        private SamplerState sampler;
+        public Sampler(TextureAddressMode addressU, TextureAddressMode addressV, Filter filter = Filter.Anisotropic, int maximumAnisotropy = 8, TextureAddressMode addressW = TextureAddressMode.Clamp)
+        {
+            sampler = new SamplerState(GraphicsCore.CurrentDevice, new SamplerStateDescription()
+            {
+                AddressU = addressU,
+                AddressV = addressV,
+                AddressW = addressW,
+                Filter = filter,
+                MaximumAnisotropy = maximumAnisotropy,
+                MipLodBias = 0,
+                MinimumLod = float.MinValue,
+                MaximumLod = float.MaxValue,
+            });
+        }
+        public void use(string variable)
+        {
+            foreach (Shader shader in ShaderPipeline.Current.Shaders)
+                if (shader.Locations.ContainsKey(variable))
+                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetSampler(shader.Locations[variable], sampler);
+        }
+    }
     public class Texture
     {
         public Bitmap image;
-        //public int id;
-        private Texture2D texture;
-        private SamplerState samplerState;
+        private ShaderResourceView resourceView;
         public Texture(Bitmap image, bool applyGammaCorrection = false)
         {
             this.image = image;
@@ -119,7 +142,7 @@ namespace SharpDXtest
                 image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
             BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-            texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+            Texture2D texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
             {
                 Width = image.Width,
                 Height = image.Height,
@@ -135,50 +158,13 @@ namespace SharpDXtest
 
             image.UnlockBits(data);
 
-            samplerState = new SamplerState(GraphicsCore.CurrentDevice, new SamplerStateDescription()
-            {
-                AddressU = TextureAddressMode.Clamp,
-                AddressV = TextureAddressMode.Clamp,
-                AddressW = TextureAddressMode.Clamp,
-                Filter = Filter.Anisotropic,
-                MaximumAnisotropy = 8,
-                MipLodBias = 0,
-                MinimumLod = float.MinValue,
-                MaximumLod = float.MaxValue,
-            });
-
-            //this.image = image;
-            //
-            ////id = GL.GenTexture();
-            ////GL.BindTexture(TextureTarget.Texture2D, id);
-            ////
-            ////GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, new int[] { (int)TextureMinFilter.Nearest });
-            ////GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, new int[] { (int)TextureMagFilter.Nearest });
-            ////GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, new int[] { (int)TextureWrapMode.ClampToBorder });
-            ////GL.TexParameterI(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, new int[] { (int)TextureWrapMode.ClampToBorder });
-            //
-            //int height = image.Height;
-            //int width = image.Width;
-            //byte[,] data = new byte[height, width * 4];
-            //Color color;
-            //for (int i = 0; i < height; i++)
-            //    for (int j = 0; j < width; j++)
-            //    {
-            //        color = image.GetPixel(j, i);
-            //        data[i, j * 4] = color.R;
-            //        data[i, j * 4 + 1] = color.G;
-            //        data[i, j * 4 + 2] = color.B;
-            //        data[i, j * 4 + 3] = color.A;
-            //    }
-            //
-            ////GL.TexImage2D(TextureTarget.Texture2D, 0, applyGammaCorrection ? PixelInternalFormat.SrgbAlpha : PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data);
-            //
-            ////GL.BindTexture(TextureTarget.Texture2D, 0);
+            resourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, texture);
         }
-        public void Use()
+        public void use(string variable)
         {
-            GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetSampler(0, samplerState);
-            GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(0, new ShaderResourceView(GraphicsCore.CurrentDevice, texture));
+            foreach (Shader shader in ShaderPipeline.Current.Shaders)
+                if (shader.Locations.ContainsKey(variable))
+                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], resourceView);
         }
     }
     public enum ShaderType
@@ -192,9 +178,10 @@ namespace SharpDXtest
     public abstract class Shader
     {
         public abstract ShaderType Type { get; }
+        public Dictionary<string, int> Locations { get; } = new Dictionary<string, int>();
         protected List<ShaderBuffer> buffers = new List<ShaderBuffer>();
 
-        public abstract void Use();
+        public abstract void use();
         public bool hasVariable(string name)
         {
             foreach (ShaderBuffer buffer in buffers)
@@ -232,7 +219,7 @@ namespace SharpDXtest
                     }
             return false;
         }
-        protected void generateBuffers(ShaderReflection reflection)
+        protected void generateBuffersAndLocations(ShaderReflection reflection)
         {
             for (int i = 0; i < reflection.Description.ConstantBuffers; i++)
             {
@@ -246,8 +233,19 @@ namespace SharpDXtest
                 }
                 buffers.Add(shaderBuffer);
             }
+            for (int i = 0; i < reflection.Description.BoundResources; i++)
+            {
+                InputBindingDescription desc = reflection.GetResourceBindingDescription(i);
+                switch (desc.Type)
+                {
+                    case ShaderInputType.Texture:
+                    case ShaderInputType.Sampler:
+                        Locations[desc.Name] = desc.BindPoint;
+                        break;
+                }
+            }
         }
-        protected void updateBuffers()
+        public void uploadUpdatedUniforms()
         {
             foreach (ShaderBuffer buf in buffers)
                 if (buf.invalidated)
@@ -407,15 +405,13 @@ namespace SharpDXtest
                 }
                 layout = new InputLayout(GraphicsCore.CurrentDevice, bytecode, inputDescription.ToArray());
                 shader = new VertexShader(GraphicsCore.CurrentDevice, bytecode);
-                generateBuffers(reflection);
+                generateBuffersAndLocations(reflection);
             }
-            public override void Use()
+            public override void use()
             {
-                DeviceContext context = GraphicsCore.CurrentDevice.ImmediateContext;
-                context.InputAssembler.InputLayout = layout;
-                context.VertexShader.Set(shader);
-                updateBuffers();
-                context.VertexShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.InputLayout = layout;
+                GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.Set(shader);
+                GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Hull : Shader
@@ -427,12 +423,11 @@ namespace SharpDXtest
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "hs_5_0");
                 ShaderReflection reflection = new ShaderReflection(bytecode);
                 shader = new HullShader(GraphicsCore.CurrentDevice, bytecode);
-                generateBuffers(reflection);
+                generateBuffersAndLocations(reflection);
             }
-            public override void Use()
+            public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.HullShader.Set(shader);
-                updateBuffers();
                 GraphicsCore.CurrentDevice.ImmediateContext.HullShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
@@ -445,12 +440,11 @@ namespace SharpDXtest
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "ds_5_0");
                 ShaderReflection reflection = new ShaderReflection(bytecode);
                 shader = new DomainShader(GraphicsCore.CurrentDevice, bytecode);
-                generateBuffers(reflection);
+                generateBuffersAndLocations(reflection);
             }
-            public override void Use()
+            public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.Set(shader);
-                updateBuffers();
                 GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
@@ -463,12 +457,11 @@ namespace SharpDXtest
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "gs_5_0");
                 ShaderReflection reflection = new ShaderReflection(bytecode);
                 shader = new GeometryShader(GraphicsCore.CurrentDevice, bytecode);
-                generateBuffers(reflection);
+                generateBuffersAndLocations(reflection);
             }
-            public override void Use()
+            public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.Set(shader);
-                updateBuffers();
                 GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
@@ -481,12 +474,11 @@ namespace SharpDXtest
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "ps_5_0");
                 ShaderReflection reflection = new ShaderReflection(bytecode);
                 shader = new PixelShader(GraphicsCore.CurrentDevice, bytecode);
-                generateBuffers(reflection);
+                generateBuffersAndLocations(reflection);
             }
-            public override void Use()
+            public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.Set(shader);
-                updateBuffers();
                 GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
@@ -494,6 +486,9 @@ namespace SharpDXtest
     public class ShaderPipeline
     {
         private List<Shader> shaders = new List<Shader>();
+        public ReadOnlyCollection<Shader> Shaders { get => shaders.AsReadOnly(); }
+        public static ShaderPipeline Current { get; private set; }
+
         public ShaderPipeline(params Shader[] shaders)
         {
             List<ShaderType> shaderTypes = new List<ShaderType>();
@@ -537,7 +532,13 @@ namespace SharpDXtest
         public void Use()
         {
             foreach (Shader shader in shaders)
-                shader.Use();
+                shader.use();
+            Current = this;
+        }
+        public void UploadUpdatedUniforms()
+        {
+            foreach (Shader shader in shaders)
+                shader.uploadUpdatedUniforms();
         }
     }
     //public class Scene
@@ -549,8 +550,10 @@ namespace SharpDXtest
     {
         public static Dictionary<string, Model> Models { get; } = new Dictionary<string, Model>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
-        public static Dictionary<string, Texture> Textures = new Dictionary<string, Texture>();
+        public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture>();
+        public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
         //public static Dictionary<string, Scene> Scenes = new Dictionary<string, Scene>();
+
         public static Dictionary<string, Model> LoadModelsFile(string path, float scaleFactor = 1.0f, bool reverse = false)
         {
             StreamReader reader = new StreamReader(File.OpenRead(path));

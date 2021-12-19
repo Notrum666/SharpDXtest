@@ -23,6 +23,7 @@ namespace SharpDXtest
 
         private static Model obj;
         private static Texture tex;
+        private static Sampler sampler;
 
         private static ShaderPipeline pipeline;
 
@@ -35,6 +36,7 @@ namespace SharpDXtest
             pipeline = AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
                                                                    Shader.Create("BaseAssets\\Shaders\\default.fsh"));
             tex = AssetsManager.LoadTexture("BaseAssets\\Textures\\template.png", "default", false);
+            sampler = AssetsManager.Samplers["default"] = new Sampler(TextureAddressMode.Clamp, TextureAddressMode.Clamp);
 
             device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, control.ClientSize.Width, control.ClientSize.Height, 0.0f, 1.0f));
             device.ImmediateContext.OutputMerger.SetTargets(depthView, renderTarget);
@@ -97,13 +99,16 @@ namespace SharpDXtest
         {
             device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFF323232));
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
+            pipeline.Use();
 
             pipeline.UpdateUniform("model", Matrix4x4f.Identity);
             pipeline.UpdateUniform("view", Matrix4x4f.Identity);
             pipeline.UpdateUniform("proj", Matrix4x4f.Identity);
-            pipeline.Use();
 
-            tex.Use();
+            pipeline.UploadUpdatedUniforms();
+
+            tex.use("tex");
+            sampler.use("texSampler");
 
             obj.Render();
 

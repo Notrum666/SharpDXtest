@@ -6,10 +6,10 @@
     float4 n : NORM;
 };
 
-Texture2D shaderTexture;
-SamplerState SampleType;
+Texture2D tex;
+SamplerState texSampler;
 
 float4 main(vert_in v) : SV_Target
 {
-    return shaderTexture.Sample(SampleType, v.t); //float4(v.v.x, v.v.y, -v.n.z, 1.0f);
+    return tex.Sample(texSampler, v.t); //float4(v.v.x, v.v.y, -v.n.z, 1.0f);
 }
