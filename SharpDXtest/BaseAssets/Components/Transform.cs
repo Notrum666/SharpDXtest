@@ -28,7 +28,7 @@ namespace SharpDXtest.BaseAssets.Components
         //public Vector3 up { get { return rotation * Vector3.up; } }
         public Transform()
         {
-            position = Vector3.zero;
+            position = Vector3.Zero;
             rotation = Quaternion.Identity;
         }
     }

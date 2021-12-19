@@ -8,13 +8,7 @@ namespace SharpDXtest
     }
     public struct Vector2f
     {
-        public static Vector2f zero { get { return new Vector2f(); } }
-
-        // x - right, y - forward
-        public static Vector2f right { get { return new Vector2f(1, 0); } }
-        public static Vector2f left { get { return new Vector2f(-1, 0); } }
-        public static Vector2f forward { get { return new Vector2f(0, 1); } }
-        public static Vector2f back { get { return new Vector2f(0, -1); } }
+        public static Vector2f Zero { get { return new Vector2f(); } }
 
         public float x { get; set; }
         public float y { get; set; }
@@ -133,7 +127,7 @@ namespace SharpDXtest
         public Vector2f projectOnVector(Vector2f vec)
         {
             if (vec.isZero())
-                return Vector2f.zero;
+                return Vector2f.Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
         /// <summary>
@@ -165,13 +159,7 @@ namespace SharpDXtest
     }
     public struct Vector2
     {
-        public static Vector2 zero { get { return new Vector2(); } }
-
-        // x - right, y - forward
-        public static Vector2 right { get { return new Vector2(1, 0); } }
-        public static Vector2 left { get { return new Vector2(-1, 0); } }
-        public static Vector2 forward { get { return new Vector2(0, 1); } }
-        public static Vector2 back { get { return new Vector2(0, -1); } }
+        public static Vector2 Zero { get { return new Vector2(); } }
 
         public double x { get; set; }
         public double y { get; set; }
@@ -288,7 +276,7 @@ namespace SharpDXtest
         public Vector2 projectOnVector(Vector2 vec)
         {
             if (vec.isZero())
-                return Vector2.zero;
+                return Vector2.Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
         /// <summary>
@@ -320,15 +308,12 @@ namespace SharpDXtest
     }
     public struct Vector3f
     {
-        public static Vector3f zero { get { return new Vector3f(); } }
+        public static Vector3f Zero { get { return new Vector3f(); } }
 
         // x - right, y - forward, z - up
-        public static Vector3f right { get { return new Vector3f(1, 0, 0); } }
-        public static Vector3f left { get { return new Vector3f(-1, 0, 0); } }
-        public static Vector3f forward { get { return new Vector3f(0, 1, 0); } }
-        public static Vector3f back { get { return new Vector3f(0, -1, 0); } }
-        public static Vector3f up { get { return new Vector3f(0, 0, 1); } }
-        public static Vector3f down { get { return new Vector3f(0, 0, -1); } }
+        public static Vector3f Right { get { return new Vector3f(1, 0, 0); } }
+        public static Vector3f Forward { get { return new Vector3f(0, 1, 0); } }
+        public static Vector3f Up { get { return new Vector3f(0, 0, 1); } }
 
         public float x { get; set; }
         public float y { get; set; }
@@ -470,7 +455,7 @@ namespace SharpDXtest
         public Vector3f projectOnVector(Vector3f vec)
         {
             if (vec.isZero())
-                return Vector3f.zero;
+                return Vector3f.Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
         /// <summary>
@@ -497,15 +482,12 @@ namespace SharpDXtest
     }
     public struct Vector3
     {
-        public static Vector3 zero { get { return new Vector3(); } }
+        public static Vector3 Zero { get { return new Vector3(); } }
 
         // x - right, y - forward, z - up
-        public static Vector3 right { get { return new Vector3(1, 0, 0); } }
-        public static Vector3 left { get { return new Vector3(-1, 0, 0); } }
-        public static Vector3 forward { get { return new Vector3(0, 1, 0); } }
-        public static Vector3 back { get { return new Vector3(0, -1, 0); } }
-        public static Vector3 up { get { return new Vector3(0, 0, 1); } }
-        public static Vector3 down { get { return new Vector3(0, 0, -1); } }
+        public static Vector3 Right { get { return new Vector3(1, 0, 0); } }
+        public static Vector3 Forward { get { return new Vector3(0, 1, 0); } }
+        public static Vector3 Up { get { return new Vector3(0, 0, 1); } }
 
         public double x { get; set; }
         public double y { get; set; }
@@ -643,7 +625,7 @@ namespace SharpDXtest
         public Vector3 projectOnVector(Vector3 vec)
         {
             if (vec.isZero())
-                return Vector3.zero;
+                return Vector3.Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
         /// <summary>
@@ -1116,9 +1098,9 @@ namespace SharpDXtest
         /// </summary>
         public static Quaternion fromEuler(Vector3 eulers)
         {
-            return FromAxisAngle(Vector3.forward, eulers.z) *
-                   FromAxisAngle(Vector3.right, eulers.x) *
-                   FromAxisAngle(Vector3.up, eulers.y);
+            return FromAxisAngle(Vector3.Forward, eulers.z) *
+                   FromAxisAngle(Vector3.Right, eulers.x) *
+                   FromAxisAngle(Vector3.Up, eulers.y);
         }
         /// <summary>
         /// Returns eulers representation of rotation in this quaternion
