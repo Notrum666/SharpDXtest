@@ -25,8 +25,8 @@ namespace SharpDXtest.Components
                 Vector3 p = -gameObject.transform.position;
 
                 Matrix4x4 view = new Matrix4x4(r.x, r.y, r.z, p * r,
-                                               u.x, u.y, u.z, p * u,
                                                f.x, f.y, f.z, p * f,
+                                               u.x, u.y, u.z, p * u,
                                                0, 0, 0, 1);
                 return view;
             }

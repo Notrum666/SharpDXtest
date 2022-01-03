@@ -116,13 +116,9 @@ namespace SharpDXtest
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
             pipeline.Use();
 
-            Matrix4x4f mat = (Matrix4x4f)transform.model;
-
-            Matrix4x4f proj = (Matrix4x4f)Camera.Current.proj;
-
-            pipeline.UpdateUniform("model", mat);// ((Matrix4x4f)transform.model).transposed());
-            //pipeline.UpdateUniform("view", Matrix4x4f.Identity);
-            pipeline.UpdateUniform("proj", proj);
+            pipeline.UpdateUniform("model", (Matrix4x4f)transform.model);
+            pipeline.UpdateUniform("view", (Matrix4x4f)Camera.Current.view);
+            pipeline.UpdateUniform("proj", (Matrix4x4f)Camera.Current.proj);
 
             pipeline.UploadUpdatedUniforms();
 
