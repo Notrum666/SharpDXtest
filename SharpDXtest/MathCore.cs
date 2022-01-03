@@ -742,6 +742,7 @@ namespace SharpDXtest
         public float y { get; set; }
         public float z { get; set; }
         public float w{ get; set; }
+        public Vector3f xyz { get { return new Vector3f(x, y, z); } }
         public Vector4f(float x = 0, float y = 0, float z = 0, float w = 0)
         {
             this.x = x;
@@ -914,6 +915,7 @@ namespace SharpDXtest
         public double y { get; set; }
         public double z { get; set; }
         public double w { get; set; }
+        public Vector3 xyz { get { return new Vector3(x, y, z); } }
         public Vector4(double x = 0, double y = 0, double z = 0, double w = 0)
         {
             this.x = x;
@@ -1120,7 +1122,6 @@ namespace SharpDXtest
                                                                                    mat.v10, mat.v11, mat.v12, mat.v13,
                                                                                    mat.v20, mat.v21, mat.v22, mat.v23,
                                                                                    mat.v30, mat.v31, mat.v32, mat.v33);
-
         public static explicit operator Matrix4x4f(Matrix4x4 mat) => new Matrix4x4f((float)mat.v00, (float)mat.v01, (float)mat.v02, (float)mat.v03,
                                                                                     (float)mat.v10, (float)mat.v11, (float)mat.v12, (float)mat.v13,
                                                                                     (float)mat.v20, (float)mat.v21, (float)mat.v22, (float)mat.v23,
@@ -1173,23 +1174,12 @@ namespace SharpDXtest
                                   mat.v20 / value, mat.v21 / value, mat.v22 / value, mat.v23 / value,
                                   mat.v30 / value, mat.v31 / value, mat.v32 / value, mat.v33 / value);
         }
-        /// <summary>
-        /// Multiplies matrix by vector, where vector represents point in space (vector = (x, y, z, 1))
-        /// </summary>
-        public Vector3f multByPoint(Vector3f vec)
+        public static Vector4f operator *(Matrix4x4f mat, Vector4f vec)
         {
-            return new Vector3f(v00 * vec.x + v01 * vec.y + v02 * vec.z + v03,
-                                v10 * vec.x + v11 * vec.y + v12 * vec.z + v13,
-                                v20 * vec.x + v21 * vec.y + v22 * vec.z + v23);
-        }
-        /// <summary>
-        /// Multiplies matrix by vector, where vector represents direction (vector = (x, y, z, 0))
-        /// </summary>
-        public Vector3f multByDirection(Vector3f vec)
-        {
-            return new Vector3f(v00 * vec.x + v01 * vec.y + v02 * vec.z,
-                                v10 * vec.x + v11 * vec.y + v12 * vec.z,
-                                v20 * vec.x + v21 * vec.y + v22 * vec.z);
+            return new Vector4f(mat.v00 * vec.x + mat.v01 * vec.y + mat.v02 * vec.z + mat.v03 * vec.w,
+                                mat.v10 * vec.x + mat.v11 * vec.y + mat.v12 * vec.z + mat.v13 * vec.w,
+                                mat.v20 * vec.x + mat.v21 * vec.y + mat.v22 * vec.z + mat.v23 * vec.w,
+                                mat.v30 * vec.x + mat.v31 * vec.y + mat.v32 * vec.z + mat.v33 * vec.w);
         }
         public Matrix4x4f inversed()
         {
@@ -1324,23 +1314,12 @@ namespace SharpDXtest
                                  mat.v20 / value, mat.v21 / value, mat.v22 / value, mat.v23 / value,
                                  mat.v30 / value, mat.v31 / value, mat.v32 / value, mat.v33 / value );
         }
-        /// <summary>
-        /// Multiplies matrix by vector, where vector represents point in space (vector = (x, y, z, 1))
-        /// </summary>
-        public Vector3 multByPoint(Vector3 vec)
+        public static Vector4 operator *(Matrix4x4 mat, Vector4 vec)
         {
-            return new Vector3(v00 * vec.x + v01 * vec.y + v02 * vec.z + v03,
-                               v10 * vec.x + v11 * vec.y + v12 * vec.z + v13,
-                               v20 * vec.x + v21 * vec.y + v22 * vec.z + v23);
-        }
-        /// <summary>
-        /// Multiplies matrix by vector, where vector represents direction (vector = (x, y, z, 0))
-        /// </summary>
-        public Vector3 multByDirection(Vector3 vec)
-        {
-            return new Vector3(v00 * vec.x + v01 * vec.y + v02 * vec.z,
-                               v10 * vec.x + v11 * vec.y + v12 * vec.z,
-                               v20 * vec.x + v21 * vec.y + v22 * vec.z);
+            return new Vector4(mat.v00 * vec.x + mat.v01 * vec.y + mat.v02 * vec.z + mat.v03 * vec.w,
+                               mat.v10 * vec.x + mat.v11 * vec.y + mat.v12 * vec.z + mat.v13 * vec.w,
+                               mat.v20 * vec.x + mat.v21 * vec.y + mat.v22 * vec.z + mat.v23 * vec.w,
+                               mat.v30 * vec.x + mat.v31 * vec.y + mat.v32 * vec.z + mat.v33 * vec.w);
         }
         public Matrix4x4 inversed()
         {
