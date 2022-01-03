@@ -78,6 +78,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BaseAssets\Components\Camera.cs" />
     <Compile Include="BaseAssets\Components\Component.cs" />
     <Compile Include="BaseAssets\Components\Transform.cs" />
     <Compile Include="GameObject.cs" />
