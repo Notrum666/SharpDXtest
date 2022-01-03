@@ -1031,6 +1031,14 @@ namespace SharpDXtest
                                   det02, -det12,  det22, -det32,
                                  -det03,  det13, -det23,  det33 ) / determinant;
         }
+        public static Matrix4x4 FromQuaternion(Quaternion q)
+        {
+            double s2 = 2.0 / q.norm();
+            return new Matrix4x4(1-s2*(q.y*q.y+q.z*q.z),   s2*(q.x*q.y-q.w*q.z),   s2*(q.x*q.z+q.w*q.y), 0,
+                                   s2*(q.x*q.y+q.w*q.z), 1-s2*(q.x*q.x+q.z*q.z),   s2*(q.y*q.z-q.w*q.x), 0,
+                                   s2*(q.x*q.z-q.w*q.y),   s2*(q.y*q.z+q.w*q.x), 1-s2*(q.x*q.x+q.y*q.y), 0,
+                                             0,             0,             0,                            1);
+        }
         public override string ToString()
         {
             return "| " + v00.ToString() + " " + v01.ToString() + " " + v02.ToString() + " " + v03.ToString() + " |\n" +
@@ -1046,12 +1054,22 @@ namespace SharpDXtest
                    "| " + v30.ToString(format) + " " + v31.ToString(format) + " " + v32.ToString(format) + " " + v33.ToString(format) + " |";
         }
     }
-    // do NOT ask me about this, i don't give a fuck how this works.
+    public enum EulerOrder
+    {
+        XYZ,
+        XZY,
+        YXZ,
+        YZX,
+        ZXY,
+        ZYX
+    }
+    // do NOT ask me about this, i don't give a fuck how this works. (times tried to understand: 2)
     public struct Quaternion
     {
-        private double w, x, y, z;
+        public double w, x, y, z;
 
         public static Quaternion Identity { get { return new Quaternion(1); } }
+        public static Quaternion Zero { get { return new Quaternion(); } }
         public Quaternion(double w = 0, double x = 0, double y = 0, double z = 0)
         {
             this.w = w;
@@ -1059,160 +1077,171 @@ namespace SharpDXtest
             this.y = y;
             this.z = z;
         }
-        /// <summary>
-        /// Normalizes this quaternion
-        /// </summary>
-        public void normalize()
+        public double dotMul(Quaternion q)
         {
-            double length = magnitude();
-            w /= length;
-            x /= length;
-            y /= length;
-            z /= length;
+            return w * q.w + x * q.x + y * q.y + z * q.z;
         }
-        /// <summary>
-        /// Returns normalized copy of this quaternion
-        /// </summary>
-        public Quaternion normalized()
+        public double norm()
         {
-            double length = magnitude();
-            return new Quaternion(w / length, x / length, y / length, z / length);
+            return dotMul(this);
         }
-        /// <summary>
-        /// Returns magnitude of this quaternion, equal to length()
-        /// </summary>
-        public double magnitude()
-        {
-            return Math.Sqrt(w * w + x * x + y * y + z * z);
-        }
-        /// <summary>
-        /// Returns length of this quaternion, equal to magnitude()
-        /// </summary>
         public double length()
         {
-            return magnitude();
+            return Math.Sqrt(norm());
         }
-        /// <summary>
-        /// returns squared magnitude of this quaternion, equal to squaredLength()
-        /// </summary>
-        public double squaredMagnitude()
+        public double magnitude()
         {
-            return w * w + x * x + y * y + z * z;
+            return length();
         }
-        /// <summary>
-        /// returns squared length of this quaternion, equal to squaredMagnitude()
-        /// </summary>
-        public double squaredLength()
+        public bool isZero()
         {
-            return squaredMagnitude();
+            return norm() < Constants.SqrEpsilon;
         }
-        /// <summary>
-        /// Returns inversed copy of this quaternion (conjugated/squaredMagnitude)
-        /// </summary>
-        public Quaternion inversed()
+        public void normalize()
         {
-            Quaternion q = conjugated();
-            double magn = squaredMagnitude();
-            q.w /= magn;
-            q.x /= magn;
-            q.y /= magn;
-            q.z /= magn;
-            return q;
+            double l = length();
+            w /= l;
+            x /= l;
+            y /= l;
+            z /= l;
         }
-        /// <summary>
-        /// Inverses this quaternion (conjugated/squaredMagnitude)
-        /// </summary>
-        public void inverse()
+        public Quaternion normalized()
         {
-            double magn = squaredMagnitude();
-            conjugate();
-            w /= magn;
-            x /= magn;
-            y /= magn;
-            z /= magn;
+            return this / length();
         }
-        /// <summary>
-        /// Conjugates this vector (w, -x, -y, -z)
-        /// </summary>
         public void conjugate()
         {
             x = -x;
             y = -y;
             z = -z;
         }
-        /// <summary>
-        /// Returns conjugated copy of this quaternion (w, -x, -y, -z)
-        /// </summary>
         public Quaternion conjugated()
         {
             return new Quaternion(w, -x, -y, -z);
         }
-        /// <summary>
-        /// Combines 2 rotations. Important: Second rotation comes first.
-        /// </summary>
-        public static Quaternion operator *(Quaternion q1, Quaternion q2)
+        public Quaternion cross(Quaternion q)
         {
-            return new Quaternion(q1.w * q2.w - q1.x * q2.x - q1.y - q2.y - q1.z * q2.z,
-                                  q1.w * q2.x + q1.x * q2.w + q1.y * q2.z - q1.z * q2.y,
-                                  q1.w * q2.y + q1.y * q2.w + q1.x * q2.z - q1.z * q2.x,
-                                  q1.w * q2.z + q1.z * q2.w + q1.x * q2.y - q1.y * q2.x);
+            return new Quaternion(0.0, y * q.z - z * q.y, z * q.x - x * q.z, x * q.y - y * q.x);
         }
-        public static Quaternion operator *(Quaternion q, Vector3 v)
+        public bool isCollinearTo(Quaternion q)
         {
-            return new Quaternion(-q.x * v.x - q.y - v.y - q.z * v.z,
-                                  q.w * v.x + q.y * v.z - q.z * v.y,
-                                  q.w * v.y + q.x * v.z - q.z * v.x,
-                                  q.w * v.z + q.x * v.y - q.y * v.x);
+            return cross(q).isZero();
         }
-        /// <summary>
-        /// Rotates vector v by quaternion q
-        /// </summary>
-        public Vector3 rotateVector(Vector3 vec)
+        public Quaternion inverse()
         {
-            Quaternion result = this * vec * inversed();
-            return new Vector3(result.x, result.y, result.z);
+            return conjugated() / norm();
         }
-        /// <summary>
-        /// Returns rotation matrix equal to this quaternion
-        /// </summary>
-        public Matrix4x4 toRotationMatrix()
+        public void invert()
         {
-            return new Matrix4x4(1-2*(y*y+z*z),   2*(x*y-w*z),   2*(x*z+w*y), 0,
-                                   2*(x*y+w*z), 1-2*(x*x+z*z),   2*(y*z-w*x), 0,
-                                   2*(x*z-w*y),   2*(y*z+w*x), 1-2*(x*x+y*y), 0,
-                                             0,             0,             0, 1 );
+            double n = norm();
+            conjugate();
+            w /= n;
+            x /= n;
+            y /= n;
+            z /= n;
         }
-        /// <summary>
-        /// Returns quaternion represented by rotation around axis
-        /// </summary>
         public static Quaternion FromAxisAngle(Vector3 axis, double angle)
         {
-            double cos = Math.Cos(angle / 2.0);
-            double sin = Math.Sin(angle / 2.0);
-            return new Quaternion(cos, sin * axis.x, sin * axis.y, sin * axis.z);
+            if (Math.Abs(axis.squaredLength() - 1.0) > Constants.SqrEpsilon)
+                throw new ArgumentException("Axis is not normalized.");
+            double sinhalf = Math.Sin(angle / 2.0);
+            return new Quaternion(Math.Cos(angle / 2.0), axis.x * sinhalf, axis.y * sinhalf, axis.z * sinhalf);
         }
-        /// <summary>
-        /// Returns quaternion representation of rotation in eulers. Order: YXZ
-        /// </summary>
-        public static Quaternion fromEuler(Vector3 eulers)
+        public static Quaternion FromEuler(Vector3 euler, EulerOrder order = EulerOrder.ZXY)
         {
-            return FromAxisAngle(Vector3.Forward, eulers.z) *
-                   FromAxisAngle(Vector3.Right, eulers.x) *
-                   FromAxisAngle(Vector3.Up, eulers.y);
+            double sinhalfx = Math.Sin(euler.x / 2.0);
+            double sinhalfy = Math.Sin(euler.y / 2.0);
+            double sinhalfz = Math.Sin(euler.z / 2.0);
+            double coshalfx = Math.Cos(euler.x / 2.0);
+            double coshalfy = Math.Cos(euler.y / 2.0);
+            double coshalfz = Math.Cos(euler.z / 2.0);
+            switch (order)
+            {
+                case EulerOrder.XYZ:
+                    return new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) * 
+                           new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
+                           new Quaternion(coshalfx, sinhalfx, 0.0, 0.0);
+                case EulerOrder.XZY:
+                    return new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
+                           new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
+                           new Quaternion(coshalfx, sinhalfx, 0.0, 0.0);
+                case EulerOrder.YXZ:
+                    return new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
+                           new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
+                           new Quaternion(coshalfy, 0.0, sinhalfy, 0.0);
+                case EulerOrder.YZX:
+                    return new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
+                           new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
+                           new Quaternion(coshalfy, 0.0, sinhalfy, 0.0);
+                case EulerOrder.ZXY:
+                    return new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
+                           new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
+                           new Quaternion(coshalfz, 0.0, 0.0, sinhalfz);
+                case EulerOrder.ZYX:
+                    return new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
+                           new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
+                           new Quaternion(coshalfz, 0.0, 0.0, sinhalfz);
+            }
+            throw new NotImplementedException();
         }
-        /// <summary>
-        /// Returns eulers representation of rotation in this quaternion
-        /// </summary>
-        public Vector3 toEuler()
+
+        public static Quaternion operator /(Quaternion lhs, double rhs)
         {
-            if (x * y + z * w == 0.5)
-                return new Vector3(Math.Asin(2 * x * y + 2 * z * w), 2 * Math.Atan2(x, w), 0);
-            else
-            if (x * y + z * w == -0.5)
-                return new Vector3(Math.Asin(2 * x * y + 2 * z * w), -2 * Math.Atan2(x, w), 0);
-            else
-                return new Vector3(Math.Asin(2 * x * y + 2 * z * w), Math.Atan2(2 * y * w - 2 * x * z, 1 - 2 * y * y - 2 * z * z), Math.Atan2(2 * x * w - 2 * y * z, 1 - 2 * x * x - 2 * z * z));
+            return new Quaternion(lhs.w / rhs, lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
         }
+        public static Quaternion operator *(Quaternion lhs, double rhs)
+        {
+            return new Quaternion(lhs.w * rhs, lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
+        }
+        public static Quaternion operator *(Quaternion lhs, Quaternion rhs)
+        {
+            return new Quaternion(lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z,
+                                  lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y,
+                                  lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x,
+                                  lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w);
+        }
+        public static Vector3 operator *(Quaternion lhs, Vector3 rhs)
+        {
+            Quaternion q = lhs * new Quaternion(0.0, rhs.x, rhs.y, rhs.z) * lhs.inverse();
+            return new Vector3(q.x, q.y, q.z);
+        }
+        public static Quaternion operator +(Quaternion lhs, Quaternion rhs)
+        {
+            return new Quaternion(lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
+        }
+        public static Quaternion operator -(Quaternion lhs, Quaternion rhs)
+        {
+            return new Quaternion(lhs.w - rhs.w, lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
+        }
+
+        //public static Quaternion operator *(Quaternion q, Vector3 v)
+        //{
+        //    return new Quaternion(-q.x * v.x - q.y - v.y - q.z * v.z,
+        //                          q.w * v.x + q.y * v.z - q.z * v.y,
+        //                          q.w * v.y + q.x * v.z - q.z * v.x,
+        //                          q.w * v.z + q.x * v.y - q.y * v.x);
+        //}
+        ///// <summary>
+        ///// Rotates vector v by quaternion q
+        ///// </summary>
+        //public Vector3 rotateVector(Vector3 vec)
+        //{
+        //    Quaternion result = this * vec * inversed();
+        //    return new Vector3(result.x, result.y, result.z);
+        //}
+        ///// <summary>
+        ///// Returns eulers representation of rotation in this quaternion
+        ///// </summary>
+        //public Vector3 toEuler()
+        //{
+        //    if (x * y + z * w == 0.5)
+        //        return new Vector3(Math.Asin(2 * x * y + 2 * z * w), 2 * Math.Atan2(x, w), 0);
+        //    else
+        //    if (x * y + z * w == -0.5)
+        //        return new Vector3(Math.Asin(2 * x * y + 2 * z * w), -2 * Math.Atan2(x, w), 0);
+        //    else
+        //        return new Vector3(Math.Asin(2 * x * y + 2 * z * w), Math.Atan2(2 * y * w - 2 * x * z, 1 - 2 * y * y - 2 * z * z), Math.Atan2(2 * x * w - 2 * y * z, 1 - 2 * x * x - 2 * z * z));
+        //}
         public override string ToString()
         {
             return "(" + w.ToString() + ", " + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";

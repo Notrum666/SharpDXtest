@@ -23,6 +23,9 @@ namespace SharpDXtest
         public MainWindow()
         {
             InitializeComponent();
+
+            Quaternion q = Quaternion.FromAxisAngle(Vector3.Up, Math.PI);
+            Vector3 vec = q * Vector3.Right;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
