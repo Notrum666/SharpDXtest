@@ -89,6 +89,10 @@ namespace SharpDXtest
         {
             return new Vector2f(vec.x / value, vec.y / value);
         }
+        public static Vector2f operator -(Vector2f vec)
+        {
+            return new Vector2f(-vec.x, -vec.y);
+        }
         /// <summary>
         /// Scalar multiplication
         /// </summary>
@@ -257,6 +261,10 @@ namespace SharpDXtest
         public static Vector2 operator /(Vector2 vec, double value)
         {
             return new Vector2(vec.x / value, vec.y / value);
+        }
+        public static Vector2 operator -(Vector2 vec)
+        {
+            return new Vector2(-vec.x, -vec.y);
         }
         /// <summary>
         /// Scalar multiplication
@@ -441,6 +449,10 @@ namespace SharpDXtest
         public static Vector3f operator /(Vector3f vec, float value)
         {
             return new Vector3f(vec.x / value, vec.y / value, vec.z / value);
+        }
+        public static Vector3f operator -(Vector3f vec)
+        {
+            return new Vector3f(-vec.x, -vec.y, -vec.z);
         }
         /// <summary>
         /// Scalar multiplication
@@ -631,6 +643,10 @@ namespace SharpDXtest
         public static Vector3 operator /(Vector3 vec, double value)
         {
             return new Vector3(vec.x / value, vec.y / value, vec.z / value);
+        }
+        public static Vector3 operator -(Vector3 vec)
+        {
+            return new Vector3(-vec.x, -vec.y, -vec.z);
         }
         /// <summary>
         /// Scalar multiplication
@@ -833,6 +849,10 @@ namespace SharpDXtest
         {
             return new Vector4f(vec.x / value, vec.y / value, vec.z / value, vec.w / value);
         }
+        public static Vector4f operator -(Vector4f vec)
+        {
+            return new Vector4f(-vec.x, -vec.y, -vec.z, -vec.w);
+        }
         /// <summary>
         /// Scalar multiplication
         /// </summary>
@@ -1001,6 +1021,10 @@ namespace SharpDXtest
         public static Vector4 operator /(Vector4 vec, double value)
         {
             return new Vector4(vec.x / value, vec.y / value, vec.z / value, vec.w / value);
+        }
+        public static Vector4 operator -(Vector4 vec)
+        {
+            return new Vector4(-vec.x, -vec.y, -vec.z, -vec.w);
         }
         /// <summary>
         /// Scalar multiplication
