@@ -622,6 +622,8 @@ namespace SharpDXtest
                         break;
                     case "f":
                         int vertexesCount = words.Length - 1;
+                        if (vertexesCount > 3)
+                            throw new NotSupportedException("DirectX does not support non-triangulated models.");
                         int[] v_i = new int[vertexesCount];
                         int[] t_i = null;
                         int[] n_i = null;

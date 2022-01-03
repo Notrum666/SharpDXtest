@@ -23,7 +23,7 @@ cbuffer mat
 vert_out main(vert_in vert)
 {
     vert_out res = (vert_out)0;
-    res.sv_pos = mul(mul(mul(proj, view), model), float4(vert.v, 1.0f));
+    res.sv_pos = mul(mul(float4(vert.v, 1.0f), model), proj);
     
     res.v = res.sv_pos;
     res.t = vert.t;

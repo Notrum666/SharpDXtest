@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
@@ -8,6 +9,8 @@ using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using Device = SharpDX.Direct3D11.Device;
+
+using SharpDXtest.Components;
 
 namespace SharpDXtest
 {
@@ -21,6 +24,7 @@ namespace SharpDXtest
 
         public static Device CurrentDevice { get => device; }
 
+        private static Transform transform;
         private static Model obj;
         private static Texture tex;
         private static Sampler sampler;
@@ -31,7 +35,18 @@ namespace SharpDXtest
         {
             InitDirectX(control);
 
-            obj = AssetsManager.LoadModelsFile("Assets\\Models\\triangle.obj")["triangle"];
+            GameObject cameraObject = new GameObject();
+            Camera camera = (Camera)cameraObject.addComponent<Camera>();
+            camera.resolution = control.ClientSize.Width / control.ClientSize.Height;
+            camera.FOV = 80.0 / 180.0 * Math.PI;
+            camera.near = 0.01;
+            camera.far = 100;
+            camera.MakeCurrent();
+
+            obj = AssetsManager.LoadModelsFile("Assets\\Models\\cube.obj")["cube"];
+            transform = new Transform();
+            transform.position = new Vector3(0.0, 10, 0.0);
+            transform.rotation = Quaternion.FromEuler(new Vector3(0.0, 0.0, Math.PI / 4));
 
             pipeline = AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
                                                                    Shader.Create("BaseAssets\\Shaders\\default.fsh"));
@@ -65,7 +80,7 @@ namespace SharpDXtest
             RasterizerState rastState = new RasterizerState(device, new RasterizerStateDescription()
             {
                 FillMode = FillMode.Solid,
-                CullMode = CullMode.None,
+                CullMode = CullMode.Back,
                 IsFrontCounterClockwise = true,
                 IsScissorEnabled = false,
                 IsAntialiasedLineEnabled = true,
@@ -101,9 +116,13 @@ namespace SharpDXtest
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
             pipeline.Use();
 
-            pipeline.UpdateUniform("model", Matrix4x4f.Identity);
-            pipeline.UpdateUniform("view", Matrix4x4f.Identity);
-            pipeline.UpdateUniform("proj", Matrix4x4f.Identity);
+            Matrix4x4f mat = (Matrix4x4f)transform.model;
+
+            Matrix4x4f proj = (Matrix4x4f)Camera.Current.proj;
+
+            pipeline.UpdateUniform("model", mat);// ((Matrix4x4f)transform.model).transposed());
+            //pipeline.UpdateUniform("view", Matrix4x4f.Identity);
+            pipeline.UpdateUniform("proj", proj);
 
             pipeline.UploadUpdatedUniforms();
 

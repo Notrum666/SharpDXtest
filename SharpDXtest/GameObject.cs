@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using SharpDXtest.BaseAssets.Components;
+using SharpDXtest.Components;
 
 namespace SharpDXtest
 {
