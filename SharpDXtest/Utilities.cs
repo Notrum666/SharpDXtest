@@ -311,7 +311,7 @@ namespace SharpDXtest
                 GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.Set(shader);
                 if (buf != null)
                 {
-                    Matrix4f mat = Matrix4f.Identity;
+                    Matrix4x4f mat = Matrix4x4f.Identity;
                     mat.v00 = 0.5f;
                     mat.v11 = 0.5f;
                     mat.v30 = 0.5f;
