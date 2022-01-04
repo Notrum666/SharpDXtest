@@ -20,7 +20,7 @@ using System.Xml.Linq;
 
 using Buffer = SharpDX.Direct3D11.Buffer;
 
-using SharpDXtest.Components;
+using SharpDXtest.BaseAssets.Components;
 
 namespace SharpDXtest
 {
