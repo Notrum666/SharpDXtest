@@ -8,7 +8,7 @@ namespace SharpDXtest.Components
 {
     public class Transform : Component
     {
-        public Transform Parent;
+        public Transform Parent { get; private set; }
         public Vector3 position;
         public Quaternion rotation;
         public Matrix4x4 model
@@ -29,6 +29,10 @@ namespace SharpDXtest.Components
         {
             position = Vector3.Zero;
             rotation = Quaternion.Identity;
+        }
+        public void setParent(Transform transform)
+        {
+            Parent = transform;
         }
     }
 }

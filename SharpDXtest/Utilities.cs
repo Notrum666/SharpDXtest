@@ -8,13 +8,19 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.D3DCompiler;
+using System.Xml;
+using System.Xml.Linq;
 
 using Buffer = SharpDX.Direct3D11.Buffer;
+
+using SharpDXtest.Components;
 
 namespace SharpDXtest
 {
@@ -541,18 +547,18 @@ namespace SharpDXtest
                 shader.uploadUpdatedUniforms();
         }
     }
-    //public class Scene
-    //{
-    //    public List<GameObject> objects = new List<GameObject>();
-    //    public Camera MainCamera;
-    //}
+    public class Scene
+    {
+        public List<GameObject> objects { get; } = new List<GameObject>();
+        public Camera mainCamera;
+    }
     public static class AssetsManager
     {
         public static Dictionary<string, Model> Models { get; } = new Dictionary<string, Model>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
         public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture>();
         public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
-        //public static Dictionary<string, Scene> Scenes = new Dictionary<string, Scene>();
+        public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
 
         public static Dictionary<string, Model> LoadModelsFile(string path, float scaleFactor = 1.0f, bool reverse = false)
         {
@@ -694,256 +700,256 @@ namespace SharpDXtest
         
             return texture;
         }
-        //private struct Reference
-        //{
-        //    public object obj;
-        //    public string fieldName;
-        //    public string referenceObjName;
-        //    public Reference(object obj, string fieldName, string referenceObjName)
-        //    {
-        //        this.obj = obj;
-        //        this.fieldName = fieldName;
-        //        this.referenceObjName = referenceObjName;
-        //    }
-        //}
-        //public static Scene LoadScene(string path)
-        //{
-        //    XDocument document = XDocument.Parse(File.ReadAllText(path));
-        //
-        //    Dictionary<string, object> namedObjects = new Dictionary<string, object>();
-        //    List<Reference> references = new List<Reference>();
-        //    List<Type> types = new List<Type>();
-        //    foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-        //        types.AddRange(assembly.GetTypes());
-        //
-        //    void parseSpecialAttribute(object obj, string name, string value)
-        //    {
-        //        string[] words = value.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-        //        if (words.Length < 2)
-        //            throw new Exception("Wrong attribute format.");
-        //        Type objType = obj.GetType();
-        //        switch (words[0])
-        //        {
-        //            case "Reference":
-        //                references.Add(new Reference(obj, name, words[1]));
-        //                break;
-        //            case "Model":
-        //                {
-        //                    if (!Models.ContainsKey(words[1]))
-        //                        throw new Exception("Model " + words[1] + " not loaded.");
-        //                    PropertyInfo property = objType.GetProperty(name);
-        //                    if (property != null)
-        //                        property.SetValue(obj, Models[words[1]]);
-        //                    else
-        //                    {
-        //                        FieldInfo field = objType.GetField(name);
-        //                        if (field != null)
-        //                            field.SetValue(obj, Models[words[1]]);
-        //                        else
-        //                            throw new Exception(objType.Name + " don't have " + name + ".");
-        //                    }
-        //                    break;
-        //                }
-        //            case "Texture":
-        //                {
-        //                    if (!Textures.ContainsKey(words[1]))
-        //                        throw new Exception("Texture " + words[1] + " not loaded.");
-        //                    PropertyInfo property = objType.GetProperty(name);
-        //                    if (property != null)
-        //                        property.SetValue(obj, Textures[words[1]]);
-        //                    else
-        //                    {
-        //                        FieldInfo field = objType.GetField(name);
-        //                        if (field != null)
-        //                            field.SetValue(obj, Textures[words[1]]);
-        //                        else
-        //                            throw new Exception(objType.Name + " don't have " + name + ".");
-        //                    }
-        //                    break;
-        //                }
-        //        }
-        //    }
-        //    void parseAttributes(ref object obj, IEnumerable<XAttribute> attributes)
-        //    {
-        //        Type objType = obj.GetType();
-        //        foreach (XAttribute attrib in attributes)
-        //        {
-        //            if (attrib.Name.LocalName == "x.Name")
-        //            {
-        //                if (namedObjects.ContainsKey(attrib.Value))
-        //                    throw new Exception("Scene can't have two or more objects with same name.");
-        //                namedObjects[attrib.Value] = obj;
-        //                continue;
-        //            }
-        //            if (attrib.Value.StartsWith("{") && attrib.Value.EndsWith("}"))
-        //                parseSpecialAttribute(obj, attrib.Name.LocalName, attrib.Value.Substring(1, attrib.Value.Length - 2));
-        //            else
-        //            {
-        //                if (obj is Quaternion)
-        //                {
-        //                    switch (attrib.Name.LocalName)
-        //                    {
-        //                        case "X":
-        //                            obj = Quaternion.FromAxisAngle(Vector3.UnitX, float.Parse(attrib.Value)) * (Quaternion)obj;
-        //                            continue;
-        //                        case "Y":
-        //                            obj = Quaternion.FromAxisAngle(Vector3.UnitY, float.Parse(attrib.Value)) * (Quaternion)obj;
-        //                            continue;
-        //                        case "Z":
-        //                            obj = Quaternion.FromAxisAngle(Vector3.UnitZ, float.Parse(attrib.Value)) * (Quaternion)obj;
-        //                            continue;
-        //                    }
-        //                }
-        //                PropertyInfo property = objType.GetProperty(attrib.Name.LocalName);
-        //                if (property != null)
-        //                    property.SetValue(obj, Convert.ChangeType(attrib.Value, property.PropertyType));
-        //                else
-        //                {
-        //                    FieldInfo field = objType.GetField(attrib.Name.LocalName);
-        //                    if (field != null)
-        //                        field.SetValue(obj, Convert.ChangeType(attrib.Value, field.FieldType));
-        //                    else
-        //                        throw new Exception(objType.Name + " don't have " + attrib.Name.LocalName + ".");
-        //                }
-        //            }
-        //        }
-        //    }
-        //    object parseElement(object parent, XElement parentElement, XElement element)
-        //    {
-        //        if (element.NodeType == XmlNodeType.Text)
-        //            return Convert.ChangeType(element.Value.Trim(' ', '\n'), parent.GetType());
-        //        object curObj = null;
-        //        Type curType = types.Find(t => t.Name == element.Name.LocalName);
-        //        if (curType != null)
-        //        {
-        //            if (curType == typeof(GameObject))
-        //            {
-        //                curObj = Activator.CreateInstance(typeof(GameObject));
-        //                parseAttributes(ref curObj, element.Attributes());
-        //                object nestedObject;
-        //                foreach (XElement elem in element.Elements())
-        //                    if ((nestedObject = parseElement(curObj, element, elem)).GetType() == typeof(GameObject))
-        //                        (nestedObject as GameObject).transform.Parent = (curObj as GameObject).transform;
-        //            }
-        //            else if (curType.IsSubclassOf(typeof(Component)))
-        //            {
-        //                if (!(parent is GameObject))
-        //                    throw new Exception("Components can only be inside of GameObject.");
-        //                if (curType == typeof(Transform))
-        //                    curObj = (parent as GameObject).transform;
-        //                else
-        //                    curObj = (parent as GameObject).addComponent(curType);
-        //                parseAttributes(ref curObj, element.Attributes());
-        //                foreach (XElement elem in element.Elements())
-        //                    parseElement(curObj, element, elem);
-        //            }
-        //            else if (curType == typeof(Scene))
-        //            {
-        //                if (parent != null)
-        //                    throw new Exception("Scene must be the root.");
-        //                curObj = Activator.CreateInstance(typeof(Scene));
-        //                parseAttributes(ref curObj, element.Attributes());
-        //                foreach (XElement elem in element.Elements())
-        //                {
-        //                    object sceneObject = parseElement(curObj, element, elem);
-        //                    if (!(sceneObject is GameObject))
-        //                        throw new Exception("Scene can contain only GameObjects.");
-        //                    (curObj as Scene).objects.Add(sceneObject as GameObject);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                if (curType == typeof(Quaternion))
-        //                    curObj = Quaternion.Identity;
-        //                else
-        //                {
-        //                    if (curType.GetConstructor(Type.EmptyTypes) != null)
-        //                        curObj = Activator.CreateInstance(curType);
-        //                    else
-        //                        curObj = FormatterServices.GetUninitializedObject(curType);
-        //                }
-        //                parseAttributes(ref curObj, element.Attributes());
-        //                foreach (XElement elem in element.Elements())
-        //                    parseElement(curObj, element, elem);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            string[] nameParts = element.Name.LocalName.Split('.');
-        //            if (nameParts.Length != 2 || nameParts[0] != parentElement.Name.LocalName)
-        //                throw new Exception(element.Name.LocalName + " not found.");
-        //
-        //            IEnumerable<XAttribute> attributes = element.Attributes();
-        //            IEnumerable<XElement> elements = element.Elements();
-        //            FieldInfo field = parent.GetType().GetField(nameParts[1]);
-        //            if (field == null)
-        //                throw new Exception(parent.GetType().Name + " don't have " + nameParts[1] + ".");
-        //            if (attributes.Count() != 0)
-        //            {
-        //                if (elements.Count() != 0)
-        //                    throw new Exception("Setter can't have values in both places");
-        //                if (field.FieldType == typeof(Quaternion))
-        //                    curObj = Quaternion.Identity;
-        //                else
-        //                    curObj = Activator.CreateInstance(field.FieldType);
-        //                parseAttributes(ref curObj, element.Attributes());
-        //                field.SetValue(parent, curObj);
-        //            }
-        //            else
-        //            {
-        //                curType = field.FieldType;
-        //                if (curType.IsArray || curType.IsGenericType && curType.GetGenericTypeDefinition() == typeof(List<>))
-        //                {
-        //                    Type listBaseType = field.FieldType.GetGenericArguments()[0];
-        //                    Type listType = typeof(List<>).MakeGenericType(listBaseType);
-        //                    curObj = Activator.CreateInstance(listType);
-        //                    MethodInfo addMethod = listType.GetMethod("Add");
-        //                    foreach (XElement elem in elements)
-        //                    {
-        //                        object listElement = parseElement(curObj, element, elem);
-        //                        if (listElement.GetType() != listBaseType && !listElement.GetType().IsSubclassOf(listBaseType))
-        //                            throw new Exception(listElement.GetType().Name + " does not match for " + listBaseType.Name + ".");
-        //                        addMethod.Invoke(curObj, new object[] { listElement });
-        //                    }
-        //                    field.SetValue(parent, curObj);
-        //                }
-        //                else
-        //                {
-        //                    if (elements.Count() != 1)
-        //                        throw new Exception("Only array and list types can contain more than one element.");
-        //                    object nestedObject = parseElement(parent, parentElement, elements.First());
-        //                    if (nestedObject.GetType() != curType && nestedObject.GetType().IsSubclassOf(curType))
-        //                        throw new Exception(nestedObject.GetType().Name + " does not match for " + curType.Name + ".");
-        //                    field.SetValue(parent, nestedObject);
-        //                }
-        //            }
-        //        }
-        //        return curObj;
-        //    }
-        //
-        //    object scene = parseElement(null, null, document.Root);
-        //    if (!(scene is Scene))
-        //        throw new Exception("Scene must be as root.");
-        //
-        //    foreach (Reference reference in references)
-        //    {
-        //        if (!namedObjects.ContainsKey(reference.referenceObjName))
-        //            throw new Exception(reference.referenceObjName + " not found.");
-        //        FieldInfo field = reference.obj.GetType().GetField(reference.fieldName);
-        //        if (field != null)
-        //            field.SetValue(reference.obj, namedObjects[reference.referenceObjName]);
-        //        else
-        //        {
-        //            PropertyInfo property = reference.obj.GetType().GetProperty(reference.fieldName);
-        //            if (property != null)
-        //                property.SetValue(reference.obj, namedObjects[reference.referenceObjName]);
-        //            else
-        //                throw new Exception(reference.obj.GetType().Name + " don't have " + reference.fieldName + ".");
-        //        }
-        //    }
-        //
-        //    Scenes[Path.GetFileNameWithoutExtension(path)] = scene as Scene;
-        //    return scene as Scene;
-        //}
+        private struct Reference
+        {
+            public object obj;
+            public string fieldName;
+            public string referenceObjName;
+            public Reference(object obj, string fieldName, string referenceObjName)
+            {
+                this.obj = obj;
+                this.fieldName = fieldName;
+                this.referenceObjName = referenceObjName;
+            }
+        }
+        public static Scene LoadScene(string path)
+        {
+            XDocument document = XDocument.Parse(File.ReadAllText(path));
+        
+            Dictionary<string, object> namedObjects = new Dictionary<string, object>();
+            List<Reference> references = new List<Reference>();
+            List<Type> types = new List<Type>();
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+                types.AddRange(assembly.GetTypes());
+        
+            void parseSpecialAttribute(object obj, string name, string value)
+            {
+                string[] words = value.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (words.Length < 2)
+                    throw new Exception("Wrong attribute format.");
+                Type objType = obj.GetType();
+                switch (words[0])
+                {
+                    case "Reference":
+                        references.Add(new Reference(obj, name, words[1]));
+                        break;
+                    case "Model":
+                        {
+                            if (!Models.ContainsKey(words[1]))
+                                throw new Exception("Model " + words[1] + " not loaded.");
+                            PropertyInfo property = objType.GetProperty(name);
+                            if (property != null)
+                                property.SetValue(obj, Models[words[1]]);
+                            else
+                            {
+                                FieldInfo field = objType.GetField(name);
+                                if (field != null)
+                                    field.SetValue(obj, Models[words[1]]);
+                                else
+                                    throw new Exception(objType.Name + " don't have " + name + ".");
+                            }
+                            break;
+                        }
+                    case "Texture":
+                        {
+                            if (!Textures.ContainsKey(words[1]))
+                                throw new Exception("Texture " + words[1] + " not loaded.");
+                            PropertyInfo property = objType.GetProperty(name);
+                            if (property != null)
+                                property.SetValue(obj, Textures[words[1]]);
+                            else
+                            {
+                                FieldInfo field = objType.GetField(name);
+                                if (field != null)
+                                    field.SetValue(obj, Textures[words[1]]);
+                                else
+                                    throw new Exception(objType.Name + " don't have " + name + ".");
+                            }
+                            break;
+                        }
+                }
+            }
+            void parseAttributes(ref object obj, IEnumerable<XAttribute> attributes)
+            {
+                Type objType = obj.GetType();
+                foreach (XAttribute attrib in attributes)
+                {
+                    if (attrib.Name.LocalName == "x.Name")
+                    {
+                        if (namedObjects.ContainsKey(attrib.Value))
+                            throw new Exception("Scene can't have two or more objects with same name.");
+                        namedObjects[attrib.Value] = obj;
+                        continue;
+                    }
+                    if (attrib.Value.StartsWith("{") && attrib.Value.EndsWith("}"))
+                        parseSpecialAttribute(obj, attrib.Name.LocalName, attrib.Value.Substring(1, attrib.Value.Length - 2));
+                    else
+                    {
+                        if (obj is Quaternion)
+                        {
+                            switch (attrib.Name.LocalName)
+                            {
+                                case "X":
+                                    obj = Quaternion.FromAxisAngle(Vector3.Right, float.Parse(attrib.Value)) * (Quaternion)obj;
+                                    continue;
+                                case "Y":
+                                    obj = Quaternion.FromAxisAngle(Vector3.Forward, float.Parse(attrib.Value)) * (Quaternion)obj;
+                                    continue;
+                                case "Z":
+                                    obj = Quaternion.FromAxisAngle(Vector3.Up, float.Parse(attrib.Value)) * (Quaternion)obj;
+                                    continue;
+                            }
+                        }
+                        PropertyInfo property = objType.GetProperty(attrib.Name.LocalName);
+                        if (property != null)
+                            property.SetValue(obj, Convert.ChangeType(attrib.Value, property.PropertyType));
+                        else
+                        {
+                            FieldInfo field = objType.GetField(attrib.Name.LocalName);
+                            if (field != null)
+                                field.SetValue(obj, Convert.ChangeType(attrib.Value, field.FieldType));
+                            else
+                                throw new Exception(objType.Name + " don't have " + attrib.Name.LocalName + ".");
+                        }
+                    }
+                }
+            }
+            object parseElement(object parent, XElement parentElement, XElement element)
+            {
+                if (element.NodeType == XmlNodeType.Text)
+                    return Convert.ChangeType(element.Value.Trim(' ', '\n'), parent.GetType());
+                object curObj = null;
+                Type curType = types.Find(t => t.Name == element.Name.LocalName);
+                if (curType != null)
+                {
+                    if (curType == typeof(GameObject))
+                    {
+                        curObj = Activator.CreateInstance(typeof(GameObject));
+                        parseAttributes(ref curObj, element.Attributes());
+                        object nestedObject;
+                        foreach (XElement elem in element.Elements())
+                            if ((nestedObject = parseElement(curObj, element, elem)).GetType() == typeof(GameObject))
+                                (nestedObject as GameObject).transform.setParent((curObj as GameObject).transform);
+                    }
+                    else if (curType.IsSubclassOf(typeof(Component)))
+                    {
+                        if (!(parent is GameObject))
+                            throw new Exception("Components can only be inside of GameObject.");
+                        if (curType == typeof(Transform))
+                            curObj = (parent as GameObject).transform;
+                        else
+                            curObj = (parent as GameObject).addComponent(curType);
+                        parseAttributes(ref curObj, element.Attributes());
+                        foreach (XElement elem in element.Elements())
+                            parseElement(curObj, element, elem);
+                    }
+                    else if (curType == typeof(Scene))
+                    {
+                        if (parent != null)
+                            throw new Exception("Scene must be the root.");
+                        curObj = Activator.CreateInstance(typeof(Scene));
+                        parseAttributes(ref curObj, element.Attributes());
+                        foreach (XElement elem in element.Elements())
+                        {
+                            object sceneObject = parseElement(curObj, element, elem);
+                            if (!(sceneObject is GameObject))
+                                throw new Exception("Scene can contain only GameObjects.");
+                            (curObj as Scene).objects.Add(sceneObject as GameObject);
+                        }
+                    }
+                    else
+                    {
+                        if (curType == typeof(Quaternion))
+                            curObj = Quaternion.Identity;
+                        else
+                        {
+                            if (curType.GetConstructor(Type.EmptyTypes) != null)
+                                curObj = Activator.CreateInstance(curType);
+                            else
+                                curObj = FormatterServices.GetUninitializedObject(curType);
+                        }
+                        parseAttributes(ref curObj, element.Attributes());
+                        foreach (XElement elem in element.Elements())
+                            parseElement(curObj, element, elem);
+                    }
+                }
+                else
+                {
+                    string[] nameParts = element.Name.LocalName.Split('.');
+                    if (nameParts.Length != 2 || nameParts[0] != parentElement.Name.LocalName)
+                        throw new Exception(element.Name.LocalName + " not found.");
+        
+                    IEnumerable<XAttribute> attributes = element.Attributes();
+                    IEnumerable<XElement> elements = element.Elements();
+                    FieldInfo field = parent.GetType().GetField(nameParts[1]);
+                    if (field == null)
+                        throw new Exception(parent.GetType().Name + " don't have " + nameParts[1] + ".");
+                    if (attributes.Count() != 0)
+                    {
+                        if (elements.Count() != 0)
+                            throw new Exception("Setter can't have values in both places");
+                        if (field.FieldType == typeof(Quaternion))
+                            curObj = Quaternion.Identity;
+                        else
+                            curObj = Activator.CreateInstance(field.FieldType);
+                        parseAttributes(ref curObj, element.Attributes());
+                        field.SetValue(parent, curObj);
+                    }
+                    else
+                    {
+                        curType = field.FieldType;
+                        if (curType.IsArray || curType.IsGenericType && curType.GetGenericTypeDefinition() == typeof(List<>))
+                        {
+                            Type listBaseType = field.FieldType.GetGenericArguments()[0];
+                            Type listType = typeof(List<>).MakeGenericType(listBaseType);
+                            curObj = Activator.CreateInstance(listType);
+                            MethodInfo addMethod = listType.GetMethod("Add");
+                            foreach (XElement elem in elements)
+                            {
+                                object listElement = parseElement(curObj, element, elem);
+                                if (listElement.GetType() != listBaseType && !listElement.GetType().IsSubclassOf(listBaseType))
+                                    throw new Exception(listElement.GetType().Name + " does not match for " + listBaseType.Name + ".");
+                                addMethod.Invoke(curObj, new object[] { listElement });
+                            }
+                            field.SetValue(parent, curObj);
+                        }
+                        else
+                        {
+                            if (elements.Count() != 1)
+                                throw new Exception("Only array and list types can contain more than one element.");
+                            object nestedObject = parseElement(parent, parentElement, elements.First());
+                            if (nestedObject.GetType() != curType && nestedObject.GetType().IsSubclassOf(curType))
+                                throw new Exception(nestedObject.GetType().Name + " does not match for " + curType.Name + ".");
+                            field.SetValue(parent, nestedObject);
+                        }
+                    }
+                }
+                return curObj;
+            }
+        
+            object scene = parseElement(null, null, document.Root);
+            if (!(scene is Scene))
+                throw new Exception("Scene must be as root.");
+        
+            foreach (Reference reference in references)
+            {
+                if (!namedObjects.ContainsKey(reference.referenceObjName))
+                    throw new Exception(reference.referenceObjName + " not found.");
+                FieldInfo field = reference.obj.GetType().GetField(reference.fieldName);
+                if (field != null)
+                    field.SetValue(reference.obj, namedObjects[reference.referenceObjName]);
+                else
+                {
+                    PropertyInfo property = reference.obj.GetType().GetProperty(reference.fieldName);
+                    if (property != null)
+                        property.SetValue(reference.obj, namedObjects[reference.referenceObjName]);
+                    else
+                        throw new Exception(reference.obj.GetType().Name + " don't have " + reference.fieldName + ".");
+                }
+            }
+        
+            Scenes[Path.GetFileNameWithoutExtension(path)] = scene as Scene;
+            return scene as Scene;
+        }
     }
 }

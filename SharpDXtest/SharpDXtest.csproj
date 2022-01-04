@@ -83,6 +83,7 @@
     </ApplicationDefinition>
     <Compile Include="BaseAssets\Components\Camera.cs" />
     <Compile Include="BaseAssets\Components\Component.cs" />
+    <Compile Include="BaseAssets\Components\Mesh.cs" />
     <Compile Include="BaseAssets\Components\Transform.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="InputManager.cs" />
@@ -137,7 +138,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\Components\" />
-    <Folder Include="Assets\Scenes\" />
     <Folder Include="Assets\Textures\" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +155,9 @@
     <None Include="BaseAssets\Textures\template.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Scenes\Level1.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
