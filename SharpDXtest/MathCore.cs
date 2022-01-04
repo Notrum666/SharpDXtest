@@ -12,7 +12,9 @@ namespace SharpDXtest
     }
     public struct Vector2f
     {
-        public static Vector2f Zero { get { return new Vector2f(); } }
+        public static readonly Vector2f Zero = new Vector2f();
+        public static readonly Vector2f UnitX = new Vector2f(1.0f, 0.0f);
+        public static readonly Vector2f UnitY = new Vector2f(0.0f, 1.0f);
 
         public float x { get; set; }
         public float y { get; set; }
@@ -187,7 +189,9 @@ namespace SharpDXtest
     }
     public struct Vector2
     {
-        public static Vector2 Zero { get { return new Vector2(); } }
+        public static readonly Vector2 Zero = new Vector2();
+        public static readonly Vector2 UnitX = new Vector2(1.0, 0.0);
+        public static readonly Vector2 UnitY = new Vector2(0.0, 1.0);
 
         public double x { get; set; }
         public double y { get; set; }
@@ -360,12 +364,15 @@ namespace SharpDXtest
     }
     public struct Vector3f
     {
-        public static Vector3f Zero { get { return new Vector3f(); } }
+        public static readonly Vector3f Zero = new Vector3f();
 
         // x - right, y - forward, z - up
-        public static Vector3f Right { get { return new Vector3f(1, 0, 0); } }
-        public static Vector3f Forward { get { return new Vector3f(0, 1, 0); } }
-        public static Vector3f Up { get { return new Vector3f(0, 0, 1); } }
+        public static readonly Vector3f Right = new Vector3f(1.0f, 0.0f, 0.0f);
+        public static readonly Vector3f Forward = new Vector3f(0.0f, 1.0f, 0.0f);
+        public static readonly Vector3f Up = new Vector3f(0.0f, 0.0f, 1.0f);
+        public static readonly Vector3f UnitX = new Vector3f(1.0f, 0.0f, 0.0f);
+        public static readonly Vector3f UnitY = new Vector3f(0.0f, 1.0f, 0.0f);
+        public static readonly Vector3f UnitZ = new Vector3f(0.0f, 0.0f, 1.0f);
 
         public float x { get; set; }
         public float y { get; set; }
@@ -558,12 +565,15 @@ namespace SharpDXtest
     }
     public struct Vector3
     {
-        public static Vector3 Zero { get { return new Vector3(); } }
+        public static readonly Vector3 Zero = new Vector3();
 
         // x - right, y - forward, z - up
-        public static Vector3 Right { get { return new Vector3(1, 0, 0); } }
-        public static Vector3 Forward { get { return new Vector3(0, 1, 0); } }
-        public static Vector3 Up { get { return new Vector3(0, 0, 1); } }
+        public static Vector3 Right { get { return new Vector3(1.0, 0.0, 0.0); } }
+        public static Vector3 Forward { get { return new Vector3(0.0, 1.0, 0.0); } }
+        public static Vector3 Up { get { return new Vector3(0.0, 0.0, 1.0); } }
+        public static readonly Vector3 UnitX = new Vector3(1.0, 0.0, 0.0);
+        public static readonly Vector3 UnitY = new Vector3(0.0, 1.0, 0.0);
+        public static readonly Vector3 UnitZ = new Vector3(0.0, 0.0, 1.0);
 
         public double x { get; set; }
         public double y { get; set; }
@@ -752,7 +762,11 @@ namespace SharpDXtest
     }
     public struct Vector4f
     {
-        public static Vector4f zero { get { return new Vector4f(); } }
+        public static readonly Vector4f Zero = new Vector4f();
+        public static readonly Vector4f UnitX = new Vector4f(1.0f, 0.0f, 0.0f, 0.0f);
+        public static readonly Vector4f UnitY = new Vector4f(0.0f, 1.0f, 0.0f, 0.0f);
+        public static readonly Vector4f UnitZ = new Vector4f(0.0f, 0.0f, 1.0f, 0.0f);
+        public static readonly Vector4f UnitW = new Vector4f(0.0f, 0.0f, 0.0f, 1.0f);
 
         public float x { get; set; }
         public float y { get; set; }
@@ -906,7 +920,7 @@ namespace SharpDXtest
         public Vector4f projectOnVector(Vector4f vec)
         {
             if (vec.isZero())
-                return Vector4f.zero;
+                return Vector4f.Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
         /// <summary>
@@ -929,7 +943,11 @@ namespace SharpDXtest
     }
     public struct Vector4
     {
-        public static Vector4 zero { get { return new Vector4(); } }
+        public static readonly Vector4 Zero = new Vector4();
+        public static readonly Vector4 UnitX = new Vector4(1.0, 0.0, 0.0, 0.0);
+        public static readonly Vector4 UnitY = new Vector4(0.0, 1.0, 0.0, 0.0);
+        public static readonly Vector4 UnitZ = new Vector4(0.0, 0.0, 1.0, 0.0);
+        public static readonly Vector4 UnitW = new Vector4(0.0, 0.0, 0.0, 1.0);
 
         public double x { get; set; }
         public double y { get; set; }
@@ -1079,7 +1097,7 @@ namespace SharpDXtest
         public Vector4 projectOnVector(Vector4 vec)
         {
             if (vec.isZero())
-                return Vector4.zero;
+                return Vector4.Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
         /// <summary>

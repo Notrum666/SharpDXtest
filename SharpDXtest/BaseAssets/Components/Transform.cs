@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpDXtest.Components
+namespace SharpDXtest.BaseAssets.Components
 {
     public class Transform : Component
     {
