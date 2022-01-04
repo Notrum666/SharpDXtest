@@ -112,8 +112,6 @@ namespace SharpDXtest
         }
         public static void Update()
         {
-            InputManager.Update();
-
             device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFF323232));
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
             pipeline.Use();

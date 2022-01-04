@@ -33,6 +33,7 @@ namespace SharpDXtest
 
         private void WinFormsControl_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
+            InputManager.Update();
             GraphicsCore.Update();
         }
 
