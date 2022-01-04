@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using SharpDX;
 using SharpDX.DirectInput;
+using System.Diagnostics;
 
 namespace SharpDXtest
 {
@@ -21,7 +21,6 @@ namespace SharpDXtest
         // States
         private static KeyboardState prevKeyboardState;
         private static KeyboardState keyboardState;
-        private static MouseState prevMouseState;
         private static MouseState mouseState;
 
         internal static void Init()
@@ -36,14 +35,12 @@ namespace SharpDXtest
             mouse = new Mouse(inputListener);
             mouse.Acquire();
             mouseState = mouse.GetCurrentState();
-            prevMouseState = mouseState;
         }
         internal static void Update()
         {
             prevKeyboardState = keyboardState;
             keyboardState = keyboard.GetCurrentState();
 
-            prevMouseState = mouseState;
             mouseState = mouse.GetCurrentState();
         }
         public static bool IsKeyDown(Key key)
@@ -64,7 +61,7 @@ namespace SharpDXtest
         }
         public static Vector2 GetMouseDelta()
         {
-            return new Vector2(mouseState.X - prevMouseState.X, mouseState.Y - prevMouseState.Y);
+            return new Vector2(mouseState.X, mouseState.Y);
         }
     }
 }

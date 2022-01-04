@@ -13,32 +13,56 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 using Device = SharpDX.Direct3D11.Device;
+using Rectangle = System.Drawing.Rectangle;
 
 namespace SharpDXtest
 {
     public partial class MainWindow : Window
     {
+        private bool isAlive;
+        private Task renderLoopTask;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            System.Windows.Forms.Cursor.Hide();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             GraphicsCore.Init(WinFormsControl);
             InputManager.Init();
+            Time.Init();
+
+            isAlive = true;
+
+            renderLoopTask = Task.Run(() =>
+            {
+                while (isAlive)
+                {
+                    InputManager.Update();
+                    Time.Update();
+                    GraphicsCore.Update();
+                }
+            });
         }
 
         private void WinFormsControl_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
         {
-            InputManager.Update();
-            GraphicsCore.Update();
+            
+
+            
         }
 
         private void MainWindowInst_Closed(object sender, EventArgs e)
         {
+            isAlive = false;
+
+            Task.WaitAll(renderLoopTask);
             GraphicsCore.Dispose();
         }
     }

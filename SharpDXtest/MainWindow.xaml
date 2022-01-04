@@ -6,7 +6,7 @@
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:local="clr-namespace:SharpDXtest"
         mc:Ignorable="d"
-        Title="Main Window" Loaded="Window_Loaded" Width="1280" Height="720" Closed="MainWindowInst_Closed">
+        Title="Main Window" Loaded="Window_Loaded" WindowState="Maximized" WindowStyle="None" Width="1280" Height="720" Closed="MainWindowInst_Closed">
     <Grid>
         <WindowsFormsHost x:Name="WinFormsHost">
             <wf:Control x:Name="WinFormsControl" Paint="WinFormsControl_Paint"/>

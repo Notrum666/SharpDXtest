@@ -11,6 +11,7 @@ using SharpDX.DXGI;
 using Device = SharpDX.Direct3D11.Device;
 
 using SharpDXtest.Components;
+using SharpDXtest.Assets.Components;
 
 namespace SharpDXtest
 {
@@ -29,6 +30,8 @@ namespace SharpDXtest
         private static Texture tex;
         private static Sampler sampler;
 
+        private static Controller cameraController;
+
         private static ShaderPipeline pipeline;
 
         public static void Init(Control control)
@@ -36,6 +39,7 @@ namespace SharpDXtest
             InitDirectX(control);
 
             GameObject cameraObject = new GameObject();
+            cameraController = (Controller) cameraObject.addComponent<Controller>();
             Camera camera = (Camera)cameraObject.addComponent<Camera>();
             camera.resolution = control.ClientSize.Width / control.ClientSize.Height;
             camera.FOV = 80.0 / 180.0 * Math.PI;
@@ -112,6 +116,8 @@ namespace SharpDXtest
         }
         public static void Update()
         {
+            cameraController.update();
+
             device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFF323232));
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
             pipeline.Use();

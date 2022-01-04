@@ -81,12 +81,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Assets\Components\Controller.cs" />
     <Compile Include="BaseAssets\Components\Camera.cs" />
     <Compile Include="BaseAssets\Components\Component.cs" />
     <Compile Include="BaseAssets\Components\Mesh.cs" />
     <Compile Include="BaseAssets\Components\Transform.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="InputManager.cs" />
+    <Compile Include="Time.cs" />
     <Compile Include="Utilities.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -137,7 +139,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Assets\Components\" />
     <Folder Include="Assets\Textures\" />
   </ItemGroup>
   <ItemGroup>
