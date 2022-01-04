@@ -10,6 +10,7 @@ using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using Device = SharpDX.Direct3D11.Device;
 
+using SharpDXtest.Assets.Components;
 using SharpDXtest.BaseAssets.Components;
 
 namespace SharpDXtest
@@ -41,7 +42,7 @@ namespace SharpDXtest
             cameraController = (Controller) cameraObject.addComponent<Controller>();
             Camera camera = (Camera)cameraObject.addComponent<Camera>();
             camera.resolution = control.ClientSize.Width / control.ClientSize.Height;
-            camera.FOV = 80.0 / 180.0 * Math.PI;
+            camera.FOV = 95.0 / 180.0 * Math.PI;
             camera.near = 0.01;
             camera.far = 100;
             camera.MakeCurrent();

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SharpDX.DirectInput;
 using SharpDXtest;
-using SharpDXtest.Components;
+using SharpDXtest.BaseAssets.Components;
 
 namespace SharpDXtest.Assets.Components
 {
