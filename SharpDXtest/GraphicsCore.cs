@@ -35,8 +35,6 @@ namespace SharpDXtest
         {
             InitDirectX(control);
 
-            InputManager.Init();
-
             GameObject cameraObject = new GameObject();
             Camera camera = (Camera)cameraObject.addComponent<Camera>();
             camera.resolution = control.ClientSize.Width / control.ClientSize.Height;
@@ -114,7 +112,7 @@ namespace SharpDXtest
         }
         public static void Update()
         {
-            InputManager.OnUpdateFrame();
+            InputManager.Update();
 
             device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFF323232));
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);

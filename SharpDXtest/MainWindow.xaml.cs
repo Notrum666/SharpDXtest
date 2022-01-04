@@ -28,6 +28,7 @@ namespace SharpDXtest
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             GraphicsCore.Init(WinFormsControl);
+            InputManager.Init();
         }
 
         private void WinFormsControl_Paint(object sender, System.Windows.Forms.PaintEventArgs e)

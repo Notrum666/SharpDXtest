@@ -38,7 +38,7 @@ namespace SharpDXtest
             mouseState = mouse.GetCurrentState();
             prevMouseState = mouseState;
         }
-        internal static void OnUpdateFrame()
+        internal static void Update()
         {
             prevKeyboardState = keyboardState;
             keyboardState = keyboard.GetCurrentState();
@@ -48,20 +48,19 @@ namespace SharpDXtest
         }
         public static bool IsKeyDown(Key key)
         {
-            return !prevKeyboardState.IsPressed(key) && keyboardState.IsPressed(key);
+            return keyboardState.IsPressed(key);
         }
         public static bool IsKeyUp(Key key)
         {
-            return prevKeyboardState.IsPressed(key) && !keyboardState.IsPressed(key);
+            return !keyboardState.IsPressed(key);
         }
         public static bool IsKeyPressed(Key key)
         {
-            return keyboardState.IsPressed(key);
+            return !prevKeyboardState.IsPressed(key) && keyboardState.IsPressed(key);
         }
-        // Same as key up
         public static bool IsKeyReleased(Key key)
         {
-            return IsKeyUp(key);
+            return prevKeyboardState.IsPressed(key) && !keyboardState.IsPressed(key);
         }
         public static Vector2 GetMouseDelta()
         {
