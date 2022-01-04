@@ -818,6 +818,76 @@ namespace SharpDXtest
             {
                 if (element.NodeType == XmlNodeType.Text)
                     return Convert.ChangeType(element.Value.Trim(' ', '\n'), parent.GetType());
+                if (element.Name.LocalName == "Assets")
+                {
+                    foreach (XElement assetsSet in element.Elements())
+                    {
+                        switch (assetsSet.Name.LocalName)
+                        {
+                            case "Models":
+                                {
+                                    foreach (XElement model in assetsSet.Elements())
+                                    {
+                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadModelsFile");
+                                        ParameterInfo[] parameters = method.GetParameters();
+                                        Dictionary<string, object> parameterValues = new Dictionary<string, object>();
+                                        foreach (XAttribute attrib in model.Attributes())
+                                        {
+                                            bool found = false;
+                                            foreach (ParameterInfo param in parameters)
+                                                if (param.Name == attrib.Name.LocalName)
+                                                {
+                                                    if (parameterValues.ContainsKey(param.Name))
+                                                        throw new Exception("Attribute \"" + param.Name + "\" is set multiple times.");
+                                                    parameterValues[param.Name] = Convert.ChangeType(attrib.Value, param.ParameterType);
+                                                    if (param.Name == "path")
+                                                        parameterValues[param.Name] = "Assets\\Models\\" + parameterValues[param.Name];
+                                                    found = true;
+                                                    break;
+                                                }
+                                            if (!found)
+                                                throw new Exception("Attribute \"" + attrib.Name.LocalName + "\" not found.");
+                                        }
+                                        method.Invoke(null, parameters.Select(p => parameterValues.ContainsKey(p.Name) ? parameterValues[p.Name] :
+                                                        (p.IsOptional ? p.DefaultValue : throw new Exception("Missing required attribute: \"" + p.Name + "\""))).ToArray());
+                                    }
+                                    continue;
+                                }
+                            case "Textures":
+                                {
+                                    foreach (XElement texture in assetsSet.Elements())
+                                    {
+                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadTexture");
+                                        ParameterInfo[] parameters = method.GetParameters();
+                                        Dictionary<string, object> parameterValues = new Dictionary<string, object>();
+                                        foreach (XAttribute attrib in texture.Attributes())
+                                        {
+                                            bool found = false;
+                                            foreach (ParameterInfo param in parameters)
+                                                if (param.Name == attrib.Name.LocalName)
+                                                {
+                                                    if (parameterValues.ContainsKey(param.Name))
+                                                        throw new Exception("Attribute \"" + param.Name + "\" is set multiple times.");
+                                                    parameterValues[param.Name] = Convert.ChangeType(attrib.Value, param.ParameterType);
+                                                    if (param.Name == "path")
+                                                        parameterValues[param.Name] = "Assets\\Textures\\" + parameterValues[param.Name];
+                                                    found = true;
+                                                    break;
+                                                }
+                                            if (!found)
+                                                throw new Exception("Attribute \"" + attrib.Name.LocalName + "\" not found.");
+                                        }
+                                        method.Invoke(null, parameters.Select(p => parameterValues.ContainsKey(p.Name) ? parameterValues[p.Name] :
+                                                        (p.IsOptional ? p.DefaultValue : throw new Exception("Missing required attribute: \"" + p.Name + "\""))).ToArray());
+                                    }
+                                    continue;
+                                }
+                            default:
+                                throw new Exception("Unknown assets type: " + assetsSet.Name.LocalName);
+                        }
+                    }
+                    return null;
+                }
                 object curObj = null;
                 Type curType = types.Find(t => t.Name == element.Name.LocalName);
                 if (curType != null)
@@ -852,9 +922,12 @@ namespace SharpDXtest
                         foreach (XElement elem in element.Elements())
                         {
                             object sceneObject = parseElement(curObj, element, elem);
-                            if (!(sceneObject is GameObject))
-                                throw new Exception("Scene can contain only GameObjects.");
-                            (curObj as Scene).objects.Add(sceneObject as GameObject);
+                            if (sceneObject != null)
+                            {
+                                if (!(sceneObject is GameObject))
+                                    throw new Exception("Scene can contain only GameObjects.");
+                                (curObj as Scene).objects.Add(sceneObject as GameObject);
+                            }
                         }
                     }
                     else

@@ -8,7 +8,22 @@ namespace SharpDXtest.BaseAssets.Components
 {
     public abstract class Component
     {
-        public GameObject gameObject;
+        private bool enabled = true;
+        public bool Enabled { get => enabled && gameObject.Enabled; set => enabled = value; }
+        private GameObject _gameObject = null;
+        public GameObject gameObject 
+        { 
+            get 
+            { 
+                return _gameObject; 
+            }
+            set 
+            { 
+                if (_gameObject != null) 
+                    throw new Exception("gameObject can be set only once.");
+                _gameObject = value;
+            } 
+        }
         public virtual void update()
         {
 

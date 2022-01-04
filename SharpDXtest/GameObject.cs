@@ -11,6 +11,8 @@ namespace SharpDXtest
 {
     public class GameObject
     {
+        private bool enabled = true;
+        public bool Enabled { get => transform.Parent == null ? enabled : enabled && transform.Parent.gameObject.enabled; set => enabled = value; }
         public Transform transform { get; }
         private List<Component> components = new List<Component>();
         public ReadOnlyCollection<Component> Components { get => components.AsReadOnly(); }
@@ -56,6 +58,12 @@ namespace SharpDXtest
                 if (component is T)
                     curComponents.Add(component);
             return curComponents.ToArray();
+        }
+        public void update()
+        {
+            foreach (Component component in components)
+                if (component.Enabled)
+                    component.update();
         }
     }
 }

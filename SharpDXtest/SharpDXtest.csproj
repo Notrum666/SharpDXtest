@@ -138,9 +138,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Assets\Textures\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="BaseAssets\Textures\default_white.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -153,12 +151,14 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="BaseAssets\Textures\template.png">
+    <None Include="Assets\Textures\template.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Assets\Scenes\Level1.xml" />
+    <None Include="Assets\Scenes\Level1.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
