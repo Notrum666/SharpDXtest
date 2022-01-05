@@ -89,6 +89,7 @@
     <Compile Include="BaseAssets\Components\Colliders\SphereCollider.cs" />
     <Compile Include="BaseAssets\Components\Component.cs" />
     <Compile Include="BaseAssets\Components\Mesh.cs" />
+    <Compile Include="BaseAssets\Components\Rigidbody.cs" />
     <Compile Include="BaseAssets\Components\Transform.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="InputManager.cs" />

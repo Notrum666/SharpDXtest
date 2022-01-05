@@ -8,17 +8,36 @@
       <Texture path="template.png"/>
     </Textures>
   </Assets>
-  
+
   <GameObject>
-    <Camera x.Name="mainCamera" resolution="1,7777" near="0,001" far="100" FOV="1,5"/>
-    <Controller speed="5"/>
+    <Transform>
+      <Transform.localPosition x="5"/>
+      <Transform.localRotation z="1"/>
+    </Transform>
+    <GameObject>
+      <Camera x.Name="mainCamera" resolution="1,7777" near="0,001" far="100" FOV="1,5"/>
+      <Controller speed="5"/>
+    </GameObject>
   </GameObject>
 
   <GameObject>
     <Transform>
-      <Transform.position x="0" y="10" z="0"/>
+      <Transform.localPosition x="0" y="10" z="0"/>
     </Transform>
-    <Mesh model="{Model cube}" texture="{Texture template}"/>    
+    <Rigidbody>
+      <Rigidbody.angularVelocity z="1"/>
+    </Rigidbody>
+    
+    <GameObject>
+      <Transform>
+        <Transform.localPosition y="5"/>
+      </Transform>
+      <Rigidbody>
+        <!--<Rigidbody.velocity y="1"/>-->
+        <Rigidbody.angularVelocity z="-1"/>
+      </Rigidbody>
+      <Mesh model="{Model cube}" texture="{Texture template}"/>
+    </GameObject>
   </GameObject>
   
   
