@@ -16,28 +16,16 @@
     </Transform>
     <GameObject>
       <Camera x.Name="mainCamera" resolution="1,7777" near="0,001" far="100" FOV="1,5"/>
-      <Controller speed="5"/>
+      <Controller speed="5" cube="{Reference Cube}"/>
     </GameObject>
   </GameObject>
 
-  <GameObject>
+  <GameObject x.Name="Cube">
     <Transform>
-      <Transform.localPosition x="0" y="10" z="0"/>
+      <Transform.localPosition y="5"/>
     </Transform>
-    <Rigidbody>
-      <Rigidbody.angularVelocity z="1"/>
-    </Rigidbody>
-    
-    <GameObject>
-      <Transform>
-        <Transform.localPosition y="5"/>
-      </Transform>
-      <Rigidbody>
-        <!--<Rigidbody.velocity y="1"/>-->
-        <Rigidbody.angularVelocity z="-1"/>
-      </Rigidbody>
-      <Mesh model="{Model cube}" texture="{Texture template}"/>
-    </GameObject>
+    <Rigidbody/>
+    <Mesh model="{Model cube}" texture="{Texture template}"/>
   </GameObject>
   
   

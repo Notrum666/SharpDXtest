@@ -61,20 +61,23 @@ namespace SharpDXtest.BaseAssets.Components
         }
         public void addForceAtPoint(Vector3 force, Vector3 point)
         {
-            //Matrix4x4 model = gameObject.transform.Parent.model;
-            //Vector3 realPosition;
-            //if (gameObject.transform.Parent == null)
-            //    realPosition = (model * new Vector4(gameObject.transform.position, 1.0)).xyz;
-            //else
-            //    realPosition = gameObject.transform.position;
-            //
-            //velocity += force.projectOnVector(point - realPosition) * Time.FixedDeltaTime / mass;
-            //
-            //angularVelocity += force % (point - realPosition)
+            Transform t = gameObject.transform;
+            Vector3 realPosition = t.Position;
+            Vector3 radiusVector = point - realPosition;
+            
+            velocity += force.projectOnVector(radiusVector) * Time.FixedDeltaTime / mass;
+
+            angularVelocity += (radiusVector % force).compDiv((t.model * new Vector4(InertiaTensor, 0.0)).xyz) * Time.FixedDeltaTime;
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
+            Transform t = gameObject.transform;
+            Vector3 realPosition = t.Position;
+            Vector3 radiusVector = point - realPosition;
 
+            velocity += impulse.projectOnVector(radiusVector) / mass;
+
+            angularVelocity += (radiusVector % impulse).compDiv((t.model * new Vector4(InertiaTensor, 0.0)).xyz);
         }
     }
 }

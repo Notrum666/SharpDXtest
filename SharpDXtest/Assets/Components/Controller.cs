@@ -12,8 +12,14 @@ namespace SharpDXtest.Assets.Components
     public class Controller : Component
     {
         public float speed = 3f;
+        public GameObject cube;
         public override void update()
         {
+            if (InputManager.IsKeyPressed(Key.F))
+            {
+                cube.getComponent<Rigidbody>().addImpulseAtPoint(new Vector3(0.0, 1.0, 1.0), new Vector3(0.0, 4.0, 0.0));
+            }
+
             float curSpeed = speed * (float)Time.DeltaTime;
 
             if (InputManager.IsKeyDown(Key.LeftShift))
