@@ -19,22 +19,38 @@ namespace SharpDXtest.Assets.Components
             if (InputManager.IsKeyDown(Key.LeftShift))
                 curSpeed *= 5f;
             if (InputManager.IsKeyDown(Key.A))
-                gameObject.transform.position -= gameObject.transform.right * curSpeed;
+                gameObject.transform.localPosition -= gameObject.transform.localRight * curSpeed;
             if (InputManager.IsKeyDown(Key.D))
-                gameObject.transform.position += gameObject.transform.right * curSpeed;
+                gameObject.transform.localPosition += gameObject.transform.localRight * curSpeed;
             if (InputManager.IsKeyDown(Key.S))
-                gameObject.transform.position -= gameObject.transform.forward * curSpeed;
+                gameObject.transform.localPosition -= gameObject.transform.localForward * curSpeed;
             if (InputManager.IsKeyDown(Key.W))
-                gameObject.transform.position += gameObject.transform.forward * curSpeed;
+                gameObject.transform.localPosition += gameObject.transform.localForward * curSpeed;
             if (InputManager.IsKeyDown(Key.C))
-                gameObject.transform.position -= Vector3.Up * curSpeed;
+                // faster
+                gameObject.transform.localPosition -= (gameObject.transform.Parent == null ? Vector3.Up : (gameObject.transform.Parent.view * Vector4.UnitZ).xyz) * curSpeed;
+                // simpler
+                //gameObject.transform.Position -= Vector3.Up * curSpeed;
             if (InputManager.IsKeyDown(Key.Space))
-                gameObject.transform.position += Vector3.Up * curSpeed;
+                // faster
+                gameObject.transform.localPosition += (gameObject.transform.Parent == null ? Vector3.Up : (gameObject.transform.Parent.view * Vector4.UnitZ).xyz) * curSpeed;
+                // simpler
+                //gameObject.transform.Position += Vector3.Up * curSpeed;
 
             Vector2 mouseDelta = InputManager.GetMouseDelta() / 1000;
 
             if (!mouseDelta.isZero())
-                gameObject.transform.rotation = Quaternion.FromAxisAngle(Vector3.Up, -mouseDelta.x) * Quaternion.FromAxisAngle(gameObject.transform.right, -mouseDelta.y) * gameObject.transform.rotation;
+            {
+                // faster
+                gameObject.transform.localRotation = Quaternion.FromAxisAngle(gameObject.transform.Parent == null ? Vector3.Up :
+                                                            (gameObject.transform.Parent.view * Vector4.UnitZ).xyz, -mouseDelta.x) *
+                                                     Quaternion.FromAxisAngle(gameObject.transform.localRight, -mouseDelta.y) *
+                                                     gameObject.transform.localRotation;
+                // simpler
+                //gameObject.transform.Rotation = Quaternion.FromAxisAngle(Vector3.Up, -mouseDelta.x) *
+                //                                     Quaternion.FromAxisAngle(gameObject.transform.right, -mouseDelta.y) *
+                //                                     gameObject.transform.Rotation;
+            }
         }
     }
 }

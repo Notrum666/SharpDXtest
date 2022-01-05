@@ -1223,6 +1223,13 @@ namespace SharpDXtest
                                 mat.v20 * vec.x + mat.v21 * vec.y + mat.v22 * vec.z + mat.v23 * vec.w,
                                 mat.v30 * vec.x + mat.v31 * vec.y + mat.v32 * vec.z + mat.v33 * vec.w);
         }
+        public static Vector4f operator *(Vector4f vec, Matrix4x4f mat)
+        {
+            return new Vector4f(mat.v00 * vec.x + mat.v10 * vec.y + mat.v20 * vec.z + mat.v30 * vec.w,
+                                mat.v01 * vec.x + mat.v11 * vec.y + mat.v21 * vec.z + mat.v31 * vec.w,
+                                mat.v02 * vec.x + mat.v12 * vec.y + mat.v22 * vec.z + mat.v32 * vec.w,
+                                mat.v03 * vec.x + mat.v13 * vec.y + mat.v23 * vec.z + mat.v33 * vec.w);
+        }
         public Matrix4x4f inversed()
         {
             float det00 = (v11 * (v22 * v33 - v23 * v32) - v12 * (v21 * v33 - v23 * v31) + v13 * (v21 * v32 - v22 * v31));
@@ -1362,6 +1369,13 @@ namespace SharpDXtest
                                mat.v10 * vec.x + mat.v11 * vec.y + mat.v12 * vec.z + mat.v13 * vec.w,
                                mat.v20 * vec.x + mat.v21 * vec.y + mat.v22 * vec.z + mat.v23 * vec.w,
                                mat.v30 * vec.x + mat.v31 * vec.y + mat.v32 * vec.z + mat.v33 * vec.w);
+        }
+        public static Vector4 operator *(Vector4 vec, Matrix4x4 mat)
+        {
+            return new Vector4(mat.v00 * vec.x + mat.v10 * vec.y + mat.v20 * vec.z + mat.v30 * vec.w,
+                               mat.v01 * vec.x + mat.v11 * vec.y + mat.v21 * vec.z + mat.v31 * vec.w,
+                               mat.v02 * vec.x + mat.v12 * vec.y + mat.v22 * vec.z + mat.v32 * vec.w,
+                               mat.v03 * vec.x + mat.v13 * vec.y + mat.v23 * vec.z + mat.v33 * vec.w);
         }
         public Matrix4x4 inversed()
         {

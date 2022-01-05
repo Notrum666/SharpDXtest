@@ -787,15 +787,15 @@ namespace SharpDXtest
                     {
                         if (obj is Quaternion)
                         {
-                            switch (attrib.Name.LocalName)
+                            switch (attrib.Name.LocalName.ToLower())
                             {
-                                case "X":
+                                case "x":
                                     obj = Quaternion.FromAxisAngle(Vector3.UnitX, float.Parse(attrib.Value)) * (Quaternion)obj;
                                     continue;
-                                case "Y":
+                                case "y":
                                     obj = Quaternion.FromAxisAngle(Vector3.UnitY, float.Parse(attrib.Value)) * (Quaternion)obj;
                                     continue;
-                                case "Z":
+                                case "z":
                                     obj = Quaternion.FromAxisAngle(Vector3.UnitZ, float.Parse(attrib.Value)) * (Quaternion)obj;
                                     continue;
                             }
@@ -814,6 +814,8 @@ namespace SharpDXtest
                     }
                 }
             }
+
+            List<GameObject> gameObjects = new List<GameObject>();
             object parseElement(object parent, XElement parentElement, XElement element)
             {
                 if (element.NodeType == XmlNodeType.Text)
@@ -896,6 +898,7 @@ namespace SharpDXtest
                     {
                         curObj = Activator.CreateInstance(typeof(GameObject));
                         parseAttributes(ref curObj, element.Attributes());
+                        gameObjects.Add(curObj as GameObject);
                         object nestedObject;
                         foreach (XElement elem in element.Elements())
                             if ((nestedObject = parseElement(curObj, element, elem)).GetType() == typeof(GameObject))
@@ -922,13 +925,10 @@ namespace SharpDXtest
                         foreach (XElement elem in element.Elements())
                         {
                             object sceneObject = parseElement(curObj, element, elem);
-                            if (sceneObject != null)
-                            {
-                                if (!(sceneObject is GameObject))
-                                    throw new Exception("Scene can contain only GameObjects.");
-                                (curObj as Scene).objects.Add(sceneObject as GameObject);
-                            }
+                            if (sceneObject != null && !(sceneObject is GameObject))
+                                throw new Exception("Scene can contain only GameObjects.");
                         }
+                        (curObj as Scene).objects.AddRange(gameObjects);
                     }
                     else
                     {
