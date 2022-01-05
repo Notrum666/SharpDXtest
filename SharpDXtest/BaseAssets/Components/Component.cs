@@ -28,5 +28,9 @@ namespace SharpDXtest.BaseAssets.Components
         {
 
         }
+        public virtual void fixedUpdate()
+        {
+
+        }
     }
 }

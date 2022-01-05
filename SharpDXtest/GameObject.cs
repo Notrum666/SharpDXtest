@@ -22,14 +22,13 @@ namespace SharpDXtest
             transform.gameObject = this;
             components.Add(transform);
         }
-        public Component addComponent<T>()
+
+        public T addComponent<T>() where T : Component
         {
-            if (!typeof(T).IsSubclassOf(typeof(Component)))
-                throw new ArgumentException("Given type must be a component");
             Component component = Activator.CreateInstance(typeof(T)) as Component;
             component.gameObject = this;
             components.Add(component);
-            return component;
+            return component as T;
         }
         public Component addComponent(Type t)
         {
@@ -40,22 +39,37 @@ namespace SharpDXtest
             components.Add(component);
             return component;
         }
-        public Component getComponent<T>()
+        public T getComponent<T>() where T : Component
         {
-            if (!typeof(T).IsSubclassOf(typeof(Component)))
-                throw new ArgumentException("Given type must be a component");
             foreach (Component component in components)
                 if (component is T)
+                    return component as T;
+            return null;
+        }
+        public T[] getComponents<T>() where T : Component
+        {
+            List<T> curComponents = new List<T>();
+            foreach (Component component in components)
+                if (component is T)
+                    curComponents.Add(component as T);
+            return curComponents.ToArray();
+        }
+        public Component getComponent(Type t)
+        {
+            if (!t.IsSubclassOf(typeof(Component)))
+                throw new ArgumentException("Given type must be a component");
+            foreach (Component component in components)
+                if (component.GetType() == t || component.GetType().IsSubclassOf(t))
                     return component;
             return null;
         }
-        public Component[] getComponents<T>()
+        public Component[] getComponents(Type t)
         {
-            if (!typeof(T).IsSubclassOf(typeof(Component)))
+            if (!t.IsSubclassOf(typeof(Component)))
                 throw new ArgumentException("Given type must be a component");
             List<Component> curComponents = new List<Component>();
             foreach (Component component in components)
-                if (component is T)
+                if (component.GetType() == t || component.GetType().IsSubclassOf(t))
                     curComponents.Add(component);
             return curComponents.ToArray();
         }
@@ -64,6 +78,12 @@ namespace SharpDXtest
             foreach (Component component in components)
                 if (component.Enabled)
                     component.update();
+        }
+        public void fixedUpdate()
+        {
+            foreach (Component component in components)
+                if (component.Enabled)
+                    component.fixedUpdate();
         }
     }
 }
