@@ -9,8 +9,8 @@ namespace SharpDXtest
 {
     public static class Time
     {
-        public static double DeltaTime { get; internal set; }
-        public static double FixedDeltaTime { get; internal set; }
+        public static double DeltaTime { get; private set; }
+        public static double FixedDeltaTime { get; private set; } = 1.0 / 20.0;
         public static double TotalTime { get; private set; }
 
         private static Stopwatch updateWatch;
