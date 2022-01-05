@@ -790,13 +790,13 @@ namespace SharpDXtest
                             switch (attrib.Name.LocalName)
                             {
                                 case "X":
-                                    obj = Quaternion.FromAxisAngle(Vector3.Right, float.Parse(attrib.Value)) * (Quaternion)obj;
+                                    obj = Quaternion.FromAxisAngle(Vector3.UnitX, float.Parse(attrib.Value)) * (Quaternion)obj;
                                     continue;
                                 case "Y":
-                                    obj = Quaternion.FromAxisAngle(Vector3.Forward, float.Parse(attrib.Value)) * (Quaternion)obj;
+                                    obj = Quaternion.FromAxisAngle(Vector3.UnitY, float.Parse(attrib.Value)) * (Quaternion)obj;
                                     continue;
                                 case "Z":
-                                    obj = Quaternion.FromAxisAngle(Vector3.Up, float.Parse(attrib.Value)) * (Quaternion)obj;
+                                    obj = Quaternion.FromAxisAngle(Vector3.UnitZ, float.Parse(attrib.Value)) * (Quaternion)obj;
                                     continue;
                             }
                         }

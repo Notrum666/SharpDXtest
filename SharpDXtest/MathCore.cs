@@ -568,9 +568,9 @@ namespace SharpDXtest
         public static readonly Vector3 Zero = new Vector3();
 
         // x - right, y - forward, z - up
-        public static Vector3 Right { get { return new Vector3(1.0, 0.0, 0.0); } }
-        public static Vector3 Forward { get { return new Vector3(0.0, 1.0, 0.0); } }
-        public static Vector3 Up { get { return new Vector3(0.0, 0.0, 1.0); } }
+        public static readonly Vector3 Right = new Vector3(1.0, 0.0, 0.0);
+        public static readonly Vector3 Forward = new Vector3(0.0, 1.0, 0.0);
+        public static readonly Vector3 Up = new Vector3(0.0, 0.0, 1.0);
         public static readonly Vector3 UnitX = new Vector3(1.0, 0.0, 0.0);
         public static readonly Vector3 UnitY = new Vector3(0.0, 1.0, 0.0);
         public static readonly Vector3 UnitZ = new Vector3(0.0, 0.0, 1.0);
@@ -598,13 +598,6 @@ namespace SharpDXtest
             x = values[0];
             y = values[1];
             z = values[2];
-        }
-        public static double divideCollinearVectors(Vector3 a, Vector3 b)
-        {
-            if (b.isZero())
-                throw new ArgumentException("Can't divide on zero vector!");
-
-            return b.x < Constants.Epsilon ? (b.y < Constants.Epsilon ? a.z / b.z : a.y / b.y) : a.x / b.x;
         }
         /// <summary>
         /// Magnitude of vector. Equals to length()
