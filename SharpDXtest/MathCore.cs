@@ -599,6 +599,13 @@ namespace SharpDXtest
             y = values[1];
             z = values[2];
         }
+        public static double divideCollinearVectors(Vector3 a, Vector3 b)
+        {
+            if (b.isZero())
+                throw new ArgumentException("Can't divide on zero vector!");
+
+            return b.x < Constants.Epsilon ? (b.y < Constants.Epsilon ? a.z / b.z : a.y / b.y) : a.x / b.x;
+        }
         /// <summary>
         /// Magnitude of vector. Equals to length()
         /// </summary>
