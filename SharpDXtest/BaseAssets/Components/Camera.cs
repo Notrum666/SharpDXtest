@@ -15,22 +15,6 @@ namespace SharpDXtest.BaseAssets.Components
         public double near;
         public double far;
 
-        public Matrix4x4 view
-        {
-            get
-            {
-                Vector3 r = gameObject.transform.right;
-                Vector3 u = gameObject.transform.up;
-                Vector3 f = gameObject.transform.forward;
-                Vector3 p = -gameObject.transform.position;
-
-                Matrix4x4 view = new Matrix4x4(r.x, r.y, r.z, p * r,
-                                               f.x, f.y, f.z, p * f,
-                                               u.x, u.y, u.z, p * u,
-                                               0, 0, 0, 1);
-                return view;
-            }
-        }
         public Matrix4x4 proj
         {
             get

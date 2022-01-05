@@ -22,6 +22,23 @@ namespace SharpDXtest.BaseAssets.Components
                 return Parent == null ? mat : Parent.model * mat;
             }
         }
+        public Matrix4x4 view
+        {
+            get
+            {
+                Vector3 r = right;
+                Vector3 u = up;
+                Vector3 f = forward;
+                Vector3 p = -position;
+
+                Matrix4x4 view = new Matrix4x4(r.x, r.y, r.z, p * r,
+                                               f.x, f.y, f.z, p * f,
+                                               u.x, u.y, u.z, p * u,
+                                               0, 0, 0, 1);
+
+                return Parent == null ? view : view * Parent.view;
+            }
+        }
         public Vector3 forward { get { return (model * new Vector4(Vector3.Forward)).xyz; } }
         public Vector3 right { get { return (model * new Vector4(Vector3.Right)).xyz; } }
         public Vector3 up { get { return (model * new Vector4(Vector3.Up)).xyz; } }

@@ -111,7 +111,7 @@ namespace SharpDXtest
             {
                 pipeline.Use();
 
-                pipeline.UpdateUniform("view", (Matrix4x4f)Camera.Current.view);
+                pipeline.UpdateUniform("view", (Matrix4x4f)Camera.Current.gameObject.transform.view);
                 pipeline.UpdateUniform("proj", (Matrix4x4f)Camera.Current.proj);
 
                 foreach (GameObject obj in currentScene.objects)
