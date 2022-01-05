@@ -118,6 +118,14 @@ namespace SharpDXtest
             return new Vector2f(x * vec.x, y * vec.y);
         }
         /// <summary>
+        /// Component division
+        /// </summary>
+        /// <returns>New vector - (x1/x2, y1/y2)</returns>
+        public Vector2f compDiv(Vector2f vec)
+        {
+            return new Vector2f(x / vec.x, y / vec.y);
+        }
+        /// <summary>
         /// Returns normalized copy of this vector
         /// </summary>
         public Vector2f normalized()
@@ -291,6 +299,14 @@ namespace SharpDXtest
         public Vector2 compMul(Vector2 vec)
         {
             return new Vector2(x * vec.x, y * vec.y);
+        }
+        /// <summary>
+        /// Component division
+        /// </summary>
+        /// <returns>New vector - (x1/x2, y1/y2)</returns>
+        public Vector2 compDiv(Vector2 vec)
+        {
+            return new Vector2(x / vec.x, y / vec.y);
         }
         /// <summary>
         /// Returns normalized copy of this vector
@@ -505,6 +521,14 @@ namespace SharpDXtest
             return new Vector3f(x * vec.x, y * vec.y, z * vec.z);
         }
         /// <summary>
+        /// Component division
+        /// </summary>
+        /// <returns>New vector - (x1/x2, y1/y2, z1/z2)</returns>
+        public Vector3f compDiv(Vector3f vec)
+        {
+            return new Vector3f(x / vec.x, y / vec.y, z / vec.z);
+        }
+        /// <summary>
         /// Returns normalized copy of this vector
         /// </summary>
         public Vector3f normalized()
@@ -702,6 +726,14 @@ namespace SharpDXtest
             return new Vector3(x * vec.x, y * vec.y, z * vec.z);
         }
         /// <summary>
+        /// Component division
+        /// </summary>
+        /// <returns>New vector - (x1/x2, y1/y2, z1/z2)</returns>
+        public Vector3 compDiv(Vector3 vec)
+        {
+            return new Vector3(x / vec.x, y / vec.y, z / vec.z);
+        }
+        /// <summary>
         /// Returns normalized copy of this vector
         /// </summary>
         public Vector3 normalized()
@@ -890,6 +922,14 @@ namespace SharpDXtest
             return new Vector4f(x * vec.x, y * vec.y, z * vec.z, w * vec.w);
         }
         /// <summary>
+        /// Component division
+        /// </summary>
+        /// <returns>New vector - (x1/x2, y1/y2, z1/z2, w1/w2)</returns>
+        public Vector4f compDiv(Vector4f vec)
+        {
+            return new Vector4f(x / vec.x, y / vec.y, z / vec.z, w / vec.w);
+        }
+        /// <summary>
         /// Returns normalized copy of this vector
         /// </summary>
         public Vector4f normalized()
@@ -934,11 +974,11 @@ namespace SharpDXtest
         }
         public override string ToString()
         {
-            return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
+            return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ", " + w.ToString() + ")";
         }
         public string ToString(string format)
         {
-            return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ", " + w.ToString(format) + ")";
         }
     }
     public struct Vector4
@@ -1067,6 +1107,14 @@ namespace SharpDXtest
             return new Vector4(x * vec.x, y * vec.y, z * vec.z, w * vec.w);
         }
         /// <summary>
+        /// Component division
+        /// </summary>
+        /// <returns>New vector - (x1/x2, y1/y2, z1/z2, w1/w2)</returns>
+        public Vector4 compDiv(Vector4 vec)
+        {
+            return new Vector4(x / vec.x, y / vec.y, z / vec.z, w / vec.w);
+        }
+        /// <summary>
         /// Returns normalized copy of this vector
         /// </summary>
         public Vector4 normalized()
@@ -1111,11 +1159,11 @@ namespace SharpDXtest
         }
         public override string ToString()
         {
-            return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
+            return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ", " + w.ToString() + ")";
         }
         public string ToString(string format)
         {
-            return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";
+            return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ", " + w.ToString() + ")";
         }
     }
     public struct Matrix4x4f
