@@ -92,7 +92,7 @@ namespace SharpDXtest.BaseAssets.Components
 
             for (i = 1; i < projection.Count; i++)
             {
-                k = Vector3.divideCollinearVectors(projection[i] - projection[0], baseVector);
+                k = (projection[i] - projection[0]) * baseVector;
 
                 if (k > maxK)
                 {
@@ -171,10 +171,11 @@ namespace SharpDXtest.BaseAssets.Components
                 Vector3 start1ToStart2 = segment2[0] - segment1[0];
                 Vector3 start1ToEnd2 = segment2[1] - segment1[0];
 
-                double t1 = Vector3.divideCollinearVectors(start1ToStart2, segmentVector);
-                double t2 = Vector3.divideCollinearVectors(start1ToEnd2, segmentVector);
+                double t1 = start1ToStart2 * segmentVector;
+                double t2 = start1ToEnd2 * segmentVector;
+                double segmentVectorSqrLength = segmentVector.squaredLength();
 
-                if(t1 > 1 && t2 > 1 ||
+                if(t1 > segmentVectorSqrLength && t2 > segmentVectorSqrLength ||
                    t1 < 0 && t2 < 0)
                 {
                     return false;

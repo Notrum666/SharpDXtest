@@ -1563,7 +1563,7 @@ namespace SharpDXtest
         }
         public static Quaternion operator *(double lhs, Quaternion rhs)
         {
-            return new Quaternion(lhs * rhs.w, lhs * rhs.w, lhs * rhs.w, lhs * rhs.w);
+            return new Quaternion(lhs * rhs.w, lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
         }
         public static Quaternion operator *(Quaternion lhs, Quaternion rhs)
         {
