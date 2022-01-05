@@ -1554,6 +1554,10 @@ namespace SharpDXtest
         {
             return new Quaternion(lhs.w * rhs, lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
         }
+        public static Quaternion operator *(double lhs, Quaternion rhs)
+        {
+            return new Quaternion(lhs * rhs.w, lhs * rhs.w, lhs * rhs.w, lhs * rhs.w);
+        }
         public static Quaternion operator *(Quaternion lhs, Quaternion rhs)
         {
             return new Quaternion(lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z,
