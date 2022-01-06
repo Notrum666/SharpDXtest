@@ -721,7 +721,7 @@ namespace SharpDXtest
             List<Type> types = new List<Type>();
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
                 types.AddRange(assembly.GetTypes());
-        
+
             void parseSpecialAttribute(object obj, string name, string value)
             {
                 string[] words = value.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -790,14 +790,16 @@ namespace SharpDXtest
                             switch (attrib.Name.LocalName.ToLower())
                             {
                                 case "x":
-                                    obj = Quaternion.FromAxisAngle(Vector3.UnitX, float.Parse(attrib.Value)) * (Quaternion)obj;
+                                    obj = Quaternion.FromAxisAngle(Vector3.UnitX, double.Parse(attrib.Value)) * (Quaternion)obj;
                                     continue;
                                 case "y":
-                                    obj = Quaternion.FromAxisAngle(Vector3.UnitY, float.Parse(attrib.Value)) * (Quaternion)obj;
+                                    obj = Quaternion.FromAxisAngle(Vector3.UnitY, double.Parse(attrib.Value)) * (Quaternion)obj;
                                     continue;
                                 case "z":
-                                    obj = Quaternion.FromAxisAngle(Vector3.UnitZ, float.Parse(attrib.Value)) * (Quaternion)obj;
+                                    obj = Quaternion.FromAxisAngle(Vector3.UnitZ, double.Parse(attrib.Value)) * (Quaternion)obj;
                                     continue;
+                                default:
+                                    throw new Exception("Quaternion does not have \"" + attrib.Name.LocalName + "\"");
                             }
                         }
                         PropertyInfo property = objType.GetProperty(attrib.Name.LocalName);
@@ -897,12 +899,12 @@ namespace SharpDXtest
                     if (curType == typeof(GameObject))
                     {
                         curObj = Activator.CreateInstance(typeof(GameObject));
+                        if (parent != null && parent.GetType() == typeof(GameObject))
+                            (curObj as GameObject).transform.setParent((parent as GameObject).transform);
                         parseAttributes(ref curObj, element.Attributes());
                         gameObjects.Add(curObj as GameObject);
-                        object nestedObject;
                         foreach (XElement elem in element.Elements())
-                            if ((nestedObject = parseElement(curObj, element, elem)).GetType() == typeof(GameObject))
-                                (nestedObject as GameObject).transform.setParent((curObj as GameObject).transform);
+                            parseElement(curObj, element, elem);
                     }
                     else if (curType.IsSubclassOf(typeof(Component)))
                     {
@@ -951,49 +953,132 @@ namespace SharpDXtest
                     string[] nameParts = element.Name.LocalName.Split('.');
                     if (nameParts.Length != 2 || nameParts[0] != parentElement.Name.LocalName)
                         throw new Exception(element.Name.LocalName + " not found.");
-        
+
                     IEnumerable<XAttribute> attributes = element.Attributes();
                     IEnumerable<XElement> elements = element.Elements();
                     FieldInfo field = parent.GetType().GetField(nameParts[1]);
                     if (field == null)
-                        throw new Exception(parent.GetType().Name + " don't have " + nameParts[1] + ".");
-                    if (attributes.Count() != 0)
                     {
-                        if (elements.Count() != 0)
-                            throw new Exception("Setter can't have values in both places");
-                        if (field.FieldType == typeof(Quaternion))
-                            curObj = Quaternion.Identity;
+                        PropertyInfo property = parent.GetType().GetProperty(nameParts[1]);
+                        if (property == null)
+                            throw new Exception(parent.GetType().Name + " don't have " + nameParts[1] + ".");
+
+                        if (attributes.Count() != 0)
+                        {
+                            if (elements.Count() != 0)
+                                throw new Exception("Setter can't have values in both places");
+                            if (property.PropertyType == typeof(Quaternion))
+                                curObj = Quaternion.Identity;
+                            else
+                                curObj = Activator.CreateInstance(property.PropertyType);
+                            parseAttributes(ref curObj, element.Attributes());
+                            property.SetValue(parent, curObj);
+                        }
                         else
-                            curObj = Activator.CreateInstance(field.FieldType);
-                        parseAttributes(ref curObj, element.Attributes());
-                        field.SetValue(parent, curObj);
+                        {
+                            curType = property.PropertyType;
+                            if (curType.IsArray || curType.IsGenericType && curType.GetGenericTypeDefinition() == typeof(List<>))
+                            {
+                                Type elementType;
+                                if (curType.IsArray)
+                                    elementType = curType.GetElementType();
+                                else
+                                    elementType = curType.GetGenericArguments()[0];
+                                Type genericListType = typeof(List<>).MakeGenericType(elementType);
+                                curObj = Activator.CreateInstance(genericListType);
+                                MethodInfo addMethod = genericListType.GetMethod("Add");
+                                foreach (XElement elem in elements)
+                                {
+                                    object listElement = parseElement(curObj, element, elem);
+                                    if (listElement.GetType() != elementType && !listElement.GetType().IsSubclassOf(elementType))
+                                        throw new Exception(listElement.GetType().Name + " does not match for " + elementType.Name + ".");
+                                    addMethod.Invoke(curObj, new object[] { listElement });
+                                }
+                                if (curType.IsArray)
+                                    property.SetValue(parent, genericListType.GetMethod("ToArray").Invoke(curObj, null));
+                                else
+                                    property.SetValue(parent, curObj);
+                            }
+                            else
+                            {
+                                if (elements.Count() > 1)
+                                    throw new Exception("Only array and list types can contain more than one element.");
+                                if (elements.Count() == 1)
+                                {
+                                    object nestedObject = parseElement(parent, parentElement, elements.First());
+                                    if (nestedObject.GetType() != curType && !nestedObject.GetType().IsSubclassOf(curType))
+                                        throw new Exception(nestedObject.GetType().Name + " does not match for " + curType.Name + ".");
+                                    property.SetValue(parent, nestedObject);
+                                }
+                                else
+                                {
+                                    if (property.PropertyType == typeof(Quaternion))
+                                        curObj = Quaternion.Identity;
+                                    else
+                                        curObj = Activator.CreateInstance(property.PropertyType);
+                                    property.SetValue(parent, curObj);
+                                }
+                            }
+                        }
                     }
                     else
                     {
-                        curType = field.FieldType;
-                        if (curType.IsArray || curType.IsGenericType && curType.GetGenericTypeDefinition() == typeof(List<>))
+                        if (attributes.Count() != 0)
                         {
-                            Type listBaseType = field.FieldType.GetGenericArguments()[0];
-                            Type listType = typeof(List<>).MakeGenericType(listBaseType);
-                            curObj = Activator.CreateInstance(listType);
-                            MethodInfo addMethod = listType.GetMethod("Add");
-                            foreach (XElement elem in elements)
-                            {
-                                object listElement = parseElement(curObj, element, elem);
-                                if (listElement.GetType() != listBaseType && !listElement.GetType().IsSubclassOf(listBaseType))
-                                    throw new Exception(listElement.GetType().Name + " does not match for " + listBaseType.Name + ".");
-                                addMethod.Invoke(curObj, new object[] { listElement });
-                            }
+                            if (elements.Count() != 0)
+                                throw new Exception("Setter can't have values in both places");
+                            if (field.FieldType == typeof(Quaternion))
+                                curObj = Quaternion.Identity;
+                            else
+                                curObj = Activator.CreateInstance(field.FieldType);
+                            parseAttributes(ref curObj, element.Attributes());
                             field.SetValue(parent, curObj);
                         }
                         else
                         {
-                            if (elements.Count() != 1)
-                                throw new Exception("Only array and list types can contain more than one element.");
-                            object nestedObject = parseElement(parent, parentElement, elements.First());
-                            if (nestedObject.GetType() != curType && nestedObject.GetType().IsSubclassOf(curType))
-                                throw new Exception(nestedObject.GetType().Name + " does not match for " + curType.Name + ".");
-                            field.SetValue(parent, nestedObject);
+                            curType = field.FieldType;
+                            if (curType.IsArray || curType.IsGenericType && curType.GetGenericTypeDefinition() == typeof(List<>))
+                            {
+                                Type elementType;
+                                if (curType.IsArray)
+                                    elementType = curType.GetElementType();
+                                else
+                                    elementType = curType.GetGenericArguments()[0];
+                                Type genericListType = typeof(List<>).MakeGenericType(elementType);
+                                curObj = Activator.CreateInstance(genericListType);
+                                MethodInfo addMethod = genericListType.GetMethod("Add");
+                                foreach (XElement elem in elements)
+                                {
+                                    object listElement = parseElement(curObj, element, elem);
+                                    if (listElement.GetType() != elementType && !listElement.GetType().IsSubclassOf(elementType))
+                                        throw new Exception(listElement.GetType().Name + " does not match for " + elementType.Name + ".");
+                                    addMethod.Invoke(curObj, new object[] { listElement });
+                                }
+                                if (curType.IsArray)
+                                    field.SetValue(parent, genericListType.GetMethod("ToArray").Invoke(curObj, null));
+                                else
+                                    field.SetValue(parent, curObj);
+                            }
+                            else
+                            {
+                                if (elements.Count() > 1)
+                                    throw new Exception("Only array and list types can contain more than one element.");
+                                if (elements.Count() == 1)
+                                {
+                                    object nestedObject = parseElement(parent, parentElement, elements.First());
+                                    if (nestedObject.GetType() != curType && !nestedObject.GetType().IsSubclassOf(curType))
+                                        throw new Exception(nestedObject.GetType().Name + " does not match for " + curType.Name + ".");
+                                    field.SetValue(parent, nestedObject);
+                                }
+                                else
+                                {
+                                    if (field.FieldType == typeof(Quaternion))
+                                        curObj = Quaternion.Identity;
+                                    else
+                                        curObj = Activator.CreateInstance(field.FieldType);
+                                    field.SetValue(parent, curObj);
+                                }
+                            }
                         }
                     }
                 }

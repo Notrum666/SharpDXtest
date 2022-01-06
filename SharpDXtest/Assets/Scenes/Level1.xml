@@ -11,10 +11,15 @@
 
   <GameObject>
     <Transform>
-      <Transform.localPosition x="5"/>
-      <Transform.localRotation z="1"/>
+      <Transform.Position x="2"/>
+      <Transform.Rotation z="3,1415"/>
     </Transform>
+    
     <GameObject>
+      <Transform>
+        <Transform.Position x="0" y="0" z="0"/>
+        <Transform.Rotation/>
+      </Transform>
       <Camera x.Name="mainCamera" resolution="1,7777" near="0,001" far="100" FOV="1,5"/>
       <Controller speed="5" cube="{Reference Cube}"/>
     </GameObject>

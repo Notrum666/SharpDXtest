@@ -9,7 +9,7 @@ using SharpDXtest.BaseAssets.Components;
 
 namespace SharpDXtest
 {
-    public class GameObject
+    public sealed class GameObject
     {
         private bool enabled = true;
         public bool Enabled { get => transform.Parent == null ? enabled : enabled && transform.Parent.gameObject.enabled; set => enabled = value; }

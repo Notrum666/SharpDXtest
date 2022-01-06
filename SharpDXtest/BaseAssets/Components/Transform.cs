@@ -21,7 +21,7 @@ namespace SharpDXtest.BaseAssets.Components
                 if (Parent == null)
                     localPosition = value;
                 else
-                    localPosition = (new Vector4(value, 1.0) * Parent.view).xyz;
+                    localPosition = (Parent.view * new Vector4(value, 1.0)).xyz;
             }
         }
         public Quaternion localRotation;
@@ -29,14 +29,14 @@ namespace SharpDXtest.BaseAssets.Components
         {
             get
             {
-                return Parent == null ? localRotation : Parent.Rotation.inverse() * localRotation;
+                return Parent == null ? localRotation : Parent.Rotation * localRotation;
             }
             set
             {
                 if (Parent == null)
                     localRotation = value;
                 else
-                    localRotation = Parent.Rotation * value;
+                    localRotation = Parent.Rotation.inverse() * value;
             }
         }
         public Matrix4x4 localModel
