@@ -19,28 +19,61 @@ namespace SharpDXtest.BaseAssets.Components
             {
                 if (value <= 0)
                     throw new ArgumentException("Mass must be positive.");
+                mass = value;
             } 
         }
         private Vector3 InertiaTensor { get; set; } = new Vector3(1.0, 1.0, 1.0);
-        public Vector3 velocity = Vector3.Zero;
-        public Vector3 angularVelocity = Vector3.Zero;
+        public Vector3 Velocity { get; set; } = Vector3.Zero;
+        public Vector3 AngularVelocity { get; set; } = Vector3.Zero;
+        private double linearDrag = 0.05;
+        public double LinearDrag
+        {
+            get
+            {
+                return linearDrag;
+            }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Linear drag can't be negative.");
+                linearDrag = value;
+            }
+        }
+        private double angularDrag = 0.05;
+        public double AngularDrag
+        {
+            get
+            {
+                return angularDrag;
+            }
+            set
+            {
+                if (value < 0)
+                    throw new ArgumentException("Angular drag can't be negative.");
+                angularDrag = value;
+            }
+        }
 
         public override void update()
         {
             Transform t = gameObject.transform;
+
+            Velocity *= 1.0 - Time.DeltaTime * linearDrag;
+            AngularVelocity *= 1.0 - Time.DeltaTime * angularDrag;
+
             if (t.Parent == null)
             {
-                t.localPosition += velocity * Time.DeltaTime;
+                t.localPosition += Velocity * Time.DeltaTime;
 
                 t.localRotation = (t.localRotation +
-                    0.5 * new Quaternion(0.0, angularVelocity.x, angularVelocity.y, angularVelocity.z) * t.localRotation * Time.DeltaTime).normalized();
+                    0.5 * new Quaternion(0.0, AngularVelocity.x, AngularVelocity.y, AngularVelocity.z) * t.localRotation * Time.DeltaTime).normalized();
             }
             else
             {
-                t.localPosition += (t.Parent.view * new Vector4(velocity * Time.DeltaTime, 0.0)).xyz;
+                t.localPosition += (t.Parent.view * new Vector4(Velocity * Time.DeltaTime, 0.0)).xyz;
 
                 // faster
-                Vector3 localAngularVelocity = (t.Parent.view * new Vector4(angularVelocity, 0.0)).xyz;
+                Vector3 localAngularVelocity = (t.Parent.view * new Vector4(AngularVelocity, 0.0)).xyz;
                 t.localRotation = (t.localRotation +
                     0.5 * new Quaternion(0.0, localAngularVelocity.x, localAngularVelocity.y, localAngularVelocity.z) * 
                     t.localRotation * Time.DeltaTime).normalized();
@@ -53,11 +86,11 @@ namespace SharpDXtest.BaseAssets.Components
 
         public void addForce(Vector3 force)
         {
-            velocity += force * Time.FixedDeltaTime / mass;
+            Velocity += force * Time.FixedDeltaTime / mass;
         }
         public void addImpulse(Vector3 impulse)
         {
-            velocity += impulse / mass;
+            Velocity += impulse / mass;
         }
         public void addForceAtPoint(Vector3 force, Vector3 point)
         {
@@ -65,9 +98,9 @@ namespace SharpDXtest.BaseAssets.Components
             Vector3 realPosition = t.Position;
             Vector3 radiusVector = point - realPosition;
             
-            velocity += force.projectOnVector(radiusVector) * Time.FixedDeltaTime / mass;
+            Velocity += force.projectOnVector(radiusVector) * Time.FixedDeltaTime / mass;
 
-            angularVelocity += (radiusVector % force).compDiv((t.model * new Vector4(InertiaTensor, 0.0)).xyz) * Time.FixedDeltaTime;
+            AngularVelocity += (radiusVector % force).compDiv((t.model * new Vector4(InertiaTensor, 0.0)).xyz) * Time.FixedDeltaTime;
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
@@ -75,9 +108,9 @@ namespace SharpDXtest.BaseAssets.Components
             Vector3 realPosition = t.Position;
             Vector3 radiusVector = point - realPosition;
 
-            velocity += impulse.projectOnVector(radiusVector) / mass;
+            Velocity += impulse.projectOnVector(radiusVector) / mass;
 
-            angularVelocity += (radiusVector % impulse).compDiv((t.model * new Vector4(InertiaTensor, 0.0)).xyz);
+            AngularVelocity += (radiusVector % impulse).compDiv((t.model * new Vector4(InertiaTensor, 0.0)).xyz);
         }
     }
 }
