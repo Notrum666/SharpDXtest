@@ -8,8 +8,6 @@ namespace SharpDXtest.BaseAssets.Components
 {
     public class Camera : Component
     {
-        public static Camera Current { get; private set; }
-
         public double FOV = Math.PI / 2;
         public double resolution;
         public double near;
@@ -30,7 +28,7 @@ namespace SharpDXtest.BaseAssets.Components
         }
         public void MakeCurrent()
         {
-            Camera.Current = this;
+            GraphicsCore.CurrentCamera = this;
         }
     }
 }

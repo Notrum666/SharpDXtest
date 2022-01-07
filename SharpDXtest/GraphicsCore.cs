@@ -28,7 +28,7 @@ namespace SharpDXtest
         private static Sampler sampler;
         private static ShaderPipeline pipeline;
 
-        private static Scene currentScene;
+        public static Camera CurrentCamera { get; set; }
 
         public static void Init(Control control)
         {
@@ -40,9 +40,6 @@ namespace SharpDXtest
 
             device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, control.ClientSize.Width, control.ClientSize.Height, 0.0f, 1.0f));
             device.ImmediateContext.OutputMerger.SetTargets(depthView, renderTarget);
-
-            currentScene = AssetsManager.LoadScene("Assets\\Scenes\\Level1.xml");
-            currentScene.mainCamera.MakeCurrent();
         }
         private static void InitDirectX(Control control)
         {
@@ -100,21 +97,19 @@ namespace SharpDXtest
         }
         public static void Update()
         {
-            foreach (GameObject obj in currentScene.objects)
-                if (obj.Enabled)
-                    obj.update();
-
             device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFF323232));
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
 
-            if (Camera.Current != null && Camera.Current.Enabled)
+            if (GameCore.CurrentScene != null && CurrentCamera != null && CurrentCamera.Enabled)
             {
+                List<GameObject> objects = GameCore.CurrentScene.objects;
+
                 pipeline.Use();
 
-                pipeline.UpdateUniform("view", (Matrix4x4f)Camera.Current.gameObject.transform.view);
-                pipeline.UpdateUniform("proj", (Matrix4x4f)Camera.Current.proj);
+                pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.view);
+                pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.proj);
 
-                foreach (GameObject obj in currentScene.objects)
+                foreach (GameObject obj in objects)
                 {
                     if (!obj.Enabled)
                         continue;

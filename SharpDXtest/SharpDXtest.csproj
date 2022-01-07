@@ -92,6 +92,7 @@
     <Compile Include="BaseAssets\Components\PhysicalMaterial.cs" />
     <Compile Include="BaseAssets\Components\Rigidbody.cs" />
     <Compile Include="BaseAssets\Components\Transform.cs" />
+    <Compile Include="GameCore.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="InputManager.cs" />
     <Compile Include="Time.cs" />

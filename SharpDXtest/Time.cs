@@ -9,7 +9,9 @@ namespace SharpDXtest
 {
     public static class Time
     {
-        public static double DeltaTime { get; private set; }
+        private static double deltaTime;
+        public static bool IsFixed { get; private set; }
+        public static double DeltaTime { get { return IsFixed ? FixedDeltaTime : deltaTime; } }
         public static double FixedDeltaTime { get; private set; } = 1.0 / 20.0;
         public static double TotalTime { get; private set; }
 
@@ -25,10 +27,19 @@ namespace SharpDXtest
 
         public static void Update()
         {
-            DeltaTime = updateWatch.Elapsed.TotalSeconds;
+            deltaTime = updateWatch.Elapsed.TotalSeconds;
             updateWatch.Restart();
 
             TotalTime += DeltaTime;
+        }
+
+        public static void SwitchToFixed()
+        {
+            IsFixed = true;
+        }
+        public static void SwitchToVariating()
+        {
+            IsFixed = false;
         }
     }
 }

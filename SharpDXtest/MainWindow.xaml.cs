@@ -37,6 +37,7 @@ namespace SharpDXtest
             GraphicsCore.Init(WinFormsControl);
             InputManager.Init();
             Time.Init();
+            GameCore.Init();
 
             isAlive = true;
 
@@ -46,16 +47,10 @@ namespace SharpDXtest
                 {
                     InputManager.Update();
                     Time.Update();
+                    GameCore.Update();
                     GraphicsCore.Update();
                 }
             });
-        }
-
-        private void WinFormsControl_Paint(object sender, System.Windows.Forms.PaintEventArgs e)
-        {
-            
-
-            
         }
 
         private void MainWindowInst_Closed(object sender, EventArgs e)

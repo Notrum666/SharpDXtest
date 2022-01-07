@@ -9,7 +9,7 @@
         Title="Main Window" Loaded="Window_Loaded" WindowState="Maximized" WindowStyle="None" Width="1280" Height="720" Closed="MainWindowInst_Closed">
     <Grid>
         <WindowsFormsHost x:Name="WinFormsHost">
-            <wf:Control x:Name="WinFormsControl" Paint="WinFormsControl_Paint"/>
+            <wf:Control x:Name="WinFormsControl"/>
         </WindowsFormsHost>
     </Grid>
 </Window>
