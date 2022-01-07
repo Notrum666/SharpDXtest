@@ -24,7 +24,7 @@ namespace SharpDXtest.BaseAssets.Components
                 mass = value;
             } 
         }
-        private Vector3 InertiaTensor { get; set; } = new Vector3(1.0, 1.0, 1.0);
+        public Vector3 InertiaTensor { get; private set; } = new Vector3(1.0, 1.0, 1.0);
         public Vector3 Velocity { get; set; } = Vector3.Zero;
         public Vector3 AngularVelocity { get; set; } = Vector3.Zero;
         private double linearDrag = 0.05;
@@ -55,6 +55,7 @@ namespace SharpDXtest.BaseAssets.Components
                 angularDrag = value;
             }
         }
+        public bool IsStatic { get; set; } = false;
 
         public override void fixedUpdate()
         {
@@ -102,7 +103,7 @@ namespace SharpDXtest.BaseAssets.Components
             
             Velocity += force.projectOnVector(radiusVector) * Time.FixedDeltaTime / mass;
 
-            AngularVelocity += (radiusVector % force).compDiv((t.model * new Vector4(InertiaTensor, 0.0)).xyz) * Time.FixedDeltaTime;
+            AngularVelocity += (radiusVector % force).compDiv(t.Rotation.inverse() * InertiaTensor) * Time.FixedDeltaTime;
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
@@ -112,7 +113,47 @@ namespace SharpDXtest.BaseAssets.Components
 
             Velocity += impulse.projectOnVector(radiusVector) / mass;
 
-            AngularVelocity += (radiusVector % impulse).compDiv((t.model * new Vector4(InertiaTensor, 0.0)).xyz);
+            //AngularVelocity += (t.model * new Vector4((t.view * new Vector4(radiusVector % impulse, 0.0)).xyz.compDiv(InertiaTensor), 0.0)).xyz;
+            AngularVelocity += (radiusVector % impulse).compDiv(t.Rotation.inverse() * InertiaTensor);
+        }
+        public void solveCollisionWith(Rigidbody otherRigidbody)
+        {
+            if (!Enabled || !otherRigidbody.Enabled || IsStatic && otherRigidbody.IsStatic)
+                return;
+
+            Collider[] colliders = gameObject.getComponents<Collider>();
+            Collider[] otherColliders = otherRigidbody.gameObject.getComponents<Collider>();
+
+            foreach (Collider collider in colliders)
+                foreach (Collider otherCollider in colliders)
+                {
+                    Vector3? _collisionExitVector;
+                    Vector3? _collisionExitNormal;
+                    Vector3? _colliderEndPoint;
+                    if (!collider.GetCollisionExitVector(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
+                        continue;
+                    Vector3 collisionExitVector = (Vector3)_collisionExitVector;
+                    Vector3 collisionExitNormal = (Vector3)_collisionExitNormal;
+                    Vector3 colliderEndPoint = (Vector3)_colliderEndPoint;
+
+                    if (IsStatic)
+                    {
+                        otherRigidbody.gameObject.transform.Position -= collisionExitVector;
+                    }
+                    else
+                    {
+                        if (otherRigidbody.IsStatic)
+                        {
+                            gameObject.transform.Position += collisionExitVector;
+                            colliderEndPoint += collisionExitVector;
+                        }
+                        else
+                        {
+                            double totalMass = mass + otherRigidbody.mass;
+
+                        }
+                    }
+                }
         }
     }
 }
