@@ -8,6 +8,8 @@ namespace SharpDXtest.BaseAssets.Components
 {
     class Rigidbody : Component
     {
+        public PhysicalMaterial Material { get; set; }
+
         private double mass = 1.0;
         public double Mass 
         { 
