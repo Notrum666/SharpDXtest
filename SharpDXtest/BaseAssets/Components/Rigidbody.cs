@@ -56,7 +56,7 @@ namespace SharpDXtest.BaseAssets.Components
             }
         }
 
-        public override void update()
+        public override void fixedUpdate()
         {
             Transform t = gameObject.transform;
 

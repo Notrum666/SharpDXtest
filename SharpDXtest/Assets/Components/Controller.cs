@@ -16,9 +16,7 @@ namespace SharpDXtest.Assets.Components
         public override void update()
         {
             if (InputManager.IsKeyPressed(Key.F))
-            {
-                cube.getComponent<Rigidbody>().addImpulseAtPoint(new Vector3(0.0, 1.0, 1.0), new Vector3(0.0, 4.0, 0.0));
-            }
+                cube.getComponent<Rigidbody>().addImpulseAtPoint(new Vector3(0.0, 1.0, 1.0), cube.transform.Position - new Vector3(0.0, 1.0, 0.0));
 
             float curSpeed = speed * (float)Time.DeltaTime;
 
