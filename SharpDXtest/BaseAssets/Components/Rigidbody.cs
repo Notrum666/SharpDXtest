@@ -89,7 +89,7 @@ namespace SharpDXtest.BaseAssets.Components
 
         public void addForce(Vector3 force)
         {
-            Velocity += force * Time.FixedDeltaTime / mass;
+            Velocity += force * Time.DeltaTime / mass;
         }
         public void addImpulse(Vector3 impulse)
         {
@@ -101,9 +101,11 @@ namespace SharpDXtest.BaseAssets.Components
             Vector3 realPosition = t.Position;
             Vector3 radiusVector = point - realPosition;
             
-            Velocity += force.projectOnVector(radiusVector) * Time.FixedDeltaTime / mass;
+            Velocity += force.projectOnVector(radiusVector) * Time.DeltaTime / mass;
 
-            AngularVelocity += (radiusVector % force).compDiv(t.Rotation.inverse() * InertiaTensor) * Time.FixedDeltaTime;
+            // TODO: make second formula work
+            AngularVelocity += (t.model * new Vector4((t.view * new Vector4(radiusVector % force, 0.0)).xyz.compDiv(InertiaTensor), 0.0)).xyz * Time.DeltaTime;
+            //AngularVelocity += (radiusVector % force).compDiv(t.Rotation.inverse() * InertiaTensor) * Time.FixedDeltaTime;
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
@@ -113,8 +115,9 @@ namespace SharpDXtest.BaseAssets.Components
 
             Velocity += impulse.projectOnVector(radiusVector) / mass;
 
-            //AngularVelocity += (t.model * new Vector4((t.view * new Vector4(radiusVector % impulse, 0.0)).xyz.compDiv(InertiaTensor), 0.0)).xyz;
-            AngularVelocity += (radiusVector % impulse).compDiv(t.Rotation.inverse() * InertiaTensor);
+            // TODO: make second formula work
+            AngularVelocity += (t.model * new Vector4((t.view * new Vector4(radiusVector % impulse, 0.0)).xyz.compDiv(InertiaTensor), 0.0)).xyz;
+            //AngularVelocity += (radiusVector % impulse).compDiv(t.Rotation.inverse() * InertiaTensor);
         }
         public void solveCollisionWith(Rigidbody otherRigidbody)
         {
