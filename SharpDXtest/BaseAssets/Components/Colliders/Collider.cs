@@ -115,10 +115,11 @@ namespace SharpDXtest.BaseAssets.Components
             return segment;
         }
 
-        public virtual bool GetCollisionExitVector(Collider collider, out Vector3? collisionExitVector, out Vector3? exitDirectionVector)
+        public virtual bool GetCollisionExitVector(Collider collider, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             collisionExitVector = null;
             exitDirectionVector = null;
+            colliderEndPoint = null;
 
             Vector3 centersVector = collider.getCenterInGlobal() - this.getCenterInGlobal();
             if(centersVector.squaredLength() > squaredOuterSphereRadius + 2 * outerSphereRadius * collider.outerSphereRadius + collider.squaredOuterSphereRadius)
@@ -167,6 +168,44 @@ namespace SharpDXtest.BaseAssets.Components
                 Vector3[] segment1 = getSegmentFromProjection(projection1);
                 Vector3[] segment2 = getSegmentFromProjection(projection2);
 
+                if ((segment2[1] - segment2[0]) * (segment1[1] - segment1[0]) < 0)
+                {
+                    Vector3 tmp = segment2[1];
+                    segment2[1] = segment2[0];
+                    segment2[0] = tmp;
+                }
+
+                Vector3 segmentVector = segment1[1] - segment1[0];
+                double segmentVectorSqrLength = segmentVector.squaredLength();
+                double t1 = (segment2[0] - segment1[0]) * segmentVector;
+                double t2 = (segment2[1] - segment1[0]) * segmentVector;
+
+                if (t2 < 0 || t1 > segmentVectorSqrLength)
+                    return false;
+
+                Vector3 outVec1 = segment2[0] - segment1[1];
+                Vector3 outVec2 = segment2[1] - segment1[0];
+                Vector3 outVec;
+                Vector3 newEndPoint;
+                if (outVec1.squaredLength() > outVec2.squaredLength())
+                {
+                    newEndPoint = segment1[0];
+                    outVec = outVec2;
+                }
+                else
+                {
+                    newEndPoint = segment1[1];
+                    outVec = outVec1;
+                }
+
+                if (!collisionExitVector.HasValue || outVec.squaredLength() < collisionExitVector.Value.squaredLength())
+                {
+                    colliderEndPoint = newEndPoint;
+                    collisionExitVector = outVec;
+                    exitDirectionVector = outVec;
+                }
+
+                /*
                 Vector3 segmentVector = segment1[1] - segment1[0];
                 Vector3 start1ToStart2 = segment2[0] - segment1[0];
                 Vector3 start1ToEnd2 = segment2[1] - segment1[0];
@@ -214,6 +253,7 @@ namespace SharpDXtest.BaseAssets.Components
                         exitDirectionVector = v1;
                     }
                 }
+                */
             }
 
             return true;
