@@ -8,20 +8,20 @@ namespace SharpDXtest.BaseAssets.Components
 {
     public enum FrictionCombineMode
     {
-        Minimum = 1,
-        Maximum = 2,
-        Multiply = 3,
-        Average = 4,
-        GeometryAverage = 5
+        Minimum,
+        Maximum,
+        Multiply,
+        Average,
+        GeometryAverage
     }
 
     public enum BouncinessCombineMode
     {
-        Minimum = 1,
-        Maximum = 2,
-        Multiply = 3,
-        Average = 4,
-        GeometryAverage = 5
+        Minimum,
+        Maximum,
+        Multiply,
+        Average,
+        GeometryAverage
     }
 
     public class PhysicalMaterial
@@ -36,7 +36,7 @@ namespace SharpDXtest.BaseAssets.Components
             set
             {
                 if (value < 0 || value > 1)
-                    throw new ArgumentOutOfRangeException("Friction value must be in [0; 1]!");
+                    throw new ArgumentOutOfRangeException("Friction value must be in range from 0 to 1.");
                 friction = value;
             }
         }
@@ -51,7 +51,7 @@ namespace SharpDXtest.BaseAssets.Components
             set
             {
                 if (value < 0 || value > 1)
-                    throw new ArgumentOutOfRangeException("Bounciness value must be in [0; 1]!");
+                    throw new ArgumentOutOfRangeException("Bounciness value must be in range from 0 to 1.");
                 bounciness = value;
             }
         }
@@ -59,7 +59,8 @@ namespace SharpDXtest.BaseAssets.Components
         public FrictionCombineMode FrictionCombineMode { get; set; }
         public BouncinessCombineMode BouncinessCombineMode { get; set; }
 
-        public PhysicalMaterial(double friction, double bounciness, FrictionCombineMode frictionCombineMode, BouncinessCombineMode bouncinessCombineMode)
+        public PhysicalMaterial(double friction, double bounciness, FrictionCombineMode frictionCombineMode = FrictionCombineMode.Average, 
+                                                                    BouncinessCombineMode bouncinessCombineMode = BouncinessCombineMode.Average)
         {
             Friction = friction;
             Bounciness = bounciness;
@@ -69,39 +70,39 @@ namespace SharpDXtest.BaseAssets.Components
 
         public double GetCombinedFrictionWith(PhysicalMaterial material)
         {
-            switch(this.FrictionCombineMode)
+            switch(FrictionCombineMode)
             {
                 case FrictionCombineMode.Minimum:
-                    return Math.Min(this.Friction, material.Friction);
+                    return Math.Min(Friction, material.Friction);
                 case FrictionCombineMode.Maximum:
-                    return Math.Max(this.Friction, material.Friction);
+                    return Math.Max(Friction, material.Friction);
                 case FrictionCombineMode.Multiply:
-                    return this.Friction * material.Friction;
+                    return Friction * material.Friction;
                 case FrictionCombineMode.Average:
-                    return (this.Friction + material.Friction) * 0.5;
+                    return (Friction + material.Friction) * 0.5;
                 case FrictionCombineMode.GeometryAverage:
-                    return Math.Sqrt(this.Friction * material.Friction);
+                    return Math.Sqrt(Friction * material.Friction);
                 default:
-                    throw new NotImplementedException($"{this.FrictionCombineMode} friction combine mode doesn't implemented!");
+                    throw new NotImplementedException($"{FrictionCombineMode} friction combine mode doesn't implemented!");
             }
         }
 
         public double GetComdinedBouncinessWith(PhysicalMaterial material)
         {
-            switch (this.BouncinessCombineMode)
+            switch (BouncinessCombineMode)
             {
                 case BouncinessCombineMode.Minimum:
-                    return Math.Min(this.Bounciness, material.Bounciness);
+                    return Math.Min(Bounciness, material.Bounciness);
                 case BouncinessCombineMode.Maximum:
-                    return Math.Max(this.Bounciness, material.Bounciness);
+                    return Math.Max(Bounciness, material.Bounciness);
                 case BouncinessCombineMode.Multiply:
-                    return this.Bounciness * material.Bounciness;
+                    return Bounciness * material.Bounciness;
                 case BouncinessCombineMode.Average:
-                    return (this.Bounciness + material.Bounciness) * 0.5;
+                    return (Bounciness + material.Bounciness) * 0.5;
                 case BouncinessCombineMode.GeometryAverage:
-                    return Math.Sqrt(this.Bounciness * material.Bounciness);
+                    return Math.Sqrt(Bounciness * material.Bounciness);
                 default:
-                    throw new NotImplementedException($"{this.BouncinessCombineMode} bounciness combine mode doesn't implemented!");
+                    throw new NotImplementedException($"{BouncinessCombineMode} bounciness combine mode doesn't implemented!");
             }
         }
     }
