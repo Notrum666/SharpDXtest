@@ -115,7 +115,7 @@ namespace SharpDXtest.BaseAssets.Components
             return segment;
         }
 
-        public virtual bool GetCollisionExitVector(Collider collider, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        public virtual bool getCollisionExitVector(Collider collider, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             collisionExitVector = null;
             exitDirectionVector = null;
@@ -259,7 +259,7 @@ namespace SharpDXtest.BaseAssets.Components
             return true;
         }
 
-        public bool IsPointInside(Vector3 point)
+        public bool isPointInside(Vector3 point)
         {
             Vector3[] vertices;
             Vector3 start, end, edge;
@@ -299,7 +299,7 @@ namespace SharpDXtest.BaseAssets.Components
             return false;
         }
 
-        public static Vector3 getAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
+        public static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
         {
             List<int> getVertexOnPlaneIndices(Collider collider)
             {
@@ -339,8 +339,8 @@ namespace SharpDXtest.BaseAssets.Components
             List<int> vertexOnPlaneIndices_1 = getVertexOnPlaneIndices(collider1);
             List<int> vertexOnPlaneIndices_2 = getVertexOnPlaneIndices(collider2);
 
-            List<int> insideVertexIndices_1 = vertexOnPlaneIndices_1.Where(index => collider2.IsPointInside(collider1.globalSpaceVertices[index])).ToList();
-            List<int> insideVertexIndices_2 = vertexOnPlaneIndices_2.Where(index => collider1.IsPointInside(collider2.globalSpaceVertices[index])).ToList();
+            List<int> insideVertexIndices_1 = vertexOnPlaneIndices_1.Where(index => collider2.isPointInside(collider1.globalSpaceVertices[index])).ToList();
+            List<int> insideVertexIndices_2 = vertexOnPlaneIndices_2.Where(index => collider1.isPointInside(collider2.globalSpaceVertices[index])).ToList();
 
             List<int[]> edges_1 = getEdgesToCheckIntersections(collider1, vertexOnPlaneIndices_1, insideVertexIndices_1);
             List<int[]> edges_2 = getEdgesToCheckIntersections(collider2, vertexOnPlaneIndices_2, insideVertexIndices_2);

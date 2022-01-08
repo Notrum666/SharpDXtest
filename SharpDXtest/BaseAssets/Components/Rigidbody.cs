@@ -138,12 +138,12 @@ namespace SharpDXtest.BaseAssets.Components
             Collider[] otherColliders = otherRigidbody.gameObject.getComponents<Collider>();
 
             foreach (Collider collider in colliders)
-                foreach (Collider otherCollider in colliders)
+                foreach (Collider otherCollider in otherColliders)
                 {
                     Vector3? _collisionExitVector;
                     Vector3? _collisionExitNormal;
                     Vector3? _colliderEndPoint;
-                    if (!collider.GetCollisionExitVector(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
+                    if (!collider.getCollisionExitVector(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
                         continue;
                     Vector3 collisionExitVector = (Vector3)_collisionExitVector;
                     Vector3 collisionExitNormal = (Vector3)_collisionExitNormal;
@@ -167,7 +167,7 @@ namespace SharpDXtest.BaseAssets.Components
                         }
                     }
 
-                    Vector3 collisionPoint = Vector3.Zero;
+                    Vector3 collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
 
                     double denominator = 0.0;
                     if (!IsStatic)
