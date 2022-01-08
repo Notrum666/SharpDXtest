@@ -202,7 +202,7 @@ namespace SharpDXtest.BaseAssets.Components
                 {
                     colliderEndPoint = newEndPoint;
                     collisionExitVector = outVec;
-                    exitDirectionVector = outVec;
+                    exitDirectionVector = segmentVector;
                 }
 
                 /*
@@ -323,8 +323,8 @@ namespace SharpDXtest.BaseAssets.Components
                     figure.Add(vertices[currentIndex]);
                     vertices.RemoveAt(currentIndex);
                 }
-
-                figure.Add(vertices[0]);
+                if (vertices.Count > 0)
+                    figure.Add(vertices[0]);
 
                 return figure;
             }
@@ -371,6 +371,11 @@ namespace SharpDXtest.BaseAssets.Components
 
             if (vertexOnPlaneIndices_1.Count == 0 || vertexOnPlaneIndices_2.Count == 0)
                 throw new ArgumentException("Colliders don't intersect in the given plane.");
+
+            if (vertexOnPlaneIndices_1.Count == 1)
+                return collider1.globalSpaceVertices[vertexOnPlaneIndices_1[0]];
+            if (vertexOnPlaneIndices_2.Count == 1)
+                return collider1.globalSpaceVertices[vertexOnPlaneIndices_2[0]];
 
             List<Vector3> figure_1 = getFigureFromVertexIndices(collider1, vertexOnPlaneIndices_1);
             List<Vector3> figure_2 = getFigureFromVertexIndices(collider2, vertexOnPlaneIndices_2);
