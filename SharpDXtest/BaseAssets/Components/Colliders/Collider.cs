@@ -325,8 +325,9 @@ namespace SharpDXtest.BaseAssets.Components
                         startIndex = poly[i];
                         endIndex = poly[(i + 1) % poly.Length];
 
-                        if(vertexOnPlaneIndices.Contains(startIndex) && insideOtherColliderVertexIndices.Contains(endIndex) ||
-                           vertexOnPlaneIndices.Contains(endIndex) && insideOtherColliderVertexIndices.Contains(startIndex))
+                        if ((vertexOnPlaneIndices.Contains(startIndex) && insideOtherColliderVertexIndices.Contains(endIndex) ||
+                            vertexOnPlaneIndices.Contains(endIndex) && insideOtherColliderVertexIndices.Contains(startIndex)) &&
+                            !edges.Exists(edge => edge[0] == startIndex && edge[1] == endIndex || edge[0] == endIndex && edge[1] == startIndex))
                         {
                             edges.Add(new int[] { startIndex, endIndex });
                         }
@@ -378,15 +379,14 @@ namespace SharpDXtest.BaseAssets.Components
                             {
                                 Vector3 start2Proj = start1 + start2.projectOnVector(edge1);
                                 Vector3 end2Proj = start1 + end2.projectOnVector(edge1);
-
                                 Vector3 start2ToProj = start2Proj - start2;
                                 Vector3 end2ToProj = end2Proj - end2;
 
-                                if(!start2ToProj.isZero() && !end2ToProj.isZero())
+                                if(!start2ToProj.isZero() && !end2ToProj.isZero() && start2ToProj.dotMul(end2ToProj) <= 0)
                                 {
                                     double k = Math.Sqrt(end2ToProj.squaredLength() / start2ToProj.squaredLength());
                                     Vector3 intersectionPoint = start2Proj + 1.0 / (k + 1.0) * (end2Proj - start2Proj);
-
+                                
                                     if (!points.Any(v => (v - intersectionPoint).isZero()))
                                     {
                                         points.AddLast(intersectionPoint);
