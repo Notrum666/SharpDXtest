@@ -8,8 +8,6 @@ namespace SharpDXtest.BaseAssets.Components
 {
     class Rigidbody : Component
     {
-        public PhysicalMaterial Material { get; set; }
-
         private double mass = 1.0;
         public double Mass 
         { 
@@ -56,6 +54,7 @@ namespace SharpDXtest.BaseAssets.Components
             }
         }
         public bool IsStatic { get; set; } = false;
+        public PhysicalMaterial Material { get; set; }
 
         public override void fixedUpdate()
         {
@@ -86,12 +85,12 @@ namespace SharpDXtest.BaseAssets.Components
                 //    t.Rotation * Time.DeltaTime).normalized();
             }
         }
-        private Matrix4x4 getGlobalInertiaTensor()
+        private Matrix3x3 getGlobalInertiaTensor()
         {
-            return gameObject.transform.model * new Matrix4x4(1.0 / InertiaTensor.x, 0.0, 0.0, 0.0,
-                                                              0.0, 1.0 / InertiaTensor.y, 0.0, 0.0,
-                                                              0.0, 0.0, 1.0 / InertiaTensor.z, 0.0,
-                                                              0.0, 0.0, 0.0, 1.0) * gameObject.transform.model.transposed();
+            Matrix3x3 model = Matrix3x3.FromQuaternion(gameObject.transform.Rotation);
+            return model * new Matrix3x3(1.0 / InertiaTensor.x, 0.0, 0.0,
+                                         0.0, 1.0 / InertiaTensor.y, 0.0,
+                                         0.0, 0.0, 1.0 / InertiaTensor.z) * model.transposed();
         }
         public void addForce(Vector3 force)
         {
@@ -104,11 +103,11 @@ namespace SharpDXtest.BaseAssets.Components
         public void addTorque(Vector3 torque)
         {
 
-            AngularVelocity += (new Vector4(torque, 0.0) * getGlobalInertiaTensor()).xyz * Time.DeltaTime;
+            AngularVelocity += torque * getGlobalInertiaTensor() * Time.DeltaTime;
         }
         public void addAngularImpulse(Vector3 angularImpulse)
         {
-            AngularVelocity += (new Vector4(angularImpulse, 0.0) * getGlobalInertiaTensor()).xyz;
+            AngularVelocity += angularImpulse * getGlobalInertiaTensor();
         }
         public void addForceAtPoint(Vector3 force, Vector3 point)
         {
@@ -118,7 +117,7 @@ namespace SharpDXtest.BaseAssets.Components
             
             Velocity += force.projectOnVector(radiusVector) * Time.DeltaTime / mass;
 
-            AngularVelocity += (new Vector4(radiusVector % force, 0.0) * getGlobalInertiaTensor()).xyz * Time.DeltaTime;
+            AngularVelocity += (radiusVector % force) * getGlobalInertiaTensor() * Time.DeltaTime;
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
@@ -128,7 +127,7 @@ namespace SharpDXtest.BaseAssets.Components
 
             Velocity += impulse.projectOnVector(radiusVector) / mass;
 
-            AngularVelocity += (new Vector4(radiusVector % impulse, 0.0) * getGlobalInertiaTensor()).xyz;
+            AngularVelocity += (radiusVector % impulse) * getGlobalInertiaTensor();
         }
         public void solveCollisionWith(Rigidbody otherRigidbody)
         {
@@ -149,11 +148,10 @@ namespace SharpDXtest.BaseAssets.Components
                     Vector3 collisionExitVector = (Vector3)_collisionExitVector;
                     Vector3 collisionExitNormal = (Vector3)_collisionExitNormal;
                     Vector3 colliderEndPoint = (Vector3)_colliderEndPoint;
+                    collisionExitNormal.normalize();
 
                     if (IsStatic)
-                    {
                         otherRigidbody.gameObject.transform.Position -= collisionExitVector;
-                    }
                     else
                     {
                         if (otherRigidbody.IsStatic)
@@ -164,9 +162,36 @@ namespace SharpDXtest.BaseAssets.Components
                         else
                         {
                             double totalMass = mass + otherRigidbody.mass;
-
+                            gameObject.transform.Position += collisionExitVector * otherRigidbody.mass / totalMass;
+                            otherRigidbody.gameObject.transform.Position += collisionExitVector * mass / totalMass;
                         }
                     }
+
+                    Vector3 collisionPoint = Vector3.Zero;
+
+                    double denominator = 0.0;
+                    if (!IsStatic)
+                    {
+                        denominator += 1.0 / mass;
+                        Vector3 r = collisionPoint - gameObject.transform.Position;
+                        denominator += collisionExitNormal * (r % collisionExitNormal * getGlobalInertiaTensor() % r);
+                    }
+                    if (!otherRigidbody.IsStatic)
+                    {
+                        denominator += 1.0 / otherRigidbody.mass;
+                        Vector3 r = collisionPoint - otherRigidbody.gameObject.transform.Position;
+                        denominator += collisionExitNormal * (r % collisionExitNormal * otherRigidbody.getGlobalInertiaTensor() % r);
+                    }
+
+                    Vector3 impulse = (otherRigidbody.Velocity - Velocity) / denominator;
+
+                    Vector3 linearImpulse = impulse.projectOnVector(collisionExitNormal) * (1.0 + Material.GetComdinedBouncinessWith(otherRigidbody.Material)) / 2.0;
+                    Vector3 angularImpulse = impulse.projectOnFlat(collisionExitNormal) * (1.0 + Material.GetCombinedFrictionWith(otherRigidbody.Material)) / 2.0;
+
+                    impulse = linearImpulse + angularImpulse;
+
+                    addImpulseAtPoint(impulse, collisionPoint);
+                    otherRigidbody.addImpulseAtPoint(-impulse, collisionPoint);
                 }
         }
     }
