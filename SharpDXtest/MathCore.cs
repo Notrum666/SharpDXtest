@@ -1285,7 +1285,7 @@ namespace SharpDXtest
             float det02 = (v10 * (v21 * v33 - v23 * v31) - v11 * (v20 * v33 - v23 * v30) + v13 * (v20 * v31 - v21 * v30));
             float det03 = (v10 * (v21 * v32 - v22 * v31) - v11 * (v20 * v32 - v22 * v30) + v12 * (v20 * v31 - v21 * v30));
 
-            float determinant = det00 - det01 + det02 - det03;
+            float determinant = v00 * det00 - v01 * det01 + v02 * det02 - v03 * det03;
             if (determinant == 0)
                 throw new Exception("This matrix is singular. (determinant = 0)");
 
@@ -1432,7 +1432,7 @@ namespace SharpDXtest
             double det02 = (v10 * (v21 * v33 - v23 * v31) - v11 * (v20 * v33 - v23 * v30) + v13 * (v20 * v31 - v21 * v30));
             double det03 = (v10 * (v21 * v32 - v22 * v31) - v11 * (v20 * v32 - v22 * v30) + v12 * (v20 * v31 - v21 * v30));
 
-            double determinant = det00 - det01 + det02 - det03;
+            double determinant = v00 * det00 - v01 * det01 + v02 * det02 - v03 * det03;
             if (determinant == 0)
                 throw new Exception("This matrix is singular. (determinant = 0)");
 
