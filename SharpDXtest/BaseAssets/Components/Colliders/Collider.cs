@@ -258,5 +258,195 @@ namespace SharpDXtest.BaseAssets.Components
 
             return true;
         }
+
+        public bool IsPointInside(Vector3 point)
+        {
+            Vector3[] vertices;
+            Vector3 start, end, edge;
+            Vector3 vec, vecMult;
+            Vector3 prevVecMult;
+            double edgeDotMult, currentDotMult;
+            foreach(int[] poly in polygons)
+            {
+                vertices = poly.Select(index => globalSpaceVertices[index]).ToArray();
+
+                prevVecMult = (vertices[1] - vertices[0]).cross(point - vertices[0]);
+                for(int i = 0; i < vertices.Length; i++)
+                {
+                    start = vertices[i];
+                    end = vertices[(i + 1) % vertices.Length];
+                    edge = end - start;
+                    vec = point - start;
+
+                    vecMult = edge.cross(vec);
+                    if(vecMult.squaredLength() < Constants.SqrEpsilon)
+                    {
+                        edgeDotMult = edge.dotMul(edge);
+                        currentDotMult = vec.dotMul(edge);
+
+                        if (currentDotMult >= 0 && currentDotMult <= edgeDotMult)
+                            return true;
+                        else continue;
+                    }
+
+                    if (vecMult.dotMul(prevVecMult) < 0)
+                        break;
+
+                    prevVecMult = vecMult;
+                }
+            }
+
+            return false;
+        }
+
+        public static Vector3 getAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
+        {
+            List<int> getVertexOnPlaneIndices(Collider collider)
+            {
+                List<int> vertexIndices = new List<int>();
+                for(int i = 0; i < collider.globalSpaceVertices.Count; i++)
+                {
+                    if (Math.Abs((collider.globalSpaceVertices[i] - collisionPlanePoint).dotMul(collisionPlaneNormal)) < Constants.Epsilon)
+                        vertexIndices.Add(i);
+                }
+
+                return vertexIndices;
+            }
+
+            List<int[]> getEdgesToCheckIntersections(Collider collider, List<int> vertexOnPlaneIndices, List<int> insideOtherColliderVertexIndices)
+            {
+                List<int[]> edges = new List<int[]>();
+                int startIndex, endIndex;
+                int i;
+                foreach (int[] poly in collider.polygons)
+                {
+                    for (i = 0; i < poly.Length; i++)
+                    {
+                        startIndex = poly[i];
+                        endIndex = poly[(i + 1) % poly.Length];
+
+                        if(vertexOnPlaneIndices.Contains(startIndex) && insideOtherColliderVertexIndices.Contains(endIndex) ||
+                           vertexOnPlaneIndices.Contains(endIndex) && insideOtherColliderVertexIndices.Contains(startIndex))
+                        {
+                            edges.Add(new int[] { startIndex, endIndex });
+                        }
+                    }
+                }
+
+                return edges;
+            }
+
+            List<int> vertexOnPlaneIndices_1 = getVertexOnPlaneIndices(collider1);
+            List<int> vertexOnPlaneIndices_2 = getVertexOnPlaneIndices(collider2);
+
+            List<int> insideVertexIndices_1 = vertexOnPlaneIndices_1.Where(index => collider2.IsPointInside(collider1.globalSpaceVertices[index])).ToList();
+            List<int> insideVertexIndices_2 = vertexOnPlaneIndices_2.Where(index => collider1.IsPointInside(collider2.globalSpaceVertices[index])).ToList();
+
+            List<int[]> edges_1 = getEdgesToCheckIntersections(collider1, vertexOnPlaneIndices_1, insideVertexIndices_1);
+            List<int[]> edges_2 = getEdgesToCheckIntersections(collider2, vertexOnPlaneIndices_2, insideVertexIndices_2);
+
+            LinkedList<Vector3> points = new LinkedList<Vector3>(insideVertexIndices_1.Select(index => collider1.globalSpaceVertices[index]));
+            insideVertexIndices_2.ForEach(index =>
+            {
+                Vector3 vertex = collider2.globalSpaceVertices[index];
+                if (!points.Any(v => (v - vertex).isZero()))
+                    points.AddLast(vertex);
+            });
+
+            Vector3 start1, end1, edge1;
+            Vector3 start2, end2, edge2;
+            foreach (int[] poly1 in collider1.polygons)
+            {
+                foreach (int[] poly2 in collider2.polygons)
+                {
+                    for (int i = 0; i < poly1.Length; i++)
+                    {
+                        start1 = collider1.globalSpaceVertices[poly1[i]];
+                        end1 = collider1.globalSpaceVertices[poly1[(i + 1) % poly1.Length]];
+                        edge1 = end1 - start1;
+
+                        for (int j = 0; j < poly2.Length; j++)
+                        {
+                            start2 = collider2.globalSpaceVertices[poly2[j]];
+                            end2 = collider2.globalSpaceVertices[poly2[(j + 1) % poly2.Length]];
+                            edge2 = end2 - start2;
+                            
+                            Vector3 start1ToStart2 = start2 - start1;
+                            Vector3 start1ToEnd2 = end2 - start1;
+
+                            if (!edge1.isCollinearTo(edge2))
+                            {
+                                Vector3 start2Proj = start1 + start2.projectOnVector(edge1);
+                                Vector3 end2Proj = start1 + end2.projectOnVector(edge1);
+
+                                Vector3 start2ToProj = start2Proj - start2;
+                                Vector3 end2ToProj = end2Proj - end2;
+
+                                if(!start2ToProj.isZero() && !end2ToProj.isZero())
+                                {
+                                    double k = Math.Sqrt(end2ToProj.squaredLength() / start2ToProj.squaredLength());
+                                    Vector3 intersectionPoint = start2Proj + 1.0 / (k + 1.0) * (end2Proj - start2Proj);
+
+                                    if (!points.Any(v => (v - intersectionPoint).isZero()))
+                                    {
+                                        points.AddLast(intersectionPoint);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //int pointCount = points.Count;
+            //List<Vector3> figure = new List<Vector3>(pointCount);
+            //figure[0] = points.First.Value;
+            //points.RemoveFirst();
+            //
+            //Vector3 currentVecMult;
+            //LinkedListNode<Vector3> endNode, currentNode;
+            //for (int i = 1; i < pointCount; i++)
+            //{
+            //    start1 = figure[i - 1];
+            //    endNode = points.First;
+            //    edge1 = endNode.Value - start1;
+            //
+            //    currentNode = endNode.Next;
+            //    while(currentNode != null)
+            //    {
+            //        edge2 = currentNode.Value - start1;
+            //        currentVecMult = edge2.cross(edge1);
+            //        if(collisionPlaneNormal.dotMul(currentVecMult) > 0)
+            //        {
+            //            endNode = currentNode;
+            //        }
+            //
+            //        currentNode = currentNode.Next;
+            //    }
+            //
+            //    figure.Add(endNode.Value);
+            //    points.Remove(endNode);
+            //}
+
+            double x = 0, y = 0, z = 0;
+            int pointCount = 0;
+            LinkedList<Vector3>.Enumerator enumerator = points.GetEnumerator();
+            while(enumerator.MoveNext())
+            {
+                start1 = enumerator.Current;
+                pointCount++;
+                x += start1.x;
+                y += start1.y;
+                z += start1.z;
+            }
+
+            return new Vector3(x / pointCount, y / pointCount, z / pointCount);
+        }
+
+        public override void fixedUpdate()
+        {
+            convertLocalVerticesToGlobal();
+            calculateNormalsInGlobal();
+        }
     }
 }
