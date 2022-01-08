@@ -13,9 +13,9 @@ namespace SharpDXtest.BaseAssets.Components
         public abstract Vector3 Offset { get; set; }
 
         protected List<Vector3> vertices;
-        protected List<Vector3> globalSpaceVertices;
-        protected List<Vector3> globalSpaceNormals;
         protected List<int[]> polygons;
+        protected List<Vector3> globalSpaceVertices = new List<Vector3>();
+        protected List<Vector3> globalSpaceNormals = new List<Vector3>();
 
         protected double squaredOuterSphereRadius;
         protected double outerSphereRadius;
@@ -34,7 +34,7 @@ namespace SharpDXtest.BaseAssets.Components
                 }
             }
         }
-        protected void convertLocalVerticesToGlobal()
+        public void calculateGlobalVertices()
         {
             globalSpaceVertices.Clear();
 
@@ -65,7 +65,7 @@ namespace SharpDXtest.BaseAssets.Components
         {
             List<Vector3> projection = new List<Vector3>();
 
-            foreach(Vector3 vertex in vertices)
+            foreach(Vector3 vertex in globalSpaceVertices)
             {
                 projection.Add(vertex.projectOnVector(vector));
             }
@@ -445,7 +445,7 @@ namespace SharpDXtest.BaseAssets.Components
 
         public override void fixedUpdate()
         {
-            convertLocalVerticesToGlobal();
+            calculateGlobalVertices();
             calculateNormalsInGlobal();
         }
     }

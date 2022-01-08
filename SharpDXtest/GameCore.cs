@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using SharpDXtest.BaseAssets.Components;
+
 namespace SharpDXtest
 {
     public static class GameCore
@@ -40,6 +42,21 @@ namespace SharpDXtest
             foreach (GameObject obj in CurrentScene.objects)
                 if (obj.Enabled)
                     obj.fixedUpdate();
+
+            List<Rigidbody> rigidbodies = new List<Rigidbody>();
+            for (int i = 0; i < CurrentScene.objects.Count; i++)
+            {
+                Rigidbody rigidbody = CurrentScene.objects[i].getComponent<Rigidbody>();
+                if (rigidbody != null)
+                {
+                    foreach (Rigidbody otherRigidbody in rigidbodies)
+                        rigidbody.solveCollisionWith(otherRigidbody);
+                    rigidbodies.Add(rigidbody);
+                }
+            }
+
+            foreach (Rigidbody rigidbody in rigidbodies)
+                rigidbody.applyCollisionExitVectors();
         }
     }
 }

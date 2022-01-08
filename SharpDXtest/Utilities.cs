@@ -970,7 +970,12 @@ namespace SharpDXtest
                             if (property.PropertyType == typeof(Quaternion))
                                 curObj = Quaternion.Identity;
                             else
-                                curObj = Activator.CreateInstance(property.PropertyType);
+                            {
+                                if (property.PropertyType.GetConstructor(Type.EmptyTypes) != null)
+                                    curObj = Activator.CreateInstance(property.PropertyType);
+                                else
+                                    curObj = FormatterServices.GetUninitializedObject(property.PropertyType);
+                            }
                             parseAttributes(ref curObj, element.Attributes());
                             property.SetValue(parent, curObj);
                         }
