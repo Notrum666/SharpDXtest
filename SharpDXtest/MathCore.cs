@@ -496,7 +496,7 @@ namespace SharpDXtest
         /// </summary>
         public Vector3f vecMul(Vector3f vec)
         {
-            return new Vector3f(y * vec.z - z * vec.y, x * vec.z - z * vec.x, x * vec.y - y * vec.x);
+            return new Vector3f(y * vec.z - z * vec.y, z * vec.x - x * vec.z, x * vec.y - y * vec.x);
         }
         /// <summary>
         /// Vector multiplication
@@ -701,7 +701,7 @@ namespace SharpDXtest
         /// </summary>
         public Vector3 vecMul(Vector3 vec)
         {
-            return new Vector3(y * vec.z - z * vec.y, x * vec.z - z * vec.x, x * vec.y - y * vec.x);
+            return new Vector3(y * vec.z - z * vec.y, z * vec.x - x * vec.z, x * vec.y - y * vec.x);
         }
         /// <summary>
         /// Vector multiplication
