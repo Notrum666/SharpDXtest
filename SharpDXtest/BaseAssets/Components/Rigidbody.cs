@@ -86,6 +86,13 @@ namespace SharpDXtest.BaseAssets.Components
                 //    t.Rotation * Time.DeltaTime).normalized();
             }
         }
+        private Matrix4x4 getGlobalInertiaTensor()
+        {
+            return gameObject.transform.model * new Matrix4x4(1.0 / InertiaTensor.x, 0.0, 0.0, 0.0,
+                                                              0.0, 1.0 / InertiaTensor.y, 0.0, 0.0,
+                                                              0.0, 0.0, 1.0 / InertiaTensor.z, 0.0,
+                                                              0.0, 0.0, 0.0, 1.0) * gameObject.transform.model.transposed();
+        }
         public void addForce(Vector3 force)
         {
             Velocity += force * Time.DeltaTime / mass;
@@ -96,21 +103,12 @@ namespace SharpDXtest.BaseAssets.Components
         }
         public void addTorque(Vector3 torque)
         {
-            Matrix4x4 globalInertiaTensor = gameObject.transform.model * new Matrix4x4(1.0 / InertiaTensor.x, 0.0, 0.0, 0.0,
-                                                                    0.0, 1.0 / InertiaTensor.y, 0.0, 0.0,
-                                                                    0.0, 0.0, 1.0 / InertiaTensor.z, 0.0,
-                                                                    0.0, 0.0, 0.0, 1.0) * gameObject.transform.model.transposed();
 
-            AngularVelocity += (new Vector4(torque, 0.0) * globalInertiaTensor).xyz * Time.DeltaTime;
+            AngularVelocity += (new Vector4(torque, 0.0) * getGlobalInertiaTensor()).xyz * Time.DeltaTime;
         }
         public void addAngularImpulse(Vector3 angularImpulse)
         {
-            Matrix4x4 globalInertiaTensor = gameObject.transform.model * new Matrix4x4(1.0 / InertiaTensor.x, 0.0, 0.0, 0.0,
-                                                                    0.0, 1.0 / InertiaTensor.y, 0.0, 0.0,
-                                                                    0.0, 0.0, 1.0 / InertiaTensor.z, 0.0,
-                                                                    0.0, 0.0, 0.0, 1.0) * gameObject.transform.model.transposed();
-
-            AngularVelocity += (new Vector4(angularImpulse, 0.0) * globalInertiaTensor).xyz;
+            AngularVelocity += (new Vector4(angularImpulse, 0.0) * getGlobalInertiaTensor()).xyz;
         }
         public void addForceAtPoint(Vector3 force, Vector3 point)
         {
@@ -120,12 +118,7 @@ namespace SharpDXtest.BaseAssets.Components
             
             Velocity += force.projectOnVector(radiusVector) * Time.DeltaTime / mass;
 
-            Matrix4x4 globalInertiaTensor = t.model * new Matrix4x4(1.0 / InertiaTensor.x, 0.0, 0.0, 0.0,
-                                                                    0.0, 1.0 / InertiaTensor.y, 0.0, 0.0,
-                                                                    0.0, 0.0, 1.0 / InertiaTensor.z, 0.0,
-                                                                    0.0, 0.0, 0.0, 1.0) * t.model.transposed();
-
-            AngularVelocity += (new Vector4(radiusVector % force, 0.0) * globalInertiaTensor).xyz * Time.DeltaTime;
+            AngularVelocity += (new Vector4(radiusVector % force, 0.0) * getGlobalInertiaTensor()).xyz * Time.DeltaTime;
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
@@ -135,12 +128,7 @@ namespace SharpDXtest.BaseAssets.Components
 
             Velocity += impulse.projectOnVector(radiusVector) / mass;
 
-            Matrix4x4 globalInertiaTensor = t.model * new Matrix4x4(1.0 / InertiaTensor.x, 0.0, 0.0, 0.0,
-                                                                    0.0, 1.0 / InertiaTensor.y, 0.0, 0.0,
-                                                                    0.0, 0.0, 1.0 / InertiaTensor.z, 0.0,
-                                                                    0.0, 0.0, 0.0, 1.0) * t.model.transposed();
-
-            AngularVelocity += (new Vector4(radiusVector % impulse, 0.0) * globalInertiaTensor).xyz;
+            AngularVelocity += (new Vector4(radiusVector % impulse, 0.0) * getGlobalInertiaTensor()).xyz;
         }
         public void solveCollisionWith(Rigidbody otherRigidbody)
         {
