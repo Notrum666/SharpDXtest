@@ -10,7 +10,7 @@ namespace SharpDXtest.BaseAssets.Components
     {
         public Vector3 InertiaTensor { get; protected set; }
 
-        public Vector3 Offset { get; set; }
+        public abstract Vector3 Offset { get; set; }
 
         protected List<Vector3> vertices;
         protected List<Vector3> globalSpaceVertices;

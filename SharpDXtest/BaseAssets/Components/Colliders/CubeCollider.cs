@@ -22,6 +22,22 @@ namespace SharpDXtest.BaseAssets.Components.Colliders
 
                 size = value;
                 calculateInertiaTensor();
+                generateVertices();
+                buildPolygons();
+            }
+        }
+        private Vector3 offset;
+        public override Vector3 Offset 
+        {
+            get
+            {
+                return offset;
+            }
+            set
+            {
+                offset = value;
+                generateVertices();
+                buildPolygons();
             }
         }
 
@@ -29,6 +45,9 @@ namespace SharpDXtest.BaseAssets.Components.Colliders
         {
             Size = size;
             Offset = Vector3.Zero;
+
+            generateVertices();
+            buildPolygons();
         }
         public CubeCollider(Vector3 size, Vector3 offset)
         {
