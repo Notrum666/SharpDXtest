@@ -94,7 +94,7 @@ namespace SharpDXtest.BaseAssets.Components
             if (colliders.Length > 0)
                 InertiaTensor = colliders[0].InertiaTensor * mass;
         }
-        private Matrix3x3 getGlobalInertiaTensor()
+        private Matrix3x3 getInverseGlobalInertiaTensor()
         {
             Matrix3x3 model = Matrix3x3.FromQuaternion(gameObject.transform.Rotation);
             return model * new Matrix3x3(1.0 / InertiaTensor.x, 0.0, 0.0,
@@ -112,11 +112,11 @@ namespace SharpDXtest.BaseAssets.Components
         public void addTorque(Vector3 torque)
         {
 
-            AngularVelocity += torque * getGlobalInertiaTensor() * Time.DeltaTime;
+            AngularVelocity += torque * getInverseGlobalInertiaTensor() * Time.DeltaTime;
         }
         public void addAngularImpulse(Vector3 angularImpulse)
         {
-            AngularVelocity += angularImpulse * getGlobalInertiaTensor();
+            AngularVelocity += angularImpulse * getInverseGlobalInertiaTensor();
         }
         public void addForceAtPoint(Vector3 force, Vector3 point)
         {
@@ -126,7 +126,7 @@ namespace SharpDXtest.BaseAssets.Components
             
             Velocity += force.projectOnVector(radiusVector) * Time.DeltaTime / mass;
 
-            AngularVelocity += (radiusVector % force) * getGlobalInertiaTensor() * Time.DeltaTime;
+            AngularVelocity += (radiusVector % force) * getInverseGlobalInertiaTensor() * Time.DeltaTime;
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
@@ -136,7 +136,7 @@ namespace SharpDXtest.BaseAssets.Components
 
             Velocity += impulse.projectOnVector(radiusVector) / mass;
 
-            AngularVelocity += (radiusVector % impulse) * getGlobalInertiaTensor();
+            AngularVelocity += (radiusVector % impulse / 2.0) * getInverseGlobalInertiaTensor();
         }
         public void applyCollisionExitVectors()
         {
@@ -157,6 +157,9 @@ namespace SharpDXtest.BaseAssets.Components
 
             Collider[] colliders = gameObject.getComponents<Collider>();
             Collider[] otherColliders = otherRigidbody.gameObject.getComponents<Collider>();
+
+            double systemEnergy = mass * Velocity * Velocity / 2.0 + AngularVelocity * getInverseGlobalInertiaTensor() * AngularVelocity / 2.0 +
+                otherRigidbody.mass * otherRigidbody.Velocity * otherRigidbody.Velocity / 2.0 + otherRigidbody.AngularVelocity * otherRigidbody.getInverseGlobalInertiaTensor() * otherRigidbody.AngularVelocity / 2.0;
 
             foreach (Collider collider in colliders)
                 foreach (Collider otherCollider in otherColliders)
@@ -209,28 +212,30 @@ namespace SharpDXtest.BaseAssets.Components
                     Vector3 collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
 
                     double denominator = 0.0;
+                    Vector3 r1 = collisionPoint - gameObject.transform.Position;
+                    Vector3 r2 = collisionPoint - otherRigidbody.gameObject.transform.Position;
                     if (!IsStatic)
                     {
                         denominator += 1.0 / mass;
-                        Vector3 r = collisionPoint - gameObject.transform.Position;
-                        denominator += collisionExitNormal * (r % collisionExitNormal * getGlobalInertiaTensor() % r);
+                        denominator += collisionExitNormal * (r1 % collisionExitNormal * getInverseGlobalInertiaTensor() % r1);
                     }
                     if (!otherRigidbody.IsStatic)
                     {
                         denominator += 1.0 / otherRigidbody.mass;
-                        Vector3 r = collisionPoint - otherRigidbody.gameObject.transform.Position;
-                        denominator += collisionExitNormal * (r % collisionExitNormal * otherRigidbody.getGlobalInertiaTensor() % r);
+                        denominator += collisionExitNormal * (r2 % collisionExitNormal * otherRigidbody.getInverseGlobalInertiaTensor() % r2);
                     }
 
-                    Vector3 impulse = (otherRigidbody.Velocity - Velocity) / denominator;
+                    Vector3 impulse = (otherRigidbody.Velocity + otherRigidbody.AngularVelocity % r2 - Velocity - AngularVelocity % r1) / denominator;
 
                     Vector3 linearImpulse = impulse.projectOnVector(collisionExitNormal) * (1.0 + Material.GetComdinedBouncinessWith(otherRigidbody.Material));
                     Vector3 angularImpulse = impulse.projectOnFlat(collisionExitNormal) * (1.0 + Material.GetCombinedFrictionWith(otherRigidbody.Material));
-
+                    
                     impulse = linearImpulse + angularImpulse;
-
+                    
                     addImpulseAtPoint(impulse, collisionPoint);
                     otherRigidbody.addImpulseAtPoint(-impulse, collisionPoint);
+                    //addImpulse(linearImpulse);
+                    //otherRigidbody.addImpulse(-linearImpulse);
 
                     gameObject.transform.Position -= moveVector;
                     collisionExitVectors.Add(moveVector);
@@ -239,6 +244,10 @@ namespace SharpDXtest.BaseAssets.Components
                     collider.calculateGlobalVertices();
                     otherCollider.calculateGlobalVertices();
                 }
+
+            double newSystemEnergy = mass * Velocity * Velocity / 2.0 + AngularVelocity * getInverseGlobalInertiaTensor() * AngularVelocity / 2.0 +
+                otherRigidbody.mass * otherRigidbody.Velocity * otherRigidbody.Velocity / 2.0 + otherRigidbody.AngularVelocity * otherRigidbody.getInverseGlobalInertiaTensor() * otherRigidbody.AngularVelocity / 2.0;
+            double systemEnergyDifference = newSystemEnergy - systemEnergy;
         }
     }
 }

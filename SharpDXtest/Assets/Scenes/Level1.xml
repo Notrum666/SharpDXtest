@@ -20,7 +20,7 @@
 
   <GameObject x.Name="Cube">
     <Transform>
-      <Transform.Position y="5" z="1"/>
+      <Transform.Position y="0" z="5"/>
     </Transform>
     <Rigidbody Mass="1">
       <Rigidbody.Material Friction="1" Bounciness="1"/>
@@ -33,13 +33,13 @@
 
   <GameObject>
     <Transform>
-      <Transform.Position y="10"/>
+      <Transform.Position y="0"/>
     </Transform>
-    <Rigidbody Mass="1">
+    <Rigidbody Mass="1000">
       <Rigidbody.Material Friction="1" Bounciness="1"/>
     </Rigidbody>
     <CubeCollider>
-      <CubeCollider.Size x="2" y="2" z="2"/>
+      <CubeCollider.Size x="4" y="4" z="2"/>
     </CubeCollider>
     <Mesh model="{Model cube}" texture="{Texture template}"/>
   </GameObject>

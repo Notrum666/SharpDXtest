@@ -17,6 +17,10 @@ namespace SharpDXtest.Assets.Components
         {
             if (InputManager.IsKeyDown(Key.F))
                 cube.getComponent<Rigidbody>().addForce(new Vector3(0.0, 1.0, 0.0));
+            if (InputManager.IsKeyDown(Key.R))
+                cube.getComponent<Rigidbody>().addForce(new Vector3(0.0, 0.0, -9.8) * cube.getComponent<Rigidbody>().Mass);
+            if (InputManager.IsKeyPressed(Key.E))
+                cube.getComponent<Rigidbody>().addAngularImpulse(new Vector3(0.5, 0.0, 0.0));
 
             float curSpeed = speed * (float)Time.DeltaTime;
 
