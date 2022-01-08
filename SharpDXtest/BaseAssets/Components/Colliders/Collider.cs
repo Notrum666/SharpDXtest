@@ -259,46 +259,6 @@ namespace SharpDXtest.BaseAssets.Components
             return true;
         }
 
-        public bool isPointInside(Vector3 point)
-        {
-            Vector3[] vertices;
-            Vector3 start, end, edge;
-            Vector3 vec, vecMult;
-            Vector3 prevVecMult;
-            double edgeDotMult, currentDotMult;
-            foreach(int[] poly in polygons)
-            {
-                vertices = poly.Select(index => globalSpaceVertices[index]).ToArray();
-
-                prevVecMult = (vertices[1] - vertices[0]).cross(point - vertices[0]);
-                for(int i = 0; i < vertices.Length; i++)
-                {
-                    start = vertices[i];
-                    end = vertices[(i + 1) % vertices.Length];
-                    edge = end - start;
-                    vec = point - start;
-
-                    vecMult = edge.cross(vec);
-                    if(vecMult.squaredLength() < Constants.SqrEpsilon)
-                    {
-                        edgeDotMult = edge.dotMul(edge);
-                        currentDotMult = vec.dotMul(edge);
-
-                        if (currentDotMult >= 0 && currentDotMult <= edgeDotMult)
-                            return true;
-                        else continue;
-                    }
-
-                    if (vecMult.dotMul(prevVecMult) < 0)
-                        break;
-
-                    prevVecMult = vecMult;
-                }
-            }
-
-            return false;
-        }
-
         public static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
         {
             List<int> getVertexOnPlaneIndices(Collider collider)
@@ -337,11 +297,86 @@ namespace SharpDXtest.BaseAssets.Components
                 return edges;
             }
 
+            List<Vector3> getFigureFromVertexIndices(Collider collider, List<int> vertexIndices)
+            {
+                List<Vector3> vertices = vertexIndices.Select(index => collider.globalSpaceVertices[index]).ToList();
+
+                int count = vertices.Count;
+                List<Vector3> figure = new List<Vector3>(count);
+                figure.Add(vertices[0]);
+                vertices.RemoveAt(0);
+
+                Vector3 start = figure[0];
+                while(vertices.Count > 1)
+                {
+                    Vector3 current = vertices[0] - start;
+                    int currentIndex = 0;
+                    for(int i = 1; i < vertices.Count; i++)
+                    {
+                        if((vertices[i] - start).cross(current) * collisionPlaneNormal > 0)
+                        {
+                            currentIndex = i;
+                            current = vertices[i] - start;
+                        }
+                    }
+
+                    figure.Add(vertices[currentIndex]);
+                    vertices.RemoveAt(currentIndex);
+                }
+
+                figure.Add(vertices[0]);
+
+                return figure;
+            }
+
+            bool IsPointInsideFigure(List<Vector3> figure, Vector3 point)
+            {
+                Vector3 start, end, edge;
+                Vector3 vec, vecMult, prevVecMult;
+                double edgeDotMult, currentDotMult;
+                int count = figure.Count;
+
+                prevVecMult = (figure[1] - figure[0]).cross(point - figure[0]);
+                for (int i = 0; i < count; i++)
+                {
+                    start = figure[i];
+                    end = figure[(i + 1) % count];
+                    edge = end - start;
+                    vec = point - start;
+
+                    vecMult = edge.cross(vec);
+                    if (vecMult.squaredLength() < Constants.SqrEpsilon)
+                    {
+                        edgeDotMult = edge.dotMul(edge);
+                        currentDotMult = vec.dotMul(edge);
+
+                        if (currentDotMult >= 0 && currentDotMult <= edgeDotMult)
+                            return true;
+                        else continue;
+                    }
+
+                    if (vecMult.dotMul(prevVecMult) < 0)
+                    {
+                        return false;
+                    }
+
+                    prevVecMult = vecMult;
+                }
+
+                return true;
+            }
+
             List<int> vertexOnPlaneIndices_1 = getVertexOnPlaneIndices(collider1);
             List<int> vertexOnPlaneIndices_2 = getVertexOnPlaneIndices(collider2);
 
-            List<int> insideVertexIndices_1 = vertexOnPlaneIndices_1.Where(index => collider2.isPointInside(collider1.globalSpaceVertices[index])).ToList();
-            List<int> insideVertexIndices_2 = vertexOnPlaneIndices_2.Where(index => collider1.isPointInside(collider2.globalSpaceVertices[index])).ToList();
+            if (vertexOnPlaneIndices_1.Count == 0 || vertexOnPlaneIndices_2.Count == 0)
+                throw new ArgumentException("Colliders don't intersect in the given plane.");
+
+            List<Vector3> figure_1 = getFigureFromVertexIndices(collider1, vertexOnPlaneIndices_1);
+            List<Vector3> figure_2 = getFigureFromVertexIndices(collider2, vertexOnPlaneIndices_2);
+
+            List<int> insideVertexIndices_1 = vertexOnPlaneIndices_1.Where(index => IsPointInsideFigure(figure_2, collider1.globalSpaceVertices[index])).ToList();
+            List<int> insideVertexIndices_2 = vertexOnPlaneIndices_2.Where(index => IsPointInsideFigure(figure_1, collider2.globalSpaceVertices[index])).ToList();
 
             List<int[]> edges_1 = getEdgesToCheckIntersections(collider1, vertexOnPlaneIndices_1, insideVertexIndices_1);
             List<int[]> edges_2 = getEdgesToCheckIntersections(collider2, vertexOnPlaneIndices_2, insideVertexIndices_2);
@@ -392,36 +427,6 @@ namespace SharpDXtest.BaseAssets.Components
                     }
                 }
             }
-
-            //int pointCount = points.Count;
-            //List<Vector3> figure = new List<Vector3>(pointCount);
-            //figure[0] = points.First.Value;
-            //points.RemoveFirst();
-            //
-            //Vector3 currentVecMult;
-            //LinkedListNode<Vector3> endNode, currentNode;
-            //for (int i = 1; i < pointCount; i++)
-            //{
-            //    start1 = figure[i - 1];
-            //    endNode = points.First;
-            //    edge1 = endNode.Value - start1;
-            //
-            //    currentNode = endNode.Next;
-            //    while(currentNode != null)
-            //    {
-            //        edge2 = currentNode.Value - start1;
-            //        currentVecMult = edge2.cross(edge1);
-            //        if(collisionPlaneNormal.dotMul(currentVecMult) > 0)
-            //        {
-            //            endNode = currentNode;
-            //        }
-            //
-            //        currentNode = currentNode.Next;
-            //    }
-            //
-            //    figure.Add(endNode.Value);
-            //    points.Remove(endNode);
-            //}
 
             double x = 0, y = 0, z = 0;
             int pointCount = 0;
