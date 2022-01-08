@@ -356,42 +356,37 @@ namespace SharpDXtest.BaseAssets.Components
 
             Vector3 start1, end1, edge1;
             Vector3 start2, end2, edge2;
-            foreach (int[] poly1 in collider1.polygons)
+
+            foreach(int[] edgeIndices_1 in edges_1)
             {
-                foreach (int[] poly2 in collider2.polygons)
+                start1 = collider1.globalSpaceVertices[edgeIndices_1[0]];
+                end1 = collider1.globalSpaceVertices[edgeIndices_1[1]];
+                edge1 = end1 - start1;
+
+                foreach (int[] edgeIndices_2 in edges_2)
                 {
-                    for (int i = 0; i < poly1.Length; i++)
+                    start2 = collider2.globalSpaceVertices[edgeIndices_2[0]];
+                    end2 = collider2.globalSpaceVertices[edgeIndices_2[1]];
+                    edge2 = end2 - start2;
+
+                    Vector3 start1ToStart2 = start2 - start1;
+                    Vector3 start1ToEnd2 = end2 - start1;
+
+                    if (!edge1.isCollinearTo(edge2))
                     {
-                        start1 = collider1.globalSpaceVertices[poly1[i]];
-                        end1 = collider1.globalSpaceVertices[poly1[(i + 1) % poly1.Length]];
-                        edge1 = end1 - start1;
+                        Vector3 start2Proj = start1 + start1ToStart2.projectOnVector(edge1);
+                        Vector3 end2Proj = start1 + start1ToEnd2.projectOnVector(edge1);
+                        Vector3 start2ToProj = start2Proj - start2;
+                        Vector3 end2ToProj = end2Proj - end2;
 
-                        for (int j = 0; j < poly2.Length; j++)
+                        if (!start2ToProj.isZero() && !end2ToProj.isZero() && start2ToProj.dotMul(end2ToProj) <= 0)
                         {
-                            start2 = collider2.globalSpaceVertices[poly2[j]];
-                            end2 = collider2.globalSpaceVertices[poly2[(j + 1) % poly2.Length]];
-                            edge2 = end2 - start2;
-                            
-                            Vector3 start1ToStart2 = start2 - start1;
-                            Vector3 start1ToEnd2 = end2 - start1;
+                            double k = Math.Sqrt(end2ToProj.squaredLength() / start2ToProj.squaredLength());
+                            Vector3 intersectionPoint = start2Proj + 1.0 / (k + 1.0) * (end2Proj - start2Proj);
 
-                            if (!edge1.isCollinearTo(edge2))
+                            if (!points.Any(v => (v - intersectionPoint).isZero()))
                             {
-                                Vector3 start2Proj = start1 + start2.projectOnVector(edge1);
-                                Vector3 end2Proj = start1 + end2.projectOnVector(edge1);
-                                Vector3 start2ToProj = start2Proj - start2;
-                                Vector3 end2ToProj = end2Proj - end2;
-
-                                if(!start2ToProj.isZero() && !end2ToProj.isZero() && start2ToProj.dotMul(end2ToProj) <= 0)
-                                {
-                                    double k = Math.Sqrt(end2ToProj.squaredLength() / start2ToProj.squaredLength());
-                                    Vector3 intersectionPoint = start2Proj + 1.0 / (k + 1.0) * (end2Proj - start2Proj);
-                                
-                                    if (!points.Any(v => (v - intersectionPoint).isZero()))
-                                    {
-                                        points.AddLast(intersectionPoint);
-                                    }
-                                }
+                                points.AddLast(intersectionPoint);
                             }
                         }
                     }
