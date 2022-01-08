@@ -224,13 +224,13 @@ namespace SharpDXtest.BaseAssets.Components
 
                     Vector3 impulse = (otherRigidbody.Velocity - Velocity) / denominator;
 
-                    Vector3 linearImpulse = impulse.projectOnVector(collisionExitNormal) * (1.0 + Material.GetComdinedBouncinessWith(otherRigidbody.Material)) / 2.0;
-                    Vector3 angularImpulse = impulse.projectOnFlat(collisionExitNormal) * (1.0 + Material.GetCombinedFrictionWith(otherRigidbody.Material)) / 2.0;
+                    Vector3 linearImpulse = impulse.projectOnVector(collisionExitNormal) * (1.0 + Material.GetComdinedBouncinessWith(otherRigidbody.Material));
+                    Vector3 angularImpulse = impulse.projectOnFlat(collisionExitNormal) * (1.0 + Material.GetCombinedFrictionWith(otherRigidbody.Material));
 
                     impulse = linearImpulse + angularImpulse;
 
-                    //addImpulseAtPoint(impulse, collisionPoint);
-                    //otherRigidbody.addImpulseAtPoint(-impulse, collisionPoint);
+                    addImpulseAtPoint(impulse, collisionPoint);
+                    otherRigidbody.addImpulseAtPoint(-impulse, collisionPoint);
 
                     gameObject.transform.Position -= moveVector;
                     collisionExitVectors.Add(moveVector);
