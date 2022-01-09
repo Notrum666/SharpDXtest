@@ -126,7 +126,7 @@ namespace SharpDXtest.BaseAssets.Components
             
             Velocity += force.projectOnVector(radiusVector) * Time.DeltaTime / mass;
 
-            AngularVelocity += (radiusVector % force) * getInverseGlobalInertiaTensor() * Time.DeltaTime;
+            AngularVelocity += (radiusVector % force) * getInverseGlobalInertiaTensor() * Time.DeltaTime / radiusVector.squaredLength();
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
@@ -136,7 +136,7 @@ namespace SharpDXtest.BaseAssets.Components
 
             Velocity += impulse.projectOnVector(radiusVector) / mass;
 
-            AngularVelocity += (radiusVector % impulse / 2.0) * getInverseGlobalInertiaTensor();
+            AngularVelocity += (radiusVector % impulse) * getInverseGlobalInertiaTensor() / radiusVector.squaredLength();
         }
         public void applyCollisionExitVectors()
         {
@@ -210,6 +210,10 @@ namespace SharpDXtest.BaseAssets.Components
                     }
 
                     Vector3 collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
+                    if (double.IsNaN(collisionPoint.x) || double.IsNaN(collisionPoint.y) || double.IsNaN(collisionPoint.z))
+                    {
+                        collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
+                    }
 
                     double denominator = 0.0;
                     Vector3 r1 = collisionPoint - gameObject.transform.Position;
@@ -232,8 +236,10 @@ namespace SharpDXtest.BaseAssets.Components
                     
                     impulse = linearImpulse + angularImpulse;
                     
-                    addImpulseAtPoint(impulse, collisionPoint);
-                    otherRigidbody.addImpulseAtPoint(-impulse, collisionPoint);
+                    if (!IsStatic)
+                        addImpulseAtPoint(impulse, collisionPoint);
+                    if (!otherRigidbody.IsStatic)
+                        otherRigidbody.addImpulseAtPoint(-impulse, collisionPoint);
                     //addImpulse(linearImpulse);
                     //otherRigidbody.addImpulse(-linearImpulse);
 

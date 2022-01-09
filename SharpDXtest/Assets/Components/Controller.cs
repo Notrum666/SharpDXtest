@@ -16,9 +16,9 @@ namespace SharpDXtest.Assets.Components
         public override void update()
         {
             if (InputManager.IsKeyDown(Key.F))
-                cube.getComponent<Rigidbody>().addForce(new Vector3(0.0, 1.0, 0.0));
+                cube.getComponent<Rigidbody>().addForce(new Vector3(0.0, 5.0, 0.0));
             if (InputManager.IsKeyDown(Key.R))
-                cube.getComponent<Rigidbody>().addForce(new Vector3(0.0, 0.0, -9.8) * cube.getComponent<Rigidbody>().Mass);
+                cube.getComponent<Rigidbody>().addForce(new Vector3(0.0, -5.0, 0.0));
             if (InputManager.IsKeyPressed(Key.E))
                 cube.getComponent<Rigidbody>().addAngularImpulse(new Vector3(0.5, 0.0, 0.0));
 
