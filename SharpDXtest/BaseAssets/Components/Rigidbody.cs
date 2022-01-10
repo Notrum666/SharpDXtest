@@ -120,23 +120,15 @@ namespace SharpDXtest.BaseAssets.Components
         }
         public void addForceAtPoint(Vector3 force, Vector3 point)
         {
-            Transform t = gameObject.transform;
-            Vector3 realPosition = t.Position;
-            Vector3 radiusVector = point - realPosition;
-            
-            Velocity += force.projectOnVector(radiusVector) * Time.DeltaTime / mass;
+            Velocity += force * Time.DeltaTime / mass;
 
-            AngularVelocity += (radiusVector % force) * getInverseGlobalInertiaTensor() * Time.DeltaTime / radiusVector.squaredLength();
+            AngularVelocity += (point - gameObject.transform.Position) % force * getInverseGlobalInertiaTensor() * Time.DeltaTime;
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
-            Transform t = gameObject.transform;
-            Vector3 realPosition = t.Position;
-            Vector3 radiusVector = point - realPosition;
+            Velocity += impulse / mass;
 
-            Velocity += impulse.projectOnVector(radiusVector) / mass;
-
-            AngularVelocity += (radiusVector % impulse) * getInverseGlobalInertiaTensor() / radiusVector.squaredLength();
+            AngularVelocity += (point - gameObject.transform.Position) % impulse * getInverseGlobalInertiaTensor();
         }
         public void applyCollisionExitVectors()
         {
@@ -218,6 +210,7 @@ namespace SharpDXtest.BaseAssets.Components
                     double denominator = 0.0;
                     Vector3 r1 = collisionPoint - gameObject.transform.Position;
                     Vector3 r2 = collisionPoint - otherRigidbody.gameObject.transform.Position;
+
                     if (!IsStatic)
                     {
                         denominator += 1.0 / mass;
@@ -233,7 +226,12 @@ namespace SharpDXtest.BaseAssets.Components
 
                     Vector3 linearImpulse = impulse.projectOnVector(collisionExitNormal) * (1.0 + Material.GetComdinedBouncinessWith(otherRigidbody.Material));
                     Vector3 angularImpulse = impulse.projectOnFlat(collisionExitNormal) * (1.0 + Material.GetCombinedFrictionWith(otherRigidbody.Material));
-                    
+
+                    if (InputManager.IsKeyDown(SharpDX.DirectInput.Key.V))
+                    {
+
+                    }
+
                     impulse = linearImpulse + angularImpulse;
                     
                     if (!IsStatic)
