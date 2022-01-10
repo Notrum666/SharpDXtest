@@ -207,39 +207,68 @@ namespace SharpDXtest.BaseAssets.Components
                         collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
                     }
 
-                    double denominator = 0.0;
+                    Vector3 newtonIteration(Func<Vector3, Vector3> f, Vector3 start)
+                    {
+                        Vector3 baseValue = f(start);
+                        Matrix3x3 jacobi = new Matrix3x3();
+                        Vector3 delta = f(start + new Vector3(Constants.Epsilon, 0.0, 0.0)) - baseValue;
+                        jacobi.v00 = delta.x / Constants.Epsilon;
+                        jacobi.v10 = delta.y / Constants.Epsilon;
+                        jacobi.v20 = delta.z / Constants.Epsilon;
+                        delta = f(start + new Vector3(0.0, Constants.Epsilon, 0.0)) - baseValue;
+                        jacobi.v01 = delta.x / Constants.Epsilon;
+                        jacobi.v11 = delta.y / Constants.Epsilon;
+                        jacobi.v21 = delta.z / Constants.Epsilon;
+                        delta = f(start + new Vector3(0.0, 0.0, Constants.Epsilon)) - baseValue;
+                        jacobi.v02 = delta.x / Constants.Epsilon;
+                        jacobi.v12 = delta.y / Constants.Epsilon;
+                        jacobi.v22 = delta.z / Constants.Epsilon;
+
+                        Vector3 dx = jacobi.inversed() * (-baseValue);
+
+                        double sqrLength = baseValue.squaredLength();
+                        while (dx.squaredLength() > Constants.Epsilon && f(start + dx).squaredLength() > sqrLength)
+                        {
+                            dx.x /= 2.0;
+                            dx.y /= 2.0;
+                            dx.z /= 2.0;
+                        }
+
+                        return start + dx;
+                    }
+
+                    Matrix3x3 inverseTensor = getInverseGlobalInertiaTensor();
+                    Matrix3x3 otherInverseTensor = otherRigidbody.getInverseGlobalInertiaTensor();
                     Vector3 r1 = collisionPoint - gameObject.transform.Position;
                     Vector3 r2 = collisionPoint - otherRigidbody.gameObject.transform.Position;
+                    Vector3 vr = Velocity + AngularVelocity % r1 - otherRigidbody.Velocity - otherRigidbody.AngularVelocity % r2;
+                    double e = 0.5;
 
-                    if (!IsStatic)
+                    Func<Vector3, Vector3> func;
+                    if (IsStatic)
                     {
-                        denominator += 1.0 / mass;
-                        denominator += collisionExitNormal * (r1 % collisionExitNormal * getInverseGlobalInertiaTensor() % r1);
+                        func = (F) => (F * (1.0 / otherRigidbody.mass) + (otherInverseTensor * (r2 % F)) % r2 + vr * (1 + e));
                     }
-                    if (!otherRigidbody.IsStatic)
+                    else
                     {
-                        denominator += 1.0 / otherRigidbody.mass;
-                        denominator += collisionExitNormal * (r2 % collisionExitNormal * otherRigidbody.getInverseGlobalInertiaTensor() % r2);
+                        if (otherRigidbody.IsStatic)
+                        {
+                            func = (F) => (F * (1.0 / mass) + (inverseTensor * (r1 % F)) % r1 + vr * (1 + e));
+                        }
+                        else
+                        {
+                            func = (F) => (F * (1.0 / mass + 1.0 / otherRigidbody.mass) +
+                                                          (inverseTensor * (r1 % F)) % r1 + (otherInverseTensor * (r2 % F)) % r2 +
+                                                          vr * (1 + e));
+                        }
                     }
 
-                    Vector3 impulse = (otherRigidbody.Velocity + otherRigidbody.AngularVelocity % r2 - Velocity - AngularVelocity % r1) / denominator;
-
-                    Vector3 linearImpulse = impulse.projectOnVector(collisionExitNormal) * (1.0 + Material.GetComdinedBouncinessWith(otherRigidbody.Material));
-                    Vector3 angularImpulse = impulse.projectOnFlat(collisionExitNormal) * (1.0 + Material.GetCombinedFrictionWith(otherRigidbody.Material));
-
-                    if (InputManager.IsKeyDown(SharpDX.DirectInput.Key.V))
-                    {
-
-                    }
-
-                    impulse = linearImpulse + angularImpulse;
+                    Vector3 impulse = newtonIteration(func, Vector3.Zero);
                     
                     if (!IsStatic)
                         addImpulseAtPoint(impulse, collisionPoint);
                     if (!otherRigidbody.IsStatic)
                         otherRigidbody.addImpulseAtPoint(-impulse, collisionPoint);
-                    //addImpulse(linearImpulse);
-                    //otherRigidbody.addImpulse(-linearImpulse);
 
                     gameObject.transform.Position -= moveVector;
                     collisionExitVectors.Add(moveVector);

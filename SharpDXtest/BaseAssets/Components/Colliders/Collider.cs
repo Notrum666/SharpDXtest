@@ -345,7 +345,7 @@ namespace SharpDXtest.BaseAssets.Components
             if (vertexOnPlaneIndices_1.Count == 1)
                 return collider1.globalSpaceVertices[vertexOnPlaneIndices_1[0]];
             if (vertexOnPlaneIndices_2.Count == 1)
-                return collider1.globalSpaceVertices[vertexOnPlaneIndices_2[0]];
+                return collider2.globalSpaceVertices[vertexOnPlaneIndices_2[0]];
 
             Vector3[] figure_1 = getFigureFromVertexIndices(collider1, vertexOnPlaneIndices_1);
             Vector3[] figure_2 = getFigureFromVertexIndices(collider2, vertexOnPlaneIndices_2);

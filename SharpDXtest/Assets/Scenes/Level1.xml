@@ -21,7 +21,7 @@
   <GameObject x.Name="Cube">
     <Transform>
       <Transform.Position y="0" z="5"/>
-      <Transform.Rotation x="1"/>
+      <Transform.Rotation x="1" z="1"/>
     </Transform>
     <Rigidbody Mass="1">
       <Rigidbody.Material Friction="1" Bounciness="1"/>
