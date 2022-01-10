@@ -61,36 +61,33 @@ namespace SharpDXtest.BaseAssets.Components
                     globalSpaceNormals.Add(currentNormal);
             }
         }
-        protected List<Vector3> projectOnVector(Vector3 vector)
+        protected void projectOnVector(Vector3 vector, Vector3[] projection)
         {
-            List<Vector3> projection = new List<Vector3>();
-
-            foreach(Vector3 vertex in globalSpaceVertices)
+            for(int i = 0; i < globalSpaceVertices.Count; i++)
             {
-                projection.Add(vertex.projectOnVector(vector));
+                projection[i] = globalSpaceVertices[i].projectOnVector(vector);
             }
-
-            return projection;
         }
         protected Vector3 getCenterInGlobal()
         {
             return (gameObject.transform.model * new Vector4(this.Offset, 1)).xyz;
         }
-        private static Vector3[] getSegmentFromProjection(List<Vector3> projection)
+        private static void getSegmentFromProjection(Vector3[] projection, Vector3[] segment)
         {
-            Vector3[] segment = new Vector3[2]; // min, max
-
             int i;
-            for (i = 1; i < projection.Count; i++)
+            for (i = 1; i < projection.Length; i++)
             {
                 if (!(projection[i] - projection[0]).isZero())
                     break;
             }
 
+            if (i == projection.Length)
+                throw new ArgumentException("Projection of collider is the point.");
+
             double maxK = 0, minK = 0, k;
             Vector3 baseVector = projection[i] - projection[0];
 
-            for (i = 1; i < projection.Count; i++)
+            for (i = 1; i < projection.Length; i++)
             {
                 k = (projection[i] - projection[0]) * baseVector;
 
@@ -111,8 +108,6 @@ namespace SharpDXtest.BaseAssets.Components
 
             if (maxK == 0)
                 segment[1] = projection[0];
-
-            return segment;
         }
 
         public virtual bool getCollisionExitVector(Collider collider, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
@@ -160,13 +155,17 @@ namespace SharpDXtest.BaseAssets.Components
                 }
             }
 
+            Vector3[] segment1 = new Vector3[2];
+            Vector3[] segment2 = new Vector3[2];
+            Vector3[] projection1 = new Vector3[globalSpaceVertices.Count];
+            Vector3[] projection2 = new Vector3[collider.globalSpaceVertices.Count];
             foreach(Vector3 normal in normals)
             {
-                List<Vector3> projection1 = this.projectOnVector(normal);
-                List<Vector3> projection2 = collider.projectOnVector(normal);
+                projectOnVector(normal, projection1);
+                collider.projectOnVector(normal, projection2);
 
-                Vector3[] segment1 = getSegmentFromProjection(projection1);
-                Vector3[] segment2 = getSegmentFromProjection(projection2);
+                getSegmentFromProjection(projection1, segment1);
+                getSegmentFromProjection(projection2, segment2);
 
                 if ((segment2[1] - segment2[0]) * (segment1[1] - segment1[0]) < 0)
                 {
@@ -204,69 +203,19 @@ namespace SharpDXtest.BaseAssets.Components
                     collisionExitVector = outVec;
                     exitDirectionVector = segmentVector;
                 }
-
-                /*
-                Vector3 segmentVector = segment1[1] - segment1[0];
-                Vector3 start1ToStart2 = segment2[0] - segment1[0];
-                Vector3 start1ToEnd2 = segment2[1] - segment1[0];
-
-                double t1 = start1ToStart2 * segmentVector;
-                double t2 = start1ToEnd2 * segmentVector;
-                double segmentVectorSqrLength = segmentVector.squaredLength();
-
-                if(t1 > segmentVectorSqrLength && t2 > segmentVectorSqrLength ||
-                   t1 < 0 && t2 < 0)
-                {
-                    return false;
-                }
-
-                if(Math.Abs(t1) < Constants.Epsilon && t2 < 0 ||
-                   Math.Abs(t2) < Constants.Epsilon && t1 < 0)
-                {
-                    collisionExitVector = Vector3.Zero;
-                    exitDirectionVector = segmentVector;
-                }
-                else if(Math.Abs(t1 - 1) < Constants.Epsilon && t2 > 1 ||
-                        Math.Abs(t2 - 1) < Constants.Epsilon && t1 > 1)
-                {
-                    collisionExitVector = Vector3.Zero;
-                    exitDirectionVector = segmentVector;
-                }
-                else
-                {
-                    if(t1 > t2)
-                    {
-                        Vector3 tmp = segment2[0];
-                        segment2[0] = segment2[1];
-                        segment2[1] = tmp;
-                    }
-
-                    Vector3 v1 = segment2[1] - segment1[0];
-                    Vector3 v2 = segment1[1] - segment2[0];
-
-                    if (v2.squaredLength() > v1.squaredLength())
-                        v1 = v2;
-
-                    if(!collisionExitVector.HasValue || v1.squaredLength() < collisionExitVector.Value.squaredLength())
-                    {
-                        collisionExitVector = v1;
-                        exitDirectionVector = v1;
-                    }
-                }
-                */
             }
 
             return true;
         }
 
-        public static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
+        private static Vector3 _GetAverageCollisionPointWithEpsilon(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon = 1E-7)
         {
             List<int> getVertexOnPlaneIndices(Collider collider)
             {
                 List<int> vertexIndices = new List<int>();
-                for(int i = 0; i < collider.globalSpaceVertices.Count; i++)
+                for (int i = 0; i < collider.globalSpaceVertices.Count; i++)
                 {
-                    if (Math.Abs((collider.globalSpaceVertices[i] - collisionPlanePoint).dotMul(collisionPlaneNormal)) < Constants.Epsilon)
+                    if (Math.Abs((collider.globalSpaceVertices[i] - collisionPlanePoint).dotMul(collisionPlaneNormal)) < epsilon)
                         vertexIndices.Add(i);
                 }
 
@@ -285,8 +234,7 @@ namespace SharpDXtest.BaseAssets.Components
                         startIndex = poly[i];
                         endIndex = poly[(i + 1) % poly.Length];
 
-                        if ((vertexOnPlaneIndices.Contains(startIndex) && insideOtherColliderVertexIndices.Contains(endIndex) ||
-                            vertexOnPlaneIndices.Contains(endIndex) && insideOtherColliderVertexIndices.Contains(startIndex)) &&
+                        if (vertexOnPlaneIndices.Contains(startIndex) && vertexOnPlaneIndices.Contains(endIndex) &&
                             !edges.Exists(edge => edge[0] == startIndex && edge[1] == endIndex || edge[0] == endIndex && edge[1] == startIndex))
                         {
                             edges.Add(new int[] { startIndex, endIndex });
@@ -296,45 +244,65 @@ namespace SharpDXtest.BaseAssets.Components
 
                 return edges;
             }
-
-            List<Vector3> getFigureFromVertexIndices(Collider collider, List<int> vertexIndices)
+            
+            Vector3[] getFigureFromVertexIndices(Collider collider, List<int> vertexIndices)
             {
                 List<Vector3> vertices = vertexIndices.Select(index => collider.globalSpaceVertices[index]).ToList();
 
                 int count = vertices.Count;
-                List<Vector3> figure = new List<Vector3>(count);
-                figure.Add(vertices[0]);
+                Vector3[] figure = new Vector3[count];
+                figure[0] = vertices[0];
                 vertices.RemoveAt(0);
 
                 Vector3 start = figure[0];
-                while(vertices.Count > 1)
+                Vector3 current;
+                for(int k = 1; k < count - 1; k++)
                 {
-                    Vector3 current = vertices[0] - start;
+                    current = vertices[0] - start;
                     int currentIndex = 0;
-                    for(int i = 1; i < vertices.Count; i++)
+                    for (int i = 1; i < vertices.Count; i++)
                     {
-                        if((vertices[i] - start).cross(current) * collisionPlaneNormal > 0)
+                        if ((vertices[i] - start).cross(current) * collisionPlaneNormal > 0)
                         {
                             currentIndex = i;
                             current = vertices[i] - start;
                         }
                     }
 
-                    figure.Add(vertices[currentIndex]);
+                    figure[k] = vertices[currentIndex];
                     vertices.RemoveAt(currentIndex);
                 }
+
                 if (vertices.Count > 0)
-                    figure.Add(vertices[0]);
+                    figure[figure.Length - 1] = vertices[0];
+
+                //while (vertices.Count > 1)
+                //{
+                //    Vector3 current = vertices[0] - start;
+                //    int currentIndex = 0;
+                //    for (int i = 1; i < vertices.Count; i++)
+                //    {
+                //        if ((vertices[i] - start).cross(current) * collisionPlaneNormal > 0)
+                //        {
+                //            currentIndex = i;
+                //            current = vertices[i] - start;
+                //        }
+                //    }
+                //
+                //    figure.Add(vertices[currentIndex]);
+                //    vertices.RemoveAt(currentIndex);
+                //}
+                
 
                 return figure;
             }
 
-            bool IsPointInsideFigure(List<Vector3> figure, Vector3 point)
+            bool IsPointInsideFigure(Vector3[] figure, Vector3 point)
             {
                 Vector3 start, end, edge;
                 Vector3 vec, vecMult, prevVecMult;
                 double edgeDotMult, currentDotMult;
-                int count = figure.Count;
+                int count = figure.Length;
 
                 prevVecMult = (figure[1] - figure[0]).cross(point - figure[0]);
                 for (int i = 0; i < count; i++)
@@ -366,6 +334,8 @@ namespace SharpDXtest.BaseAssets.Components
                 return true;
             }
 
+            double sqrEpsilon = epsilon * epsilon;
+
             List<int> vertexOnPlaneIndices_1 = getVertexOnPlaneIndices(collider1);
             List<int> vertexOnPlaneIndices_2 = getVertexOnPlaneIndices(collider2);
 
@@ -377,8 +347,8 @@ namespace SharpDXtest.BaseAssets.Components
             if (vertexOnPlaneIndices_2.Count == 1)
                 return collider1.globalSpaceVertices[vertexOnPlaneIndices_2[0]];
 
-            List<Vector3> figure_1 = getFigureFromVertexIndices(collider1, vertexOnPlaneIndices_1);
-            List<Vector3> figure_2 = getFigureFromVertexIndices(collider2, vertexOnPlaneIndices_2);
+            Vector3[] figure_1 = getFigureFromVertexIndices(collider1, vertexOnPlaneIndices_1);
+            Vector3[] figure_2 = getFigureFromVertexIndices(collider2, vertexOnPlaneIndices_2);
 
             List<int> insideVertexIndices_1 = vertexOnPlaneIndices_1.Where(index => IsPointInsideFigure(figure_2, collider1.globalSpaceVertices[index])).ToList();
             List<int> insideVertexIndices_2 = vertexOnPlaneIndices_2.Where(index => IsPointInsideFigure(figure_1, collider2.globalSpaceVertices[index])).ToList();
@@ -386,18 +356,25 @@ namespace SharpDXtest.BaseAssets.Components
             List<int[]> edges_1 = getEdgesToCheckIntersections(collider1, vertexOnPlaneIndices_1, insideVertexIndices_1);
             List<int[]> edges_2 = getEdgesToCheckIntersections(collider2, vertexOnPlaneIndices_2, insideVertexIndices_2);
 
-            LinkedList<Vector3> points = new LinkedList<Vector3>(insideVertexIndices_1.Select(index => collider1.globalSpaceVertices[index]));
-            insideVertexIndices_2.ForEach(index =>
+            Vector3[] firstColliderVertices = new Vector3[vertexOnPlaneIndices_1.Count];
+            for(int index = 0; index < firstColliderVertices.Length; index++)
             {
-                Vector3 vertex = collider2.globalSpaceVertices[index];
-                if (!points.Any(v => (v - vertex).isZero()))
+                firstColliderVertices[index] = collider1.globalSpaceVertices[index];
+            }
+
+            LinkedList<Vector3> points = new LinkedList<Vector3>(firstColliderVertices);
+            Vector3 vertex;
+            foreach (int index in insideVertexIndices_2)
+            {
+                vertex = collider2.globalSpaceVertices[index];
+
+                if (!firstColliderVertices.Any(v => (v - vertex).isZero()))
                     points.AddLast(vertex);
-            });
+            }
 
             Vector3 start1, end1, edge1;
             Vector3 start2, end2, edge2;
-
-            foreach(int[] edgeIndices_1 in edges_1)
+            foreach (int[] edgeIndices_1 in edges_1)
             {
                 start1 = collider1.globalSpaceVertices[edgeIndices_1[0]];
                 end1 = collider1.globalSpaceVertices[edgeIndices_1[1]];
@@ -436,7 +413,7 @@ namespace SharpDXtest.BaseAssets.Components
             double x = 0, y = 0, z = 0;
             int pointCount = 0;
             LinkedList<Vector3>.Enumerator enumerator = points.GetEnumerator();
-            while(enumerator.MoveNext())
+            while (enumerator.MoveNext())
             {
                 start1 = enumerator.Current;
                 pointCount++;
@@ -446,6 +423,14 @@ namespace SharpDXtest.BaseAssets.Components
             }
 
             return new Vector3(x / pointCount, y / pointCount, z / pointCount);
+        }
+
+        public static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
+        {
+            Vector3 point = _GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.Epsilon);
+            return double.IsNaN(point.x) || double.IsNaN(point.y) || double.IsNaN(point.z) ?
+                _GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.FloatEpsilon) :
+                point;
         }
 
         public override void fixedUpdate()
