@@ -210,6 +210,8 @@ namespace SharpDXtest.BaseAssets.Components
 
         private static Vector3 _GetAverageCollisionPointWithEpsilon(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon = 1E-7)
         {
+            double sqrEpsilon = epsilon * epsilon;
+
             List<int> getVertexOnPlaneIndices(Collider collider)
             {
                 List<int> vertexIndices = new List<int>();
@@ -313,7 +315,7 @@ namespace SharpDXtest.BaseAssets.Components
                     vec = point - start;
 
                     vecMult = edge.cross(vec);
-                    if (vecMult.squaredLength() < Constants.SqrEpsilon)
+                    if (vecMult.squaredLength() < sqrEpsilon)
                     {
                         edgeDotMult = edge.dotMul(edge);
                         currentDotMult = vec.dotMul(edge);
@@ -333,8 +335,6 @@ namespace SharpDXtest.BaseAssets.Components
 
                 return true;
             }
-
-            double sqrEpsilon = epsilon * epsilon;
 
             List<int> vertexOnPlaneIndices_1 = getVertexOnPlaneIndices(collider1);
             List<int> vertexOnPlaneIndices_2 = getVertexOnPlaneIndices(collider2);
@@ -356,20 +356,31 @@ namespace SharpDXtest.BaseAssets.Components
             List<int[]> edges_1 = getEdgesToCheckIntersections(collider1, vertexOnPlaneIndices_1, insideVertexIndices_1);
             List<int[]> edges_2 = getEdgesToCheckIntersections(collider2, vertexOnPlaneIndices_2, insideVertexIndices_2);
 
-            Vector3[] firstColliderVertices = new Vector3[vertexOnPlaneIndices_1.Count];
+            Vector3[] firstColliderVertices = new Vector3[insideVertexIndices_1.Count];
             for(int index = 0; index < firstColliderVertices.Length; index++)
             {
-                firstColliderVertices[index] = collider1.globalSpaceVertices[index];
+                firstColliderVertices[index] = collider1.globalSpaceVertices[insideVertexIndices_1[index]];
             }
 
             LinkedList<Vector3> points = new LinkedList<Vector3>(firstColliderVertices);
-            Vector3 vertex;
-            foreach (int index in insideVertexIndices_2)
+            if (firstColliderVertices.Length == 0)
             {
-                vertex = collider2.globalSpaceVertices[index];
+                foreach(int index in insideVertexIndices_2)
+                {
+                    points.AddLast(collider2.globalSpaceVertices[index]);
+                }
+            }
+            else
+            {
+                Vector3 vertex;
 
-                if (!firstColliderVertices.Any(v => (v - vertex).isZero()))
-                    points.AddLast(vertex);
+                foreach (int index in insideVertexIndices_2)
+                {
+                    vertex = collider2.globalSpaceVertices[index];
+
+                    if (!firstColliderVertices.Any(v => (v - vertex).isZero()))
+                        points.AddLast(vertex);
+                }
             }
 
             Vector3 start1, end1, edge1;
