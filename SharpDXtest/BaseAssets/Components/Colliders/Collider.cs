@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDXtest.BaseAssets.Components.Colliders;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +13,8 @@ namespace SharpDXtest.BaseAssets.Components
 
         public abstract Vector3 Offset { get; set; }
 
-        protected List<Vector3> vertices;
-        protected List<int[]> polygons;
+        protected List<Vector3> vertices = new List<Vector3>();
+        protected List<int[]> polygons = new List<int[]>();
         protected List<Vector3> globalSpaceVertices = new List<Vector3>();
         protected List<Vector3> globalSpaceNormals = new List<Vector3>();
 
@@ -34,7 +35,7 @@ namespace SharpDXtest.BaseAssets.Components
                 }
             }
         }
-        public void calculateGlobalVertices()
+        public virtual void calculateGlobalVertices()
         {
             globalSpaceVertices.Clear();
 
@@ -61,7 +62,7 @@ namespace SharpDXtest.BaseAssets.Components
                     globalSpaceNormals.Add(currentNormal);
             }
         }
-        protected void projectOnVector(Vector3 vector, Vector3[] projection)
+        protected virtual void projectOnVector(Vector3 vector, Vector3[] projection)
         {
             for(int i = 0; i < globalSpaceVertices.Count; i++)
             {
@@ -110,14 +111,19 @@ namespace SharpDXtest.BaseAssets.Components
                 segment[1] = projection[0];
         }
 
+        protected bool IsOuterSphereIntersectWith(Collider collider, out Vector3 centersVector)
+        {
+            centersVector = collider.getCenterInGlobal() - getCenterInGlobal();
+            return centersVector.squaredLength() <= squaredOuterSphereRadius + 2 * outerSphereRadius * collider.outerSphereRadius + collider.squaredOuterSphereRadius;
+        }
+
         public virtual bool getCollisionExitVector(Collider collider, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             collisionExitVector = null;
             exitDirectionVector = null;
             colliderEndPoint = null;
 
-            Vector3 centersVector = collider.getCenterInGlobal() - this.getCenterInGlobal();
-            if(centersVector.squaredLength() > squaredOuterSphereRadius + 2 * outerSphereRadius * collider.outerSphereRadius + collider.squaredOuterSphereRadius)
+            if(!IsOuterSphereIntersectWith(collider, out _))
             {
                 return false;
             }
@@ -133,22 +139,49 @@ namespace SharpDXtest.BaseAssets.Components
             }
 
             Vector3 edge1, edge2, currentNormal;
-            foreach(int[] poly1 in this.polygons)
+            if (collider is SphereCollider)
             {
-                foreach(int[] poly2 in collider.polygons)
+                Vector3 sphereCenter = collider.getCenterInGlobal();
+                
+                foreach(Vector3 vertex in globalSpaceVertices)
                 {
-                    for(int i = 0; i < poly1.Length; i++)
+                    currentNormal = vertex - sphereCenter;
+                    if (!normals.Exists(n => n.isCollinearTo(currentNormal)))
+                        normals.Add(currentNormal);
+                }
+                
+                foreach(int[] poly in polygons)
+                {
+                    for(int i = 0; i < poly.Length; i++)
                     {
-                        edge1 = globalSpaceVertices[poly1[(i + 1) % poly1.Length]] - globalSpaceVertices[poly1[i]];
-
-                        for (int j = 0; j < poly2.Length; j++)
+                        edge1 = globalSpaceVertices[poly[(i + 1) % poly.Length]] - globalSpaceVertices[poly[i]];
+                        edge2 = sphereCenter - globalSpaceVertices[poly[i]];
+                
+                        currentNormal = edge2 % edge1 % edge1;
+                        if (!normals.Exists(n => n.isCollinearTo(currentNormal)))
+                            normals.Add(currentNormal);
+                    }
+                }
+            }
+            else
+            {
+                foreach (int[] poly1 in this.polygons)
+                {
+                    foreach (int[] poly2 in collider.polygons)
+                    {
+                        for (int i = 0; i < poly1.Length; i++)
                         {
-                            edge2 = collider.globalSpaceVertices[poly2[(j + 1) % poly2.Length]] - collider.globalSpaceVertices[poly2[j]];
-                            currentNormal = edge1.cross(edge2);
+                            edge1 = globalSpaceVertices[poly1[(i + 1) % poly1.Length]] - globalSpaceVertices[poly1[i]];
 
-                            if(!normals.Exists(n => n.isCollinearTo(currentNormal)))
+                            for (int j = 0; j < poly2.Length; j++)
                             {
-                                normals.Add(currentNormal);
+                                edge2 = collider.globalSpaceVertices[poly2[(j + 1) % poly2.Length]] - collider.globalSpaceVertices[poly2[j]];
+                                currentNormal = edge1.cross(edge2);
+
+                                if (!normals.Exists(n => n.isCollinearTo(currentNormal)))
+                                {
+                                    normals.Add(currentNormal);
+                                }
                             }
                         }
                     }
@@ -208,21 +241,21 @@ namespace SharpDXtest.BaseAssets.Components
             return true;
         }
 
+        protected virtual List<int> getVertexOnPlaneIndices(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon)
+        {
+            List<int> vertexIndices = new List<int>();
+            for (int i = 0; i < globalSpaceVertices.Count; i++)
+            {
+                if (Math.Abs((globalSpaceVertices[i] - collisionPlanePoint).dotMul(collisionPlaneNormal)) < epsilon)
+                    vertexIndices.Add(i);
+            }
+
+            return vertexIndices;
+        }
+
         private static Vector3 _GetAverageCollisionPointWithEpsilon(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon = 1E-7)
         {
             double sqrEpsilon = epsilon * epsilon;
-
-            List<int> getVertexOnPlaneIndices(Collider collider)
-            {
-                List<int> vertexIndices = new List<int>();
-                for (int i = 0; i < collider.globalSpaceVertices.Count; i++)
-                {
-                    if (Math.Abs((collider.globalSpaceVertices[i] - collisionPlanePoint).dotMul(collisionPlaneNormal)) < epsilon)
-                        vertexIndices.Add(i);
-                }
-
-                return vertexIndices;
-            }
 
             List<int[]> getEdgesToCheckIntersections(Collider collider, List<int> vertexOnPlaneIndices, List<int> insideOtherColliderVertexIndices)
             {
@@ -336,8 +369,8 @@ namespace SharpDXtest.BaseAssets.Components
                 return true;
             }
 
-            List<int> vertexOnPlaneIndices_1 = getVertexOnPlaneIndices(collider1);
-            List<int> vertexOnPlaneIndices_2 = getVertexOnPlaneIndices(collider2);
+            List<int> vertexOnPlaneIndices_1 = collider1.getVertexOnPlaneIndices(collisionPlanePoint, collisionPlaneNormal, epsilon);
+            List<int> vertexOnPlaneIndices_2 = collider2.getVertexOnPlaneIndices(collisionPlanePoint, collisionPlaneNormal, epsilon);
 
             if (vertexOnPlaneIndices_1.Count == 0 || vertexOnPlaneIndices_2.Count == 0)
                 throw new ArgumentException("Colliders don't intersect in the given plane.");
