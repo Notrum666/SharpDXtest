@@ -20,79 +20,28 @@
 
   <GameObject x.Name="Cube">
     <Transform>
-      <Transform.Position x="-1,5" y="4" z="6,5"/>
+      <Transform.Position x="0" y="0" z="2"/>
     </Transform>
     <Rigidbody Mass="1">
-      <Rigidbody.Material Friction="1" Bounciness="1"/>
-    </Rigidbody>
-    <SphereCollider Radius="1"/>
-    <Mesh model="{Model cube}" texture="{Texture template}"/>
-  </GameObject>
-
-  <!--<GameObject>
-    <Transform>
-      <Transform.Position x="0" y="0" z="0"/>
-    </Transform>
-    <Rigidbody Mass="10000">
-      <Rigidbody.Material Friction="1" Bounciness="1"/>
+      <Rigidbody.Material Friction="0,5" Bounciness="1"/>
     </Rigidbody>
     <CubeCollider>
-      <CubeCollider.Size x="10" y="10" z="2"/>
+      <CubeCollider.Size x="2" y="2" z="2"/>
     </CubeCollider>
     <Mesh model="{Model cube}" texture="{Texture template}"/>
   </GameObject>
 
   <GameObject>
     <Transform>
-      <Transform.Position x="7" y="0" z="5"/>
-    </Transform>
-    <Rigidbody Mass="10000">
-      <Rigidbody.Material Friction="1" Bounciness="1"/>
-    </Rigidbody>
-    <CubeCollider>
-      <CubeCollider.Size x="2" y="10" z="10"/>
-    </CubeCollider>
-    <Mesh model="{Model cube}" texture="{Texture template}"/>
-  </GameObject>
-
-  <GameObject>
-    <Transform>
-      <Transform.Position x="-7" y="0" z="5"/>
-    </Transform>
-    <Rigidbody Mass="10000">
-      <Rigidbody.Material Friction="1" Bounciness="1"/>
-    </Rigidbody>
-    <CubeCollider>
-      <CubeCollider.Size x="2" y="10" z="10"/>
-    </CubeCollider>
-    <Mesh model="{Model cube}" texture="{Texture template}"/>
-  </GameObject>-->
-
-  <GameObject>
-    <Transform>
-      <Transform.Position x="0" y="7" z="5"/>
+      <Transform.Position x="0" y="5" z="0"/>
     </Transform>
     <Rigidbody Mass="1">
-      <Rigidbody.Material Friction="1" Bounciness="1"/>
+      <Rigidbody.Material Friction="0,5" Bounciness="1"/>
     </Rigidbody>
 	  <CubeCollider>
 		  <CubeCollider.Size x="2" y="2" z="2"/>
 	  </CubeCollider>
     <Mesh model="{Model cube}" texture="{Texture template}"/>
   </GameObject>
-
-  <!--<GameObject>
-    <Transform>
-      <Transform.Position x="0" y="-7" z="5"/>
-    </Transform>
-    <Rigidbody Mass="10000">
-      <Rigidbody.Material Friction="1" Bounciness="1"/>
-    </Rigidbody>
-    <CubeCollider>
-      <CubeCollider.Size x="10" y="2" z="10"/>
-    </CubeCollider>
-    <Mesh model="{Model cube}" texture="{Texture template}"/>
-  </GameObject>-->
-  
   
 </Scene>

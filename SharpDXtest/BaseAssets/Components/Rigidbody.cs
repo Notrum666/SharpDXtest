@@ -241,27 +241,33 @@ namespace SharpDXtest.BaseAssets.Components
                     Matrix3x3 otherInverseTensor = otherRigidbody.getInverseGlobalInertiaTensor();
                     Vector3 r1 = collisionPoint - gameObject.transform.Position;
                     Vector3 r2 = collisionPoint - otherRigidbody.gameObject.transform.Position;
-                    Vector3 vr = Velocity + AngularVelocity % r1 - otherRigidbody.Velocity - otherRigidbody.AngularVelocity % r2;
-                    double e = 0.5;
+                    Vector3 vp = Velocity + AngularVelocity % r1;
+                    Vector3 othervp = otherRigidbody.Velocity + otherRigidbody.AngularVelocity % r2;
+                    Vector3 dvn = vp.projectOnVector(collisionExitNormal) - othervp.projectOnVector(collisionExitNormal);
+                    Vector3 dvf = vp.projectOnFlat(collisionExitNormal) - othervp.projectOnFlat(collisionExitNormal);
+                    double bounciness = Material.GetComdinedBouncinessWith(otherRigidbody.Material);
+                    double friction = Material.GetCombinedFrictionWith(otherRigidbody.Material);
 
-                    Func<Vector3, Vector3> func;
-                    if (IsStatic)
-                    {
-                        func = (F) => (F * (1.0 / otherRigidbody.mass) + (otherInverseTensor * (r2 % F)) % r2 + vr * (1 + e));
-                    }
-                    else
-                    {
-                        if (otherRigidbody.IsStatic)
-                        {
-                            func = (F) => (F * (1.0 / mass) + (inverseTensor * (r1 % F)) % r1 + vr * (1 + e));
-                        }
-                        else
-                        {
-                            func = (F) => (F * (1.0 / mass + 1.0 / otherRigidbody.mass) +
+                    Func<Vector3, Vector3> func = (F) => (F * (1.0 / mass + 1.0 / otherRigidbody.mass) +
                                                           (inverseTensor * (r1 % F)) % r1 + (otherInverseTensor * (r2 % F)) % r2 +
-                                                          vr * (1 + e));
-                        }
-                    }
+                                                          dvn * (1 + bounciness) + dvf * friction);
+                    //if (IsStatic)
+                    //{
+                    //    func = (F) => (F * (1.0 / otherRigidbody.mass) + (otherInverseTensor * (r2 % F)) % r2 + vr * (1 + e));
+                    //}
+                    //else
+                    //{
+                    //    if (otherRigidbody.IsStatic)
+                    //    {
+                    //        func = (F) => (F * (1.0 / mass) + (inverseTensor * (r1 % F)) % r1 + vr * (1 + e));
+                    //    }
+                    //    else
+                    //    {
+                    //        func = (F) => (F * (1.0 / mass + 1.0 / otherRigidbody.mass) +
+                    //                                      (inverseTensor * (r1 % F)) % r1 + (otherInverseTensor * (r2 % F)) % r2 +
+                    //                                      vr * (1 + e));
+                    //    }
+                    //}
 
                     Vector3 impulse = newtonIteration(func, Vector3.Zero);
                     
