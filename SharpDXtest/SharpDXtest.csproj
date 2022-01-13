@@ -57,6 +57,9 @@
     <Reference Include="SharpDX.Mathematics, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpDX.Mathematics.4.2.0\lib\net45\SharpDX.Mathematics.dll</HintPath>
     </Reference>
+    <Reference Include="SharpDX.XAudio2, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpDX.XAudio2.4.2.0\lib\net45\SharpDX.XAudio2.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -95,6 +98,7 @@
     <Compile Include="GameCore.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="InputManager.cs" />
+    <Compile Include="SoundCore.cs" />
     <Compile Include="Time.cs" />
     <Compile Include="Utilities.cs" />
     <Page Include="MainWindow.xaml">
@@ -145,7 +149,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Assets\Sounds\sample.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <None Include="BaseAssets\Textures\default_white.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

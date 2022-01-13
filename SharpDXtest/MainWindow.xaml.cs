@@ -37,10 +37,15 @@ namespace SharpDXtest
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            GraphicsCore.Init(WinFormsControl);
-            InputManager.Init();
-            Time.Init();
-            GameCore.Init();
+            // Order of initialization is important, same number means no difference
+            GraphicsCore.Init(WinFormsControl); // 1
+            SoundCore.Init(); // 1
+            Time.Init(); // 1
+            InputManager.Init(); // 2
+            GameCore.Init(); // 2
+
+            Sound sound = AssetsManager.LoadSound("Assets\\Sounds\\sample.wav");
+            SoundCore.Play(sound);
 
             isAlive = true;
 

@@ -10,13 +10,16 @@ using System.Runtime.InteropServices;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Xml;
+using System.Xml.Linq;
+
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using SharpDX.D3DCompiler;
-using System.Xml;
-using System.Xml.Linq;
+using SharpDX.XAudio2;
+using SharpDX.Multimedia;
 
 using Buffer = SharpDX.Direct3D11.Buffer;
 
@@ -139,11 +142,11 @@ namespace SharpDXtest
     }
     public class Texture
     {
-        public Bitmap image;
+        public Bitmap Image { get; private set; }
         private ShaderResourceView resourceView;
         public Texture(Bitmap image, bool applyGammaCorrection = false)
         {
-            this.image = image;
+            this.Image = image;
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
                 image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
             BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
@@ -171,6 +174,39 @@ namespace SharpDXtest
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
                 if (shader.Locations.ContainsKey(variable))
                     GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], resourceView);
+        }
+    }
+    public class Sound : IDisposable
+    {
+        public AudioBuffer Buffer { get; private set; }
+        public WaveFormat Format { get; private set; }
+        public uint[] DecodedPacketsInfo { get; private set; }
+        
+        private bool disposed = false;
+
+        public Sound(AudioBuffer buffer, WaveFormat format, uint[] decodedPacketsInfo)
+        {
+            Buffer = buffer;
+            Format = format;
+            DecodedPacketsInfo = decodedPacketsInfo;
+        }
+        ~Sound()
+        {
+            Dispose(disposing: false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                Buffer.Stream.Dispose();
+                disposed = true;
+            }
+        }
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
     public enum ShaderType
@@ -559,6 +595,7 @@ namespace SharpDXtest
         public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture>();
         public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
         public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
+        public static Dictionary<string, Sound> Sounds { get; } = new Dictionary<string, Sound>();
 
         public static Dictionary<string, Model> LoadModelsFile(string path, float scaleFactor = 1.0f, bool reverse = false)
         {
@@ -684,7 +721,7 @@ namespace SharpDXtest
         public static ShaderPipeline LoadShaderPipeline(string shaderPipelineName, params Shader[] shaders)
         {
             if (ShaderPipelines.ContainsKey(shaderPipelineName))
-                throw new ArgumentException("Shader pipeline with this name already loaded.");
+                throw new ArgumentException("Shader pipeline with name \"" + shaderPipelineName + "\" is already loaded.");
             ShaderPipeline shaderPipeline = new ShaderPipeline(shaders);
             ShaderPipelines[shaderPipelineName] = shaderPipeline;
             return shaderPipeline;
@@ -693,12 +730,34 @@ namespace SharpDXtest
         {
             if (textureName == "")
                 textureName = Path.GetFileNameWithoutExtension(path);
+            if (Textures.ContainsKey(textureName))
+                throw new ArgumentException("Texture with name \"" + textureName + "\" is already loaded.");
         
             Texture texture = new Texture(new Bitmap(path), applyGammaCorrection);
         
             Textures[textureName] = texture;
         
             return texture;
+        }
+        public static Sound LoadSound(string path, string soundName = "")
+        {
+            if (soundName == "")
+                soundName = Path.GetFileNameWithoutExtension(path);
+            if (Sounds.ContainsKey(soundName))
+                throw new ArgumentException("Sound with name \"" + soundName + "\" is already loaded.");
+
+            SoundStream stream = new SoundStream(File.OpenRead(path));
+            AudioBuffer buffer = new AudioBuffer
+            {
+                Stream = stream.ToDataStream(),
+                AudioBytes = (int)stream.Length,
+                Flags = BufferFlags.EndOfStream
+            };
+            stream.Close();
+
+            Sound sound = new Sound(buffer, stream.Format, stream.DecodedPacketsInfo);
+            Sounds[soundName] = sound;
+            return sound;
         }
         private struct Reference
         {
