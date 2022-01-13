@@ -804,12 +804,32 @@ namespace SharpDXtest
                         }
                         PropertyInfo property = objType.GetProperty(attrib.Name.LocalName);
                         if (property != null)
-                            property.SetValue(obj, Convert.ChangeType(attrib.Value, property.PropertyType));
+                        {
+                            if (property.PropertyType.IsSubclassOf(typeof(Enum)))
+                            {
+                                int value = 0;
+                                foreach (string subValue in attrib.Value.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries))
+                                    value |= (int)Enum.Parse(property.PropertyType, subValue);
+                                property.SetValue(obj, value);
+                            }
+                            else
+                                property.SetValue(obj, Convert.ChangeType(attrib.Value, property.PropertyType));
+                        }
                         else
                         {
                             FieldInfo field = objType.GetField(attrib.Name.LocalName);
                             if (field != null)
-                                field.SetValue(obj, Convert.ChangeType(attrib.Value, field.FieldType));
+                            {
+                                if (field.FieldType.IsSubclassOf(typeof(Enum)))
+                                {
+                                    int value = 0;
+                                    foreach (string subValue in attrib.Value.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries))
+                                        value |= (int)Enum.Parse(field.FieldType, subValue);
+                                    field.SetValue(obj, value);
+                                }
+                                else
+                                    field.SetValue(obj, Convert.ChangeType(attrib.Value, field.FieldType));
+                            }
                             else
                                 throw new Exception(objType.Name + " don't have " + attrib.Name.LocalName + ".");
                         }

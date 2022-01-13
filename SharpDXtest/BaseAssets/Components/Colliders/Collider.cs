@@ -12,6 +12,20 @@ namespace SharpDXtest.BaseAssets.Components
         public Vector3 InertiaTensor { get; protected set; }
 
         public abstract Vector3 Offset { get; set; }
+        private double massPart = 1.0;
+        public double MassPart
+        {
+            get
+            {
+                return massPart;
+            }
+            set
+            {
+                if (value < 0.0)
+                    throw new ArgumentException("Mass part can't be negative.");
+                massPart = value;
+            }
+        }
 
         protected List<Vector3> vertices = new List<Vector3>();
         protected List<int[]> polygons = new List<int[]>();

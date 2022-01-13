@@ -56,7 +56,7 @@ namespace SharpDXtest
             }
 
             foreach (Rigidbody rigidbody in rigidbodies)
-                rigidbody.applyCollisionExitVectors();
+                rigidbody.applyChanges();
         }
     }
 }
