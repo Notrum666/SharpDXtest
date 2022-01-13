@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Globalization;
 
 using Device = SharpDX.Direct3D11.Device;
 using Rectangle = System.Drawing.Rectangle;
@@ -30,6 +31,8 @@ namespace SharpDXtest
             InitializeComponent();
 
             System.Windows.Forms.Cursor.Hide();
+
+            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

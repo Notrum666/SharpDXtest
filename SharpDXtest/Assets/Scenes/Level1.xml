@@ -14,7 +14,7 @@
       <Transform.Position x="0" y="0" z="0"/>
       <Transform.Rotation/>
     </Transform>
-    <Camera x.Name="mainCamera" resolution="1,7777" near="0,001" far="100" FOV="1,5"/>
+    <Camera x.Name="mainCamera" resolution="1.7777" near="0.001" far="100" FOV="1.5"/>
     <Controller speed="5" cube="{Reference Cube}"/>
   </GameObject>
 
@@ -23,7 +23,7 @@
       <Transform.Position x="0" y="0" z="0"/>
     </Transform>
     <Rigidbody Mass="1">
-      <Rigidbody.Material Friction="0,5" Bounciness="1,0" BouncinessCombineMode="Maximum"/>
+      <Rigidbody.Material Friction="0.5" Bounciness="1.0" BouncinessCombineMode="Maximum"/>
     </Rigidbody>
     <CubeCollider>
       <CubeCollider.Size x="2" y="2" z="2"/>
@@ -36,7 +36,7 @@
       <Transform.Position x="0" y="5" z="0"/>
     </Transform>
     <Rigidbody Mass="1">
-      <Rigidbody.Material Friction="0,5" Bounciness="0,0" BouncinessCombineMode="Minimum"/>
+      <Rigidbody.Material Friction="0.5" Bounciness="0.0" BouncinessCombineMode="Minimum"/>
     </Rigidbody>
 	  <CubeCollider>
 		  <CubeCollider.Size x="2" y="2" z="2"/>
