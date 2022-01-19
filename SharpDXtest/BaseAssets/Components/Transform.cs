@@ -76,7 +76,7 @@ namespace SharpDXtest.BaseAssets.Components
             }
         }
         public Vector3 LocalForward { get { return localRotation * Vector3.Forward; } }
-        public Vector3 LocalRight { get { return localRotation *Vector3.Right; } }
+        public Vector3 LocalRight { get { return localRotation * Vector3.Right; } }
         public Vector3 LocalUp { get { return localRotation * Vector3.Up; } }
         public Vector3 Forward { get { return Rotation * Vector3.Forward; } }
         public Vector3 Right { get { return Rotation * Vector3.Right; } }
