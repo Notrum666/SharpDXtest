@@ -42,11 +42,11 @@ namespace SharpDXtest.BaseAssets.Components
             Listener.Position.X = -(float)pos.x;
             Listener.Position.Y = (float)pos.y;
             Listener.Position.Z = (float)pos.z;
-            Vector3 forward = gameObject.transform.forward;
+            Vector3 forward = gameObject.transform.Forward;
             Listener.OrientFront.X = -(float)forward.x;
             Listener.OrientFront.Y = (float)forward.y;
             Listener.OrientFront.Z = (float)forward.z;
-            Vector3 up = gameObject.transform.up;
+            Vector3 up = gameObject.transform.Up;
             Listener.OrientTop.X = -(float)up.x;
             Listener.OrientTop.Y = (float)up.y;
             Listener.OrientTop.Z = (float)up.z;

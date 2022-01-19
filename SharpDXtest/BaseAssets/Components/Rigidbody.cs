@@ -145,10 +145,10 @@ namespace SharpDXtest.BaseAssets.Components
             }
             else
             {
-                t.localPosition += (t.Parent.view * new Vector4(Velocity * Time.DeltaTime, 0.0)).xyz;
+                t.localPosition += (t.Parent.View * new Vector4(Velocity * Time.DeltaTime, 0.0)).xyz;
 
                 // faster
-                Vector3 localAngularVelocity = (t.Parent.view * new Vector4(AngularVelocity, 0.0)).xyz;
+                Vector3 localAngularVelocity = (t.Parent.View * new Vector4(AngularVelocity, 0.0)).xyz;
                 t.localRotation = (t.localRotation +
                     0.5 * new Quaternion(0.0, localAngularVelocity.x, localAngularVelocity.y, localAngularVelocity.z) * 
                     t.localRotation * Time.DeltaTime).normalized();

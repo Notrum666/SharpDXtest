@@ -106,7 +106,7 @@ namespace SharpDXtest
 
                 pipeline.Use();
 
-                pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.view);
+                pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.View);
                 pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.proj);
 
                 foreach (GameObject obj in objects)
@@ -117,7 +117,7 @@ namespace SharpDXtest
                     {
                         if (!mesh.Enabled)
                             continue;
-                        pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.model);
+                        pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
                         pipeline.UploadUpdatedUniforms();
                         mesh.texture.use("tex");
                         sampler.use("texSampler");

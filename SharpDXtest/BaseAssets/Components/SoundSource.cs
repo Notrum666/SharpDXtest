@@ -31,11 +31,11 @@ namespace SharpDXtest.BaseAssets.Components
             Source.Position.X = -(float)pos.x;
             Source.Position.Y = (float)pos.y;
             Source.Position.Z = (float)pos.z;
-            Vector3 forward = gameObject.transform.forward;
+            Vector3 forward = gameObject.transform.Forward;
             Source.OrientFront.X = -(float)forward.x;
             Source.OrientFront.Y = (float)forward.y;
             Source.OrientFront.Z = (float)forward.z;
-            Vector3 up = gameObject.transform.up;
+            Vector3 up = gameObject.transform.Up;
             Source.OrientTop.X = -(float)up.x;
             Source.OrientTop.Y = (float)up.y;
             Source.OrientTop.Z = (float)up.z;

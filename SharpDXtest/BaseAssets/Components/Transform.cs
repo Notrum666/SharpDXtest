@@ -14,14 +14,14 @@ namespace SharpDXtest.BaseAssets.Components
         { 
             get 
             {
-                return Parent == null ? localPosition : (Parent.model * new Vector4(localPosition, 1.0)).xyz;
+                return Parent == null ? localPosition : (Parent.Model * new Vector4(localPosition, 1.0)).xyz;
             } 
             set
             {
                 if (Parent == null)
                     localPosition = value;
                 else
-                    localPosition = (Parent.view * new Vector4(value, 1.0)).xyz;
+                    localPosition = (Parent.View * new Vector4(value, 1.0)).xyz;
             }
         }
         public Quaternion localRotation;
@@ -39,7 +39,7 @@ namespace SharpDXtest.BaseAssets.Components
                     localRotation = Parent.Rotation.inverse() * value;
             }
         }
-        public Matrix4x4 localModel
+        public Matrix4x4 LocalModel
         {
             get
             {
@@ -50,43 +50,37 @@ namespace SharpDXtest.BaseAssets.Components
                 return mat;
             }
         }
-        public Matrix4x4 model
+        public Matrix4x4 Model
         {
             get
             {
-                return Parent == null ? localModel : Parent.model * localModel;
+                return Parent == null ? LocalModel : Parent.Model * LocalModel;
             }
         }
-        public Matrix4x4 localView
+        public Matrix4x4 LocalView
         {
             get
             {
-                Vector3 r = localRight;
-                Vector3 u = localUp;
-                Vector3 f = localForward;
-                Vector3 p = -localPosition;
-
-                Matrix4x4 view = new Matrix4x4(r.x, r.y, r.z, p * r,
-                                               f.x, f.y, f.z, p * f,
-                                               u.x, u.y, u.z, p * u,
-                                               0, 0, 0, 1);
-
+                Matrix4x4 view = Matrix4x4.FromQuaternion(localRotation).transposed();
+                view.v03 = -localPosition.x * view.v00 - localPosition.y * view.v01 - localPosition.z * view.v02;
+                view.v13 = -localPosition.x * view.v10 - localPosition.y * view.v11 - localPosition.z * view.v12;
+                view.v23 = -localPosition.x * view.v20 - localPosition.y * view.v21 - localPosition.z * view.v22;
                 return view;
             }
         }
-        public Matrix4x4 view
+        public Matrix4x4 View
         {
             get
             {
-                return Parent == null ? localView : localView * Parent.view;
+                return Parent == null ? LocalView : LocalView * Parent.View;
             }
         }
-        public Vector3 localForward { get { return (localModel * new Vector4(Vector3.Forward)).xyz; } }
-        public Vector3 localRight { get { return (localModel * new Vector4(Vector3.Right)).xyz; } }
-        public Vector3 localUp { get { return (localModel * new Vector4(Vector3.Up)).xyz; } }
-        public Vector3 forward { get { return (model * new Vector4(Vector3.Forward)).xyz; } }
-        public Vector3 right { get { return (model * new Vector4(Vector3.Right)).xyz; } }
-        public Vector3 up { get { return (model * new Vector4(Vector3.Up)).xyz; } }
+        public Vector3 LocalForward { get { return localRotation * Vector3.Forward; } }
+        public Vector3 LocalRight { get { return localRotation *Vector3.Right; } }
+        public Vector3 LocalUp { get { return localRotation * Vector3.Up; } }
+        public Vector3 Forward { get { return Rotation * Vector3.Forward; } }
+        public Vector3 Right { get { return Rotation * Vector3.Right; } }
+        public Vector3 Up { get { return Rotation * Vector3.Up; } }
         public Transform()
         {
             localPosition = Vector3.Zero;

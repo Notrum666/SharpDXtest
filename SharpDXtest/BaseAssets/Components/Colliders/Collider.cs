@@ -53,7 +53,7 @@ namespace SharpDXtest.BaseAssets.Components
         {
             globalSpaceVertices.Clear();
 
-            Matrix4x4 worldMatrix = gameObject.transform.model;
+            Matrix4x4 worldMatrix = gameObject.transform.Model;
             foreach(Vector3 localVertex in vertices)
             {
                 globalSpaceVertices.Add((worldMatrix * new Vector4(localVertex, 1)).xyz);
@@ -85,7 +85,7 @@ namespace SharpDXtest.BaseAssets.Components
         }
         protected Vector3 getCenterInGlobal()
         {
-            return (gameObject.transform.model * new Vector4(this.Offset, 1)).xyz;
+            return (gameObject.transform.Model * new Vector4(this.Offset, 1)).xyz;
         }
         private static void getSegmentFromProjection(Vector3[] projection, Vector3[] segment)
         {
