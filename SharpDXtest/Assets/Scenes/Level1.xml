@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Scene mainCamera="{Reference mainCamera}">
+<Scene>
   <Assets>
     <Models>
       <Model path="cube.obj"/>
@@ -7,6 +7,9 @@
     <Textures>
       <Texture path="template.png"/>
     </Textures>
+    <Sounds>
+      <Sound path="sample.wav"/>
+    </Sounds>
   </Assets>
 
   <GameObject>
@@ -14,7 +17,8 @@
       <Transform.Position x="0" y="0" z="0"/>
       <Transform.Rotation/>
     </Transform>
-    <Camera x.Name="mainCamera" resolution="1.7777" near="0.001" far="100" FOV="1.5"/>
+    <Camera IsCurrent="true" resolution="1.7777" near="0.001" far="100" FOV="1.5"/>
+    <SoundListener IsCurrent="true"/>
     <Controller speed="5" cube="{Reference Cube}"/>
   </GameObject>
 
@@ -28,6 +32,8 @@
     <CubeCollider>
       <CubeCollider.Size x="2" y="2" z="2"/>
     </CubeCollider>
+    <SoundSource/>
+    <CubeScript/>
     <Mesh model="{Model cube}" texture="{Texture template}"/>
   </GameObject>
 

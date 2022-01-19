@@ -44,9 +44,6 @@ namespace SharpDXtest
             InputManager.Init(); // 2
             GameCore.Init(); // 2
 
-            Sound sound = AssetsManager.LoadSound("Assets\\Sounds\\sample.wav");
-            SoundCore.Play(sound);
-
             isAlive = true;
 
             renderLoopTask = Task.Run(() =>
@@ -56,6 +53,7 @@ namespace SharpDXtest
                     InputManager.Update();
                     Time.Update();
                     GameCore.Update();
+                    SoundCore.Update();
                     GraphicsCore.Update();
                 }
             });

@@ -12,6 +12,23 @@ namespace SharpDXtest.BaseAssets.Components
         public double resolution;
         public double near;
         public double far;
+        public bool IsCurrent
+        {
+            get
+            {
+                return GraphicsCore.CurrentCamera == this;
+            }
+            set
+            {
+                if (value)
+                    makeCurrent();
+                else
+                {
+                    if (IsCurrent)
+                        GraphicsCore.CurrentCamera = this;
+                }
+            }
+        }
 
         public Matrix4x4 proj
         {
@@ -26,7 +43,7 @@ namespace SharpDXtest.BaseAssets.Components
                 return proj;
             }
         }
-        public void MakeCurrent()
+        public void makeCurrent()
         {
             GraphicsCore.CurrentCamera = this;
         }

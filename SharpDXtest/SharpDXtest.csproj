@@ -85,6 +85,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Assets\Components\Controller.cs" />
+    <Compile Include="Assets\Components\CubeScript.cs" />
     <Compile Include="BaseAssets\Components\Camera.cs" />
     <Compile Include="BaseAssets\Components\Colliders\Collider.cs" />
     <Compile Include="BaseAssets\Components\Colliders\CubeCollider.cs" />
@@ -94,6 +95,8 @@
     <Compile Include="BaseAssets\Components\Mesh.cs" />
     <Compile Include="BaseAssets\Components\PhysicalMaterial.cs" />
     <Compile Include="BaseAssets\Components\Rigidbody.cs" />
+    <Compile Include="BaseAssets\Components\SoundListener.cs" />
+    <Compile Include="BaseAssets\Components\SoundSource.cs" />
     <Compile Include="BaseAssets\Components\Transform.cs" />
     <Compile Include="GameCore.cs" />
     <Compile Include="GameObject.cs" />

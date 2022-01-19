@@ -586,7 +586,6 @@ namespace SharpDXtest
     public class Scene
     {
         public List<GameObject> objects { get; } = new List<GameObject>();
-        public Camera mainCamera;
     }
     public static class AssetsManager
     {
@@ -826,6 +825,23 @@ namespace SharpDXtest
                             }
                             break;
                         }
+                    case "Sound":
+                        {
+                            if (!Sounds.ContainsKey(words[1]))
+                                throw new Exception("Sound " + words[1] + " not loaded.");
+                            PropertyInfo property = objType.GetProperty(name);
+                            if (property != null)
+                                property.SetValue(obj, Sounds[words[1]]);
+                            else
+                            {
+                                FieldInfo field = objType.GetField(name);
+                                if (field != null)
+                                    field.SetValue(obj, Sounds[words[1]]);
+                                else
+                                    throw new Exception(objType.Name + " don't have " + name + ".");
+                            }
+                            break;
+                        }
                 }
             }
             void parseAttributes(ref object obj, IEnumerable<XAttribute> attributes)
@@ -954,6 +970,35 @@ namespace SharpDXtest
                                                     parameterValues[param.Name] = Convert.ChangeType(attrib.Value, param.ParameterType);
                                                     if (param.Name == "path")
                                                         parameterValues[param.Name] = "Assets\\Textures\\" + parameterValues[param.Name];
+                                                    found = true;
+                                                    break;
+                                                }
+                                            if (!found)
+                                                throw new Exception("Attribute \"" + attrib.Name.LocalName + "\" not found.");
+                                        }
+                                        method.Invoke(null, parameters.Select(p => parameterValues.ContainsKey(p.Name) ? parameterValues[p.Name] :
+                                                        (p.IsOptional ? p.DefaultValue : throw new Exception("Missing required attribute: \"" + p.Name + "\""))).ToArray());
+                                    }
+                                    continue;
+                                }
+                            case "Sounds":
+                                {
+                                    foreach (XElement sound in assetsSet.Elements())
+                                    {
+                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadSound");
+                                        ParameterInfo[] parameters = method.GetParameters();
+                                        Dictionary<string, object> parameterValues = new Dictionary<string, object>();
+                                        foreach (XAttribute attrib in sound.Attributes())
+                                        {
+                                            bool found = false;
+                                            foreach (ParameterInfo param in parameters)
+                                                if (param.Name == attrib.Name.LocalName)
+                                                {
+                                                    if (parameterValues.ContainsKey(param.Name))
+                                                        throw new Exception("Attribute \"" + param.Name + "\" is set multiple times.");
+                                                    parameterValues[param.Name] = Convert.ChangeType(attrib.Value, param.ParameterType);
+                                                    if (param.Name == "path")
+                                                        parameterValues[param.Name] = "Assets\\Sounds\\" + parameterValues[param.Name];
                                                     found = true;
                                                     break;
                                                 }

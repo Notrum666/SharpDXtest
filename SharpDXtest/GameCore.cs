@@ -15,7 +15,6 @@ namespace SharpDXtest
         public static void Init()
         {
             CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Level1.xml");
-            CurrentScene.mainCamera.MakeCurrent();
         }
         public static void Update()
         {
