@@ -15,11 +15,14 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Globalization;
+using System.ComponentModel;
 
 namespace SharpDXtest
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        public bool IsPaused { get => GameCore.IsPaused; }
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainWindow()
         {
@@ -28,6 +31,11 @@ namespace SharpDXtest
             System.Windows.Forms.Cursor.Hide();
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
+
+            DataContext = this;
+
+            GameCore.OnPaused += () => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPaused"));
+            GameCore.OnResumed += () => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPaused"));
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -35,6 +43,8 @@ namespace SharpDXtest
             GameCore.Init(WinFormsControl);
 
             GameCore.Run();
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPaused"));
         }
 
         private void MainWindowInst_Closed(object sender, EventArgs e)
@@ -52,15 +62,11 @@ namespace SharpDXtest
                 GameCore.IsPaused = !GameCore.IsPaused;
                 if (GameCore.IsPaused)
                 {
-                    PauseWinFormsHost.Visibility = Visibility.Visible;
                     System.Windows.Forms.Cursor.Position = new System.Drawing.Point(WinFormsControl.ClientSize.Width / 2, WinFormsControl.ClientSize.Height / 2);
                     System.Windows.Forms.Cursor.Show();
                 }
                 else
-                {
-                    PauseWinFormsHost.Visibility = Visibility.Hidden;
                     System.Windows.Forms.Cursor.Hide();
-                }
             }
         }
 
@@ -72,8 +78,7 @@ namespace SharpDXtest
 
         private void PauseMenuButton_Resume_Click(object sender, RoutedEventArgs e)
         {
-            GameCore.IsPaused = !GameCore.IsPaused;
-            PauseWinFormsHost.Visibility = Visibility.Hidden;
+            GameCore.IsPaused = false;
             System.Windows.Forms.Cursor.Hide();
         }
     }
