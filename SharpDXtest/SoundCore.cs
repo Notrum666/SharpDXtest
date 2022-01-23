@@ -18,6 +18,77 @@ using System.Threading;
 
 namespace SharpDXtest
 {
+    public class PlayingSound : IDisposable
+    {
+        public SourceVoice voice;
+        public Emitter source;
+
+        private bool isFinished = false;
+        public bool IsFinished { get => isFinished; }
+        private bool isPaused = false;
+        public bool IsPaused
+        {
+            get
+            {
+                return isPaused;
+            }
+            set
+            {
+                if (value)
+                {
+                    isPaused = value;
+                    if (!GameCore.IsPaused)
+                        voice.Start();
+                }
+                else
+                {
+                    isPaused = value;
+                    if (!GameCore.IsPaused)
+                        voice.Stop();
+                }
+            }
+        }
+
+        private bool disposed;
+
+        public PlayingSound(SourceVoice voice, Emitter source = null)
+        {
+            this.voice = voice;
+            voice.BufferEnd += onBufferEnd;
+            this.source = source;
+        }
+
+        private void onBufferEnd(IntPtr context)
+        {
+            isFinished = true;
+            voice.BufferEnd -= onBufferEnd;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+
+                }
+                voice.DestroyVoice();
+                //voice.Dispose();
+                disposed = true;
+            }
+        }
+
+        ~PlayingSound()
+        {
+            Dispose(false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+    }
     public static class SoundCore
     {
         private static XAudio2 device;
@@ -27,62 +98,34 @@ namespace SharpDXtest
         public static XAudio2 CurrentDevice { get => device; }
         public static SoundListener CurrentListener { get; set; }
 
-        private class PlayingSound : IDisposable
-        {
-            public SourceVoice voice;
-            public Emitter source;
-
-            public bool finished;
-
-            private bool disposed;
-
-            public PlayingSound(SourceVoice voice, Emitter source = null)
-            {
-                this.voice = voice;
-                voice.BufferEnd += onBufferEnd;
-                this.source = source;
-            }
-
-            private void onBufferEnd(IntPtr context)
-            {
-                finished = true;
-                voice.BufferEnd -= onBufferEnd;
-            }
-
-            protected virtual void Dispose(bool disposing)
-            {
-                if (!disposed)
-                {
-                    if (disposing)
-                    {
-
-                    }
-                    voice.DestroyVoice();
-                    //voice.Dispose();
-                    disposed = true;
-                }
-            }
-
-            ~PlayingSound()
-            {
-                Dispose(false);
-            }
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-        }
         private static List<PlayingSound> playingSounds = new List<PlayingSound>();
+        public static IReadOnlyCollection<PlayingSound> PlayingSounds { get => playingSounds.AsReadOnly(); }
+
         public static void Init()
         {
             device = new XAudio2();
             device3d = new X3DAudio(Speakers.FrontLeft | Speakers.FrontRight | Speakers.FrontCenter | Speakers.LowFrequency |
                                     Speakers.BackLeft | Speakers.BackRight | Speakers.SideLeft | Speakers.SideRight);
             masteringVoice = new MasteringVoice(device, XAudio2.DefaultChannels, 44100);
+
+            GameCore.OnPaused += OnPaused;
+            GameCore.OnResumed += OnResumed;
         }
-        public static void PlayFrom(Sound sound, SoundSource source)
+        private static void OnPaused()
+        {
+            foreach (PlayingSound sound in playingSounds)
+                if (!sound.IsPaused)
+                    sound.voice.Stop(1);
+            device.CommitChanges(1);
+        }
+        private static void OnResumed()
+        {
+            foreach (PlayingSound sound in playingSounds)
+                if (!sound.IsPaused)
+                    sound.voice.Start(1);
+            device.CommitChanges(1);
+        }
+        public static PlayingSound PlayFrom(Sound sound, SoundSource source)
         {
             SourceVoice voice = new SourceVoice(device, sound.Format, VoiceFlags.None, 1024f, true);
             voice.SetOutputVoices(new VoiceSendDescriptor(masteringVoice));
@@ -99,16 +142,18 @@ namespace SharpDXtest
             playingSounds.Add(playingSound);
             voice.SubmitSourceBuffer(sound.Buffer, sound.DecodedPacketsInfo);
             voice.Start();
+
+            return playingSound;
         }
-        public static void Play(Sound sound)
+        public static PlayingSound Play(Sound sound)
         {
-            PlayFrom(sound, null);
+            return PlayFrom(sound, null);
         }
         public static void Update()
         {
             for (int i = 0; i < playingSounds.Count; i++)
             {
-                if (playingSounds[i].finished)
+                if (playingSounds[i].IsFinished)
                 {
                     playingSounds.RemoveAt(i);
                     i--;

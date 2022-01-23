@@ -16,15 +16,10 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Globalization;
 
-using Device = SharpDX.Direct3D11.Device;
-using Rectangle = System.Drawing.Rectangle;
-
 namespace SharpDXtest
 {
     public partial class MainWindow : Window
     {
-        private bool isAlive;
-        private Task renderLoopTask;
 
         public MainWindow()
         {
@@ -37,34 +32,49 @@ namespace SharpDXtest
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // Order of initialization is important, same number means no difference
-            GraphicsCore.Init(WinFormsControl); // 1
-            SoundCore.Init(); // 1
-            Time.Init(); // 1
-            InputManager.Init(); // 2
-            GameCore.Init(); // 2
+            GameCore.Init(WinFormsControl);
 
-            isAlive = true;
-
-            renderLoopTask = Task.Run(() =>
-            {
-                while (isAlive)
-                {
-                    InputManager.Update();
-                    Time.Update();
-                    GameCore.Update();
-                    SoundCore.Update();
-                    GraphicsCore.Update();
-                }
-            });
+            GameCore.Run();
         }
 
         private void MainWindowInst_Closed(object sender, EventArgs e)
         {
-            isAlive = false;
-
-            Task.WaitAll(renderLoopTask);
+            if (GameCore.IsAlive)
+                GameCore.Stop();
+            
             GraphicsCore.Dispose();
+        }
+
+        private void MainWindowInst_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                GameCore.IsPaused = !GameCore.IsPaused;
+                if (GameCore.IsPaused)
+                {
+                    PauseWinFormsHost.Visibility = Visibility.Visible;
+                    System.Windows.Forms.Cursor.Position = new System.Drawing.Point(WinFormsControl.ClientSize.Width / 2, WinFormsControl.ClientSize.Height / 2);
+                    System.Windows.Forms.Cursor.Show();
+                }
+                else
+                {
+                    PauseWinFormsHost.Visibility = Visibility.Hidden;
+                    System.Windows.Forms.Cursor.Hide();
+                }
+            }
+        }
+
+        private void PauseMenuButton_Exit_Click(object sender, RoutedEventArgs e)
+        {
+            GameCore.Stop();
+            Close();
+        }
+
+        private void PauseMenuButton_Resume_Click(object sender, RoutedEventArgs e)
+        {
+            GameCore.IsPaused = !GameCore.IsPaused;
+            PauseWinFormsHost.Visibility = Visibility.Hidden;
+            System.Windows.Forms.Cursor.Hide();
         }
     }
 }

@@ -6,10 +6,29 @@
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:local="clr-namespace:SharpDXtest"
         mc:Ignorable="d"
-        Title="Main Window" Loaded="Window_Loaded" WindowState="Maximized" WindowStyle="None" Width="1280" Height="720" Closed="MainWindowInst_Closed">
+        Title="Main Window" Loaded="Window_Loaded" WindowState="Maximized" WindowStyle="None" Width="1280" Height="720" Closed="MainWindowInst_Closed" KeyDown="MainWindowInst_KeyDown">
     <Grid>
-        <WindowsFormsHost x:Name="WinFormsHost">
-            <wf:Control x:Name="WinFormsControl"/>
-        </WindowsFormsHost>
+        <Grid x:Name="GameGrid">
+            <WindowsFormsHost x:Name="WinFormsHost">
+                <!--<wf:Panel Dock="Fill">
+                    <wf:Panel.Controls>
+                        <ElementHost Dock="Fill" BackColor="Transparent" BackColorTransparent="True">
+                            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Height="100" Background="#7F000000"/>
+                        </ElementHost>-->
+                        <wf:Control x:Name="WinFormsControl" Dock="Fill"/>
+                        <!--</wf:Panel.Controls>
+                </wf:Panel>-->
+            </WindowsFormsHost>
+            <WindowsFormsHost x:Name="PauseWinFormsHost" Visibility="Hidden">
+                <ElementHost Dock="Fill" BackColor="Transparent">
+                    <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Background="#66000000">
+                        <StackPanel Margin="20,25,20,25">
+                            <Button x:Name="PauseMenuButton_Resume" Padding="50,10,50,10" Content="Resume" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Resume_Click"/>
+                            <Button x:Name="PauseMenuButton_Exit" Padding="50,10,50,10" Content="Exit" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Exit_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </ElementHost>
+            </WindowsFormsHost>
+        </Grid>
     </Grid>
 </Window>

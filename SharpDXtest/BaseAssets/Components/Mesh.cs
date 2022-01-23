@@ -14,12 +14,12 @@ namespace SharpDXtest.BaseAssets.Components
     }
     public class Material
     {
-        public static Material Default { get { return new Material(new Vector4(1.0, 1.0, 1.0, 1.0), new Vector4(1.0, 1.0, 1.0, 1.0), new Vector4(1.0, 1.0, 1.0, 1.0), 1.0f); } }
-        public Vector4 ambient;
-        public Vector4 diffuse;
-        public Vector4 specular;
+        public static Material Default { get { return new Material(new Vector3(1.0, 1.0, 1.0), new Vector3(1.0, 1.0, 1.0), new Vector3(1.0, 1.0, 1.0), 1.0f); } }
+        public Vector3 ambient;
+        public Vector3 diffuse;
+        public Vector3 specular;
         public float metallic;
-        public Material(Vector4 ambient, Vector4 diffuse, Vector4 specular, float metallic)
+        public Material(Vector3 ambient, Vector3 diffuse, Vector3 specular, float metallic)
         {
             this.ambient = ambient;
             this.diffuse = diffuse;
