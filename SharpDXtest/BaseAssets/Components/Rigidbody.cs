@@ -262,9 +262,6 @@ namespace SharpDXtest.BaseAssets.Components
                     {
                         moveVector = Vector3.Zero;
                         otherMoveVector = -collisionExitVector;
-                        otherRigidbody.gameObject.transform.Position += otherMoveVector;
-
-                        otherCollider.calculateGlobalVertices();
                     }
                     else
                     {
@@ -272,10 +269,7 @@ namespace SharpDXtest.BaseAssets.Components
                         {
                             moveVector = collisionExitVector;
                             otherMoveVector = Vector3.Zero;
-                            gameObject.transform.Position += moveVector;
                             colliderEndPoint += moveVector;
-
-                            collider.calculateGlobalVertices();
                         }
                         else
                         {
@@ -283,12 +277,18 @@ namespace SharpDXtest.BaseAssets.Components
                             moveVector = collisionExitVector * otherRigidbody.mass / totalMass;
                             otherMoveVector = -collisionExitVector * mass / totalMass;
                             colliderEndPoint += moveVector;
-                            gameObject.transform.Position += moveVector;
-                            otherRigidbody.gameObject.transform.Position += otherMoveVector;
-
-                            collider.calculateGlobalVertices();
-                            otherCollider.calculateGlobalVertices();
                         }
+                    }
+
+                    if (!moveVector.isZero())
+                    {
+                        gameObject.transform.Position += moveVector;
+                        collider.calculateGlobalVertices();
+                    }
+                    if (!otherMoveVector.isZero())
+                    {
+                        otherRigidbody.gameObject.transform.Position += otherMoveVector;
+                        otherCollider.calculateGlobalVertices();
                     }
 
                     Vector3 collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
@@ -347,12 +347,18 @@ namespace SharpDXtest.BaseAssets.Components
 
                     otherRigidbody.addImpulseAtPoint(-impulse, collisionPoint);
 
-                    gameObject.transform.Position -= moveVector;
-                    collisionExitVectors.Add(moveVector);
-                    otherRigidbody.gameObject.transform.Position -= otherMoveVector;
-                    otherRigidbody.collisionExitVectors.Add(otherMoveVector);
-                    collider.calculateGlobalVertices();
-                    otherCollider.calculateGlobalVertices();
+                    if (!moveVector.isZero())
+                    {
+                        gameObject.transform.Position -= moveVector;
+                        collisionExitVectors.Add(moveVector);
+                        collider.calculateGlobalVertices();
+                    }
+                    if (!otherMoveVector.isZero())
+                    {
+                        otherRigidbody.gameObject.transform.Position -= otherMoveVector;
+                        otherRigidbody.collisionExitVectors.Add(otherMoveVector);
+                        otherCollider.calculateGlobalVertices();
+                    }
                 }
         }
     }
