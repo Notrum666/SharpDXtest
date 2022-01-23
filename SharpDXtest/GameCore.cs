@@ -114,6 +114,8 @@ namespace SharpDXtest
         }
         private static void fixedUpdate()
         {
+            InputManager.FixedUpdate();
+
             foreach (GameObject obj in CurrentScene.objects)
                 if (obj.Enabled)
                     obj.fixedUpdate();

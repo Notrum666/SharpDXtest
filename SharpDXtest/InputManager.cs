@@ -21,8 +21,12 @@ namespace SharpDXtest
         // States
         private static KeyboardState prevKeyboardState;
         private static KeyboardState keyboardState;
+        private static KeyboardState prevFixedKeyboardState;
+        private static KeyboardState fixedKeyboardState;
         private static MouseState prevMouseState;
         private static MouseState mouseState;
+        private static MouseState prevFixedMouseState;
+        private static MouseState fixedMouseState;
 
         internal static void Init()
         {
@@ -32,11 +36,15 @@ namespace SharpDXtest
             keyboard.Acquire();
             keyboardState = keyboard.GetCurrentState();
             prevKeyboardState = keyboardState;
+            fixedKeyboardState = keyboardState;
+            prevFixedKeyboardState = keyboardState;
 
             mouse = new Mouse(inputListener);
             mouse.Acquire();
             mouseState = mouse.GetCurrentState();
             prevMouseState = mouseState;
+            fixedMouseState = mouseState;
+            prevFixedMouseState = mouseState;
         }
         internal static void Update()
         {
@@ -46,41 +54,67 @@ namespace SharpDXtest
             prevMouseState = mouseState;
             mouseState = mouse.GetCurrentState();
         }
+        internal static void FixedUpdate()
+        {
+            prevFixedKeyboardState = fixedKeyboardState;
+            fixedKeyboardState = keyboard.GetCurrentState();
+
+            prevFixedMouseState = fixedMouseState;
+            fixedMouseState = mouse.GetCurrentState();
+        }
         public static bool IsKeyDown(Key key)
         {
+            if (Time.IsFixed)
+                return fixedKeyboardState.IsPressed(key);
             return keyboardState.IsPressed(key);
         }
         public static bool IsKeyUp(Key key)
         {
+            if (Time.IsFixed)
+                return !fixedKeyboardState.IsPressed(key);
             return !keyboardState.IsPressed(key);
         }
         public static bool IsKeyPressed(Key key)
         {
+            if (Time.IsFixed)
+                return !prevFixedKeyboardState.IsPressed(key) && fixedKeyboardState.IsPressed(key);
             return !prevKeyboardState.IsPressed(key) && keyboardState.IsPressed(key);
         }
         public static bool IsKeyReleased(Key key)
         {
+            if (Time.IsFixed)
+                return prevFixedKeyboardState.IsPressed(key) && !fixedKeyboardState.IsPressed(key);
             return prevKeyboardState.IsPressed(key) && !keyboardState.IsPressed(key);
         }
 
         public static bool IsMouseButtonDown(int button)
         {
+            if (Time.IsFixed)
+                return fixedMouseState.Buttons[button];
             return mouseState.Buttons[button];
         }
         public static bool IsMouseButtonUp(int button)
         {
+            if (Time.IsFixed)
+                return !fixedMouseState.Buttons[button];
             return !mouseState.Buttons[button];
         }
         public static bool IsMouseButtonPressed(int button)
         {
+            if (Time.IsFixed)
+                return !prevFixedMouseState.Buttons[button] && prevMouseState.Buttons[button];
             return !prevMouseState.Buttons[button] && mouseState.Buttons[button];
         }
         public static bool IsMouseButtonReleased(int button)
         {
+            if (Time.IsFixed)
+                return prevFixedMouseState.Buttons[button] && !fixedMouseState.Buttons[button];
             return prevMouseState.Buttons[button] && !mouseState.Buttons[button];
         }
         public static Vector2 GetMouseDelta()
         {
+            if (Time.IsFixed)
+                return new Vector2(fixedMouseState.X, fixedMouseState.Y);
             return new Vector2(mouseState.X, mouseState.Y);
         }
     }
