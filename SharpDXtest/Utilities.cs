@@ -271,7 +271,10 @@ namespace SharpDXtest
                 for (int j = 0; j < buffer.Description.VariableCount; j++)
                 {
                     ShaderReflectionVariable variable = buffer.GetVariable(j);
-                    shaderBuffer.variables.Add(new ShaderVariable() { name = variable.Description.Name, size = variable.Description.Size, value = null });
+                    shaderBuffer.variables.Add(new ShaderVariable() { name = variable.Description.Name, 
+                                                                      size = variable.Description.Size, 
+                                                                      offset = variable.Description.StartOffset,
+                                                                      value = null });
                 }
                 buffers.Add(shaderBuffer);
             }
@@ -297,14 +300,12 @@ namespace SharpDXtest
                     foreach (ShaderVariable variable in buf.variables)
                     {
                         if (variable.value == null)
-                        {
-                            stream.Position += variable.size;
                             continue;
-                        }
+
+                        stream.Position = variable.offset;
                         Type type = variable.value.GetType();
                         IntPtr ptr = stream.PositionPointer;
                         Marshal.StructureToPtr(variable.value, ptr, true);
-                        stream.Position += variable.size;
                     }
                     GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.buffer, 0);
                     buf.invalidated = false;
@@ -358,6 +359,7 @@ namespace SharpDXtest
         {
             public string name;
             public int size;
+            public int offset;
             public object value;
         }
 
