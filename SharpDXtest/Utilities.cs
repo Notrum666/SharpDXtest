@@ -227,38 +227,36 @@ namespace SharpDXtest
         public bool hasVariable(string name)
         {
             foreach (ShaderBuffer buffer in buffers)
-                foreach (ShaderVariable variable in buffer.variables)
-                    if (variable.name == name)
-                        return true;
-
+                if (buffer.variables.ContainsKey(name))
+                    return true;
             return false;
         }
         public void updateUniform(string name, object value)
         {
+            ShaderVariable variable;
             foreach (ShaderBuffer buffer in buffers)
-                foreach (ShaderVariable variable in buffer.variables)
-                    if (variable.name == name)
-                    {
-                        if (variable.size != Marshal.SizeOf(value))
-                            throw new ArgumentException("Value must be the size of " + variable.size.ToString() + " bytes.");
-                        variable.value = value;
-                        buffer.invalidated = true;
-                        return;
-                    }
+                if (buffer.variables.TryGetValue(name, out variable))
+                {
+                    if (variable.size < Marshal.SizeOf(value))
+                        throw new ArgumentException("Value size can't be bigger than " + variable.size.ToString() + " bytes.");
+                    variable.value = value;
+                    buffer.invalidated = true;
+                    return;
+                }
             throw new ArgumentException("Variable does not exists.");
         }
         public bool tryUpdateUniform(string name, object value)
         {
+            ShaderVariable variable;
             foreach (ShaderBuffer buffer in buffers)
-                foreach (ShaderVariable variable in buffer.variables)
-                    if (variable.name == name)
-                    {
-                        if (variable.size != Marshal.SizeOf(value))
-                            return false;
-                        variable.value = value;
-                        buffer.invalidated = true;
-                        return true;
-                    }
+                if (buffer.variables.TryGetValue(name, out variable))
+                {
+                    if (variable.size < Marshal.SizeOf(value))
+                        return false;
+                    variable.value = value;
+                    buffer.invalidated = true;
+                    return true;
+                }
             return false;
         }
         protected void generateBuffersAndLocations(ShaderReflection reflection)
@@ -269,13 +267,8 @@ namespace SharpDXtest
                 ShaderBuffer shaderBuffer = new ShaderBuffer();
                 shaderBuffer.buffer = new Buffer(GraphicsCore.CurrentDevice, buffer.Description.Size, ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
                 for (int j = 0; j < buffer.Description.VariableCount; j++)
-                {
-                    ShaderReflectionVariable variable = buffer.GetVariable(j);
-                    shaderBuffer.variables.Add(new ShaderVariable() { name = variable.Description.Name, 
-                                                                      size = variable.Description.Size, 
-                                                                      offset = variable.Description.StartOffset,
-                                                                      value = null });
-                }
+                    shaderBuffer.variables.AddRange(parseShaderVariable(buffer.GetVariable(j)));
+
                 buffers.Add(shaderBuffer);
             }
             for (int i = 0; i < reflection.Description.BoundResources; i++)
@@ -290,6 +283,43 @@ namespace SharpDXtest
                 }
             }
         }
+        private Dictionary<string, ShaderVariable> parseShaderVariable(ShaderReflectionVariable variable)
+        {
+            return parseShaderVariableType(variable.GetVariableType(), variable.Description.Name, variable.Description.StartOffset, variable.Description.Size);
+        }
+        private Dictionary<string, ShaderVariable> parseShaderVariableType(ShaderReflectionType type, string varName, int parentOffset, int varSize)
+        {
+            int elementCount = type.Description.ElementCount;
+            if (elementCount == 0)
+                return parseNonArrayShaderVariableType(type, varName, parentOffset, varSize);
+
+            int elementOffset = (int)Math.Ceiling(varSize / (double)elementCount / 16.0) * 16;
+            int elementSize = varSize - elementOffset * (elementCount - 1);
+            Dictionary<string, ShaderVariable> variables = new Dictionary<string, ShaderVariable>();
+
+            for (int i = 0; i < elementCount; i++)
+                variables.AddRange(parseNonArrayShaderVariableType(type, varName + "[" + i.ToString() + "]", parentOffset + i * elementOffset, elementSize));
+
+            return variables;
+        }
+        private Dictionary<string, ShaderVariable> parseNonArrayShaderVariableType(ShaderReflectionType type, string varName, int parentOffset, int varSize)
+        {
+            Dictionary<string, ShaderVariable> variables = new Dictionary<string, ShaderVariable>();
+            if (type.Description.MemberCount == 0)
+                variables.Add(varName, new ShaderVariable() { offset = parentOffset + type.Description.Offset, size = varSize, value = null });
+            else
+                for (int i = 0; i < type.Description.MemberCount; i++)
+                {
+                    ShaderReflectionType subtype = type.GetMemberType(i);
+                    int memberSize;
+                    if (i == type.Description.MemberCount - 1)
+                        memberSize = varSize - subtype.Description.Offset;
+                    else
+                        memberSize = type.GetMemberType(i + 1).Description.Offset - subtype.Description.Offset;
+                    variables.AddRange(parseShaderVariableType(subtype, varName + "." + type.GetMemberTypeName(i), parentOffset + type.Description.Offset, memberSize));
+                }
+            return variables;
+        }
         public void uploadUpdatedUniforms()
         {
             foreach (ShaderBuffer buf in buffers)
@@ -297,15 +327,14 @@ namespace SharpDXtest
                 {
                     DataStream stream;
                     GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.buffer, 0, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out stream);
-                    foreach (ShaderVariable variable in buf.variables)
+                    foreach (ShaderVariable variable in buf.variables.Values)
                     {
                         if (variable.value == null)
                             continue;
 
                         stream.Position = variable.offset;
-                        Type type = variable.value.GetType();
-                        IntPtr ptr = stream.PositionPointer;
-                        Marshal.StructureToPtr(variable.value, ptr, true);
+
+                        Marshal.StructureToPtr(variable.value, stream.PositionPointer, true);
                     }
                     GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.buffer, 0);
                     buf.invalidated = false;
@@ -351,13 +380,12 @@ namespace SharpDXtest
 
         protected class ShaderBuffer
         {
-            public List<ShaderVariable> variables = new List<ShaderVariable>();
+            public Dictionary<string, ShaderVariable> variables = new Dictionary<string, ShaderVariable>();
             public Buffer buffer;
             public bool invalidated = true;
         }
         protected class ShaderVariable
         {
-            public string name;
             public int size;
             public int offset;
             public object value;
@@ -558,7 +586,7 @@ namespace SharpDXtest
                     exists = true;
                 }
             if (!exists)
-                throw new ArgumentException("Variable does not exists.");
+                throw new ArgumentException("Variable \n" + name + "\n does not exists in this shader pipeline.");
         }
         public bool TryUpdateUniform(string name, object value)
         {
