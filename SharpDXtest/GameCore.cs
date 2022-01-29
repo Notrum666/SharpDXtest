@@ -41,7 +41,7 @@ namespace SharpDXtest
                 }
             }
         }
-        private static Task renderLoopTask;
+        private static Task loopTask;
         public static event Action OnPaused;
         public static event Action OnResumed;
         public static void Init(Control control)
@@ -54,14 +54,14 @@ namespace SharpDXtest
 
             CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Level1.xml");
         }
-        public static void Run()
+        public static async void Run()
         {
             if (isAlive)
                 return;
 
             isAlive = true;
 
-            renderLoopTask = Task.Run(() =>
+            loopTask = Task.Run(() =>
             {
                 while (isAlive)
                 {
@@ -82,6 +82,10 @@ namespace SharpDXtest
                     }
                 }
             });
+            await loopTask;
+
+            if (loopTask.Exception != null)
+                throw loopTask.Exception;
         }
         public static void Stop()
         {
@@ -90,7 +94,7 @@ namespace SharpDXtest
 
             isAlive = false;
             isPaused = false;
-            Task.WaitAll(renderLoopTask);
+            Task.WaitAll(loopTask);
         }
         public static void Update()
         {
