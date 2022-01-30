@@ -895,13 +895,13 @@ namespace SharpDXtest
                             switch (attrib.Name.LocalName.ToLower())
                             {
                                 case "x":
-                                    obj = Quaternion.FromAxisAngle(Vector3.UnitX, double.Parse(attrib.Value)) * (Quaternion)obj;
+                                    obj = Quaternion.FromAxisAngle(Vector3.UnitX, double.Parse(attrib.Value) / 180.0 * Math.PI) * (Quaternion)obj;
                                     continue;
                                 case "y":
-                                    obj = Quaternion.FromAxisAngle(Vector3.UnitY, double.Parse(attrib.Value)) * (Quaternion)obj;
+                                    obj = Quaternion.FromAxisAngle(Vector3.UnitY, double.Parse(attrib.Value) / 180.0 * Math.PI) * (Quaternion)obj;
                                     continue;
                                 case "z":
-                                    obj = Quaternion.FromAxisAngle(Vector3.UnitZ, double.Parse(attrib.Value)) * (Quaternion)obj;
+                                    obj = Quaternion.FromAxisAngle(Vector3.UnitZ, double.Parse(attrib.Value) / 180.0 * Math.PI) * (Quaternion)obj;
                                     continue;
                                 default:
                                     throw new Exception("Quaternion does not have \"" + attrib.Name.LocalName + "\"");
