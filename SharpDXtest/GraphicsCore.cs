@@ -34,6 +34,8 @@ namespace SharpDXtest
         {
             InitDirectX(control);
 
+            AssetsManager.LoadTexture("BaseAssets\\Textures\\default_white.png", "default");
+
             pipeline = AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
                                                                    Shader.Create("BaseAssets\\Shaders\\default.fsh"));
             sampler = AssetsManager.Samplers["default"] = new Sampler(TextureAddressMode.Clamp, TextureAddressMode.Clamp);
@@ -100,29 +102,118 @@ namespace SharpDXtest
             device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFF323232));
             device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
 
-            if (GameCore.CurrentScene != null && CurrentCamera != null && CurrentCamera.Enabled)
+            if (GameCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
             {
-                List<GameObject> objects = GameCore.CurrentScene.objects;
+                device.ImmediateContext.Flush();
+                swapchain.Present(0, PresentFlags.None);
+                return;
+            }
 
-                pipeline.Use();
+            List<GameObject> objects = GameCore.CurrentScene.objects;
 
-                pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.View);
-                pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.proj);
+            pipeline.Use();
 
-                foreach (GameObject obj in objects)
+            int spotLights = 0;
+            int directionalLights = 0;
+            int pointLights = 0;
+            int ambientLights = 0;
+            foreach (GameObject obj in objects)
+            {
+                if (!obj.Enabled)
+                    continue;
+                foreach (Light light in obj.getComponents<Light>())
                 {
-                    if (!obj.Enabled)
+                    if (!light.Enabled)
                         continue;
-                    foreach (Mesh mesh in obj.getComponents<Mesh>())
+
+                    if (light is SpotLight)
                     {
-                        if (!mesh.Enabled)
-                            continue;
-                        pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
-                        pipeline.UploadUpdatedUniforms();
-                        mesh.texture.use("tex");
-                        sampler.use("texSampler");
-                        mesh.model.Render();
+                        SpotLight curLight = light as SpotLight;
+                        string baseLocation = "spotLights[" + spotLights.ToString() + "].";
+
+                        pipeline.UpdateUniform(baseLocation + "position", (Vector3f)obj.transform.Position);
+                        pipeline.UpdateUniform(baseLocation + "direction", (Vector3f)obj.transform.Forward);
+                        pipeline.UpdateUniform(baseLocation + "radius", curLight.Radius);
+                        pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
+                        pipeline.UpdateUniform(baseLocation + "intensity", curLight.Intensity);
+                        pipeline.UpdateUniform(baseLocation + "angle", curLight.Angle);
+                        pipeline.UpdateUniform(baseLocation + "color", curLight.color);
+
+                        pipeline.UpdateUniform(baseLocation + "lightSpace", (Matrix4x4f)obj.transform.View);
+
+                        spotLights++;
                     }
+                    else if (light is DirectionalLight)
+                    {
+                        DirectionalLight curLight = light as DirectionalLight;
+                        string baseLocation = "directionalLights[" + directionalLights.ToString() + "].";
+
+                        pipeline.UpdateUniform(baseLocation + "direction", (Vector3f)curLight.gameObject.transform.Forward);
+                        pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
+                        pipeline.UpdateUniform(baseLocation + "color", curLight.color);
+
+                        pipeline.UpdateUniform(baseLocation + "lightSpace", (Matrix4x4f)obj.transform.View);
+
+                        directionalLights++;
+                    }
+                    else if (light is PointLight)
+                    {
+                        PointLight curLight = light as PointLight;
+                        string baseLocation = "pointLights[" + pointLights.ToString() + "].";
+
+                        pipeline.UpdateUniform(baseLocation + "position", (Vector3f)curLight.gameObject.transform.Position);
+                        pipeline.UpdateUniform(baseLocation + "radius", curLight.Radius);
+                        pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
+                        pipeline.UpdateUniform(baseLocation + "intensity", curLight.Intensity);
+                        pipeline.UpdateUniform(baseLocation + "color", curLight.color);
+
+                        pointLights++;
+                    }
+                    else if (light is AmbientLight)
+                    {
+                        AmbientLight curLight = light as AmbientLight;
+                        string baseLocation = "ambientLights[" + ambientLights.ToString() + "].";
+
+                        pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
+                        pipeline.UpdateUniform(baseLocation + "color", curLight.color);
+
+                        ambientLights++;
+                    }
+                    else
+                        throw new NotImplementedException("Light type " + light.GetType().Name + " is not supported.");
+                }
+            }
+
+            pipeline.UpdateUniform("spotLightsCount", spotLights);
+            pipeline.UpdateUniform("directionalLightsCount", directionalLights);
+            pipeline.UpdateUniform("pointLightsCount", pointLights);
+            pipeline.UpdateUniform("ambientLightsCount", ambientLights);
+
+            pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.gameObject.transform.Position);
+
+            pipeline.UpdateUniform("exposure", 1.0f);
+
+            pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.View);
+            pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.proj);
+
+            foreach (GameObject obj in objects)
+            {
+                if (!obj.Enabled)
+                    continue;
+                foreach (Mesh mesh in obj.getComponents<Mesh>())
+                {
+                    if (!mesh.Enabled)
+                        continue;
+                    pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
+
+                    pipeline.UpdateUniform("metallic", (float)mesh.material.Metallic);
+                    pipeline.UpdateUniform("roughness", (float)mesh.material.Roughness);
+                    pipeline.UpdateUniform("ambientOcclusion", (float)mesh.material.AmbientOcclusion);
+
+                    pipeline.UploadUpdatedUniforms();
+                    mesh.material.Albedo.use("albedoTex");
+                    sampler.use("texSampler");
+                    mesh.model.Render();
                 }
             }
 

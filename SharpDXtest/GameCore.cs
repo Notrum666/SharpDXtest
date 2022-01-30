@@ -82,10 +82,14 @@ namespace SharpDXtest
                     }
                 }
             });
-            await loopTask;
-
-            if (loopTask.Exception != null)
-                throw loopTask.Exception;
+            try
+            {
+                await loopTask;
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
         }
         public static void Stop()
         {

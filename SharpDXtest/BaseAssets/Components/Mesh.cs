@@ -9,22 +9,79 @@ namespace SharpDXtest.BaseAssets.Components
     public class Mesh : Component
     {
         public Model model;
-        public Texture texture;
-        public Material material = Material.Default;
+        public Material material = new Material();
     }
     public class Material
     {
-        public static Material Default { get { return new Material(new Vector3(1.0, 1.0, 1.0), new Vector3(1.0, 1.0, 1.0), new Vector3(1.0, 1.0, 1.0), 1.0f); } }
-        public Vector3 ambient;
-        public Vector3 diffuse;
-        public Vector3 specular;
-        public float metallic;
-        public Material(Vector3 ambient, Vector3 diffuse, Vector3 specular, float metallic)
+        private Texture albedo;
+        public Texture Albedo
         {
-            this.ambient = ambient;
-            this.diffuse = diffuse;
-            this.specular = specular;
-            this.metallic = metallic;
+            get
+            {
+                return albedo;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Texture can't be null.");
+                albedo = value;
+            }
+        }
+        private double metallic;
+        public double Metallic
+        {
+            get
+            {
+                return metallic;
+            }
+            set
+            {
+                if (value > 1.0 || value < 0.0)
+                    throw new ArgumentOutOfRangeException("Metallic can't be lower than 0 or bigger than 1.");
+                metallic = value;
+            }
+        }
+        private double roughness;
+        public double Roughness
+        {
+            get
+            {
+                return roughness;
+            }
+            set
+            {
+                if (value > 1.0 || value < 0.0)
+                    throw new ArgumentOutOfRangeException("Roughness can't be lower than 0 or bigger than 1.");
+                roughness = value;
+            }
+        }
+        private double ambientOcclusion;
+        public double AmbientOcclusion
+        {
+            get
+            {
+                return ambientOcclusion;
+            }
+            set
+            {
+                if (value > 1.0 || value < 0.0)
+                    throw new ArgumentOutOfRangeException("Ambient occlusion can't be lower than 0 or bigger than 1.");
+                ambientOcclusion = value;
+            }
+        }
+        public Material()
+        {
+            albedo = AssetsManager.Textures["default"];
+            metallic = 0.1;
+            roughness = 0.5;
+            ambientOcclusion = 0.0;
+        }
+        public Material(Texture albedo, double metallic = 0.1, double roughness = 0.5, double ambientOcclusion = 0.0)
+        {
+            Albedo = albedo;
+            Metallic = metallic;
+            Roughness = roughness;
+            AmbientOcclusion = ambientOcclusion;
         }
     }
 }

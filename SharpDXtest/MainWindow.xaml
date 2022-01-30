@@ -20,6 +20,7 @@
                 </StackPanel>
             </Grid>
             <asf:AirspacePanel x:Name="Airspace" FixAirspace="{Binding Path=IsPaused, Mode=OneWay}">
+                <!-- TODO: try rendering via d3dimage -->
                 <WindowsFormsHost x:Name="WinFormsHost">
                     <wf:Control x:Name="WinFormsControl" Dock="Fill"/>
                 </WindowsFormsHost>

@@ -83,7 +83,7 @@ namespace SharpDXtest
                         Vector3 p1 = v[v_i[i][0]];
                         Vector3 p2 = v[v_i[i][1]];
                         Vector3 p3 = v[v_i[i][2]];
-                        Vector3 normal = (p3 - p1).vecMul(p2 - p1).normalized();
+                        Vector3 normal = (p2 - p1).vecMul(p3 - p1).normalized();
                         curVertex.n.x = (float)normal.x;
                         curVertex.n.y = (float)normal.y;
                         curVertex.n.z = (float)normal.z;
@@ -144,7 +144,7 @@ namespace SharpDXtest
     {
         public Bitmap Image { get; private set; }
         private ShaderResourceView resourceView;
-        public Texture(Bitmap image, bool applyGammaCorrection = false)
+        public Texture(Bitmap image, bool applyGammaCorrection = true)
         {
             this.Image = image;
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
@@ -238,7 +238,7 @@ namespace SharpDXtest
                 if (buffer.variables.TryGetValue(name, out variable))
                 {
                     if (variable.size < Marshal.SizeOf(value))
-                        throw new ArgumentException("Value size can't be bigger than " + variable.size.ToString() + " bytes.");
+                        throw new ArgumentException("Value size can't be bigger than " + variable.size.ToString() + " bytes for \"" + name + "\".");
                     variable.value = value;
                     buffer.invalidated = true;
                     return;

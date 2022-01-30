@@ -4,9 +4,11 @@
     <Models>
       <Model path="cube.obj"/>
     </Models>
+    
     <Textures>
       <Texture path="template.png"/>
     </Textures>
+    
     <Sounds>
       <Sound path="sample.wav"/>
     </Sounds>
@@ -34,7 +36,9 @@
     </CubeCollider>
     <SoundSource/>
     <CubeScript/>
-    <Mesh model="{Model cube}" texture="{Texture template}"/>
+    <Mesh model="{Model cube}">
+      <!--<Mesh.material Texture="{Texture template}"/>-->
+    </Mesh>
   </GameObject>
 
   <GameObject>
@@ -47,7 +51,16 @@
 	  <CubeCollider>
 		  <CubeCollider.Size x="2" y="2" z="2"/>
 	  </CubeCollider>
-    <Mesh model="{Model cube}" texture="{Texture template}"/>
+    <Mesh model="{Model cube}">
+      <Mesh.material Metallic="1" Roughness="0.01"/>
+    </Mesh>
+  </GameObject>
+
+  <GameObject>
+    <Transform>
+      <Transform.Position x="0" y="0" z="2"/>
+    </Transform>
+    <PointLight Radius="10" Brightness="1" Intensity="1"/>
   </GameObject>
   
 </Scene>
