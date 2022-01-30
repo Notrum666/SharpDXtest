@@ -19,7 +19,7 @@ namespace SharpDXtest.BaseAssets.Components
                 radius = value;
             }
         }
-        private float intensity = 0.0f;
+        private float intensity = 0.4f;
         public float Intensity
         {
             get => intensity;
@@ -28,6 +28,20 @@ namespace SharpDXtest.BaseAssets.Components
                 if (value < 0.0f || value > 1.0f)
                     throw new ArgumentOutOfRangeException("Intensity", "Intensity can't be negative or more than 1");
                 intensity = value;
+            }
+        }
+        private float angularIntensity = 0.4f;
+        public float AngularIntensity
+        {
+            get
+            {
+                return angularIntensity;
+            }
+            set
+            {
+                if (value < 0.0f || value > 1.0f)
+                    throw new ArgumentOutOfRangeException("AngularIntensity", "Angular intensity can't be negative or more than 1");
+                angularIntensity = value;
             }
         }
         private float angle = (float)Math.PI / 3.0f;

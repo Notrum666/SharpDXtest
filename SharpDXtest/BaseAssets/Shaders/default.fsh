@@ -38,6 +38,7 @@ struct SpotLight
 	float radius;
 	float brightness;
 	float intensity;
+	float angularIntensity;
 	float angle;
 	float3 color;
 	float4x4 lightSpace;
@@ -121,15 +122,22 @@ float directionalLightAttenuation(DirectionalLight light)
 	return light.brightness;
 }
 
+float attenuationFunction(float x, float maximum, float curvature)
+{
+	return max(pow((maximum - x) / maximum, 1.0f / curvature - 1.0f), 0.0f);
+}
+
 float spotLightAttenuation(SpotLight light, float3 lightVec)
 {
-	return 0.0f;
+	float dist = length(lightVec);
+	float angle = acos(dot(normalize(-lightVec), light.direction));
+	return light.brightness * attenuationFunction(dist, light.radius, light.intensity) * attenuationFunction(angle, light.angle, light.angularIntensity);
 }
 
 float pointLightAttenuation(PointLight light, float3 lightVec)
 {
 	float dist = length(lightVec);
-	return light.brightness * pow((light.radius - dist) / light.radius, 1.0f / light.intensity - 1.0f);
+	return light.brightness * attenuationFunction(dist, light.radius, light.intensity);
 }
 
 float4 main(vert_in v) : SV_Target
@@ -155,6 +163,9 @@ float4 main(vert_in v) : SV_Target
 		
 		float ndotl = max(dot(v.n, lightDir), 0.0f);
 		
+		totalRadiance += radiance;
+		continue;
+		
 		float3 baseRefl = float3(0.04f, 0.04f, 0.04f);
 		baseRefl = baseRefl * (1.0f - metallic) + albedo * metallic;
 		float3 F = FSF(baseRefl, halfway, camDir);
@@ -170,25 +181,29 @@ float4 main(vert_in v) : SV_Target
 	}
 	for (i = 0; i < spotLightsCount; i++)
 	{
-		//curLightColor = float3(0.0f, 0.0f, 0.0f);
-    	//
-		//float3 lightDirection = normalize(spotLights[i].position - v.v.xyz);
-		//if (dot(lightDirection, -spotLights[i].direction) >= cos(spotLights[i].angle / 2.0f))
-		//{
-		//	float3 vl = v.vsl[i] * 0.5f + 0.5f;
-		//	//if ((2.0 * spot_near) / (spotLights[i].radius + spot_near - (vl.z * 2.0f - 1.0f) * (spotLights[i].radius - spot_near)) -
-        //    //    max(SHADOW_BIAS_MAX * (1.0f - dot(_vn, lightDirection)), SHADOW_BIAS_MIN) <=
-        //    //    (2.0 * spot_near) / (spotLights[i].radius + spot_near - (texture(spotLights[i].shadowTex, vl.xy).r * 2.0f - 1.0f) * (spotLights[i].radius - spot_near)))
-		//	{
-		//		float dist = distance(spotLights[i].position, v.v);
-    	//
-		//		curLightColor += max(0.0f, dot(lightDirection, v.n)) * diffuse;
-		//		curLightColor += pow(max(0.0f, dot(v.n, normalize(lightDirection + normalize(camPos - v.v)))), metallic) * specular;
-		//		curLightColor *= pow(spotLights[i].brightness * (spotLights[i].radius - dist) / spotLights[i].radius, (4.0f - 3.0f * spotLights[i].intensity) / 2.0f);
-		//	}
-		//}
-        //
-		//lightColor += spotLights[i].color * curLightColor;
+		float3 lightVec = spotLights[i].position - v.v;
+		//float lightDistSqr = length(lightVec);
+		//lightDistSqr *= lightDistSqr;
+		//float attenuation = 1.0f / lightDistSqr;
+		float attenuation = spotLightAttenuation(spotLights[i], lightVec);
+		float3 lightDir = normalize(lightVec);
+		float3 halfway = normalize(lightDir + camDir);
+		float3 radiance = spotLights[i].color * attenuation;
+		
+		float ndotl = max(dot(v.n, lightDir), 0.0f);
+		
+		float3 baseRefl = float3(0.04f, 0.04f, 0.04f);
+		baseRefl = baseRefl * (1.0f - metallic) + albedo * metallic;
+		float3 F = FSF(baseRefl, halfway, camDir);
+		float D = NDFGGX(v.n, halfway, roughness);
+		float G = GSF(v.n, lightDir, camDir, roughness);
+		
+		float denominator = 4.0f * ndotc * ndotl + FLOAT_EPSILON;
+		
+		float3 specular = D * G * F / denominator;
+		float3 diffuse = (1.0f - F) * (1.0f - metallic);
+		
+		totalRadiance += (diffuse * albedo / PI + specular) * radiance * ndotl;		
 	}
 	for (i = 0; i < pointLightsCount; i++)
 	{		

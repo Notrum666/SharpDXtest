@@ -19,7 +19,7 @@ namespace SharpDXtest.BaseAssets.Components
                 radius = value;
             }
         }
-        private float intensity = 0.0f;
+        private float intensity = 0.4f;
         public float Intensity
         {
             get => intensity;

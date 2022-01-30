@@ -145,7 +145,8 @@ namespace SharpDXtest
                         pipeline.UpdateUniform(baseLocation + "radius", curLight.Radius);
                         pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
                         pipeline.UpdateUniform(baseLocation + "intensity", curLight.Intensity);
-                        pipeline.UpdateUniform(baseLocation + "angle", curLight.Angle);
+                        pipeline.UpdateUniform(baseLocation + "angularIntensity", curLight.AngularIntensity);
+                        pipeline.UpdateUniform(baseLocation + "angle", curLight.Angle / 2.0f);
                         pipeline.UpdateUniform(baseLocation + "color", curLight.color);
 
                         pipeline.UpdateUniform(baseLocation + "lightSpace", (Matrix4x4f)obj.transform.View);
