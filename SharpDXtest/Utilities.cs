@@ -142,11 +142,13 @@ namespace SharpDXtest
     }
     public class Texture
     {
-        public Bitmap Image { get; private set; }
         private ShaderResourceView resourceView;
+        public Texture()
+        {
+
+        }
         public Texture(Bitmap image, bool applyGammaCorrection = true)
         {
-            this.Image = image;
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
                 image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
             BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
@@ -168,6 +170,83 @@ namespace SharpDXtest
             image.UnlockBits(data);
 
             resourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, texture);
+        }
+        //public static Texture SolidValue(int width, int height, byte value)
+        //{
+        //    if (width <= 0)
+        //        throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
+        //    if (height <= 0)
+        //        throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
+        //
+        //    byte[] data = new byte[width * height];
+        //    for (int i = 0; i < width * height; i++)
+        //        data[i] = value;
+        //
+        //    IntPtr dataPtr = Marshal.AllocHGlobal(width * height);
+        //    Marshal.Copy(data, 0, dataPtr, width * height);
+        //
+        //    Texture2D texture2d = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+        //    {
+        //        Width = width,
+        //        Height = height,
+        //        ArraySize = 1,
+        //        BindFlags = BindFlags.ShaderResource,
+        //        Usage = ResourceUsage.Immutable,
+        //        CpuAccessFlags = CpuAccessFlags.None,
+        //        Format = Format.R8_SNorm,
+        //        MipLevels = 1,
+        //        OptionFlags = ResourceOptionFlags.None,
+        //        SampleDescription = new SampleDescription(1, 0)
+        //    }, new DataRectangle(dataPtr, width));
+        //
+        //    Marshal.FreeHGlobal(dataPtr);
+        //
+        //    Texture texture = new Texture();
+        //    texture.resourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, texture2d);
+        //
+        //    return texture;
+        //}
+        public static Texture SolidColor(int width, int height, Vector3f color, byte alpha = 255, bool applyGammaCorrection = true)
+        {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
+
+            byte[] data = new byte[width * height * 4];
+            for (int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
+                {
+                    int pos = (i * width  + j) * 4;
+                    data[pos] = (byte)(color.x * 255);
+                    data[pos + 1] = (byte)(color.y * 255);
+                    data[pos + 2] = (byte)(color.z * 255);
+                    data[pos + 3] = alpha;
+                }
+
+            IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
+            Marshal.Copy(data, 0, dataPtr, width * height * 4);
+
+            Texture2D texture2d = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+            {
+                Width = width,
+                Height = height,
+                ArraySize = 1,
+                BindFlags = BindFlags.ShaderResource,
+                Usage = ResourceUsage.Immutable,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = applyGammaCorrection ? Format.R8G8B8A8_UNorm_SRgb : Format.R8G8B8A8_UNorm,
+                MipLevels = 1,
+                OptionFlags = ResourceOptionFlags.None,
+                SampleDescription = new SampleDescription(1, 0)
+            }, new DataRectangle(dataPtr, width * 4));
+
+            Marshal.FreeHGlobal(dataPtr);
+
+            Texture texture = new Texture();
+            texture.resourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, texture2d);
+
+            return texture;
         }
         public void use(string variable)
         {

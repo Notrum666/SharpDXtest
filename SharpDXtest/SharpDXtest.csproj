@@ -167,9 +167,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="BaseAssets\Textures\default_white.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="BaseAssets\Shaders\default.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -186,6 +183,9 @@
     <None Include="Assets\Scenes\Level1.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="BaseAssets\Textures\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

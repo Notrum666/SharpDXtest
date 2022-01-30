@@ -55,10 +55,10 @@ struct PointLight
 
 cbuffer materialBuf
 {
-	Texture2D albedoTex;
-	float metallic;
-	float roughness;
-	float ambientOcclusion;
+	Texture2D albedoMap;
+	Texture2D metallicMap;
+	Texture2D roughnessMap;
+	Texture2D ambientOcclusionMap;
 };
 
 cbuffer lightsBuf
@@ -142,7 +142,10 @@ float pointLightAttenuation(PointLight light, float3 lightVec)
 
 float4 main(vert_in v) : SV_Target
 {
-	float3 albedo = albedoTex.Sample(texSampler, v.t).xyz;
+	float3 albedo = albedoMap.Sample(texSampler, v.t).xyz;
+	float metallic = metallicMap.Sample(texSampler, v.t).x;
+	float roughness = roughnessMap.Sample(texSampler, v.t).x;
+	float ambientOcclusion = ambientOcclusionMap.Sample(texSampler, v.t).x;
 	
 	float3 camDir = normalize(camPos - v.v);
 	float ndotc = max(dot(camDir, v.n), 0.0f);

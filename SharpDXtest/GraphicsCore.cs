@@ -34,7 +34,10 @@ namespace SharpDXtest
         {
             InitDirectX(control);
 
-            AssetsManager.LoadTexture("BaseAssets\\Textures\\default_white.png", "default");
+            AssetsManager.Textures["default_albedo"] = Texture.SolidColor(64, 64, new Vector3f(1.0f, 1.0f, 1.0f), 255, true);
+            AssetsManager.Textures["default_metallic"] = Texture.SolidColor(64, 64, new Vector3f(0.1f, 0.0f, 0.0f), 0, false);
+            AssetsManager.Textures["default_roughness"] = Texture.SolidColor(64, 64, new Vector3f(0.5f, 0.0f, 0.0f), 0, false);
+            AssetsManager.Textures["default_ambientOcclusion"] = Texture.SolidColor(64, 64, new Vector3f(0.0f, 0.0f, 0.0f), 0, false);
 
             pipeline = AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
                                                                    Shader.Create("BaseAssets\\Shaders\\default.fsh"));
@@ -216,12 +219,11 @@ namespace SharpDXtest
                         continue;
                     pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
 
-                    pipeline.UpdateUniform("metallic", (float)mesh.material.Metallic);
-                    pipeline.UpdateUniform("roughness", (float)mesh.material.Roughness);
-                    pipeline.UpdateUniform("ambientOcclusion", (float)mesh.material.AmbientOcclusion);
-
                     pipeline.UploadUpdatedUniforms();
-                    mesh.material.Albedo.use("albedoTex");
+                    mesh.material.Albedo.use("albedoMap");
+                    mesh.material.Metallic.use("metallicMap");
+                    mesh.material.Roughness.use("roughnessMap");
+                    mesh.material.AmbientOcclusion.use("ambientOcclusionMap");
                     sampler.use("texSampler");
                     mesh.model.Render();
                 }

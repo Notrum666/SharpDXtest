@@ -36,9 +36,7 @@
     </CubeCollider>
     <SoundSource/>
     <CubeScript/>
-    <Mesh model="{Model cube}">
-      <!--<Mesh.material Texture="{Texture template}"/>-->
-    </Mesh>
+    <Mesh model="{Model cube}"/>
   </GameObject>
 
   <GameObject>
@@ -51,9 +49,7 @@
 	  <CubeCollider>
 		  <CubeCollider.Size x="2" y="2" z="2"/>
 	  </CubeCollider>
-    <Mesh model="{Model cube}">
-      <Mesh.material Metallic="1" Roughness="0.01"/>
-    </Mesh>
+    <Mesh model="{Model cube}"/>
   </GameObject>
 
   <GameObject>

@@ -23,12 +23,12 @@ namespace SharpDXtest.BaseAssets.Components
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("Texture can't be null.");
+                    throw new ArgumentNullException("Albedo", "Texture can't be null.");
                 albedo = value;
             }
         }
-        private double metallic;
-        public double Metallic
+        private Texture metallic;
+        public Texture Metallic
         {
             get
             {
@@ -36,13 +36,13 @@ namespace SharpDXtest.BaseAssets.Components
             }
             set
             {
-                if (value > 1.0 || value < 0.0)
-                    throw new ArgumentOutOfRangeException("Metallic can't be lower than 0 or bigger than 1.");
+                if (value == null)
+                    throw new ArgumentNullException("Metallic", "Texture can't be null.");
                 metallic = value;
             }
         }
-        private double roughness;
-        public double Roughness
+        private Texture roughness;
+        public Texture Roughness
         {
             get
             {
@@ -50,13 +50,13 @@ namespace SharpDXtest.BaseAssets.Components
             }
             set
             {
-                if (value > 1.0 || value < 0.0)
-                    throw new ArgumentOutOfRangeException("Roughness can't be lower than 0 or bigger than 1.");
+                if (value == null)
+                    throw new ArgumentNullException("Roughness", "Texture can't be null.");
                 roughness = value;
             }
         }
-        private double ambientOcclusion;
-        public double AmbientOcclusion
+        private Texture ambientOcclusion;
+        public Texture AmbientOcclusion
         {
             get
             {
@@ -64,19 +64,19 @@ namespace SharpDXtest.BaseAssets.Components
             }
             set
             {
-                if (value > 1.0 || value < 0.0)
-                    throw new ArgumentOutOfRangeException("Ambient occlusion can't be lower than 0 or bigger than 1.");
+                if (value == null)
+                    throw new ArgumentNullException("AmbientOcclusion", "Texture can't be null.");
                 ambientOcclusion = value;
             }
         }
         public Material()
         {
-            albedo = AssetsManager.Textures["default"];
-            metallic = 0.1;
-            roughness = 0.5;
-            ambientOcclusion = 0.0;
+            albedo = AssetsManager.Textures["default_albedo"];
+            metallic = AssetsManager.Textures["default_metallic"];
+            roughness = AssetsManager.Textures["default_roughness"];
+            ambientOcclusion = AssetsManager.Textures["default_ambientOcclusion"];
         }
-        public Material(Texture albedo, double metallic = 0.1, double roughness = 0.5, double ambientOcclusion = 0.0)
+        public Material(Texture albedo, Texture metallic, Texture roughness, Texture ambientOcclusion)
         {
             Albedo = albedo;
             Metallic = metallic;
