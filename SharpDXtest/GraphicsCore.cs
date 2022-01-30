@@ -57,12 +57,21 @@ namespace SharpDXtest
                 SampleDescription = new SampleDescription(1, 0)
             };
 
+#if DEBUG
             Device.CreateWithSwapChain(DriverType.Reference,
                                        DeviceCreationFlags.Debug,
                                        new FeatureLevel[] { FeatureLevel.Level_11_0 },
                                        sc_desc,
                                        out device,
                                        out swapchain);
+#else
+            Device.CreateWithSwapChain(DriverType.Hardware,
+                                       DeviceCreationFlags.None,
+                                       new FeatureLevel[] { FeatureLevel.Level_11_0 },
+                                       sc_desc,
+                                       out device,
+                                       out swapchain);
+#endif
 
             RasterizerState rastState = new RasterizerState(device, new RasterizerStateDescription()
             {

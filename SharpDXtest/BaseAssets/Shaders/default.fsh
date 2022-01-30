@@ -111,11 +111,25 @@ float3 FSF(float3 baseRefl, float3 halfway, float3 obsDir)
 	return baseRefl + (1.0f - baseRefl) * oneMinusDot * oneMinusDot * oneMinusDot * oneMinusDot * oneMinusDot;
 }
 
-// bidirectional reflective distribution function
-// current implementation: Cook-Torrance reflectance equation
-float BRDF(float3 p, float3 lightDir, float3 obsDir)
+float ambientLightAttenuation(AmbientLight light)
+{
+	return light.brightness;
+}
+
+float directionalLightAttenuation(DirectionalLight light)
+{
+	return light.brightness;
+}
+
+float spotLightAttenuation(SpotLight light, float3 lightVec)
 {
 	return 0.0f;
+}
+
+float pointLightAttenuation(PointLight light, float3 lightVec)
+{
+	float dist = length(lightVec);
+	return light.brightness * pow((light.radius - dist) / light.radius, 1.0f / light.intensity - 1.0f);
 }
 
 float4 main(vert_in v) : SV_Target
@@ -130,22 +144,29 @@ float4 main(vert_in v) : SV_Target
 	int i;
 	for (i = 0; i < ambientLightsCount; i++)
 	{
-		//curLightColor = ambientLights[i].brightness * ambient;
-		//lightColor += ambientLights[i].color * curLightColor;
+		totalRadiance += ambientLights[i].color * ambientLightAttenuation(ambientLights[i]);
 	}
 	for (i = 0; i < directionalLightsCount; i++)
 	{
-		//curLightColor = float3(0.0f, 0.0f, 0.0f);
-    	//
-		//float3 vl = v.vdl[i] * 0.5f + 0.5f;
-		//float3 lightDirection = -directionalLights[i].direction;
-		////if (vl.z - max(SHADOW_BIAS_MAX * (1.0f - dot(v.n, lightDirection)), SHADOW_BIAS_MIN) <= directionalLights[i].shadowTex.sample(shadowSampler, vl.xy).r)
-		//{
-		//	curLightColor += max(0.0f, dot(lightDirection, v.n)) * diffuse;
-		//	curLightColor += pow(max(0.0f, dot(v.n, normalize(lightDirection + normalize(camPos - v.v)))), metallic) * specular;
-		//	curLightColor *= directionalLights[i].brightness;
-		//}
-		//lightColor += directionalLights[i].color * curLightColor;
+		float attenuation = directionalLightAttenuation(directionalLights[i]);
+		float3 lightDir = -directionalLights[i].direction;
+		float3 halfway = normalize(lightDir + camDir);
+		float3 radiance = directionalLights[i].color * attenuation;
+		
+		float ndotl = max(dot(v.n, lightDir), 0.0f);
+		
+		float3 baseRefl = float3(0.04f, 0.04f, 0.04f);
+		baseRefl = baseRefl * (1.0f - metallic) + albedo * metallic;
+		float3 F = FSF(baseRefl, halfway, camDir);
+		float D = NDFGGX(v.n, halfway, roughness);
+		float G = GSF(v.n, lightDir, camDir, roughness);
+		
+		float denominator = 4.0f * ndotc * ndotl + FLOAT_EPSILON;
+		
+		float3 specular = D * G * F / denominator;
+		float3 diffuse = (1.0f - F) * (1.0f - metallic);
+		
+		totalRadiance += (diffuse * albedo / PI + specular) * radiance * ndotl;
 	}
 	for (i = 0; i < spotLightsCount; i++)
 	{
@@ -172,11 +193,12 @@ float4 main(vert_in v) : SV_Target
 	for (i = 0; i < pointLightsCount; i++)
 	{		
 		float3 lightVec = pointLights[i].position - v.v;
+		//float lightDistSqr = length(lightVec);
+		//lightDistSqr *= lightDistSqr;
+		//float attenuation = 1.0f / lightDistSqr;
+		float attenuation = pointLightAttenuation(pointLights[i], lightVec);
 		float3 lightDir = normalize(lightVec);
 		float3 halfway = normalize(lightDir + camDir);
-		float lightDistSqr = length(lightVec);
-		lightDistSqr *= lightDistSqr;
-		float attenuation = 1.0f / lightDistSqr;
 		float3 radiance = pointLights[i].color * attenuation;
 		
 		float ndotl = max(dot(v.n, lightDir), 0.0f);

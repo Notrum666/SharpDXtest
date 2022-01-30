@@ -59,8 +59,9 @@
   <GameObject>
     <Transform>
       <Transform.Position x="0" y="0" z="2"/>
+      <Transform.Rotation x="-45" z="45"/>
     </Transform>
-    <PointLight Radius="10" Brightness="1" Intensity="1"/>
+    <DirectionalLight/>
   </GameObject>
   
 </Scene>
