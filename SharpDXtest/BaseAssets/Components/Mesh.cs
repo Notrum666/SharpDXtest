@@ -27,6 +27,20 @@ namespace SharpDXtest.BaseAssets.Components
                 albedo = value;
             }
         }
+        private Texture normal;
+        public Texture Normal
+        {
+            get
+            {
+                return normal;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Normal", "Texture can't be null.");
+                normal = value;
+            }
+        }
         private Texture metallic;
         public Texture Metallic
         {
@@ -72,16 +86,18 @@ namespace SharpDXtest.BaseAssets.Components
         public Material()
         {
             albedo = AssetsManager.Textures["default_albedo"];
+            normal = AssetsManager.Textures["default_normal"];
             metallic = AssetsManager.Textures["default_metallic"];
             roughness = AssetsManager.Textures["default_roughness"];
             ambientOcclusion = AssetsManager.Textures["default_ambientOcclusion"];
         }
-        public Material(Texture albedo, Texture metallic, Texture roughness, Texture ambientOcclusion)
+        public Material(Texture albedo, Texture normal, Texture metallic, Texture roughness, Texture ambientOcclusion)
         {
             Albedo = albedo;
             Metallic = metallic;
             Roughness = roughness;
             AmbientOcclusion = ambientOcclusion;
+            Normal = normal;
         }
     }
 }

@@ -8,10 +8,12 @@
 
 struct vert_in
 {
-    float4 _ : SV_POSITION;
-    float3 v : POS;
-    float2 t : TEX;
+	float4 _ : SV_POSITION;
+	float3 v : POS;
+	float2 t : TEX;
 	float3 n : NORM;
+	// ttw - tangent to world
+	float3x3 ttw : TBN;
     
 	float3 vdl[MAX_DIRECTIONAL_LIGHTS] : POS_IN_DIR_LIGHT;
 	float3 vsl[MAX_SPOT_LIGHTS] : POS_IN_SPOT_LIGHT;
@@ -56,6 +58,7 @@ struct PointLight
 cbuffer materialBuf
 {
 	Texture2D albedoMap;
+	Texture2D normalMap;
 	Texture2D metallicMap;
 	Texture2D roughnessMap;
 	Texture2D ambientOcclusionMap;
@@ -141,14 +144,15 @@ float pointLightAttenuation(PointLight light, float3 lightVec)
 }
 
 float4 main(vert_in v) : SV_Target
-{
+{	
 	float3 albedo = albedoMap.Sample(texSampler, v.t).xyz;
+	float3 normal = normalize(mul(normalMap.Sample(texSampler, v.t).xyz * 2.0f - 1.0f, v.ttw));
 	float metallic = metallicMap.Sample(texSampler, v.t).x;
 	float roughness = roughnessMap.Sample(texSampler, v.t).x;
 	float ambientOcclusion = ambientOcclusionMap.Sample(texSampler, v.t).x;
 	
 	float3 camDir = normalize(camPos - v.v);
-	float ndotc = max(dot(camDir, v.n), 0.0f);
+	float ndotc = max(dot(camDir, normal), 0.0f);
 	
 	float3 totalRadiance = float3(0.0f, 0.0f, 0.0f);
 
@@ -164,7 +168,7 @@ float4 main(vert_in v) : SV_Target
 		float3 halfway = normalize(lightDir + camDir);
 		float3 radiance = directionalLights[i].color * attenuation;
 		
-		float ndotl = max(dot(v.n, lightDir), 0.0f);
+		float ndotl = max(dot(normal, lightDir), 0.0f);
 		
 		totalRadiance += radiance;
 		continue;
@@ -172,8 +176,8 @@ float4 main(vert_in v) : SV_Target
 		float3 baseRefl = float3(0.04f, 0.04f, 0.04f);
 		baseRefl = baseRefl * (1.0f - metallic) + albedo * metallic;
 		float3 F = FSF(baseRefl, halfway, camDir);
-		float D = NDFGGX(v.n, halfway, roughness);
-		float G = GSF(v.n, lightDir, camDir, roughness);
+		float D = NDFGGX(normal, halfway, roughness);
+		float G = GSF(normal, lightDir, camDir, roughness);
 		
 		float denominator = 4.0f * ndotc * ndotl + FLOAT_EPSILON;
 		
@@ -193,13 +197,13 @@ float4 main(vert_in v) : SV_Target
 		float3 halfway = normalize(lightDir + camDir);
 		float3 radiance = spotLights[i].color * attenuation;
 		
-		float ndotl = max(dot(v.n, lightDir), 0.0f);
+		float ndotl = max(dot(normal, lightDir), 0.0f);
 		
 		float3 baseRefl = float3(0.04f, 0.04f, 0.04f);
 		baseRefl = baseRefl * (1.0f - metallic) + albedo * metallic;
 		float3 F = FSF(baseRefl, halfway, camDir);
-		float D = NDFGGX(v.n, halfway, roughness);
-		float G = GSF(v.n, lightDir, camDir, roughness);
+		float D = NDFGGX(normal, halfway, roughness);
+		float G = GSF(normal, lightDir, camDir, roughness);
 		
 		float denominator = 4.0f * ndotc * ndotl + FLOAT_EPSILON;
 		
@@ -219,13 +223,13 @@ float4 main(vert_in v) : SV_Target
 		float3 halfway = normalize(lightDir + camDir);
 		float3 radiance = pointLights[i].color * attenuation;
 		
-		float ndotl = max(dot(v.n, lightDir), 0.0f);
+		float ndotl = max(dot(normal, lightDir), 0.0f);
 		
 		float3 baseRefl = float3(0.04f, 0.04f, 0.04f);
 		baseRefl = baseRefl * (1.0f - metallic) + albedo * metallic;
 		float3 F = FSF(baseRefl, halfway, camDir);
-		float D = NDFGGX(v.n, halfway, roughness);
-		float G = GSF(v.n, lightDir, camDir, roughness);
+		float D = NDFGGX(normal, halfway, roughness);
+		float G = GSF(normal, lightDir, camDir, roughness);
 		
 		float denominator = 4.0f * ndotc * ndotl + FLOAT_EPSILON;
 		

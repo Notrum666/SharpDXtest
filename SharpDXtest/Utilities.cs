@@ -44,6 +44,7 @@ namespace SharpDXtest
             public Vector3f v;
             public Vector2f t;
             public Vector3f n;
+            public Vector3f tx;
         }
 
         public void updateModel()
@@ -52,6 +53,7 @@ namespace SharpDXtest
                 throw new Exception("Model can't be empty.");
 
             List<ModelVertex> vertexes = new List<ModelVertex>();
+            ModelVertex[] curPolygon = new ModelVertex[3];
             int polygonsCount = v_i.Count;
             uint[] indexes = new uint[3 * polygonsCount];
             for (int i = 0; i < polygonsCount; i++)
@@ -88,6 +90,28 @@ namespace SharpDXtest
                         curVertex.n.y = (float)normal.y;
                         curVertex.n.z = (float)normal.z;
                     }
+
+                    //curPolygon.Add(curVertex);
+                    curPolygon[j] = curVertex;
+                }
+
+                Vector3 edge1 = curPolygon[1].v - curPolygon[0].v;
+                Vector3 edge2 = curPolygon[2].v - curPolygon[0].v;
+                Vector2 UVedge1 = curPolygon[1].t - curPolygon[0].t;
+                Vector2 UVedge2 = curPolygon[2].t - curPolygon[0].t;
+                Vector3 norm = edge1.cross(edge2).normalized();
+
+                Matrix3x3 invB = new Matrix3x3(UVedge1, UVedge2, Vector3.UnitZ, false).inversed();
+                Matrix3x3 A = new Matrix3x3(edge1, edge2, norm, false);
+                Matrix3x3 invP = A * invB;
+                Vector3f tangent = new Vector3f((float)invP.v00, (float)invP.v10, (float)invP.v20);//(Vector3f)(invP * Vector3.UnitX);
+                curPolygon[0].tx = tangent;
+                curPolygon[1].tx = tangent;
+                curPolygon[2].tx = tangent;
+
+                for (int j = 0; j < 3; j++)
+                {
+                    ModelVertex curVertex = curPolygon[j];
                     uint k;
                     for (k = 0; k < vertexes.Count; k++)
                     {

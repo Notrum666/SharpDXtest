@@ -5,7 +5,8 @@ struct vert_in
 {
     float3 v : POS;
     float2 t : TEX;
-    float3 n : NORM;
+	float3 n : NORM;
+	float3 tx : TANGENT;
 };
 
 struct vert_out
@@ -14,6 +15,8 @@ struct vert_out
     float3 v : POS;
     float2 t : TEX;
 	float3 n : NORM;
+	// ttw - tangent to world
+	float3x3 ttw : TBN;
     
 	float3 vdl[MAX_DIRECTIONAL_LIGHTS] : POS_IN_DIR_LIGHT;
 	float3 vsl[MAX_SPOT_LIGHTS] : POS_IN_SPOT_LIGHT;
@@ -63,6 +66,9 @@ vert_out main(vert_in vert)
 	res.v = v_world.xyz;
 	res.t = vert.t;
 	res.n = mul(float4(vert.n, 0.0f), model).xyz;
+	float3 tangent = mul(float4(vert.tx, 0.0f), model).xyz;
+	float3 bitangent = cross(res.n, tangent);
+	res.ttw = float3x3(tangent, bitangent, res.n);
 	
 	float4 tmp;
 	int i;

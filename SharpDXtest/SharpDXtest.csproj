@@ -165,6 +165,9 @@
     <Content Include="Assets\Sounds\sample.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Assets\Textures\brick_wall_normal.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="BaseAssets\Shaders\default.fsh">
