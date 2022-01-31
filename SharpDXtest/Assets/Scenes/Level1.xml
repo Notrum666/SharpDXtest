@@ -7,6 +7,7 @@
     
     <Textures>
       <Texture path="template.png"/>
+      <Texture path="brick_wall_normal.png"/>
     </Textures>
     
     <Sounds>
@@ -36,7 +37,11 @@
     </CubeCollider>
     <SoundSource/>
     <CubeScript/>
-    <Mesh model="{Model cube}"/>
+    <Mesh model="{Model cube}">
+      <Mesh.Material>
+        <Material Normal="{Texture brick_wall_normal}"/>
+      </Mesh.Material>
+    </Mesh>
   </GameObject>
 
   <GameObject>
@@ -49,7 +54,11 @@
 	  <CubeCollider>
 		  <CubeCollider.Size x="2" y="2" z="2"/>
 	  </CubeCollider>
-    <Mesh model="{Model cube}"/>
+    <Mesh model="{Model cube}">
+      <Mesh.Material>
+        <Material Normal="{Texture brick_wall_normal}"/>
+      </Mesh.Material>
+    </Mesh>
   </GameObject>
 
   <GameObject>

@@ -36,7 +36,6 @@ namespace SharpDXtest
 
             AssetsManager.Textures["default_albedo"] = Texture.SolidColor(64, 64, new Vector3f(1.0f, 1.0f, 1.0f), 255, true);
             AssetsManager.Textures["default_normal"] = Texture.SolidColor(64, 64, new Vector3f(0.5f, 0.5f, 1.0f), 255, false);
-            //AssetsManager.LoadTexture("Assets\\Textures\\brick_wall_normal.png", "default_normal", false);
             AssetsManager.Textures["default_metallic"] = Texture.SolidColor(64, 64, new Vector3f(0.1f, 0.0f, 0.0f), 0, false);
             AssetsManager.Textures["default_roughness"] = Texture.SolidColor(64, 64, new Vector3f(0.5f, 0.0f, 0.0f), 0, false);
             AssetsManager.Textures["default_ambientOcclusion"] = Texture.SolidColor(64, 64, new Vector3f(0.0f, 0.0f, 0.0f), 0, false);
@@ -222,11 +221,11 @@ namespace SharpDXtest
                     pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
 
                     pipeline.UploadUpdatedUniforms();
-                    mesh.material.Albedo.use("albedoMap");
-                    mesh.material.Normal.use("normalMap");
-                    mesh.material.Metallic.use("metallicMap");
-                    mesh.material.Roughness.use("roughnessMap");
-                    mesh.material.AmbientOcclusion.use("ambientOcclusionMap");
+                    mesh.Material.Albedo.use("albedoMap");
+                    mesh.Material.Normal.use("normalMap");
+                    mesh.Material.Metallic.use("metallicMap");
+                    mesh.Material.Roughness.use("roughnessMap");
+                    mesh.Material.AmbientOcclusion.use("ambientOcclusionMap");
                     sampler.use("texSampler");
                     mesh.model.Render();
                 }

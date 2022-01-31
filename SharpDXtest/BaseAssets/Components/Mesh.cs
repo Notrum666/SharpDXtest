@@ -9,7 +9,20 @@ namespace SharpDXtest.BaseAssets.Components
     public class Mesh : Component
     {
         public Model model;
-        public Material material = new Material();
+        private Material material = new Material();
+        public Material Material
+        {
+            get
+            {
+                return material;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Material", "Material can't be null.");
+                material = value;
+            }
+        }
     }
     public class Material
     {
