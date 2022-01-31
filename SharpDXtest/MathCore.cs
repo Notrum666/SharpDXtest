@@ -1193,6 +1193,33 @@ namespace SharpDXtest
             v21 = values[7];
             v22 = values[8];
         }
+        public Matrix3x3f(Vector3f vec1, Vector3f vec2, Vector3f vec3, bool rows = true)
+        {
+            if (rows)
+            {
+                v00 = vec1.x;
+                v01 = vec1.y;
+                v02 = vec1.z;
+                v10 = vec2.x;
+                v11 = vec2.y;
+                v12 = vec2.z;
+                v20 = vec3.x;
+                v21 = vec3.y;
+                v22 = vec3.z;
+            }
+            else
+            {
+                v00 = vec1.x;
+                v01 = vec2.x;
+                v02 = vec3.x;
+                v10 = vec1.y;
+                v11 = vec2.y;
+                v12 = vec3.y;
+                v20 = vec1.z;
+                v21 = vec2.z;
+                v22 = vec3.z;
+            }
+        }
         /// <summary>
         /// Returns transposed copy of this matrix
         /// </summary>
@@ -1302,6 +1329,33 @@ namespace SharpDXtest
             v20 = values[6];
             v21 = values[7];
             v22 = values[8];
+        }
+        public Matrix3x3(Vector3 vec1, Vector3 vec2, Vector3 vec3, bool rows = true)
+        {
+            if (rows)
+            {
+                v00 = vec1.x;
+                v01 = vec1.y;
+                v02 = vec1.z;
+                v10 = vec2.x;
+                v11 = vec2.y;
+                v12 = vec2.z;
+                v20 = vec3.x;
+                v21 = vec3.y;
+                v22 = vec3.z;
+            }
+            else
+            {
+                v00 = vec1.x;
+                v01 = vec2.x;
+                v02 = vec3.x;
+                v10 = vec1.y;
+                v11 = vec2.y;
+                v12 = vec3.y;
+                v20 = vec1.z;
+                v21 = vec2.z;
+                v22 = vec3.z;
+            }
         }
         /// <summary>
         /// Returns transposed copy of this matrix
@@ -1433,6 +1487,47 @@ namespace SharpDXtest
             v31 = values[13];
             v32 = values[14];
             v33 = values[15];
+        }
+        public Matrix4x4f(Vector4f vec1, Vector4f vec2, Vector4f vec3, Vector4f vec4, bool rows = true)
+        {
+            if (rows)
+            {
+                v00 = vec1.x;
+                v01 = vec1.y;
+                v02 = vec1.z;
+                v03 = vec1.w;
+                v10 = vec2.x;
+                v11 = vec2.y;
+                v12 = vec2.z;
+                v13 = vec2.w;
+                v20 = vec3.x;
+                v21 = vec3.y;
+                v22 = vec3.z;
+                v23 = vec3.w;
+                v30 = vec4.x;
+                v31 = vec4.y;
+                v32 = vec4.z;
+                v33 = vec4.w;
+            }
+            else
+            {
+                v00 = vec1.x;
+                v01 = vec2.x;
+                v02 = vec3.x;
+                v03 = vec4.x;
+                v10 = vec1.y;
+                v11 = vec2.y;
+                v12 = vec3.y;
+                v13 = vec4.y;
+                v20 = vec1.z;
+                v21 = vec2.z;
+                v22 = vec3.z;
+                v23 = vec4.z;
+                v30 = vec1.w;
+                v31 = vec2.w;
+                v32 = vec3.w;
+                v33 = vec4.w;
+            }
         }
 
         public static implicit operator Matrix4x4(Matrix4x4f mat) => new Matrix4x4(mat.v00, mat.v01, mat.v02, mat.v03,
@@ -1589,6 +1684,47 @@ namespace SharpDXtest
             v31 = values[13];
             v32 = values[14];
             v33 = values[15];
+        }
+        public Matrix4x4(Vector4 vec1, Vector4 vec2, Vector4 vec3, Vector4 vec4, bool rows = true)
+        {
+            if (rows)
+            {
+                v00 = vec1.x;
+                v01 = vec1.y;
+                v02 = vec1.z;
+                v03 = vec1.w;
+                v10 = vec2.x;
+                v11 = vec2.y;
+                v12 = vec2.z;
+                v13 = vec2.w;
+                v20 = vec3.x;
+                v21 = vec3.y;
+                v22 = vec3.z;
+                v23 = vec3.w;
+                v30 = vec4.x;
+                v31 = vec4.y;
+                v32 = vec4.z;
+                v33 = vec4.w;
+            }
+            else
+            {
+                v00 = vec1.x;
+                v01 = vec2.x;
+                v02 = vec3.x;
+                v03 = vec4.x;
+                v10 = vec1.y;
+                v11 = vec2.y;
+                v12 = vec3.y;
+                v13 = vec4.y;
+                v20 = vec1.z;
+                v21 = vec2.z;
+                v22 = vec3.z;
+                v23 = vec4.z;
+                v30 = vec1.w;
+                v31 = vec2.w;
+                v32 = vec3.w;
+                v33 = vec4.w;
+            }
         }
         /// <summary>
         /// Returns transposed copy of this matrix
