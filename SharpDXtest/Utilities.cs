@@ -20,6 +20,7 @@ using SharpDX.DXGI;
 using SharpDX.D3DCompiler;
 using SharpDX.XAudio2;
 using SharpDX.Multimedia;
+using SharpDX.Mathematics.Interop;
 
 using Buffer = SharpDX.Direct3D11.Buffer;
 
@@ -37,6 +38,7 @@ namespace SharpDXtest
         public List<int[]> n_i = null;
 
         private Buffer vertexBuffer;
+        private VertexBufferBinding vertexBufferBinding;
         private Buffer indexBuffer;
 
         private struct ModelVertex
@@ -130,12 +132,13 @@ namespace SharpDXtest
             }
 
             vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, vertexes.ToArray());
+            vertexBufferBinding = new VertexBufferBinding(vertexBuffer, Utilities.SizeOf<ModelVertex>(), 0);
             indexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.IndexBuffer, indexes);
         }
 
         public void Render()
         {
-            GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, new VertexBufferBinding(vertexBuffer, Utilities.SizeOf<ModelVertex>(), 0));
+            GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
             GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(v_i.Count * 3, 0, 0);
         }
@@ -143,7 +146,7 @@ namespace SharpDXtest
     public class Sampler
     {
         private SamplerState sampler;
-        public Sampler(TextureAddressMode addressU, TextureAddressMode addressV, Filter filter = Filter.Anisotropic, int maximumAnisotropy = 8, TextureAddressMode addressW = TextureAddressMode.Clamp)
+        public Sampler(TextureAddressMode addressU, TextureAddressMode addressV, Filter filter = Filter.Anisotropic, int maximumAnisotropy = 8, RawColor4 borderColor = new RawColor4(), TextureAddressMode addressW = TextureAddressMode.Clamp)
         {
             sampler = new SamplerState(GraphicsCore.CurrentDevice, new SamplerStateDescription()
             {
@@ -155,6 +158,7 @@ namespace SharpDXtest
                 MipLodBias = 0,
                 MinimumLod = float.MinValue,
                 MaximumLod = float.MaxValue,
+                BorderColor = borderColor
             });
         }
         public void use(string variable)
@@ -166,24 +170,34 @@ namespace SharpDXtest
     }
     public class Texture
     {
-        private ShaderResourceView resourceView;
-        public Texture()
+        private Texture2D texture;
+        public BindFlags Usage
         {
-
+            get => texture.Description.BindFlags;
         }
-        public Texture(Bitmap image, bool applyGammaCorrection = true)
+        public ShaderResourceView ShaderResource { get; private set; }
+        public DepthStencilView DepthStencil { get; private set; }
+        public RenderTargetView RenderTarget { get; private set; }
+        public Texture(Bitmap image, bool applyGammaCorrection = true, BindFlags usage = BindFlags.ShaderResource)
         {
+            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource | BindFlags.DepthStencil);
+            if (unsupportedUsage != BindFlags.None)
+                throw new NotImplementedException("Texture usage \"" + unsupportedUsage.ToString() + "\" is not supported.");
+
+            if (usage.HasFlag(BindFlags.DepthStencil))
+                throw new ArgumentException("Image base can't be used for depth stencil texture, use constructor overload with float base value instead.");
+
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
                 image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
             BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-            Texture2D texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+            texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
             {
                 Width = image.Width,
                 Height = image.Height,
                 ArraySize = 1,
-                BindFlags = BindFlags.ShaderResource,
-                Usage = ResourceUsage.Immutable,
+                BindFlags = usage,
+                Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
                 CpuAccessFlags = CpuAccessFlags.None,
                 Format = applyGammaCorrection ? Format.B8G8R8A8_UNorm_SRgb : Format.B8G8R8A8_UNorm,
                 MipLevels = 1,
@@ -193,49 +207,27 @@ namespace SharpDXtest
 
             image.UnlockBits(data);
 
-            resourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, texture);
+            generateViews();
         }
-        //public static Texture SolidValue(int width, int height, byte value)
-        //{
-        //    if (width <= 0)
-        //        throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
-        //    if (height <= 0)
-        //        throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
-        //
-        //    byte[] data = new byte[width * height];
-        //    for (int i = 0; i < width * height; i++)
-        //        data[i] = value;
-        //
-        //    IntPtr dataPtr = Marshal.AllocHGlobal(width * height);
-        //    Marshal.Copy(data, 0, dataPtr, width * height);
-        //
-        //    Texture2D texture2d = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
-        //    {
-        //        Width = width,
-        //        Height = height,
-        //        ArraySize = 1,
-        //        BindFlags = BindFlags.ShaderResource,
-        //        Usage = ResourceUsage.Immutable,
-        //        CpuAccessFlags = CpuAccessFlags.None,
-        //        Format = Format.R8_SNorm,
-        //        MipLevels = 1,
-        //        OptionFlags = ResourceOptionFlags.None,
-        //        SampleDescription = new SampleDescription(1, 0)
-        //    }, new DataRectangle(dataPtr, width));
-        //
-        //    Marshal.FreeHGlobal(dataPtr);
-        //
-        //    Texture texture = new Texture();
-        //    texture.resourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, texture2d);
-        //
-        //    return texture;
-        //}
-        public static Texture SolidColor(int width, int height, Vector3f color, byte alpha = 255, bool applyGammaCorrection = true)
+        public Texture(Texture2D texture)
+        {
+            this.texture = texture;
+
+            generateViews();
+        }
+        public Texture(int width, int height, Vector4f color, bool applyGammaCorrection = true, BindFlags usage = BindFlags.ShaderResource)
         {
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
             if (height <= 0)
                 throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
+
+            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource | BindFlags.DepthStencil);
+            if (unsupportedUsage != BindFlags.None)
+                throw new NotImplementedException("Texture usage \"" + unsupportedUsage.ToString() + "\" is not supported.");
+
+            if (usage.HasFlag(BindFlags.DepthStencil))
+                throw new ArgumentException("Color base value can't be used for depth stencil texture, use constructor overload with float base value instead.");
 
             byte[] data = new byte[width * height * 4];
             for (int i = 0; i < height; i++)
@@ -245,19 +237,19 @@ namespace SharpDXtest
                     data[pos] = (byte)(color.x * 255);
                     data[pos + 1] = (byte)(color.y * 255);
                     data[pos + 2] = (byte)(color.z * 255);
-                    data[pos + 3] = alpha;
+                    data[pos + 3] = (byte)(color.w * 255);
                 }
 
             IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
             Marshal.Copy(data, 0, dataPtr, width * height * 4);
 
-            Texture2D texture2d = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+            texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
             {
                 Width = width,
                 Height = height,
                 ArraySize = 1,
-                BindFlags = BindFlags.ShaderResource,
-                Usage = ResourceUsage.Immutable,
+                BindFlags = usage,
+                Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
                 CpuAccessFlags = CpuAccessFlags.None,
                 Format = applyGammaCorrection ? Format.R8G8B8A8_UNorm_SRgb : Format.R8G8B8A8_UNorm,
                 MipLevels = 1,
@@ -267,16 +259,61 @@ namespace SharpDXtest
 
             Marshal.FreeHGlobal(dataPtr);
 
-            Texture texture = new Texture();
-            texture.resourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, texture2d);
+            generateViews();
+        }
+        public Texture(int width, int height, float value = 0.0f, BindFlags usage = BindFlags.DepthStencil)
+        {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
 
-            return texture;
+            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource | BindFlags.DepthStencil);
+            if (unsupportedUsage != BindFlags.None)
+                throw new NotImplementedException("Texture usage \"" + unsupportedUsage.ToString() + "\" is not supported.");
+
+            float[] data = new float[width * height];
+            for (int i = 0; i < height; i++)
+                for (int j = 0; j < width; j++)
+                    data[i * width + height] = value;
+
+            IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
+            Marshal.Copy(data, 0, dataPtr, width * height);
+
+            texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+            {
+                Width = width,
+                Height = height,
+                ArraySize = 1,
+                BindFlags = usage,
+                Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = Format.D32_Float,
+                MipLevels = 1,
+                OptionFlags = ResourceOptionFlags.None,
+                SampleDescription = new SampleDescription(1, 0)
+            }, new DataRectangle(dataPtr, width * 4));
+
+            Marshal.FreeHGlobal(dataPtr);
+
+            generateViews();
+        }
+        private void generateViews()
+        {
+            if (Usage.HasFlag(BindFlags.ShaderResource))
+                ShaderResource = new ShaderResourceView(GraphicsCore.CurrentDevice, texture);
+            if (Usage.HasFlag(BindFlags.DepthStencil))
+                DepthStencil = new DepthStencilView(GraphicsCore.CurrentDevice, texture);
+            if (Usage.HasFlag(BindFlags.RenderTarget))
+                RenderTarget = new RenderTargetView(GraphicsCore.CurrentDevice, texture);
         }
         public void use(string variable)
         {
+            if ((texture.Description.BindFlags & BindFlags.ShaderResource) == BindFlags.None)
+                throw new Exception("This texture is not a shader resource");
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
                 if (shader.Locations.ContainsKey(variable))
-                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], resourceView);
+                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], ShaderResource);
         }
     }
     public class Sound : IDisposable

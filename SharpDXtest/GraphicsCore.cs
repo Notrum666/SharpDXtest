@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.IO;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -8,6 +9,7 @@ using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+using SharpDX.Mathematics.Interop;
 using Device = SharpDX.Direct3D11.Device;
 
 using SharpDXtest.Assets.Components;
@@ -19,45 +21,53 @@ namespace SharpDXtest
     {
         private static Device device;
         private static SwapChain swapchain;
-        private static RenderTargetView renderTarget;
-        private static DepthStencilView depthView;
+        private static Texture renderTexture;
+        private static Texture depthTexture;
+        private static int width, height;
         private static bool disposed = false;
 
         public static Device CurrentDevice { get => device; }
 
         private static Sampler sampler;
-        private static ShaderPipeline pipeline;
+        private static Sampler shadowsSampler;
 
         public static Camera CurrentCamera { get; set; }
 
         public static void Init(Control control)
         {
-            InitDirectX(control);
+            width = control.ClientSize.Width;
+            height = control.ClientSize.Height;
 
-            AssetsManager.Textures["default_albedo"] = Texture.SolidColor(64, 64, new Vector3f(1.0f, 1.0f, 1.0f), 255, true);
-            AssetsManager.Textures["default_normal"] = Texture.SolidColor(64, 64, new Vector3f(0.5f, 0.5f, 1.0f), 255, false);
-            AssetsManager.Textures["default_metallic"] = Texture.SolidColor(64, 64, new Vector3f(0.1f, 0.0f, 0.0f), 0, false);
-            AssetsManager.Textures["default_roughness"] = Texture.SolidColor(64, 64, new Vector3f(0.5f, 0.0f, 0.0f), 0, false);
-            AssetsManager.Textures["default_ambientOcclusion"] = Texture.SolidColor(64, 64, new Vector3f(0.0f, 0.0f, 0.0f), 0, false);
+            InitDirectX(control.Handle, width, height);
 
-            pipeline = AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
-                                                                   Shader.Create("BaseAssets\\Shaders\\default.fsh"));
+            AssetsManager.Textures["default_albedo"] = new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f), true);
+            AssetsManager.Textures["default_normal"] = new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f), false);
+            AssetsManager.Textures["default_metallic"] = new Texture(64, 64, new Vector4f(0.1f, 0.0f, 0.0f, 0.0f), false);
+            AssetsManager.Textures["default_roughness"] = new Texture(64, 64, new Vector4f(0.5f, 0.0f, 0.0f, 0.0f), false);
+            AssetsManager.Textures["default_ambientOcclusion"] = new Texture(64, 64, new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), false);
+
+            AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
+                                                        Shader.Create("BaseAssets\\Shaders\\default.fsh"));
             sampler = AssetsManager.Samplers["default"] = new Sampler(TextureAddressMode.Clamp, TextureAddressMode.Clamp);
 
-            device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, control.ClientSize.Width, control.ClientSize.Height, 0.0f, 1.0f));
-            device.ImmediateContext.OutputMerger.SetTargets(depthView, renderTarget);
+            AssetsManager.LoadShaderPipeline("light_directional", Shader.Create("BaseAssets\\Shaders\\ShadowShaders\\light_directional.vsh"),
+                                                                  Shader.Create("BaseAssets\\Shaders\\ShadowShaders\\light_directional.fsh"));
+            shadowsSampler = AssetsManager.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.MinMagMipPoint, borderColor: new RawColor4(1.0f, 0.0f, 0.0f, 0.0f));
+
+            AssetsManager.LoadShaderPipeline("tex_to_screen", Shader.Create("BaseAssets\\Shaders\\tex_to_screen.vsh"),
+                                                              Shader.Create("BaseAssets\\Shaders\\tex_to_screen.fsh"));
         }
-        private static void InitDirectX(Control control)
+        private static void InitDirectX(IntPtr HWND, int width, int height)
         {
             SwapChainDescription sc_desc = new SwapChainDescription()
             {
                 BufferCount = 1,
                 Flags = SwapChainFlags.None,
                 IsWindowed = true,
-                OutputHandle = control.Handle,
+                OutputHandle = HWND,
                 SwapEffect = SwapEffect.Discard,
                 Usage = Usage.RenderTargetOutput,
-                ModeDescription = new ModeDescription(control.ClientSize.Width, control.ClientSize.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
+                ModeDescription = new ModeDescription(width, height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
                 SampleDescription = new SampleDescription(1, 0)
             };
 
@@ -89,31 +99,83 @@ namespace SharpDXtest
             });
             device.ImmediateContext.Rasterizer.State = rastState;
 
-            swapchain.ResizeBuffers(sc_desc.BufferCount, control.ClientSize.Width, control.ClientSize.Height, Format.Unknown, SwapChainFlags.None);
+            swapchain.ResizeBuffers(sc_desc.BufferCount, width, height, Format.Unknown, SwapChainFlags.None);
 
-            Texture2D backBuffer = Texture2D.FromSwapChain<Texture2D>(swapchain, 0);
-            renderTarget = new RenderTargetView(device, backBuffer);
-            Texture2D depthBuffer = new Texture2D(device, new Texture2DDescription()
-            {
-                Format = Format.D32_Float_S8X24_UInt,
-                ArraySize = 1,
-                MipLevels = 1,
-                Width = control.ClientSize.Width,
-                Height = control.ClientSize.Height,
-                SampleDescription = new SampleDescription(1, 0),
-                Usage = ResourceUsage.Default,
-                BindFlags = BindFlags.DepthStencil,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None
-            });
-            depthView = new DepthStencilView(device, depthBuffer);
+            renderTexture = new Texture(Texture2D.FromSwapChain<Texture2D>(swapchain, 0));
+            depthTexture = new Texture(width, height);
 
             device.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         }
         public static void Update()
         {
-            device.ImmediateContext.ClearRenderTargetView(renderTarget, Color.FromRgba(0xFF323232));
-            device.ImmediateContext.ClearDepthStencilView(depthView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
+            //RenderShadows();
+            RenderScene();
+            //RenderTexture(AssetsManager.Textures["template"]);
+        }
+
+        private static void RenderShadows()
+        {
+            if (GameCore.CurrentScene == null)
+                return;
+
+            List<GameObject> objects = GameCore.CurrentScene.objects;
+
+            foreach (GameObject lightObj in objects)
+            {
+                if (!lightObj.Enabled)
+                    continue;
+                foreach (Light light in lightObj.getComponents<Light>())
+                {
+                    if (!light.Enabled)
+                        continue;
+
+                    if (light is SpotLight)
+                    {
+                        SpotLight curLight = light as SpotLight;
+
+
+                    }
+                    else if (light is DirectionalLight)
+                    {
+                        DirectionalLight curLight = light as DirectionalLight;
+
+                        device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, DirectionalLight.SHADOW_SIZE, DirectionalLight.SHADOW_SIZE, 0.0f, 1.0f));
+                        device.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.DepthStencil, renderTargetView: null);
+                    }
+                    else if (light is PointLight)
+                    {
+                        PointLight curLight = light as PointLight;
+
+
+                    }
+
+
+                    foreach (GameObject obj in objects)
+                    {
+                        if (!obj.Enabled)
+                            continue;
+                        foreach (Mesh mesh in obj.getComponents<Mesh>())
+                        {
+                            if (!mesh.Enabled)
+                                continue;
+                            //pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
+
+                            //pipeline.UploadUpdatedUniforms();
+
+                            mesh.model.Render();
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void RenderScene()
+        {
+            device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
+            device.ImmediateContext.OutputMerger.SetTargets(depthTexture.DepthStencil, renderTexture.RenderTarget);
+
+            device.ImmediateContext.ClearRenderTargetView(renderTexture.RenderTarget, Color.FromRgba(0xFF323232));
+            device.ImmediateContext.ClearDepthStencilView(depthTexture.DepthStencil, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
 
             if (GameCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
             {
@@ -124,6 +186,7 @@ namespace SharpDXtest
 
             List<GameObject> objects = GameCore.CurrentScene.objects;
 
+            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["default"];
             pipeline.Use();
 
             int spotLights = 0;
@@ -235,13 +298,28 @@ namespace SharpDXtest
             swapchain.Present(0, PresentFlags.None);
         }
 
+        private static void RenderTexture(Texture tex)
+        {
+            device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
+            device.ImmediateContext.OutputMerger.SetTargets(renderTexture.RenderTarget);
+
+            AssetsManager.ShaderPipelines["tex_to_screen"].Use();
+
+            tex.use("tex");
+            sampler.use("texSampler");
+            CurrentDevice.ImmediateContext.Draw(6, 0);
+
+            device.ImmediateContext.Flush();
+            swapchain.Present(0, PresentFlags.None);
+        }
+
         public static void Dispose()
         {
             if (!disposed)
             {
                 device.Dispose();
                 swapchain.Dispose();
-                renderTarget.Dispose();
+                //renderTarget.Dispose();
 
                 disposed = true;
             }

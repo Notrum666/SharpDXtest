@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+
 namespace SharpDXtest.BaseAssets.Components
 {
     public class DirectionalLight : Light
@@ -19,26 +22,38 @@ namespace SharpDXtest.BaseAssets.Components
                 radius = value;
             }
         }
-        //public static readonly int SHADOW_SIZE = 4096;
-        //public int FBO { get; private set; } = 0;
-        //public int shadowTex { get; private set; } = 0;
-        //public Matrix4x4 lightSpace
-        //{
-        //    get
-        //    {
-        //        Vector3 r = gameObject.transform.Right / radius;
-        //        Vector3 u = gameObject.transform.up / radius;
-        //        Vector3 f = gameObject.transform.forward / radius;
-        //        Vector3 p = -Camera.Current.gameObject.transform.position;
-        //        Matrix4 mat = new Matrix4(r.X, r.Y, r.Z, Vector3.Dot(p, r),
-        //                                  u.X, u.Y, u.Z, Vector3.Dot(p, u),
-        //                                  f.X, f.Y, f.Z, Vector3.Dot(p, f),
-        //                                  0f, 0f, 0f, 1f);
-        //        return mat;
-        //    }
-        //}
+        public static readonly int SHADOW_SIZE = 4096;
+        public Matrix4x4 lightSpace
+        {
+            get
+            {
+                Matrix4x4 view = gameObject.transform.View / radius;
+                view.v33 = 1.0;
+
+                return view;
+            }
+        }
+        public Texture ShadowTexture { get; private set; }
         public DirectionalLight()
         {
+            //shadowTex = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+            //{
+            //    Width = SHADOW_SIZE,
+            //    Height = SHADOW_SIZE,
+            //    ArraySize = 1,
+            //    BindFlags = BindFlags.ShaderResource | BindFlags.RenderTarget,
+            //    Usage = ResourceUsage.Immutable,
+            //    CpuAccessFlags = CpuAccessFlags.None,
+            //    Format = Format.D32_Float,
+            //    MipLevels = 1,
+            //    OptionFlags = ResourceOptionFlags.None,
+            //    SampleDescription = new SampleDescription(1, 0)
+            //});
+            //
+            //textureView = new ShaderResourceView(GraphicsCore.CurrentDevice, shadowTex);
+            //depthView = new DepthStencilView(GraphicsCore.CurrentDevice, shadowTex);            
+            ShadowTexture = new Texture(SHADOW_SIZE, SHADOW_SIZE, usage: BindFlags.ShaderResource | BindFlags.RenderTarget);
+
             //FBO = GL.GenFramebuffer();
             //GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
             //

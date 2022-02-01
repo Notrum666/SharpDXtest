@@ -152,6 +152,12 @@
     <None Include="Assets\Models\cube.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="BaseAssets\Shaders\tex_to_screen.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="BaseAssets\Shaders\ShadowShaders\light_directional.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -165,6 +171,12 @@
     <Content Include="Assets\Sounds\sample.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="BaseAssets\Shaders\tex_to_screen.vsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="BaseAssets\Shaders\ShadowShaders\light_directional.vsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Assets\Textures\brick_wall_normal.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

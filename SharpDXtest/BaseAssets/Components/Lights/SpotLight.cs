@@ -55,27 +55,23 @@ namespace SharpDXtest.BaseAssets.Components
                 angle = value;
             }
         }
-        //public static readonly float NEAR = 0.001f;
-        //public static readonly int SHADOW_SIZE = 2048;
+        public static readonly float NEAR = 0.001f;
+        public static readonly int SHADOW_SIZE = 2048;
         //public int FBO { get; private set; } = 0;
         //public int shadowTex { get; private set; } = 0;
-        //public Matrix4 lightSpace
-        //{
-        //    get
-        //    {
-        //        float ctg = 1f / (float)Math.Tan(angle / 2f);
-        //        Vector3 r = gameObject.transform.right * ctg;
-        //        Vector3 u = gameObject.transform.up * ctg;
-        //        Vector3 f = gameObject.transform.forward;
-        //        Vector3 p = -gameObject.transform.position;
-        //        float val = (radius + NEAR) / (radius - NEAR);
-        //        Matrix4 mat = new Matrix4(r.X, r.Y, r.Z, Vector3.Dot(p, r),
-        //                                  u.X, u.Y, u.Z, Vector3.Dot(p, u),
-        //                                  f.X * val, f.Y * val, f.Z * val, Vector3.Dot(p, f) * val - 2f * radius * NEAR / (radius - NEAR),
-        //                                  f.X, f.Y, f.Z, Vector3.Dot(p, f));
-        //        return mat;
-        //    }
-        //}
+        public Matrix4x4 lightSpace
+        {
+            get
+            {
+                float ctg = 1f / (float)Math.Tan(angle / 2f);
+
+                Matrix4x4 proj = new Matrix4x4(ctg, 0, 0, 0,
+                                               0, 0, ctg, 0,
+                                               0, radius / (radius - NEAR), 0, -radius * NEAR / (radius - NEAR),
+                                               0, 1, 0, 0);
+                return proj * gameObject.transform.View;
+            }
+        }
         public SpotLight()
         {
             //FBO = GL.GenFramebuffer();
