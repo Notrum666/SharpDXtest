@@ -1,6 +1,9 @@
 ﻿#define PI 3.14159265f
 #define FLOAT_EPSILON 1e-6
 
+#define SHADOW_BIAS_MIN 0.001f
+#define SHADOW_BIAS_MAX 0.005f
+
 #define MAX_AMBIENT_LIGHTS 8
 #define MAX_DIRECTIONAL_LIGHTS 8
 #define MAX_SPOT_LIGHTS 8
@@ -31,6 +34,7 @@ struct DirectionalLight
 	float brightness;
 	float3 color;
 	float4x4 lightSpace;
+	Texture2D shadowMap;
 };
 
 struct SpotLight
@@ -79,6 +83,7 @@ cbuffer lightsBuf
 };
 
 SamplerState texSampler;
+SamplerState shadowSampler;
 
 // normal distribution function
 float NDFGGX(float3 norm, float3 halfway, float roughness)
@@ -163,28 +168,28 @@ float4 main(vert_in v) : SV_Target
 	}
 	for (i = 0; i < directionalLightsCount; i++)
 	{
-		float attenuation = directionalLightAttenuation(directionalLights[i]);
 		float3 lightDir = -directionalLights[i].direction;
-		float3 halfway = normalize(lightDir + camDir);
-		float3 radiance = directionalLights[i].color * attenuation;
+		if (dot(lightDir, v.n) > 0 && v.vdl[i].z - max(SHADOW_BIAS_MAX * (1.0f - dot(normal, lightDir)), SHADOW_BIAS_MIN) < directionalLights[i].shadowMap.Sample(shadowSampler, v.vdl[i].xy * 0.5f + 0.5f).r)
+		{
+			float attenuation = directionalLightAttenuation(directionalLights[i]);
+			float3 halfway = normalize(lightDir + camDir);
+			float3 radiance = directionalLights[i].color * attenuation;
 		
-		float ndotl = max(dot(normal, lightDir), 0.0f);
+			float ndotl = max(dot(normal, lightDir), 0.0f);
 		
-		totalRadiance += radiance;
-		continue;
+			float3 baseRefl = float3(0.04f, 0.04f, 0.04f);
+			baseRefl = baseRefl * (1.0f - metallic) + albedo * metallic;
+			float3 F = FSF(baseRefl, halfway, camDir);
+			float D = NDFGGX(normal, halfway, roughness);
+			float G = GSF(normal, lightDir, camDir, roughness);
 		
-		float3 baseRefl = float3(0.04f, 0.04f, 0.04f);
-		baseRefl = baseRefl * (1.0f - metallic) + albedo * metallic;
-		float3 F = FSF(baseRefl, halfway, camDir);
-		float D = NDFGGX(normal, halfway, roughness);
-		float G = GSF(normal, lightDir, camDir, roughness);
+			float denominator = 4.0f * ndotc * ndotl + FLOAT_EPSILON;
 		
-		float denominator = 4.0f * ndotc * ndotl + FLOAT_EPSILON;
+			float3 specular = D * G * F / denominator;
+			float3 diffuse = (1.0f - F) * (1.0f - metallic);
 		
-		float3 specular = D * G * F / denominator;
-		float3 diffuse = (1.0f - F) * (1.0f - metallic);
-		
-		totalRadiance += (diffuse * albedo / PI + specular) * radiance * ndotl;
+			totalRadiance += (diffuse * albedo / PI + specular) * radiance * ndotl;
+		}
 	}
 	for (i = 0; i < spotLightsCount; i++)
 	{

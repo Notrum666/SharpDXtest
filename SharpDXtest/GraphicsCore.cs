@@ -52,7 +52,7 @@ namespace SharpDXtest
 
             AssetsManager.LoadShaderPipeline("light_directional", Shader.Create("BaseAssets\\Shaders\\ShadowShaders\\light_directional.vsh"),
                                                                   Shader.Create("BaseAssets\\Shaders\\ShadowShaders\\light_directional.fsh"));
-            shadowsSampler = AssetsManager.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.MinMagMipPoint, borderColor: new RawColor4(1.0f, 0.0f, 0.0f, 0.0f));
+            shadowsSampler = AssetsManager.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.MinMagMipPoint, borderColor: new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
 
             AssetsManager.LoadShaderPipeline("tex_to_screen", Shader.Create("BaseAssets\\Shaders\\tex_to_screen.vsh"),
                                                               Shader.Create("BaseAssets\\Shaders\\tex_to_screen.fsh"));
@@ -108,7 +108,7 @@ namespace SharpDXtest
         }
         public static void Update()
         {
-            //RenderShadows();
+            RenderShadows();
             RenderScene();
             //RenderTexture(AssetsManager.Textures["template"]);
         }
@@ -120,6 +120,7 @@ namespace SharpDXtest
 
             List<GameObject> objects = GameCore.CurrentScene.objects;
 
+            ShaderPipeline pipeline = null;
             foreach (GameObject lightObj in objects)
             {
                 if (!lightObj.Enabled)
@@ -139,8 +140,13 @@ namespace SharpDXtest
                     {
                         DirectionalLight curLight = light as DirectionalLight;
 
+                        pipeline = AssetsManager.ShaderPipelines["light_directional"];
+                        pipeline.Use();
                         device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, DirectionalLight.SHADOW_SIZE, DirectionalLight.SHADOW_SIZE, 0.0f, 1.0f));
-                        device.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.DepthStencil, renderTargetView: null);
+                        device.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.DepthStencil, renderTargetView: curLight.ShadowTexture.RenderTarget);
+                        device.ImmediateContext.ClearDepthStencilView(curLight.ShadowTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
+
+                        pipeline.UpdateUniform("lightSpace", (Matrix4x4f)curLight.lightSpace);
                     }
                     else if (light is PointLight)
                     {
@@ -158,13 +164,15 @@ namespace SharpDXtest
                         {
                             if (!mesh.Enabled)
                                 continue;
-                            //pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
+                            pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
 
-                            //pipeline.UploadUpdatedUniforms();
+                            pipeline.UploadUpdatedUniforms();
 
                             mesh.model.Render();
                         }
                     }
+
+                    //device.ImmediateContext.Flush();
                 }
             }
         }
@@ -175,7 +183,7 @@ namespace SharpDXtest
             device.ImmediateContext.OutputMerger.SetTargets(depthTexture.DepthStencil, renderTexture.RenderTarget);
 
             device.ImmediateContext.ClearRenderTargetView(renderTexture.RenderTarget, Color.FromRgba(0xFF323232));
-            device.ImmediateContext.ClearDepthStencilView(depthTexture.DepthStencil, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, 1.0f, 0);
+            device.ImmediateContext.ClearDepthStencilView(depthTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
 
             if (GameCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
             {
@@ -229,7 +237,9 @@ namespace SharpDXtest
                         pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
                         pipeline.UpdateUniform(baseLocation + "color", curLight.color);
 
-                        pipeline.UpdateUniform(baseLocation + "lightSpace", (Matrix4x4f)obj.transform.View);
+                        pipeline.UpdateUniform(baseLocation + "lightSpace", (Matrix4x4f)curLight.lightSpace);
+
+                        curLight.ShadowTexture.use(baseLocation + "shadowMap");
 
                         directionalLights++;
                     }
@@ -266,6 +276,9 @@ namespace SharpDXtest
             pipeline.UpdateUniform("pointLightsCount", pointLights);
             pipeline.UpdateUniform("ambientLightsCount", ambientLights);
 
+            sampler.use("texSampler");
+            shadowsSampler.use("shadowSampler");
+
             pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.gameObject.transform.Position);
 
             pipeline.UpdateUniform("exposure", 1.0f);
@@ -289,7 +302,6 @@ namespace SharpDXtest
                     mesh.Material.Metallic.use("metallicMap");
                     mesh.Material.Roughness.use("roughnessMap");
                     mesh.Material.AmbientOcclusion.use("ambientOcclusionMap");
-                    sampler.use("texSampler");
                     mesh.model.Render();
                 }
             }
@@ -301,7 +313,7 @@ namespace SharpDXtest
         private static void RenderTexture(Texture tex)
         {
             device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
-            device.ImmediateContext.OutputMerger.SetTargets(renderTexture.RenderTarget);
+            device.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: renderTexture.RenderTarget);
 
             AssetsManager.ShaderPipelines["tex_to_screen"].Use();
 

@@ -75,11 +75,13 @@ vert_out main(vert_in vert)
 	for (i = 0; i < directionalLightsCount; i++)
 	{
 		tmp = mul(v_world, directionalLights[i].lightSpace);
+		tmp.y *= -1;
 		res.vdl[i] = tmp.xyz / tmp.w;
 	}
 	for (i = 0; i < spotLightsCount; i++)
 	{
 		tmp = mul(v_world, spotLights[i].lightSpace);
+		tmp.y *= -1;
 		res.vsl[i] = tmp.xyz / tmp.w;
 	}
     

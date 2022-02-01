@@ -27,10 +27,18 @@ namespace SharpDXtest.BaseAssets.Components
         {
             get
             {
-                Matrix4x4 view = gameObject.transform.View / radius;
-                view.v33 = 1.0;
+                Matrix4x4 view = Matrix4x4.FromQuaternion(gameObject.transform.Rotation).transposed();
+                Vector3 pos = GraphicsCore.CurrentCamera.gameObject.transform.Position;
+                view.v03 = -pos.x * view.v00 - pos.y * view.v01 - pos.z * view.v02;
+                view.v13 = -pos.x * view.v10 - pos.y * view.v11 - pos.z * view.v12;
+                view.v23 = -pos.x * view.v20 - pos.y * view.v21 - pos.z * view.v22;
 
-                return view;
+                Matrix4x4 ortho = new Matrix4x4(1, 0, 0, 0,
+                                                0, 0, 1, 0,
+                                                0, 0.5, 0, 0.5 * radius,
+                                                0, 0, 0, radius);
+
+                return ortho * view;
             }
         }
         public Texture ShadowTexture { get; private set; }
@@ -51,8 +59,10 @@ namespace SharpDXtest.BaseAssets.Components
             //});
             //
             //textureView = new ShaderResourceView(GraphicsCore.CurrentDevice, shadowTex);
-            //depthView = new DepthStencilView(GraphicsCore.CurrentDevice, shadowTex);            
-            ShadowTexture = new Texture(SHADOW_SIZE, SHADOW_SIZE, usage: BindFlags.ShaderResource | BindFlags.RenderTarget);
+            //depthView = new DepthStencilView(GraphicsCore.CurrentDevice, shadowTex);
+
+            ShadowTexture = new Texture(SHADOW_SIZE, SHADOW_SIZE, usage: BindFlags.ShaderResource | BindFlags.DepthStencil);
+            //ShadowTexture = new Texture(SHADOW_SIZE, SHADOW_SIZE, Vector4f.Zero, usage: BindFlags.ShaderResource | BindFlags.RenderTarget);
 
             //FBO = GL.GenFramebuffer();
             //GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);

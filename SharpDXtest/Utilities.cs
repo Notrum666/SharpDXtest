@@ -180,12 +180,9 @@ namespace SharpDXtest
         public RenderTargetView RenderTarget { get; private set; }
         public Texture(Bitmap image, bool applyGammaCorrection = true, BindFlags usage = BindFlags.ShaderResource)
         {
-            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource | BindFlags.DepthStencil);
+            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource);
             if (unsupportedUsage != BindFlags.None)
-                throw new NotImplementedException("Texture usage \"" + unsupportedUsage.ToString() + "\" is not supported.");
-
-            if (usage.HasFlag(BindFlags.DepthStencil))
-                throw new ArgumentException("Image base can't be used for depth stencil texture, use constructor overload with float base value instead.");
+                throw new NotImplementedException("Texture with image base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
 
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
                 image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
@@ -222,12 +219,9 @@ namespace SharpDXtest
             if (height <= 0)
                 throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
 
-            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource | BindFlags.DepthStencil);
+            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource);
             if (unsupportedUsage != BindFlags.None)
-                throw new NotImplementedException("Texture usage \"" + unsupportedUsage.ToString() + "\" is not supported.");
-
-            if (usage.HasFlag(BindFlags.DepthStencil))
-                throw new ArgumentException("Color base value can't be used for depth stencil texture, use constructor overload with float base value instead.");
+                throw new NotImplementedException("Texture with color base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
 
             byte[] data = new byte[width * height * 4];
             for (int i = 0; i < height; i++)
@@ -268,14 +262,14 @@ namespace SharpDXtest
             if (height <= 0)
                 throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
 
-            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource | BindFlags.DepthStencil);
+            BindFlags unsupportedUsage = usage & ~(BindFlags.DepthStencil | BindFlags.ShaderResource);
             if (unsupportedUsage != BindFlags.None)
-                throw new NotImplementedException("Texture usage \"" + unsupportedUsage.ToString() + "\" is not supported.");
+                throw new NotImplementedException("Texture with scalar base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
 
             float[] data = new float[width * height];
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++)
-                    data[i * width + height] = value;
+                    data[i * width + j] = value;
 
             IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
             Marshal.Copy(data, 0, dataPtr, width * height);
@@ -288,7 +282,7 @@ namespace SharpDXtest
                 BindFlags = usage,
                 Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
                 CpuAccessFlags = CpuAccessFlags.None,
-                Format = Format.D32_Float,
+                Format = Format.R32_Typeless,
                 MipLevels = 1,
                 OptionFlags = ResourceOptionFlags.None,
                 SampleDescription = new SampleDescription(1, 0)
@@ -300,12 +294,62 @@ namespace SharpDXtest
         }
         private void generateViews()
         {
-            if (Usage.HasFlag(BindFlags.ShaderResource))
-                ShaderResource = new ShaderResourceView(GraphicsCore.CurrentDevice, texture);
-            if (Usage.HasFlag(BindFlags.DepthStencil))
-                DepthStencil = new DepthStencilView(GraphicsCore.CurrentDevice, texture);
-            if (Usage.HasFlag(BindFlags.RenderTarget))
-                RenderTarget = new RenderTargetView(GraphicsCore.CurrentDevice, texture);
+            Format format = texture.Description.Format;
+            if (format == Format.B8G8R8A8_UNorm || format == Format.B8G8R8A8_UNorm_SRgb || 
+                format == Format.R8G8B8A8_UNorm || format == Format.R8G8B8A8_UNorm_SRgb)
+            {
+                if (Usage.HasFlag(BindFlags.RenderTarget))
+                    RenderTarget = new RenderTargetView(GraphicsCore.CurrentDevice, texture,
+                    new RenderTargetViewDescription()
+                    {
+                        Format = format,
+                        Dimension = RenderTargetViewDimension.Texture2D,
+                        Texture2D = new RenderTargetViewDescription.Texture2DResource()
+                        {
+                            MipSlice = 0
+                        }
+                    });
+                if (Usage.HasFlag(BindFlags.ShaderResource))
+                    ShaderResource = new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
+                        new ShaderResourceViewDescription()
+                        {
+                            Format = format,
+                            Dimension = ShaderResourceViewDimension.Texture2D,
+                            Texture2D = new ShaderResourceViewDescription.Texture2DResource()
+                            {
+                                MipLevels = texture.Description.MipLevels,
+                                MostDetailedMip = texture.Description.MipLevels - 1
+                            }
+                        });
+            }
+            else if (texture.Description.Format.HasFlag(Format.R32_Typeless))
+            {
+                DepthStencil = new DepthStencilView(GraphicsCore.CurrentDevice, texture,
+                    new DepthStencilViewDescription()
+                    {
+                        Format = Format.D32_Float,
+                        Dimension = DepthStencilViewDimension.Texture2D,
+                        Flags = DepthStencilViewFlags.None,
+                        Texture2D = new DepthStencilViewDescription.Texture2DResource()
+                        {
+                            MipSlice = 0
+                        }
+                    });
+                if (Usage.HasFlag(BindFlags.ShaderResource))
+                    ShaderResource = new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
+                        new ShaderResourceViewDescription()
+                        {
+                            Format = Format.R32_Float,
+                            Dimension = ShaderResourceViewDimension.Texture2D,
+                            Texture2D = new ShaderResourceViewDescription.Texture2DResource()
+                            {
+                                MipLevels = texture.Description.MipLevels,
+                                MostDetailedMip = texture.Description.MipLevels - 1
+                            }
+                        });
+            }
+            else
+                throw new NotImplementedException("Texture format \"" + texture.Description.Format.ToString() + "\" is not supported.");
         }
         public void use(string variable)
         {
