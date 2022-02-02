@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using SharpDX.Direct3D11;
+
 namespace SharpDXtest.BaseAssets.Components
 {
     public class SpotLight : Light
@@ -56,41 +58,38 @@ namespace SharpDXtest.BaseAssets.Components
             }
         }
         public static readonly float NEAR = 0.001f;
-        public static readonly int SHADOW_SIZE = 2048;
-        //public int FBO { get; private set; } = 0;
-        //public int shadowTex { get; private set; } = 0;
-        public Matrix4x4 lightSpace
+        private int shadowSize = 1024;
+        public int ShadowSize
+        {
+            get
+            {
+                return shadowSize;
+            }
+            set
+            {
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException("ShadowSize", "Shadow size must be a positive value.");
+                shadowSize = value;
+            }
+        }
+        public Matrix4x4f lightSpace
         {
             get
             {
                 float ctg = 1f / (float)Math.Tan(angle / 2f);
 
-                Matrix4x4 proj = new Matrix4x4(ctg, 0, 0, 0,
-                                               0, 0, ctg, 0,
-                                               0, radius / (radius - NEAR), 0, -radius * NEAR / (radius - NEAR),
-                                               0, 1, 0, 0);
-                return proj * gameObject.transform.View;
+                Matrix4x4f proj = new Matrix4x4f(ctg, 0, 0, 0,
+                                                 0, 0, ctg, 0,
+                                                 0, radius / (radius - NEAR), 0, -radius * NEAR / (radius - NEAR),
+                                                 0, 1, 0, 0);
+
+                return proj * (Matrix4x4f)gameObject.transform.View;
             }
         }
+        public Texture ShadowTexture { get; private set; }
         public SpotLight()
         {
-            //FBO = GL.GenFramebuffer();
-            //GL.BindFramebuffer(FramebufferTarget.Framebuffer, FBO);
-            //
-            //shadowTex = GL.GenTexture();
-            //GL.BindTexture(TextureTarget.Texture2D, shadowTex);
-            //GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.DepthComponent, SHADOW_SIZE, SHADOW_SIZE, 0, PixelFormat.DepthComponent, PixelType.Float, IntPtr.Zero);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-            //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-            //
-            //GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, TextureTarget.Texture2D, shadowTex, 0);
-            //
-            //GL.DrawBuffer(DrawBufferMode.None);
-            //GL.ReadBuffer(ReadBufferMode.None);
-            //GL.BindTexture(TextureTarget.Texture2D, 0);
-            //GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            ShadowTexture = new Texture(shadowSize, shadowSize, 0.0f, BindFlags.ShaderResource | BindFlags.DepthStencil);
         }
     }
 }

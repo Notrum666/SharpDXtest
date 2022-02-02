@@ -155,7 +155,7 @@
     <None Include="BaseAssets\Shaders\tex_to_screen.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="BaseAssets\Shaders\ShadowShaders\light_directional.fsh">
+    <None Include="BaseAssets\Shaders\depth_only.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
@@ -174,7 +174,7 @@
     <None Include="BaseAssets\Shaders\tex_to_screen.vsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="BaseAssets\Shaders\ShadowShaders\light_directional.vsh">
+    <None Include="BaseAssets\Shaders\depth_only.vsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Assets\Textures\brick_wall_normal.png">
@@ -182,10 +182,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="BaseAssets\Shaders\default.fsh">
+    <None Include="BaseAssets\Shaders\pbr_lighting.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="BaseAssets\Shaders\default.vsh">
+    <None Include="BaseAssets\Shaders\pbr_lighting.vsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

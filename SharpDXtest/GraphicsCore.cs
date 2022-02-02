@@ -46,12 +46,12 @@ namespace SharpDXtest
             AssetsManager.Textures["default_roughness"] = new Texture(64, 64, new Vector4f(0.5f, 0.0f, 0.0f, 0.0f), false);
             AssetsManager.Textures["default_ambientOcclusion"] = new Texture(64, 64, new Vector4f(0.0f, 0.0f, 0.0f, 0.0f), false);
 
-            AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\default.vsh"), 
-                                                        Shader.Create("BaseAssets\\Shaders\\default.fsh"));
+            AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"), 
+                                                        Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
             sampler = AssetsManager.Samplers["default"] = new Sampler(TextureAddressMode.Clamp, TextureAddressMode.Clamp);
 
-            AssetsManager.LoadShaderPipeline("light_directional", Shader.Create("BaseAssets\\Shaders\\ShadowShaders\\light_directional.vsh"),
-                                                                  Shader.Create("BaseAssets\\Shaders\\ShadowShaders\\light_directional.fsh"));
+            AssetsManager.LoadShaderPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
+                                                                  Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
             shadowsSampler = AssetsManager.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.MinMagMipPoint, borderColor: new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
 
             AssetsManager.LoadShaderPipeline("tex_to_screen", Shader.Create("BaseAssets\\Shaders\\tex_to_screen.vsh"),
@@ -110,7 +110,6 @@ namespace SharpDXtest
         {
             RenderShadows();
             RenderScene();
-            //RenderTexture(AssetsManager.Textures["template"]);
         }
 
         private static void RenderShadows()
@@ -134,19 +133,25 @@ namespace SharpDXtest
                     {
                         SpotLight curLight = light as SpotLight;
 
+                        pipeline = AssetsManager.ShaderPipelines["depth_only"];
+                        pipeline.Use();
+                        device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, curLight.ShadowSize, curLight.ShadowSize, 0.0f, 1.0f));
+                        device.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.DepthStencil, renderTargetView: curLight.ShadowTexture.RenderTarget);
+                        device.ImmediateContext.ClearDepthStencilView(curLight.ShadowTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
 
+                        pipeline.UpdateUniform("view", curLight.lightSpace);
                     }
                     else if (light is DirectionalLight)
                     {
                         DirectionalLight curLight = light as DirectionalLight;
 
-                        pipeline = AssetsManager.ShaderPipelines["light_directional"];
+                        pipeline = AssetsManager.ShaderPipelines["depth_only"];
                         pipeline.Use();
-                        device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, DirectionalLight.SHADOW_SIZE, DirectionalLight.SHADOW_SIZE, 0.0f, 1.0f));
+                        device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, curLight.ShadowSize, curLight.ShadowSize, 0.0f, 1.0f));
                         device.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.DepthStencil, renderTargetView: curLight.ShadowTexture.RenderTarget);
                         device.ImmediateContext.ClearDepthStencilView(curLight.ShadowTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
 
-                        pipeline.UpdateUniform("lightSpace", (Matrix4x4f)curLight.lightSpace);
+                        pipeline.UpdateUniform("view", curLight.lightSpace);
                     }
                     else if (light is PointLight)
                     {
@@ -154,7 +159,6 @@ namespace SharpDXtest
 
 
                     }
-
 
                     foreach (GameObject obj in objects)
                     {
@@ -171,8 +175,6 @@ namespace SharpDXtest
                             mesh.model.Render();
                         }
                     }
-
-                    //device.ImmediateContext.Flush();
                 }
             }
         }
@@ -224,7 +226,9 @@ namespace SharpDXtest
                         pipeline.UpdateUniform(baseLocation + "angle", curLight.Angle / 2.0f);
                         pipeline.UpdateUniform(baseLocation + "color", curLight.color);
 
-                        pipeline.UpdateUniform(baseLocation + "lightSpace", (Matrix4x4f)obj.transform.View);
+                        pipeline.UpdateUniform(baseLocation + "lightSpace", curLight.lightSpace);
+
+                        curLight.ShadowTexture.use(baseLocation + "shadowMap");
 
                         spotLights++;
                     }
@@ -237,7 +241,7 @@ namespace SharpDXtest
                         pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
                         pipeline.UpdateUniform(baseLocation + "color", curLight.color);
 
-                        pipeline.UpdateUniform(baseLocation + "lightSpace", (Matrix4x4f)curLight.lightSpace);
+                        pipeline.UpdateUniform(baseLocation + "lightSpace", curLight.lightSpace);
 
                         curLight.ShadowTexture.use(baseLocation + "shadowMap");
 
@@ -276,12 +280,12 @@ namespace SharpDXtest
             pipeline.UpdateUniform("pointLightsCount", pointLights);
             pipeline.UpdateUniform("ambientLightsCount", ambientLights);
 
+            pipeline.UpdateUniform("spotLight_NEAR", SpotLight.NEAR);
+
             sampler.use("texSampler");
             shadowsSampler.use("shadowSampler");
 
             pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.gameObject.transform.Position);
-
-            pipeline.UpdateUniform("exposure", 1.0f);
 
             pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.View);
             pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.proj);

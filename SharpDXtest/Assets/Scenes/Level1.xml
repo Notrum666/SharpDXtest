@@ -16,10 +16,6 @@
   </Assets>
 
   <GameObject>
-    <Transform>
-      <Transform.Position x="0" y="0" z="0"/>
-      <Transform.Rotation/>
-    </Transform>
     <Camera IsCurrent="true" resolution="1.7777" near="0.001" far="100" FOV="1.5"/>
     <SoundListener IsCurrent="true"/>
     <Controller speed="5" cube="{Reference Cube}"/>
@@ -63,13 +59,10 @@
 
   <GameObject>
     <Transform>
-      <!--<Transform.Position x="2" y="-2" z="2"/>
-      <Transform.Rotation x="-35" z="45"/>-->
-      <Transform.Position x="0" y="0" z="2"/>
-      <Transform.Rotation x="-20" z="10"/>
+      <Transform.Position x="2" y="-3" z="2"/>
+      <Transform.Rotation x="-20" z="20"/>
     </Transform>
-    <!--<SpotLight Angle="1" Radius="5"/>-->
-    <DirectionalLight Radius="10"/>
+    <SpotLight Angle="1" Radius="10"/>
   </GameObject>
   
 </Scene>

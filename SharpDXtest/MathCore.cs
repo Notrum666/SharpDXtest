@@ -1629,6 +1629,18 @@ namespace SharpDXtest
                                    det02, -det12,  det22, -det32,
                                   -det03,  det13, -det23,  det33) / determinant;
         }
+        public static Matrix4x4f FromQuaternion(Quaternion q)
+        {
+            float s2 = 2.0f / (float)q.norm();
+            float x = (float)q.x;
+            float y = (float)q.y;
+            float z = (float)q.z;
+            float w = (float)q.w;
+            return new Matrix4x4f(1 - s2 * (y * y + z * z), s2 * (x * y - w * z), s2 * (x * z + w * y), 0,
+                                  s2 * (x * y + w * z), 1 - s2 * (x * x + z * z), s2 * (y * z - w * x), 0,
+                                  s2 * (x * z - w * y), s2 * (y * z + w * x), 1 - s2 * (x * x + y * y), 0,
+                                  0, 0, 0, 1);
+        }
         public override string ToString()
         {
             return "| " + v00.ToString() + " " + v01.ToString() + " " + v02.ToString() + " " + v03.ToString() + " |\n" +

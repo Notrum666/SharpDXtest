@@ -14,14 +14,14 @@ struct vert_out
 cbuffer mat
 {
 	float4x4 model;
-	float4x4 lightSpace;
+	float4x4 view;
 };
 
 vert_out main(vert_in vert)
 {
 	vert_out res = (vert_out) 0;
 	
-	res.sv_pos = mul(mul(float4(vert.v, 1.0), model), lightSpace);
+	res.sv_pos = mul(mul(float4(vert.v, 1.0), model), view);
 	
 	return res;
 }
