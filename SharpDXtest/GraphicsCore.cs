@@ -159,6 +159,8 @@ namespace SharpDXtest
 
 
                     }
+                    else
+                        continue;
 
                     foreach (GameObject obj in objects)
                     {
