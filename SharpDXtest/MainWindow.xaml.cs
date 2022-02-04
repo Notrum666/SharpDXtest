@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Globalization;
 using System.ComponentModel;
+using System.Windows.Interop;
 
 namespace SharpDXtest
 {
@@ -40,7 +41,8 @@ namespace SharpDXtest
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            GameCore.Init(WinFormsControl);
+            //GameCore.Init(WinFormsControl);
+            GameCore.Init(d3dimage, new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
 
             GameCore.Run();
 
@@ -62,7 +64,7 @@ namespace SharpDXtest
                 GameCore.IsPaused = !GameCore.IsPaused;
                 if (GameCore.IsPaused)
                 {
-                    System.Windows.Forms.Cursor.Position = new System.Drawing.Point(WinFormsControl.ClientSize.Width / 2, WinFormsControl.ClientSize.Height / 2);
+                    System.Windows.Forms.Cursor.Position = new System.Drawing.Point((int)ActualWidth / 2, (int)ActualHeight / 2);
                     System.Windows.Forms.Cursor.Show();
                 }
                 else

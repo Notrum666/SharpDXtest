@@ -8,19 +8,24 @@ using SharpDX;
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
+using SharpDX.Direct3D9;
 using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using Device = SharpDX.Direct3D11.Device;
+using Filter = SharpDX.Direct3D11.Filter;
+using Light = SharpDXtest.BaseAssets.Components.Light;
+using Mesh = SharpDXtest.BaseAssets.Components.Mesh;
 
 using SharpDXtest.Assets.Components;
 using SharpDXtest.BaseAssets.Components;
+using System.Windows.Interop;
 
 namespace SharpDXtest
 {
     public class GraphicsCore
     {
         private static Device device;
-        private static SwapChain swapchain;
+        //private static SwapChain swapchain;
         private static Texture renderTexture;
         private static Texture depthTexture;
         private static int width, height;
@@ -28,17 +33,23 @@ namespace SharpDXtest
 
         public static Device CurrentDevice { get => device; }
 
+        private static D3DImage d3dimage;
+        private static SharpDX.Direct3D9.Texture d9texture;
+
         private static Sampler sampler;
         private static Sampler shadowsSampler;
 
         public static Camera CurrentCamera { get; set; }
 
-        public static void Init(Control control)
-        {
-            width = control.ClientSize.Width;
-            height = control.ClientSize.Height;
+        public static event Action<Texture2D> OnRedrawn;
 
-            InitDirectX(control.Handle, width, height);
+        public static void Init(D3DImage d3dimage, IntPtr HWND, int width, int height)
+        {
+            GraphicsCore.width = width;
+            GraphicsCore.height = height;
+            GraphicsCore.d3dimage = d3dimage;
+
+            InitDirectX(HWND, width, height);
 
             AssetsManager.Textures["default_albedo"] = new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f), true);
             AssetsManager.Textures["default_normal"] = new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f), false);
@@ -59,37 +70,11 @@ namespace SharpDXtest
         }
         private static void InitDirectX(IntPtr HWND, int width, int height)
         {
-            SwapChainDescription sc_desc = new SwapChainDescription()
-            {
-                BufferCount = 1,
-                Flags = SwapChainFlags.None,
-                IsWindowed = true,
-                OutputHandle = HWND,
-                SwapEffect = SwapEffect.Discard,
-                Usage = Usage.RenderTargetOutput,
-                ModeDescription = new ModeDescription(width, height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                SampleDescription = new SampleDescription(1, 0)
-            };
-
-#if DEBUG
-            Device.CreateWithSwapChain(DriverType.Reference,
-                                       DeviceCreationFlags.Debug,
-                                       new FeatureLevel[] { FeatureLevel.Level_11_0 },
-                                       sc_desc,
-                                       out device,
-                                       out swapchain);
-#else
-            Device.CreateWithSwapChain(DriverType.Hardware,
-                                       DeviceCreationFlags.None,
-                                       new FeatureLevel[] { FeatureLevel.Level_11_0 },
-                                       sc_desc,
-                                       out device,
-                                       out swapchain);
-#endif
+            device = new Device(DriverType.Hardware, DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport, FeatureLevel.Level_11_0);
 
             RasterizerState rastState = new RasterizerState(device, new RasterizerStateDescription()
             {
-                FillMode = FillMode.Solid,
+                FillMode = SharpDX.Direct3D11.FillMode.Solid,
                 CullMode = CullMode.Back,
                 IsFrontCounterClockwise = true,
                 IsScissorEnabled = false,
@@ -99,12 +84,34 @@ namespace SharpDXtest
             });
             device.ImmediateContext.Rasterizer.State = rastState;
 
-            swapchain.ResizeBuffers(sc_desc.BufferCount, width, height, Format.Unknown, SwapChainFlags.None);
-
-            renderTexture = new Texture(Texture2D.FromSwapChain<Texture2D>(swapchain, 0));
+            renderTexture = new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource);
             depthTexture = new Texture(width, height);
 
             device.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+
+            Direct3DEx context = new Direct3DEx();
+
+            SharpDX.Direct3D9.Device d9device = new SharpDX.Direct3D9.Device(context,
+                                         0,
+                                         DeviceType.Hardware,
+                                         IntPtr.Zero,
+                                         CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.FpuPreserve,
+                                         new SharpDX.Direct3D9.PresentParameters()
+                                         {
+                                             Windowed = true,
+                                             SwapEffect = SharpDX.Direct3D9.SwapEffect.Discard,
+                                             DeviceWindowHandle = HWND,
+                                             PresentationInterval = PresentInterval.Default,
+                                         });
+            IntPtr renderTextureHandle = renderTexture.texture.QueryInterface<SharpDX.DXGI.Resource>().SharedHandle;
+            d9texture = new SharpDX.Direct3D9.Texture(d9device,
+                                                      width,
+                                                      height,
+                                                      1,
+                                                      SharpDX.Direct3D9.Usage.RenderTarget,
+                                                      SharpDX.Direct3D9.Format.A8R8G8B8,
+                                                      Pool.Default,
+                                                      ref renderTextureHandle);
         }
         public static void Update()
         {
@@ -192,7 +199,7 @@ namespace SharpDXtest
             if (GameCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
             {
                 device.ImmediateContext.Flush();
-                swapchain.Present(0, PresentFlags.None);
+                PresentTexture(d9texture);
                 return;
             }
 
@@ -313,7 +320,9 @@ namespace SharpDXtest
             }
 
             device.ImmediateContext.Flush();
-            swapchain.Present(0, PresentFlags.None);
+            PresentTexture(d9texture);
+
+            OnRedrawn?.Invoke(renderTexture.texture);
         }
 
         private static void RenderTexture(Texture tex)
@@ -328,7 +337,22 @@ namespace SharpDXtest
             CurrentDevice.ImmediateContext.Draw(6, 0);
 
             device.ImmediateContext.Flush();
-            swapchain.Present(0, PresentFlags.None);
+            PresentTexture(d9texture);
+        }
+
+        private static void PresentTexture(SharpDX.Direct3D9.Texture tex)
+        {
+            SharpDX.Direct3D9.Surface surface = tex.GetSurfaceLevel(0);
+
+            d3dimage.Dispatcher.Invoke(() =>
+            {
+                d3dimage.Lock();
+
+                d3dimage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, surface.NativePointer);
+                d3dimage.AddDirtyRect(new System.Windows.Int32Rect(0, 0, renderTexture.texture.Description.Width, renderTexture.texture.Description.Height));
+
+                d3dimage.Unlock();
+            });
         }
 
         public static void Dispose()
@@ -336,7 +360,7 @@ namespace SharpDXtest
             if (!disposed)
             {
                 device.Dispose();
-                swapchain.Dispose();
+                //swapchain.Dispose();
                 //renderTarget.Dispose();
 
                 disposed = true;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.Windows.Interop;
 using SharpDXtest.BaseAssets.Components;
 
 namespace SharpDXtest
@@ -44,10 +44,10 @@ namespace SharpDXtest
         private static Task loopTask;
         public static event Action OnPaused;
         public static event Action OnResumed;
-        public static void Init(Control control)
+        public static void Init(D3DImage d3dimage, IntPtr HWND, int width, int height)
         {
             // Order of initialization is important, same number means no difference
-            GraphicsCore.Init(control); // 1
+            GraphicsCore.Init(d3dimage, HWND, width, height); // 1
             SoundCore.Init(); // 1
             Time.Init(); // 1
             InputManager.Init(); // 2

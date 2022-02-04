@@ -170,7 +170,7 @@ namespace SharpDXtest
     }
     public class Texture
     {
-        private Texture2D texture;
+        public Texture2D texture { get; private set; }
         public BindFlags Usage
         {
             get => texture.Description.BindFlags;
@@ -198,7 +198,7 @@ namespace SharpDXtest
                 CpuAccessFlags = CpuAccessFlags.None,
                 Format = applyGammaCorrection ? Format.B8G8R8A8_UNorm_SRgb : Format.B8G8R8A8_UNorm,
                 MipLevels = 1,
-                OptionFlags = ResourceOptionFlags.None,
+                OptionFlags = ResourceOptionFlags.Shared,
                 SampleDescription = new SampleDescription(1, 0)
             }, new DataRectangle(data.Scan0, data.Stride));
 
@@ -245,9 +245,9 @@ namespace SharpDXtest
                 BindFlags = usage,
                 Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
                 CpuAccessFlags = CpuAccessFlags.None,
-                Format = applyGammaCorrection ? Format.R8G8B8A8_UNorm_SRgb : Format.R8G8B8A8_UNorm,
+                Format = applyGammaCorrection ? Format.B8G8R8A8_UNorm_SRgb : Format.B8G8R8A8_UNorm,
                 MipLevels = 1,
-                OptionFlags = ResourceOptionFlags.None,
+                OptionFlags = ResourceOptionFlags.Shared,
                 SampleDescription = new SampleDescription(1, 0)
             }, new DataRectangle(dataPtr, width * 4));
 
@@ -284,7 +284,7 @@ namespace SharpDXtest
                 CpuAccessFlags = CpuAccessFlags.None,
                 Format = Format.R32_Typeless,
                 MipLevels = 1,
-                OptionFlags = ResourceOptionFlags.None,
+                OptionFlags = ResourceOptionFlags.Shared,
                 SampleDescription = new SampleDescription(1, 0)
             }, new DataRectangle(dataPtr, width * 4));
 
