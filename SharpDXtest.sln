@@ -1,9 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpDXtest", "SharpDXtest\SharpDXtest.csproj", "{60876186-23C6-4BF9-AD02-632A9EF767ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinearAlgebra", "LinearAlgebra\LinearAlgebra.csproj", "{CCA05DCE-086A-4C88-873A-48A4A11E305E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{7BE49A57-9914-4520-A6DE-95195906D7DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinearAlgebra.Test", "LinearAlgebra.Test\LinearAlgebra.Test.csproj", "{4B93FD37-F130-418C-B58B-B7B1E61E3DFB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +21,18 @@ Global
 		{60876186-23C6-4BF9-AD02-632A9EF767ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60876186-23C6-4BF9-AD02-632A9EF767ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60876186-23C6-4BF9-AD02-632A9EF767ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCA05DCE-086A-4C88-873A-48A4A11E305E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCA05DCE-086A-4C88-873A-48A4A11E305E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCA05DCE-086A-4C88-873A-48A4A11E305E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCA05DCE-086A-4C88-873A-48A4A11E305E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BE49A57-9914-4520-A6DE-95195906D7DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BE49A57-9914-4520-A6DE-95195906D7DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BE49A57-9914-4520-A6DE-95195906D7DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BE49A57-9914-4520-A6DE-95195906D7DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B93FD37-F130-418C-B58B-B7B1E61E3DFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B93FD37-F130-418C-B58B-B7B1E61E3DFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B93FD37-F130-418C-B58B-B7B1E61E3DFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B93FD37-F130-418C-B58B-B7B1E61E3DFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

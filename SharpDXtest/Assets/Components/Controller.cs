@@ -4,8 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SharpDX.DirectInput;
-using SharpDXtest;
-using SharpDXtest.BaseAssets.Components;
+
+using LinearAlgebra;
+using Engine;
+using Engine.BaseAssets.Components;
 
 namespace SharpDXtest.Assets.Components
 {

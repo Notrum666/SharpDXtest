@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using SharpDXtest.BaseAssets.Components;
+using Engine.BaseAssets.Components;
 
 namespace SharpDXtest.Assets.Components
 {

@@ -7,7 +7,7 @@
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:asf="clr-namespace:AirspaceFixer;assembly=AirspaceFixer"
         mc:Ignorable="d"
-        Title="Main Window" Loaded="Window_Loaded" WindowState="Maximized" WindowStyle="None" Width="1280" Height="720" Closed="MainWindowInst_Closed" KeyDown="MainWindowInst_KeyDown">
+        Title="Main Window" Loaded="Window_Loaded" WindowState="Maximized" Width="1280" Height="720" Closed="MainWindowInst_Closed" KeyDown="MainWindowInst_KeyDown">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
     </Window.Resources>
