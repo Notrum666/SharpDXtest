@@ -10,44 +10,106 @@ namespace Engine.BaseAssets.Components
 {
     public class Camera : Component
     {
-        public double FOV = Math.PI / 2;
-        public double resolution;
-        public double near;
-        public double far;
+        private double fov = Math.PI / 2;
+        public double FOV
+        {
+            get
+            {
+                return fov;
+            }
+            set
+            {
+                fov = value;
+                recalculateMatrixes();
+            }
+        }
+        private double aspect;
+        public double Aspect
+        {
+            get
+            {
+                return aspect;
+            }
+            set
+            {
+                aspect = value;
+                recalculateMatrixes();
+            }
+        }
+        private double near;
+        public double Near
+        {
+            get
+            {
+                return near;
+            }
+            set
+            {
+                near = value;
+                recalculateMatrixes();
+            }
+        }
+        private double far;
+        public double Far
+        {
+            get
+            {
+                return far;
+            }
+            set
+            {
+                far = value;
+                recalculateMatrixes();
+            }
+        }
+        private static Camera current = null;
+        public static Camera Current
+        {
+            get
+            {
+                return current;
+            }
+            set
+            {
+                if (value != null && value.gameObject == null)
+                    throw new Exception("Camera component must be attached to a gameobject.");
+
+                current = value;
+            }
+        }
         public bool IsCurrent
         {
             get
             {
-                return GraphicsCore.CurrentCamera == this;
+                return Current == this;
             }
             set
             {
                 if (value)
-                    makeCurrent();
+                    Current = this;
                 else
                 {
-                    if (IsCurrent)
-                        GraphicsCore.CurrentCamera = this;
+                    if (Current == this)
+                        Current = null;
                 }
             }
         }
-
-        public Matrix4x4 proj
+        private Matrix4x4 proj;
+        public Matrix4x4 Proj
         {
             get
             {
-                double ctg = 1 / Math.Tan(FOV / 2);
-
-                Matrix4x4 proj = new Matrix4x4(ctg / resolution, 0, 0, 0,
-                                               0, 0, ctg, 0,
-                                               0, far / (far - near), 0, -far * near / (far - near),
-                                               0, 1, 0, 0);
                 return proj;
             }
         }
-        public void makeCurrent()
+        private void recalculateMatrixes()
         {
-            GraphicsCore.CurrentCamera = this;
+            double ctg = 1 / Math.Tan(FOV / 2);
+
+            proj = new Matrix4x4(ctg / aspect, 0, 0, 0,
+                                 0, 0, ctg, 0,
+                                 0, far / (far - near), 0, -far * near / (far - near),
+                                 0, 1, 0, 0);
         }
     }
 }

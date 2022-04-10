@@ -91,7 +91,8 @@
     <Compile Include="BaseAssets\Components\SoundSource.cs" />
     <Compile Include="BaseAssets\Components\Transform.cs" />
     <Compile Include="Extentions.cs" />
-    <Compile Include="Framebuffer.cs" />
+    <Compile Include="FrameBuffer.cs" />
+    <Compile Include="FramebufferPool.cs" />
     <Compile Include="GameCore.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="GraphicsCore.cs" />

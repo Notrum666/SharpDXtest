@@ -32,11 +32,21 @@ namespace Engine
         private static Sampler sampler;
         private static Sampler shadowsSampler;
 
-        public static Camera CurrentCamera { get; set; }
+        public static Camera CurrentCamera
+        {
+            get
+            {
+                return Camera.Current;
+            }
+            set
+            {
+                Camera.Current = value;
+            }
+        }
 
-        public static Framebuffer Frontbuffer { get; private set; }
-        private static Framebuffer middlebuffer;
-        private static Framebuffer backbuffer;
+        public static FrameBuffer Frontbuffer { get; private set; }
+        private static FrameBuffer middlebuffer;
+        private static FrameBuffer backbuffer;
 
         public static void Init(IntPtr HWND, int width, int height)
         {
@@ -92,11 +102,11 @@ namespace Engine
                                              PresentationInterval = PresentInterval.Default,
                                          });
 
-            Frontbuffer = new Framebuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
+            Frontbuffer = new FrameBuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
                                           new Texture(width, height, 0.0f));
-            backbuffer = new Framebuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
+            backbuffer = new FrameBuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
                                          new Texture(width, height, 0.0f));
-            middlebuffer = new Framebuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
+            middlebuffer = new FrameBuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
                                            new Texture(width, height, 0.0f));
         }
         public static void Update()
@@ -282,7 +292,7 @@ namespace Engine
             pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.gameObject.transform.Position);
 
             pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.View);
-            pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.proj);
+            pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.Proj);
 
             foreach (GameObject obj in objects)
             {
@@ -328,7 +338,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.ResolveSubresource(backbuffer.ColorTexture.texture, 0, middlebuffer.ColorTexture.texture, 0, SharpDX.DXGI.Format.B8G8R8A8_UNorm);
             lock (Frontbuffer)
             {
-                Framebuffer tmp = Frontbuffer;
+                FrameBuffer tmp = Frontbuffer;
                 Frontbuffer = middlebuffer;
                 middlebuffer = tmp;
             }

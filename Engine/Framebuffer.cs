@@ -7,15 +7,17 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
-    public sealed class Framebuffer
+    public sealed class FrameBuffer : IDisposable
     {
         public Texture ColorTexture { get; private set; }
         public Texture DepthTexture { get; private set; }
         public int Width { get => ColorTexture.texture.Description.Width; }
         public int Height { get => ColorTexture.texture.Description.Height; }
         private SharpDX.Direct3D9.Texture d9texture;
+        private bool disposed;
+
         public IntPtr D9SurfaceNativePointer { get => d9texture.GetSurfaceLevel(0).NativePointer; }
-        public Framebuffer(Texture colorTexture, Texture depthTexture)
+        public FrameBuffer(Texture colorTexture, Texture depthTexture)
         {
             if (colorTexture == null)
                 throw new ArgumentNullException(nameof(colorTexture));
@@ -41,6 +43,46 @@ namespace Engine
                                                       SharpDX.Direct3D9.Format.A8R8G8B8,
                                                       Pool.Default,
                                                       ref renderTextureHandle);
+        }
+        public FrameBuffer(int width, int height)
+        {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width));
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height));
+
+            ColorTexture = new Texture(width, height, LinearAlgebra.Vector4f.Zero, false, SharpDX.Direct3D11.BindFlags.ShaderResource | SharpDX.Direct3D11.BindFlags.RenderTarget);
+            DepthTexture = new Texture(width, height, 0.0f);
+
+            IntPtr renderTextureHandle = ColorTexture.texture.QueryInterface<SharpDX.DXGI.Resource>().SharedHandle;
+            d9texture = new SharpDX.Direct3D9.Texture(GraphicsCore.D9Device,
+                                                      Width,
+                                                      Height,
+                                                      1,
+                                                      SharpDX.Direct3D9.Usage.RenderTarget,
+                                                      SharpDX.Direct3D9.Format.A8R8G8B8,
+                                                      Pool.Default,
+                                                      ref renderTextureHandle);
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                d9texture.Dispose();
+
+                disposed = true;
+            }
+        }
+        ~FrameBuffer()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

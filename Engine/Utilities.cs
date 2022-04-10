@@ -33,7 +33,7 @@ using Quaternion = LinearAlgebra.Quaternion;
 
 namespace Engine
 {
-    public class Model
+    public class Model : IDisposable
     {
         public List<Vector3> v = null;
         public List<Vector2> t = null;
@@ -45,6 +45,7 @@ namespace Engine
         private Buffer vertexBuffer;
         private VertexBufferBinding vertexBufferBinding;
         private Buffer indexBuffer;
+        private bool disposed;
 
         private struct ModelVertex
         {
@@ -143,14 +144,50 @@ namespace Engine
 
         public void Render()
         {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(Model));
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
             GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(v_i.Count * 3, 0, 0);
         }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    v = null;
+                    t = null;
+                    n = null;
+                    v_i = null;
+                    t_i = null;
+                    n_i = null;
+                }
+
+                vertexBuffer.Dispose();
+                indexBuffer.Dispose();
+
+                disposed = true;
+            }
+        }
+
+        ~Model()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
-    public class Sampler
+    public class Sampler : IDisposable
     {
         private SamplerState sampler;
+        private bool disposed;
+
         public Sampler(TextureAddressMode addressU, TextureAddressMode addressV, Filter filter = Filter.Anisotropic, int maximumAnisotropy = 8, RawColor4 borderColor = new RawColor4(), TextureAddressMode addressW = TextureAddressMode.Clamp)
         {
             sampler = new SamplerState(GraphicsCore.CurrentDevice, new SamplerStateDescription()
@@ -168,13 +205,38 @@ namespace Engine
         }
         public void use(string variable)
         {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(Sampler));
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
                 if (shader.Locations.ContainsKey(variable))
                     GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetSampler(shader.Locations[variable], sampler);
         }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                sampler.Dispose();
+
+                disposed = true;
+            }
+        }
+
+        ~Sampler()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
-    public class Texture
+    public class Texture : IDisposable
     {
+        private bool disposed = false;
+
         public Texture2D texture { get; private set; }
         public BindFlags Usage
         {
@@ -208,12 +270,6 @@ namespace Engine
             }, new DataRectangle(data.Scan0, data.Stride));
 
             image.UnlockBits(data);
-
-            generateViews();
-        }
-        public Texture(Texture2D texture)
-        {
-            this.texture = texture;
 
             generateViews();
         }
@@ -364,6 +420,27 @@ namespace Engine
                 if (shader.Locations.ContainsKey(variable))
                     GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], ShaderResource);
         }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                texture.Dispose();
+
+                disposed = true;
+            }
+        }
+
+        ~Texture()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
     public class Sound : IDisposable
     {
@@ -379,10 +456,6 @@ namespace Engine
             Format = format;
             DecodedPacketsInfo = decodedPacketsInfo;
         }
-        ~Sound()
-        {
-            Dispose(disposing: false);
-        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -391,6 +464,10 @@ namespace Engine
                 Buffer.Stream.Dispose();
                 disposed = true;
             }
+        }
+        ~Sound()
+        {
+            Dispose(disposing: false);
         }
         public void Dispose()
         {

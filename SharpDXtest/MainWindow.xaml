@@ -7,7 +7,7 @@
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
         xmlns:asf="clr-namespace:AirspaceFixer;assembly=AirspaceFixer"
         mc:Ignorable="d"
-        Title="Main Window" Loaded="Window_Loaded" WindowState="Maximized" Width="1280" Height="720" Closed="MainWindowInst_Closed" KeyDown="MainWindowInst_KeyDown">
+        Title="Main Window" Loaded="Window_Loaded" WindowState="Maximized" Width="1280" Height="720" Closed="MainWindowInst_Closed" KeyDown="MainWindowInst_KeyDown" SizeChanged="MainWindowInst_SizeChanged">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
     </Window.Resources>
@@ -19,7 +19,7 @@
                     <Button x:Name="PauseMenuButton_Exit" Padding="100,10,100,10" Content="Exit" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Exit_Click"/>
                 </StackPanel>
             </Grid>
-            <Image Stretch="Fill">
+            <Image x:Name="RenderControl" Stretch="Fill">
                 <Image.Source>
                     <i:D3DImage x:Name="d3dimage"/>
                 </Image.Source>

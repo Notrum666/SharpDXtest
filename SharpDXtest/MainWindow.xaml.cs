@@ -121,5 +121,11 @@ namespace SharpDXtest
         {
             GameCore.IsPaused = false;
         }
+
+        private void MainWindowInst_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (GraphicsCore.CurrentCamera != null)
+                GraphicsCore.CurrentCamera.Aspect = RenderControl.ActualWidth / RenderControl.ActualHeight;
+        }
     }
 }

@@ -16,7 +16,7 @@
   </Assets>
 
   <GameObject>
-    <Camera IsCurrent="true" resolution="1.7777" near="0.001" far="100" FOV="1.5"/>
+    <Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.5"/>
     <SoundListener IsCurrent="true"/>
     <Controller speed="5" cube="{Reference Cube}"/>
   </GameObject>
