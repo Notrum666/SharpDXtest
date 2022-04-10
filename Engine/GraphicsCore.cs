@@ -48,6 +48,11 @@ namespace Engine
         private static FrameBuffer middlebuffer;
         private static FrameBuffer backbuffer;
 
+        private static bool needsToBeResized;
+        private static int targetWidth;
+        private static int targetHeight;
+        private static object resizeLockObject = new object();
+
         public static void Init(IntPtr HWND, int width, int height)
         {
             InitDirectX(HWND, width, height);
@@ -109,8 +114,37 @@ namespace Engine
             middlebuffer = new FrameBuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
                                            new Texture(width, height, 0.0f));
         }
+        public static void Resize(int width, int height)
+        {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width));
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height));
+
+            lock (resizeLockObject)
+            {
+                targetHeight = height;
+                targetWidth = width;
+                needsToBeResized = true;
+            }
+        }
         public static void Update()
         {
+            if (needsToBeResized)
+            {
+                lock (resizeLockObject)
+                {
+                    //Frontbuffer.Dispose();
+                    //middlebuffer.Dispose();
+                    //backbuffer.Dispose();
+                    Frontbuffer = new FrameBuffer(targetWidth, targetHeight);
+                    middlebuffer = new FrameBuffer(targetWidth, targetHeight);
+                    backbuffer = new FrameBuffer(targetWidth, targetHeight);
+
+                    needsToBeResized = false;
+                }
+            }
+
             RenderShadows();
             RenderScene();
         }
@@ -349,8 +383,9 @@ namespace Engine
             if (!disposed)
             {
                 CurrentDevice.Dispose();
-                //swapchain.Dispose();
-                //renderTarget.Dispose();
+                Frontbuffer.Dispose();
+                middlebuffer.Dispose();
+                backbuffer.Dispose();
 
                 disposed = true;
             }

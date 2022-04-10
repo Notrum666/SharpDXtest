@@ -29,6 +29,8 @@ namespace SharpDXtest
         public event PropertyChangedEventHandler PropertyChanged;
 
         private bool isCursorShown = true;
+
+        private bool windowLoaded = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -97,6 +99,8 @@ namespace SharpDXtest
             GameCore.Run();
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPaused"));
+
+            windowLoaded = true;
         }
 
         private void MainWindowInst_Closed(object sender, EventArgs e)
@@ -124,8 +128,13 @@ namespace SharpDXtest
 
         private void MainWindowInst_SizeChanged(object sender, SizeChangedEventArgs e)
         {
+            if (!windowLoaded)
+                return;
+
             if (GraphicsCore.CurrentCamera != null)
                 GraphicsCore.CurrentCamera.Aspect = RenderControl.ActualWidth / RenderControl.ActualHeight;
+
+            GraphicsCore.Resize((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
     }
 }
