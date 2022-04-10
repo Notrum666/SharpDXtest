@@ -24,31 +24,22 @@ namespace Engine
 {
     public static class GraphicsCore
     {
-        private static Device device;
-        //private static SwapChain swapchain;
-        private static Texture renderTexture;
-        private static Texture depthTexture;
-        private static int width, height;
         private static bool disposed = false;
 
-        public static Device CurrentDevice { get => device; }
-
-        private static D3DImage d3dimage;
-        private static SharpDX.Direct3D9.Texture d9texture;
+        public static Device CurrentDevice { get; private set; }
+        public static SharpDX.Direct3D9.Device D9Device { get; private set; }
 
         private static Sampler sampler;
         private static Sampler shadowsSampler;
 
         public static Camera CurrentCamera { get; set; }
 
-        public static event Action<Texture2D> OnRedrawn;
+        public static Framebuffer Frontbuffer { get; private set; }
+        private static Framebuffer middlebuffer;
+        private static Framebuffer backbuffer;
 
-        public static void Init(D3DImage d3dimage, IntPtr HWND, int width, int height)
+        public static void Init(IntPtr HWND, int width, int height)
         {
-            GraphicsCore.width = width;
-            GraphicsCore.height = height;
-            GraphicsCore.d3dimage = d3dimage;
-
             InitDirectX(HWND, width, height);
 
             AssetsManager.Textures["default_albedo"] = new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f), true);
@@ -62,7 +53,7 @@ namespace Engine
             sampler = AssetsManager.Samplers["default"] = new Sampler(TextureAddressMode.Clamp, TextureAddressMode.Clamp);
 
             AssetsManager.LoadShaderPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
-                                                                  Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
+                                                           Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
             shadowsSampler = AssetsManager.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.MinMagMipPoint, borderColor: new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
 
             AssetsManager.LoadShaderPipeline("tex_to_screen", Shader.Create("BaseAssets\\Shaders\\tex_to_screen.vsh"),
@@ -70,9 +61,9 @@ namespace Engine
         }
         private static void InitDirectX(IntPtr HWND, int width, int height)
         {
-            device = new Device(DriverType.Hardware, DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport, FeatureLevel.Level_11_0);
+            CurrentDevice = new Device(DriverType.Hardware, DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport, FeatureLevel.Level_11_0);
 
-            RasterizerState rastState = new RasterizerState(device, new RasterizerStateDescription()
+            RasterizerState rastState = new RasterizerState(CurrentDevice, new RasterizerStateDescription()
             {
                 FillMode = SharpDX.Direct3D11.FillMode.Solid,
                 CullMode = CullMode.Back,
@@ -82,16 +73,13 @@ namespace Engine
                 IsDepthClipEnabled = true,
                 IsMultisampleEnabled = true
             });
-            device.ImmediateContext.Rasterizer.State = rastState;
+            CurrentDevice.ImmediateContext.Rasterizer.State = rastState;
 
-            renderTexture = new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            depthTexture = new Texture(width, height);
-
-            device.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+            CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
             Direct3DEx context = new Direct3DEx();
 
-            SharpDX.Direct3D9.Device d9device = new SharpDX.Direct3D9.Device(context,
+            D9Device = new SharpDX.Direct3D9.Device(context,
                                          0,
                                          DeviceType.Hardware,
                                          IntPtr.Zero,
@@ -103,15 +91,13 @@ namespace Engine
                                              DeviceWindowHandle = HWND,
                                              PresentationInterval = PresentInterval.Default,
                                          });
-            IntPtr renderTextureHandle = renderTexture.texture.QueryInterface<SharpDX.DXGI.Resource>().SharedHandle;
-            d9texture = new SharpDX.Direct3D9.Texture(d9device,
-                                                      width,
-                                                      height,
-                                                      1,
-                                                      SharpDX.Direct3D9.Usage.RenderTarget,
-                                                      SharpDX.Direct3D9.Format.A8R8G8B8,
-                                                      Pool.Default,
-                                                      ref renderTextureHandle);
+
+            Frontbuffer = new Framebuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
+                                          new Texture(width, height, 0.0f));
+            backbuffer = new Framebuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
+                                         new Texture(width, height, 0.0f));
+            middlebuffer = new Framebuffer(new Texture(width, height, Vector4f.Zero, false, BindFlags.RenderTarget | BindFlags.ShaderResource),
+                                           new Texture(width, height, 0.0f));
         }
         public static void Update()
         {
@@ -142,9 +128,9 @@ namespace Engine
 
                         pipeline = AssetsManager.ShaderPipelines["depth_only"];
                         pipeline.Use();
-                        device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, curLight.ShadowSize, curLight.ShadowSize, 0.0f, 1.0f));
-                        device.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.DepthStencil, renderTargetView: curLight.ShadowTexture.RenderTarget);
-                        device.ImmediateContext.ClearDepthStencilView(curLight.ShadowTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
+                        CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, curLight.ShadowSize, curLight.ShadowSize, 0.0f, 1.0f));
+                        CurrentDevice.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.DepthStencil, renderTargetView: curLight.ShadowTexture.RenderTarget);
+                        CurrentDevice.ImmediateContext.ClearDepthStencilView(curLight.ShadowTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
 
                         pipeline.UpdateUniform("view", curLight.lightSpace);
                     }
@@ -154,9 +140,9 @@ namespace Engine
 
                         pipeline = AssetsManager.ShaderPipelines["depth_only"];
                         pipeline.Use();
-                        device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, curLight.ShadowSize, curLight.ShadowSize, 0.0f, 1.0f));
-                        device.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.DepthStencil, renderTargetView: curLight.ShadowTexture.RenderTarget);
-                        device.ImmediateContext.ClearDepthStencilView(curLight.ShadowTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
+                        CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, curLight.ShadowSize, curLight.ShadowSize, 0.0f, 1.0f));
+                        CurrentDevice.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.DepthStencil, renderTargetView: curLight.ShadowTexture.RenderTarget);
+                        CurrentDevice.ImmediateContext.ClearDepthStencilView(curLight.ShadowTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
 
                         pipeline.UpdateUniform("view", curLight.lightSpace);
                     }
@@ -190,16 +176,15 @@ namespace Engine
 
         private static void RenderScene()
         {
-            device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
-            device.ImmediateContext.OutputMerger.SetTargets(depthTexture.DepthStencil, renderTexture.RenderTarget);
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(backbuffer.DepthTexture.DepthStencil, backbuffer.ColorTexture.RenderTarget);
 
-            device.ImmediateContext.ClearRenderTargetView(renderTexture.RenderTarget, Color.FromRgba(0xFF323232));
-            device.ImmediateContext.ClearDepthStencilView(depthTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(backbuffer.ColorTexture.RenderTarget, Color.FromRgba(0xFF202020));
+            CurrentDevice.ImmediateContext.ClearDepthStencilView(backbuffer.DepthTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
 
             if (GameCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
             {
-                device.ImmediateContext.Flush();
-                PresentTexture(d9texture);
+                CurrentDevice.ImmediateContext.Flush();
                 return;
             }
 
@@ -319,16 +304,14 @@ namespace Engine
                 }
             }
 
-            device.ImmediateContext.Flush();
-            PresentTexture(d9texture);
-
-            OnRedrawn?.Invoke(renderTexture.texture);
+            CurrentDevice.ImmediateContext.Flush();
+            SwapFramebuffers();
         }
 
         private static void RenderTexture(Texture tex)
         {
-            device.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
-            device.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: renderTexture.RenderTarget);
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: backbuffer.ColorTexture.RenderTarget);
 
             AssetsManager.ShaderPipelines["tex_to_screen"].Use();
 
@@ -336,30 +319,26 @@ namespace Engine
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
 
-            device.ImmediateContext.Flush();
-            PresentTexture(d9texture);
+            CurrentDevice.ImmediateContext.Flush();
+            SwapFramebuffers();
         }
 
-        private static void PresentTexture(SharpDX.Direct3D9.Texture tex)
+        private static void SwapFramebuffers()
         {
-            SharpDX.Direct3D9.Surface surface = tex.GetSurfaceLevel(0);
-
-            d3dimage.Dispatcher.Invoke(() =>
+            CurrentDevice.ImmediateContext.ResolveSubresource(backbuffer.ColorTexture.texture, 0, middlebuffer.ColorTexture.texture, 0, SharpDX.DXGI.Format.B8G8R8A8_UNorm);
+            lock (Frontbuffer)
             {
-                d3dimage.Lock();
-
-                d3dimage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, surface.NativePointer);
-                d3dimage.AddDirtyRect(new System.Windows.Int32Rect(0, 0, renderTexture.texture.Description.Width, renderTexture.texture.Description.Height));
-
-                d3dimage.Unlock();
-            });
+                Framebuffer tmp = Frontbuffer;
+                Frontbuffer = middlebuffer;
+                middlebuffer = tmp;
+            }
         }
 
         public static void Dispose()
         {
             if (!disposed)
             {
-                device.Dispose();
+                CurrentDevice.Dispose();
                 //swapchain.Dispose();
                 //renderTarget.Dispose();
 

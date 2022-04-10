@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -40,6 +41,8 @@ namespace SharpDXtest
 
             GameCore.OnPaused += GameCore_OnPaused;
             GameCore.OnResumed += GameCore_OnResumed;
+
+            CompositionTarget.Rendering += OnRender;
         }
         private void HideCursor()
         {
@@ -57,6 +60,18 @@ namespace SharpDXtest
             isCursorShown = true;
             System.Windows.Forms.Cursor.Position = new System.Drawing.Point((int)ActualWidth / 2, (int)ActualHeight / 2);
             System.Windows.Forms.Cursor.Show();
+        }
+        private void OnRender(object sender, EventArgs e)
+        {
+            lock (GraphicsCore.Frontbuffer)
+            {
+                d3dimage.Lock();
+
+                d3dimage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, GraphicsCore.Frontbuffer.D9SurfaceNativePointer);
+                d3dimage.AddDirtyRect(new System.Windows.Int32Rect(0, 0, GraphicsCore.Frontbuffer.Width, GraphicsCore.Frontbuffer.Height));
+
+                d3dimage.Unlock();
+            }
         }
         private void GameCore_OnPaused()
         {

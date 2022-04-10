@@ -40,7 +40,7 @@ namespace Engine
         public static void Init(D3DImage d3dimage, IntPtr HWND, int width, int height)
         {
             // Order of initialization is important, same number means no difference
-            GraphicsCore.Init(d3dimage, HWND, width, height); // 1
+            GraphicsCore.Init(HWND, width, height); // 1
             SoundCore.Init(); // 1
             Time.Init(); // 1
             InputManager.Init(); // 2

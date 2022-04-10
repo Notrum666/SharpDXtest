@@ -260,7 +260,7 @@ namespace Engine
 
             generateViews();
         }
-        public Texture(int width, int height, float value = 0.0f, BindFlags usage = BindFlags.DepthStencil)
+        public Texture(int width, int height, float value, BindFlags usage = BindFlags.DepthStencil)
         {
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
