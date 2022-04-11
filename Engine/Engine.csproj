@@ -75,8 +75,8 @@
   <ItemGroup>
     <Compile Include="BaseAssets\Components\Camera.cs" />
     <Compile Include="BaseAssets\Components\Colliders\Collider.cs" />
+    <Compile Include="BaseAssets\Components\Colliders\MeshCollider.cs" />
     <Compile Include="BaseAssets\Components\Colliders\CubeCollider.cs" />
-    <Compile Include="BaseAssets\Components\Colliders\CylinderCollider.cs" />
     <Compile Include="BaseAssets\Components\Colliders\SphereCollider.cs" />
     <Compile Include="BaseAssets\Components\Component.cs" />
     <Compile Include="BaseAssets\Components\Lights\AmbientLight.cs" />

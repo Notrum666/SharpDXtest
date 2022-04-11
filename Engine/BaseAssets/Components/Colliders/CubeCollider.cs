@@ -8,7 +8,7 @@ using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components.Colliders
 {
-    public class CubeCollider : Collider
+    public class CubeCollider : MeshCollider
     {
         private Vector3 size;
         public Vector3 Size 
@@ -24,34 +24,26 @@ namespace Engine.BaseAssets.Components.Colliders
 
                 size = value;
                 calculateInertiaTensor();
-                generateVertices();
-                buildPolygons();
+                buildCollider();
             }
         }
-        private Vector3 offset;
-        public override Vector3 Offset 
+        private Vector3 inertiaTensor;
+        public override Vector3 InertiaTensor
         {
             get
             {
-                return offset;
-            }
-            set
-            {
-                offset = value;
-                generateVertices();
-                buildPolygons();
+                return inertiaTensor;
             }
         }
-
         public CubeCollider()
         {
-            size = new Vector3(1.0, 1.0, 1.0);
-            offset = Vector3.Zero;
+            Size = new Vector3(1.0, 1.0, 1.0);
+            Offset = Vector3.Zero;
         }
         public CubeCollider(Vector3 size)
         {
             Size = size;
-            offset = Vector3.Zero;
+            Offset = Vector3.Zero;
         }
         public CubeCollider(Vector3 size, Vector3 offset)
         {
@@ -61,36 +53,51 @@ namespace Engine.BaseAssets.Components.Colliders
 
         private void calculateInertiaTensor()
         {
-            InertiaTensor = 1.0 / 12.0 * new Vector3(Size.y * Size.y + Size.z * Size.z,
+            inertiaTensor = 1.0 / 12.0 * new Vector3(Size.y * Size.y + Size.z * Size.z,
                                                      Size.x * Size.x + Size.z * Size.z,
                                                      Size.x * Size.x + Size.y * Size.y);
         }
 
-        private void generateVertices()
+        private void buildCollider()
         {
-            vertices = new List<Vector3>(8);
-
-            vertices.Add(-0.5 * Size);
-            vertices.Add(0.5 * new Vector3(-Size.x, -Size.y, Size.z));
-
-            vertices.Add(0.5 * new Vector3(-Size.x, Size.y, -Size.z));
-            vertices.Add(0.5 * new Vector3(-Size.x, Size.y, Size.z));
-            
-            vertices.Add(0.5 * new Vector3(Size.x, Size.y, -Size.z));
-            vertices.Add(0.5 * Size);
-
-            vertices.Add(0.5 * new Vector3(Size.x, -Size.y, -Size.z));
-            vertices.Add(0.5 * new Vector3(Size.x, -Size.y, Size.z));
-
-            for (int i = 0; i < 8; i++)
-                vertices[i] += Offset;
-
-            calculateOuterSphereRadius();
+            generateVertexes();
+            generateNormals();
+            buildPolygons();
+            recalculateOuterSphere();
         }
 
+        private void generateVertexes()
+        {
+            vertexes.Clear();
+
+            vertexes.Add(-0.5 * Size);
+            vertexes.Add(0.5 * new Vector3(-Size.x, -Size.y, Size.z));
+
+            vertexes.Add(0.5 * new Vector3(-Size.x, Size.y, -Size.z));
+            vertexes.Add(0.5 * new Vector3(-Size.x, Size.y, Size.z));
+
+            vertexes.Add(0.5 * new Vector3(Size.x, Size.y, -Size.z));
+            vertexes.Add(0.5 * Size);
+
+            vertexes.Add(0.5 * new Vector3(Size.x, -Size.y, -Size.z));
+            vertexes.Add(0.5 * new Vector3(Size.x, -Size.y, Size.z));
+        }
+        private void generateNormals()
+        {
+            normals.Clear();
+
+            normals.Add(-Vector3.Up);
+            normals.Add(Vector3.Up);
+
+            normals.Add(-Vector3.Forward);
+            normals.Add(Vector3.Forward);
+
+            normals.Add(-Vector3.Right);
+            normals.Add(Vector3.Right);
+        }
         private void buildPolygons()
         {
-            polygons = new List<int[]>(6);
+            polygons.Clear();
 
             polygons.Add(new int[] { 0, 2, 4, 6 }); // Down
             polygons.Add(new int[] { 1, 7, 5, 3 }); // Up

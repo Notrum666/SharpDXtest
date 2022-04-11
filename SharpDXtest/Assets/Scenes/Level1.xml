@@ -1,68 +1,69 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
-  <Assets>
-    <Models>
-      <Model path="cube.obj"/>
-    </Models>
-    
-    <Textures>
-      <Texture path="template.png"/>
-      <Texture path="brick_wall_normal.png"/>
-    </Textures>
-    
-    <Sounds>
-      <Sound path="sample.wav"/>
-    </Sounds>
-  </Assets>
+	<Assets>
+		<Models>
+			<Model path="cube.obj"/>
+		</Models>
 
-  <GameObject>
-    <Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.5"/>
-    <SoundListener IsCurrent="true"/>
-    <Controller speed="5" cube="{Reference Cube}"/>
-  </GameObject>
+		<Textures>
+			<Texture path="template.png"/>
+			<Texture path="brick_wall_normal.png"/>
+		</Textures>
 
-  <GameObject x.Name="Cube">
-    <Transform>
-      <Transform.Position x="0" y="0" z="0"/>
-    </Transform>
-    <Rigidbody Mass="1">
-      <Rigidbody.Material Friction="0.5" Bounciness="1.0" BouncinessCombineMode="Maximum"/>
-    </Rigidbody>
-    <CubeCollider>
-      <CubeCollider.Size x="2" y="2" z="2"/>
-    </CubeCollider>
-    <SoundSource/>
-    <CubeScript/>
-    <Mesh model="{Model cube}">
-      <Mesh.Material>
-        <Material Normal="{Texture brick_wall_normal}"/>
-      </Mesh.Material>
-    </Mesh>
-  </GameObject>
+		<Sounds>
+			<Sound path="sample.wav"/>
+		</Sounds>
+	</Assets>
 
-  <GameObject>
-    <Transform>
-      <Transform.Position x="0" y="4" z="0"/>
-    </Transform>
-    <Rigidbody Mass="1">
-      <Rigidbody.Material Friction="0.5" Bounciness="0.0" BouncinessCombineMode="Minimum"/>
-    </Rigidbody>
-	  <CubeCollider>
-		  <CubeCollider.Size x="2" y="2" z="2"/>
-	  </CubeCollider>
-    <Mesh model="{Model cube}">
-      <Mesh.Material>
-        <Material Normal="{Texture brick_wall_normal}"/>
-      </Mesh.Material>
-    </Mesh>
-  </GameObject>
+	<GameObject>
+		<Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.5"/>
+		<SoundListener IsCurrent="true"/>
+		<Controller speed="5" cube="{Reference Cube}"/>
+	</GameObject>
 
-  <GameObject>
-    <Transform>
-      <Transform.Position x="2" y="-3" z="2"/>
-      <Transform.Rotation x="-20" z="20"/>
-    </Transform>
-    <SpotLight Angle="1" Radius="10"/>
-  </GameObject>
-  
+	<GameObject x.Name="Cube">
+		<Transform>
+			<Transform.Position x="0" y="0" z="0"/>
+			<Transform.Rotation x="0" y="0" z="0"/>
+		</Transform>
+		<Rigidbody Mass="1">
+			<Rigidbody.Material Friction="0.5" Bounciness="1.0" BouncinessCombineMode="Maximum"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
+		<SoundSource/>
+		<CubeScript/>
+		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position x="0" y="4" z="0"/>
+		</Transform>
+		<Rigidbody Mass="1">
+			<Rigidbody.Material Friction="0.5" Bounciness="0.0" BouncinessCombineMode="Minimum"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
+		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position x="2" y="-3" z="2"/>
+			<Transform.Rotation x="-20" z="20"/>
+		</Transform>
+		<SpotLight Angle="1" Radius="10"/>
+	</GameObject>
+
 </Scene>
