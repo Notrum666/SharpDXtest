@@ -62,6 +62,7 @@ namespace Engine.BaseAssets.Components.Colliders
         {
             generateVertexes();
             generateNormals();
+            buildEdges();
             buildPolygons();
             recalculateOuterSphere();
         }
@@ -94,6 +95,12 @@ namespace Engine.BaseAssets.Components.Colliders
 
             normals.Add(-Vector3.Right);
             normals.Add(Vector3.Right);
+
+            nonCollinearNormals.Clear();
+
+            nonCollinearNormals.Add(Vector3.Up);
+            nonCollinearNormals.Add(Vector3.Forward);
+            nonCollinearNormals.Add(Vector3.Right);
         }
         private void buildPolygons()
         {
@@ -107,6 +114,23 @@ namespace Engine.BaseAssets.Components.Colliders
 
             polygons.Add(new int[] { 0, 1, 3, 2 }); // Left
             polygons.Add(new int[] { 4, 5, 7, 6 }); // Right
+        }
+        private void buildEdges()
+        {
+            edges.Clear();
+
+            edges.Add((0, 2));
+            edges.Add((2, 4));
+            edges.Add((4, 6));
+            edges.Add((6, 0));
+            edges.Add((1, 7));
+            edges.Add((7, 5));
+            edges.Add((5, 3));
+            edges.Add((3, 1));
+            edges.Add((6, 7));
+            edges.Add((1, 0));
+            edges.Add((2, 3));
+            edges.Add((5, 4));
         }
     }
 }

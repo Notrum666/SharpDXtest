@@ -35,7 +35,79 @@ namespace Engine.BaseAssets.Components
         public abstract double OuterSphereRadius { get; }
 
         protected abstract void getBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest);
-        protected abstract Vector3[] getPossibleCollisionDirections(Collider other);
+        private static List<Vector3> getPossibleCollisionDirections(Collider col1, Collider col2, bool first = true)
+        {
+            List<Vector3> result = new List<Vector3>();
+            
+            void addUnique(Vector3 vec)
+            {
+                bool exists = false;
+                foreach (Vector3 vector in result)
+                    if (vector.isCollinearTo(vec))
+                    {
+                        exists = true;
+                        break;
+                    }
+                if (!exists)
+                    result.Add(vec);
+            }
+
+            switch (col1)
+            {
+                case MeshCollider mesh1:
+                    switch (col2)
+                    {
+                        case MeshCollider mesh2:
+                            {
+                                result.AddRange(mesh1.GlobalNonCollinearNormals);
+                                foreach (Vector3 vec in mesh2.GlobalNonCollinearNormals)
+                                    addUnique(vec);
+                                IReadOnlyList<Vector3> globalVertexes1 = mesh1.GlobalVertexes;
+                                IReadOnlyList<Vector3> globalVertexes2 = mesh2.GlobalVertexes;
+
+                                IReadOnlyList<(int a, int b)> edges2 = mesh2.Edges;
+                                foreach ((int a, int b) edge1 in mesh1.Edges)
+                                    foreach ((int a, int b) edge2 in edges2)
+                                        addUnique((globalVertexes1[edge1.b] - globalVertexes1[edge1.a]).cross(globalVertexes2[edge2.b] - globalVertexes2[edge2.a]));
+
+                                return result;
+                            }
+                        case SphereCollider sphere2:
+                            {
+                                result.AddRange(mesh1.GlobalNonCollinearNormals);
+
+                                IReadOnlyList<Vector3> globalVertexes1 = mesh1.GlobalVertexes;
+                                Vector3 curAxis;
+                                foreach (Vector3 vertex in globalVertexes1)
+                                    addUnique(vertex - sphere2.globalCenter);
+
+                                foreach ((int a, int b) edge1 in mesh1.Edges)
+                                {
+                                    curAxis = globalVertexes1[edge1.b] - globalVertexes1[edge1.a];
+                                    curAxis = curAxis.vecMul(sphere2.globalCenter - globalVertexes1[edge1.a]).vecMul(curAxis);
+                                    addUnique(curAxis);
+                                }
+
+                                return result;
+                            }
+                    }
+                    break;
+                case SphereCollider sphere1:
+                    switch (col2)
+                    {
+                        case SphereCollider sphere2:
+                            result.Add(sphere2.globalCenter - sphere1.globalCenter);
+                            return result;
+                    }
+                    break;
+            }
+
+
+            if (first)
+                return getPossibleCollisionDirections(col2, col1, false);
+
+            throw new NotImplementedException("getPossibleCollisionDirections is not implemented for " + col1.GetType().Name + " and " + col2.GetType().Name + " pair.");
+        }
 
         protected bool IsOuterSphereIntersectWith(Collider collider)
         {
@@ -52,11 +124,7 @@ namespace Engine.BaseAssets.Components
             if(!IsOuterSphereIntersectWith(other))
                 return false;
 
-            List<Vector3> axises = new List<Vector3>();
-            axises.AddRange(getPossibleCollisionDirections(other));
-            foreach(var normal in other.getPossibleCollisionDirections(this))
-                if(!axises.Exists(n => n.isCollinearTo(normal)))
-                    axises.Add(normal);
+            List<Vector3> axises = getPossibleCollisionDirections(this, other);
 
             Vector3[] projection = new Vector3[2];
             Vector3[] projectionOther = new Vector3[2];
@@ -227,6 +295,47 @@ namespace Engine.BaseAssets.Components
             }
             addIntersectionPoints(ref figure1, ref figure2);
             addIntersectionPoints(ref figure2, ref figure1);
+            Vector3 start1, end1, start2, end2;
+            Vector3 start1start2, start1end2;
+            Vector3 edge1, edge2;
+            Vector3 start2proj, end2proj;
+            for (int i = 0; i < figure1.Length; i++)
+            {
+                start1 = figure1[i];
+                end1 = figure1[(i + 1) % figure1.Length];
+                edge1 = end1 - start1;
+                for (int j = 0; j < figure2.Length; j++)
+                {
+                    start2 = figure2[j];
+                    end2 = figure2[(j + 1) % figure2.Length];
+                    edge2 = end2 - start2;
+            
+                    start1start2 = start2 - start1;
+                    start1end2 = end2 - start1;
+                    if (start1start2.cross(edge1).dot(start1end2.cross(edge1)) >= -sqrEpsilon ||
+                        (-start1start2).cross(edge2).dot((end1 - start2).cross(edge2)) >= -sqrEpsilon)
+                        continue;
+            
+                    start2proj = start1 + start1start2.projectOnVector(edge1);
+                    end2proj = start1 + start1end2.projectOnVector(edge1);
+            
+                    double k = (start2 - start2proj).length();
+                    k = k / (k + (end2 - end2proj).length());
+            
+                    // start2 is reused as variable for final point
+                    start2 = start2proj * k + end2proj * (1.0 - k);
+            
+                    pointExists = false;
+                    foreach (Vector3 intersectionPoint in intersectionPoints)
+                        if (intersectionPoint.equals(start2))
+                        {
+                            pointExists = true;
+                            break;
+                        }
+                    if (!pointExists)
+                        intersectionPoints.Add(start2);
+                }
+            }
 
             double x = 0, y = 0, z = 0;
             foreach (Vector3 point in intersectionPoints)

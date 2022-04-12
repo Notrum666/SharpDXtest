@@ -12,7 +12,9 @@ namespace Engine.BaseAssets.Components.Colliders
     {
         protected List<Vector3> vertexes = new List<Vector3>();
         protected List<Vector3> normals = new List<Vector3>();
+        protected List<Vector3> nonCollinearNormals = new List<Vector3>();
         protected List<int[]> polygons = new List<int[]>();
+        protected List<(int a, int b)> edges = new List<(int a, int b)>();
         public IReadOnlyList<Vector3> Vertexes
         {
             get
@@ -27,11 +29,25 @@ namespace Engine.BaseAssets.Components.Colliders
                 return normals.AsReadOnly();
             }
         }
+        public IReadOnlyList<Vector3> NonCollinearNormals
+        {
+            get
+            {
+                return nonCollinearNormals.AsReadOnly();
+            }
+        }
         public IReadOnlyList<int[]> Polygons
         {
             get
             {
                 return polygons.Select(arr => (int[])arr.Clone()).ToList().AsReadOnly();
+            }
+        }
+        public IReadOnlyList<(int a, int b)> Edges
+        {
+            get
+            {
+                return edges.AsReadOnly();
             }
         }
         private Vector3 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
@@ -45,6 +61,7 @@ namespace Engine.BaseAssets.Components.Colliders
 
         private List<Vector3> globalVertexes = new List<Vector3>();
         private List<Vector3> globalNormals = new List<Vector3>();
+        private List<Vector3> globalNonCollinearNormals = new List<Vector3>();
         public IReadOnlyList<Vector3> GlobalVertexes
         {
             get
@@ -57,6 +74,13 @@ namespace Engine.BaseAssets.Components.Colliders
             get
             {
                 return globalNormals.AsReadOnly();
+            }
+        }
+        public IReadOnlyList<Vector3> GlobalNonCollinearNormals
+        {
+            get
+            {
+                return globalNonCollinearNormals.AsReadOnly();
             }
         }
         private double squaredOuterSphereRadius;
@@ -76,7 +100,6 @@ namespace Engine.BaseAssets.Components.Colliders
             }
         }
 
-        private List<Vector3> globalUniqueNormals = new List<Vector3>();
         protected void recalculateOuterSphere()
         {
             double curSqrRadius;
@@ -117,11 +140,6 @@ namespace Engine.BaseAssets.Components.Colliders
             }
         }
 
-        protected override Vector3[] getPossibleCollisionDirections(Collider other)
-        {
-            return globalUniqueNormals.ToArray();
-        }
-
         protected override List<Vector3> getVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon)
         {
             List<Vector3> result = new List<Vector3>();
@@ -141,27 +159,15 @@ namespace Engine.BaseAssets.Components.Colliders
 
             globalVertexes.Clear();
             globalNormals.Clear();
-            globalUniqueNormals.Clear();
+            globalNonCollinearNormals.Clear();
 
             Matrix4x4 model = gameObject.transform.Model;
             foreach (Vector3 vertex in vertexes)
                 globalVertexes.Add((model * new Vector4(vertex + Offset, 1.0)).xyz);
-            bool exists;
-            Vector3 globalNormal;
             foreach (Vector3 normal in normals)
-            {
-                globalNormal = (model * new Vector4(normal, 0.0)).xyz;
-                globalNormals.Add(globalNormal);
-                exists = false;
-                foreach (Vector3 uniqueNormal in globalUniqueNormals)
-                    if (uniqueNormal.isCollinearTo(globalNormal))
-                    {
-                        exists = true;
-                        break;
-                    }
-                if (!exists)
-                    globalUniqueNormals.Add(globalNormal);
-            }
+                globalNormals.Add((model * new Vector4(normal, 0.0)).xyz);
+            foreach (Vector3 normal in nonCollinearNormals)
+                globalNonCollinearNormals.Add((model * new Vector4(normal, 0.0)).xyz);
         }
     }
 }

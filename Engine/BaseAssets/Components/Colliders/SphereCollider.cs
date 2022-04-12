@@ -85,58 +85,6 @@ namespace Engine.BaseAssets.Components.Colliders
             hindmost = GlobalCenter - direction;
         }
 
-        protected override Vector3[] getPossibleCollisionDirections(Collider other)
-        {
-            switch (other)
-            {
-                case SphereCollider sphere:
-                    return new Vector3[] { sphere.GlobalCenter - GlobalCenter };
-                case MeshCollider mesh:
-                    {
-                        List<Vector3> result = new List<Vector3>();
-
-                        IReadOnlyList<Vector3> vertexes = mesh.GlobalVertexes;
-                        Vector3 curAxis;
-                        bool exists;
-                        foreach (Vector3 vertex in vertexes)
-                        {
-                            curAxis = vertex - GlobalCenter;
-                            exists = false;
-                            foreach (Vector3 axis in result)
-                                if (axis.isCollinearTo(curAxis))
-                                {
-                                    exists = true;
-                                    break;
-                                }
-                            if (!exists)
-                                result.Add(curAxis);
-                        }
-                        IReadOnlyList<int[]> polygons = mesh.Polygons;
-                        foreach (int[] polygon in polygons)
-                        {
-                            for (int i = 0; i < polygon.Length; i++)
-                            {
-                                curAxis = vertexes[polygon[(i + 1) % polygon.Length]] - vertexes[polygon[i]];
-                                curAxis = curAxis.vecMul(GlobalCenter - vertexes[polygon[i]]).vecMul(curAxis);
-                                exists = false;
-                                foreach (Vector3 axis in result)
-                                    if (axis.isCollinearTo(curAxis))
-                                    {
-                                        exists = true;
-                                        break;
-                                    }
-                                if (!exists)
-                                    result.Add(curAxis);
-                            }
-                        }
-
-                        return result.ToArray();
-                    }
-                default:
-                    throw new NotImplementedException("Collision of " + GetType().Name + " with " + other.GetType().Name + " is not supported.");
-            }
-        }
-
         protected override List<Vector3> getVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon)
         {
             Vector3 result = (collisionPlanePoint - GlobalCenter).projectOnVector(collisionPlaneNormal);
