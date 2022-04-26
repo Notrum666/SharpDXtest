@@ -37,6 +37,7 @@ namespace Engine
         private static Task loopTask;
         public static event Action OnPaused;
         public static event Action OnResumed;
+        public static event Action OnFrameEnded;
         public static void Init(D3DImage d3dimage, IntPtr HWND, int width, int height)
         {
             // Order of initialization is important, same number means no difference
@@ -63,6 +64,8 @@ namespace Engine
                     Update();
                     SoundCore.Update();
                     GraphicsCore.Update();
+
+                    OnFrameEnded?.Invoke();
 
                     if (needsToBePaused)
                     {

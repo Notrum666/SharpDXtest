@@ -19,6 +19,10 @@
                     <Button x:Name="PauseMenuButton_Exit" Padding="100,10,100,10" Content="Exit" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Exit_Click"/>
                 </StackPanel>
             </Grid>
+            <StackPanel Panel.ZIndex="10" Background="#B2000000" TextElement.FontSize="40" TextElement.Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal">
+                <TextBlock Text="Collision:" Margin="10"/>
+                <TextBlock Text="{Binding IsColliding}" Margin="10"/>
+            </StackPanel>
             <Image x:Name="RenderControl" Stretch="Fill">
                 <Image.Source>
                     <i:D3DImage x:Name="d3dimage"/>

@@ -24,7 +24,7 @@
 	<GameObject x.Name="Cube">
 		<Transform>
 			<Transform.Position x="0" y="0" z="0"/>
-			<Transform.Rotation x="45" y="0" z="0"/>
+			<Transform.Rotation x="0" y="0" z="0"/>
 		</Transform>
 		<Rigidbody Mass="1">
 			<Rigidbody.Material Friction="0.5" Bounciness="1.0" BouncinessCombineMode="Maximum"/>
@@ -32,6 +32,7 @@
 		<CubeCollider>
 			<CubeCollider.Size x="2" y="2" z="2"/>
 		</CubeCollider>
+		<!--<SphereCollider/>-->
 		<SoundSource/>
 		<CubeScript/>
 		<Mesh model="{Model cube}">
@@ -43,7 +44,7 @@
 
 	<GameObject>
 		<Transform>
-			<Transform.Position x="0" y="4" z="0"/>
+			<Transform.Position x="0" y="2.8" z="0"/>
 			<Transform.Rotation x="0" y="0" z="45"/>
 		</Transform>
 		<Rigidbody Mass="1">
@@ -52,6 +53,7 @@
 		<CubeCollider>
 			<CubeCollider.Size x="2" y="2" z="2"/>
 		</CubeCollider>
+		<!--<SphereCollider/>-->
 		<Mesh model="{Model cube}">
 			<Mesh.Material>
 				<Material Normal="{Texture brick_wall_normal}"/>

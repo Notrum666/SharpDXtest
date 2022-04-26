@@ -26,6 +26,7 @@ namespace SharpDXtest
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public bool IsPaused { get => GameCore.IsPaused; }
+        public bool IsColliding { get; private set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
         private bool isCursorShown = true;
@@ -43,6 +44,7 @@ namespace SharpDXtest
 
             GameCore.OnPaused += GameCore_OnPaused;
             GameCore.OnResumed += GameCore_OnResumed;
+            GameCore.OnFrameEnded += GameCore_OnFrameEnded;
 
             CompositionTarget.Rendering += OnRender;
         }
@@ -74,6 +76,14 @@ namespace SharpDXtest
 
                 d3dimage.Unlock();
             }
+        }
+        private void GameCore_OnFrameEnded()
+        {
+            List<Engine.BaseAssets.Components.Collider> colliders =
+                GameCore.CurrentScene.objects.Where(obj => obj.Components.Any(comp => comp is Engine.BaseAssets.Components.Collider))
+                .Select(obj => obj.getComponent<Engine.BaseAssets.Components.Collider>()).ToList();
+            IsColliding = colliders[0].getCollisionExitVector(colliders[1], out _, out _, out _);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsColliding"));
         }
         private void GameCore_OnPaused()
         {

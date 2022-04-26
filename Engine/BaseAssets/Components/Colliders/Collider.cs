@@ -114,8 +114,7 @@ namespace Engine.BaseAssets.Components
             Vector3 centersVector = collider.globalCenter - globalCenter;
             return centersVector.squaredLength() <= SquaredOuterSphereRadius + 2 * OuterSphereRadius * collider.OuterSphereRadius + collider.SquaredOuterSphereRadius;
         }
-
-        public virtual bool getCollisionExitVector_SAT(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        private bool getCollisionExitVector_SAT(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             collisionExitVector = null;
             exitDirectionVector = null;
@@ -171,7 +170,154 @@ namespace Engine.BaseAssets.Components
 
             return true;
         }
+        private bool GilbertJohnsonKeerthi(Collider other, out List<Vector3> simplex)
+        {
+            simplex = new List<Vector3>();
 
+            Vector3 A, B, C, D;
+            Vector3 direction = Vector3.Forward;
+            Vector3 point1, point2;
+            Vector3 MinkowskiDifference()
+            {
+                getBoundaryPointsInDirection(direction, out _, out point1);
+                other.getBoundaryPointsInDirection(direction, out point2, out _);
+                return point1 - point2;
+            }
+
+            Vector3 tmp;
+
+            A = MinkowskiDifference();
+
+            if (A.isZero())
+                direction = -Vector3.Forward;
+            else
+                direction = -A;
+            B = MinkowskiDifference();
+
+            if (direction.dot(B) <= -Constants.SqrEpsilon)
+                return false;
+
+            if ((tmp = A.cross(B - A)).isZero())
+            {
+                direction = Vector3.Up;
+                C = MinkowskiDifference();
+                if ((C - A).isCollinearTo(B - A))
+                {
+                    direction = -Vector3.Up;
+                    C = MinkowskiDifference();
+                }
+            }
+            else
+            {
+                direction = tmp.cross(B - A);
+                C = MinkowskiDifference();
+            }
+
+            if (direction.dot(C) <= -Constants.SqrEpsilon)
+                return false;
+
+            if (Math.Abs((tmp = (B - A).cross(C - A)).dot(A)) <= Constants.SqrEpsilon)
+            {
+                direction = tmp;
+                D = MinkowskiDifference();
+                if (Math.Abs((D - A).dot(direction)) <= Constants.SqrEpsilon)
+                {
+                    direction = -tmp;
+                    D = MinkowskiDifference();
+                }
+            }
+            else
+            {
+                direction = tmp;
+                if (direction.dot(A) > Constants.SqrEpsilon)
+                    direction = -direction;
+                D = MinkowskiDifference();
+            }
+
+            if (direction.dot(D) <= -Constants.SqrEpsilon)
+                return false;
+
+            if ((B - A).cross(C - A).dot(D - A) < -Constants.SqrEpsilon)
+            {
+                tmp = A;
+                A = B;
+                B = tmp;
+            }
+
+            while (true)
+            {
+                // checking face ABD
+                direction = (B - A).cross(D - A);
+                if (direction.dot(A) < -Constants.SqrEpsilon)
+                {
+                    tmp = MinkowskiDifference();
+
+                    if (direction.dot(tmp) < -Constants.SqrEpsilon)
+                        return false;
+
+                    C = D;
+                    D = tmp;
+                    continue;
+                }
+
+                // checking face BCD
+                direction = (C - B).cross(D - B);
+                if (direction.dot(B) < -Constants.SqrEpsilon)
+                {
+                    tmp = MinkowskiDifference();
+
+                    if (direction.dot(tmp) < -Constants.SqrEpsilon)
+                        return false;
+
+                    A = D;
+                    D = tmp;
+                    continue;
+                }
+
+                // checking face CAD
+                direction = (A - C).cross(D - C);
+                if (direction.dot(C) < -Constants.SqrEpsilon)
+                {
+                    tmp = MinkowskiDifference();
+
+                    if (direction.dot(tmp) < -Constants.SqrEpsilon)
+                        return false;
+
+                    B = D;
+                    D = tmp;
+                    continue;
+                }
+
+                simplex = new List<Vector3>() { A, B, C, D };
+                return true;
+            }
+        }
+        private void ExpandingPolytopeAlgorithm(Collider other, List<Vector3> initialSimplex, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        {
+            collisionExitVector = null;
+            exitDirectionVector = null;
+            colliderEndPoint = null;
+        }
+        private bool getCollisionExitVector_GJK_EPA(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        {
+            collisionExitVector = null;
+            exitDirectionVector = null;
+            colliderEndPoint = null;
+
+            List<Vector3> simplex;
+
+            if (!GilbertJohnsonKeerthi(other, out simplex))
+                return false;
+
+            ExpandingPolytopeAlgorithm(other, simplex, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+
+            return true;
+        }
+        public bool getCollisionExitVector(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        {
+            //return getCollisionExitVector_SAT(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+            return getCollisionExitVector_GJK_EPA(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+        }
         protected abstract List<Vector3> getVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon);
 
         private static Vector3 GetAverageCollisionPointWithEpsilon(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon = 1E-7)

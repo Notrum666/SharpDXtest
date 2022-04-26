@@ -252,8 +252,11 @@ namespace Engine.BaseAssets.Components
                     Vector3? _collisionExitVector;
                     Vector3? _collisionExitNormal;
                     Vector3? _colliderEndPoint;
-                    if (!collider.getCollisionExitVector_SAT(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
+                    if (!collider.getCollisionExitVector(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
                         continue;
+
+                    return;
+
                     Vector3 collisionExitVector = (Vector3)_collisionExitVector;
                     Vector3 collisionExitNormal = (Vector3)_collisionExitNormal;
                     Vector3 colliderEndPoint = (Vector3)_colliderEndPoint;
@@ -296,23 +299,19 @@ namespace Engine.BaseAssets.Components
                     Vector3 collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
                     if (double.IsNaN(collisionPoint.x) || double.IsNaN(collisionPoint.y) || double.IsNaN(collisionPoint.z))
                     {
-                        collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
-                        if (double.IsNaN(collisionPoint.x) || double.IsNaN(collisionPoint.y) || double.IsNaN(collisionPoint.z))
+                        if (!moveVector.isZero())
                         {
-                            if (!moveVector.isZero())
-                            {
-                                gameObject.transform.Position -= moveVector;
-                                collisionExitVectors.Add(moveVector);
-                                collider.updateData();
-                            }
-                            if (!otherMoveVector.isZero())
-                            {
-                                otherRigidbody.gameObject.transform.Position -= otherMoveVector;
-                                otherRigidbody.collisionExitVectors.Add(otherMoveVector);
-                                otherCollider.updateData();
-                            }
-                            return;
+                            gameObject.transform.Position -= moveVector;
+                            collisionExitVectors.Add(moveVector);
+                            collider.updateData();
                         }
+                        if (!otherMoveVector.isZero())
+                        {
+                            otherRigidbody.gameObject.transform.Position -= otherMoveVector;
+                            otherRigidbody.collisionExitVectors.Add(otherMoveVector);
+                            otherCollider.updateData();
+                        }
+                        return;
                     }
 
                     Vector3 newtonIteration(Func<Vector3, Vector3> f, Vector3 start)
