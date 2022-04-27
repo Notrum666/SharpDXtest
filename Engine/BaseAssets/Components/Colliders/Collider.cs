@@ -11,6 +11,15 @@ namespace Engine.BaseAssets.Components
 {
     public abstract class Collider : Component
     {
+        private class PolygonDistanceComparer : IComparer<double>
+        {
+            public int Compare(double x, double y)
+            {
+                int value = y.CompareTo(x);
+                return value == 0 ? -1 : value;
+            }
+        }
+        private static readonly PolygonDistanceComparer distanceComparer = new PolygonDistanceComparer();
         public abstract Vector3 InertiaTensor { get; }
 
         public virtual Vector3 Offset { get; set; }
@@ -294,9 +303,57 @@ namespace Engine.BaseAssets.Components
         }
         private void ExpandingPolytopeAlgorithm(Collider other, List<Vector3> initialSimplex, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
-            collisionExitVector = null;
-            exitDirectionVector = null;
-            colliderEndPoint = null;
+            Vector3 point1, point2;
+            Vector3 direction;
+            Vector3 MinkowskiDifference()
+            {
+                getBoundaryPointsInDirection(direction, out _, out point1);
+                other.getBoundaryPointsInDirection(direction, out point2, out _);
+                return point1 - point2;
+            }
+
+            SortedList<double, int[]> polygons = new SortedList<double, int[]>(distanceComparer);
+
+            void addPolygon(params int[] indexes)
+            {
+                polygons.Add(initialSimplex[indexes[0]].projectOnVector((initialSimplex[indexes[1]] - initialSimplex[indexes[0]])
+                    .cross(initialSimplex[indexes[2]] - initialSimplex[indexes[0]])).squaredLength(), indexes);
+            }
+            addPolygon(1, 0, 2);
+            addPolygon(0, 1, 3);
+            addPolygon(1, 2, 3);
+            addPolygon(2, 0, 3);
+
+            Vector3 tmp;
+            int[] currentPolygon;
+            Vector3 A, B, C;
+            while (true)
+            {
+                currentPolygon = polygons.Values[polygons.Count - 1];
+                polygons.RemoveAt(polygons.Count - 1);
+
+                A = initialSimplex[currentPolygon[0]];
+                B = initialSimplex[currentPolygon[1]];
+                C = initialSimplex[currentPolygon[2]];
+
+                direction = (B - A).cross(C - A);
+                tmp = MinkowskiDifference();
+                if ((tmp - A).dot(direction) <= Constants.SqrEpsilon)
+                    break;
+
+                initialSimplex.Add(tmp);
+                polygons.Add(tmp.projectOnVector((B - A).cross(tmp - A)).squaredLength(), new int[] { currentPolygon[0], currentPolygon[1], initialSimplex.Count - 1 });
+                polygons.Add(tmp.projectOnVector((C - B).cross(tmp - B)).squaredLength(), new int[] { currentPolygon[1], currentPolygon[2], initialSimplex.Count - 1 });
+                polygons.Add(tmp.projectOnVector((A - C).cross(tmp - C)).squaredLength(), new int[] { currentPolygon[2], currentPolygon[0], initialSimplex.Count - 1 });
+            }
+
+            tmp = -tmp.projectOnVector(direction);
+
+            exitDirectionVector = direction;
+            collisionExitVector = tmp;
+            Vector3 _colliderEndPoint;
+            getBoundaryPointsInDirection(direction, out _, out _colliderEndPoint);
+            colliderEndPoint = _colliderEndPoint;
         }
         private bool getCollisionExitVector_GJK_EPA(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
