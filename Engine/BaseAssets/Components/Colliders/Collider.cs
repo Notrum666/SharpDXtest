@@ -20,6 +20,19 @@ namespace Engine.BaseAssets.Components
             }
         }
         private static readonly PolygonDistanceComparer distanceComparer = new PolygonDistanceComparer();
+        private const int EPA_MAX_ITER = 4096;
+        private class Polygon
+        {
+            public int indexA, indexB, indexC;
+            public Polygon adjacentAB, adjacentBC, adjacentCA;
+            public Vector3 normal;
+            public Polygon(int indexA, int indexB, int indexC)
+            {
+                this.indexA = indexA;
+                this.indexB = indexB;
+                this.indexC = indexC;
+            }
+        }
         public abstract Vector3 InertiaTensor { get; }
 
         public virtual Vector3 Offset { get; set; }
@@ -312,39 +325,173 @@ namespace Engine.BaseAssets.Components
                 return point1 - point2;
             }
 
-            SortedList<double, int[]> polygons = new SortedList<double, int[]>(distanceComparer);
+            SortedList<double, Polygon> polygons = new SortedList<double, Polygon>(distanceComparer);
 
-            void addPolygon(params int[] indexes)
+            void addPolygon(Polygon polygon)
             {
-                polygons.Add(initialSimplex[indexes[0]].projectOnVector((initialSimplex[indexes[1]] - initialSimplex[indexes[0]])
-                    .cross(initialSimplex[indexes[2]] - initialSimplex[indexes[0]])).squaredLength(), indexes);
+                polygon.normal = (initialSimplex[polygon.indexB] - initialSimplex[polygon.indexA]).cross(initialSimplex[polygon.indexC] - initialSimplex[polygon.indexA]);
+                polygons.Add(initialSimplex[polygon.indexA].projectOnVector(polygon.normal).squaredLength(), polygon);
             }
-            addPolygon(1, 0, 2);
-            addPolygon(0, 1, 3);
-            addPolygon(1, 2, 3);
-            addPolygon(2, 0, 3);
 
+            {
+                Polygon BAC = new Polygon(1, 0, 2);
+                Polygon ABD = new Polygon(0, 1, 3);
+                Polygon CDB = new Polygon(2, 3, 1);
+                Polygon DCA = new Polygon(3, 2, 0);
+
+                BAC.adjacentAB = ABD;
+                ABD.adjacentAB = BAC;
+
+                BAC.adjacentBC = DCA;
+                DCA.adjacentBC = BAC;
+
+                BAC.adjacentCA = CDB;
+                CDB.adjacentCA = BAC;
+
+                ABD.adjacentBC = CDB;
+                CDB.adjacentBC = ABD;
+
+                ABD.adjacentCA = DCA;
+                DCA.adjacentCA = ABD;
+
+                CDB.adjacentAB = DCA;
+                DCA.adjacentAB = CDB;
+
+                addPolygon(BAC);
+                addPolygon(ABD);
+                addPolygon(CDB);
+                addPolygon(DCA);
+            }
+
+            void replaceAdjacent(Polygon polygon, Polygon toReplace, Polygon replaceFor)
+            {
+                if (polygon.adjacentAB == toReplace)
+                    polygon.adjacentAB = replaceFor;
+                else if (polygon.adjacentBC == toReplace)
+                    polygon.adjacentBC = replaceFor;
+                else if (polygon.adjacentCA == toReplace)
+                    polygon.adjacentCA = replaceFor;
+            }
+            void getAdjacentPolygons(Polygon polygon, int indexLeft, int indexRight, out Polygon adjacentLeft, out Polygon adjacentRight, out int thirdVertexIndex)
+            {
+                if (polygon.indexA != indexLeft && polygon.indexA != indexRight)
+                {
+                    thirdVertexIndex = polygon.indexA;
+                    if (polygon.indexB == indexLeft)
+                    {
+                        adjacentLeft = polygon.adjacentAB;
+                        adjacentRight = polygon.adjacentCA;
+                        return;
+                    }
+                    else
+                    {
+                        adjacentLeft = polygon.adjacentCA;
+                        adjacentRight = polygon.adjacentAB;
+                        return;
+                    }
+                }
+                else if (polygon.indexB != indexLeft && polygon.indexB != indexRight)
+                {
+                    thirdVertexIndex = polygon.indexB;
+                    if (polygon.indexA == indexLeft)
+                    {
+                        adjacentLeft = polygon.adjacentAB;
+                        adjacentRight = polygon.adjacentBC;
+                        return;
+                    }
+                    else
+                    {
+                        adjacentLeft = polygon.adjacentBC;
+                        adjacentRight = polygon.adjacentAB;
+                        return;
+                    }
+                }
+                else
+                {
+                    thirdVertexIndex = polygon.indexC;
+                    if (polygon.indexA == indexLeft)
+                    {
+                        adjacentLeft = polygon.adjacentCA;
+                        adjacentRight = polygon.adjacentBC;
+                        return;
+                    }
+                    else
+                    {
+                        adjacentLeft = polygon.adjacentBC;
+                        adjacentRight = polygon.adjacentCA;
+                        return;
+                    }
+                }
+            }
+
+            Polygon currentPolygon;
             Vector3 tmp;
-            int[] currentPolygon;
-            Vector3 A, B, C;
-            while (true)
+            int tmpIndex;
+            Polygon AB_left, AB_right, BC_left, BC_right, CA_left, CA_right;
+            Polygon adjLeft, adjRight;
+            int adjVertexIndex;
+            int i = 0;
+            void resolveCurrentPolygonSide(Polygon adjacentToResolve, int leftVertexIndex, int rightVertexIndex, out Polygon leftPolygonResult, out Polygon rightPolygonResult)
+            {
+                if ((tmp - initialSimplex[adjacentToResolve.indexA]).dot(adjacentToResolve.normal) >= -Constants.SqrEpsilon)
+                {
+                    getAdjacentPolygons(adjacentToResolve, leftVertexIndex, rightVertexIndex, out adjLeft, out adjRight, out adjVertexIndex);
+                    leftPolygonResult = new Polygon(leftVertexIndex, adjVertexIndex, tmpIndex);
+                    rightPolygonResult = new Polygon(adjVertexIndex, rightVertexIndex, tmpIndex);
+                    leftPolygonResult.adjacentAB = adjLeft;
+                    rightPolygonResult.adjacentAB = adjRight;
+                    leftPolygonResult.adjacentBC = rightPolygonResult;
+                    rightPolygonResult.adjacentCA = leftPolygonResult;
+                    replaceAdjacent(adjLeft, adjacentToResolve, leftPolygonResult);
+                    replaceAdjacent(adjRight, adjacentToResolve, rightPolygonResult);
+                    polygons.RemoveAt(polygons.IndexOfValue(adjacentToResolve));
+                    addPolygon(leftPolygonResult);
+                    addPolygon(rightPolygonResult);
+                }
+                else
+                {
+                    rightPolygonResult = new Polygon(leftVertexIndex, rightVertexIndex, tmpIndex);
+                    leftPolygonResult = rightPolygonResult;
+                    rightPolygonResult.adjacentAB = adjacentToResolve;
+                    replaceAdjacent(adjacentToResolve, currentPolygon, rightPolygonResult);
+                    addPolygon(rightPolygonResult);
+                }
+            }
+            do
             {
                 currentPolygon = polygons.Values[polygons.Count - 1];
                 polygons.RemoveAt(polygons.Count - 1);
 
-                A = initialSimplex[currentPolygon[0]];
-                B = initialSimplex[currentPolygon[1]];
-                C = initialSimplex[currentPolygon[2]];
-
-                direction = (B - A).cross(C - A);
+                direction = currentPolygon.normal;
                 tmp = MinkowskiDifference();
-                if ((tmp - A).dot(direction) <= Constants.SqrEpsilon)
+                if ((tmp - initialSimplex[currentPolygon.indexA]).dot(direction) <= Constants.SqrEpsilon)
                     break;
 
                 initialSimplex.Add(tmp);
-                polygons.Add(tmp.projectOnVector((B - A).cross(tmp - A)).squaredLength(), new int[] { currentPolygon[0], currentPolygon[1], initialSimplex.Count - 1 });
-                polygons.Add(tmp.projectOnVector((C - B).cross(tmp - B)).squaredLength(), new int[] { currentPolygon[1], currentPolygon[2], initialSimplex.Count - 1 });
-                polygons.Add(tmp.projectOnVector((A - C).cross(tmp - C)).squaredLength(), new int[] { currentPolygon[2], currentPolygon[0], initialSimplex.Count - 1 });
+                tmpIndex = initialSimplex.Count - 1;
+
+                resolveCurrentPolygonSide(currentPolygon.adjacentAB, currentPolygon.indexA, currentPolygon.indexB, out AB_left, out AB_right);
+                resolveCurrentPolygonSide(currentPolygon.adjacentBC, currentPolygon.indexB, currentPolygon.indexC, out BC_left, out BC_right);
+                resolveCurrentPolygonSide(currentPolygon.adjacentCA, currentPolygon.indexC, currentPolygon.indexA, out CA_left, out CA_right);
+
+                AB_right.adjacentBC = BC_left;
+                BC_left.adjacentCA = AB_right;
+
+                BC_right.adjacentBC = CA_left;
+                CA_left.adjacentCA = BC_right;
+
+                CA_right.adjacentBC = AB_left;
+                AB_left.adjacentCA = CA_right;
+
+                i++;
+            } while (i < EPA_MAX_ITER);
+
+            if (i == EPA_MAX_ITER)
+            {
+                currentPolygon = polygons.Values[polygons.Count - 1];
+
+                direction = currentPolygon.normal;
+                tmp = MinkowskiDifference();
             }
 
             tmp = -tmp.projectOnVector(direction);
