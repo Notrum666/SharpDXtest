@@ -3,6 +3,7 @@
 	<Assets>
 		<Models>
 			<Model path="cube.obj"/>
+			<Model path="sphere.obj"/>
 		</Models>
 
 		<Textures>
@@ -16,23 +17,28 @@
 	</Assets>
 
 	<GameObject>
+		<Transform>
+			<Transform.Position x="5" y="2"/>
+			<Transform.Rotation z="90"/>
+		</Transform>
 		<Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.5"/>
 		<SoundListener IsCurrent="true"/>
 		<Controller speed="5" cube="{Reference Cube}"/>
+		<SpotLight Angle="1.7777" Radius="10"/>
 	</GameObject>
 
 	<GameObject x.Name="Cube">
 		<Transform>
-			<Transform.Position x="0" y="0" z="0"/>
-			<Transform.Rotation x="0" y="0" z="0"/>
+			<Transform.Position y="1.5" z="-0.5"/>
+			<Transform.Rotation/>
 		</Transform>
 		<Rigidbody Mass="1">
-			<Rigidbody.Material Friction="0.5" Bounciness="1.0" BouncinessCombineMode="Maximum"/>
+			<Rigidbody.Material Bounciness="1.0"/>
 		</Rigidbody>
-		<!--<CubeCollider>
+		<CubeCollider Enabled="false">
 			<CubeCollider.Size x="2" y="2" z="2"/>
-		</CubeCollider>-->
-		<SphereCollider/>
+		</CubeCollider>
+		<!--<SphereCollider Enabled="false" Radius="1"/>-->
 		<SoundSource/>
 		<CubeScript/>
 		<Mesh model="{Model cube}">
@@ -44,29 +50,20 @@
 
 	<GameObject>
 		<Transform>
-			<Transform.Position x="0" y="2.4" z="0"/>
-			<Transform.Rotation x="0" y="0" z="0"/>
+			<Transform.Position x="0" y="2.5" z="0.5"/>
+			<Transform.Rotation x="0"/>
 		</Transform>
 		<Rigidbody Mass="1">
-			<Rigidbody.Material Friction="0.5" Bounciness="0.0" BouncinessCombineMode="Minimum"/>
+			<Rigidbody.Material Bounciness="1.0"/>
 		</Rigidbody>
-		<!--<CubeCollider>
+		<CubeCollider Enabled="false">
 			<CubeCollider.Size x="2" y="2" z="2"/>
-		</CubeCollider>-->
-		<SphereCollider/>
+		</CubeCollider>
+		<!--<SphereCollider Enabled="false" Radius="1"/>-->
 		<Mesh model="{Model cube}">
 			<Mesh.Material>
 				<Material Normal="{Texture brick_wall_normal}"/>
 			</Mesh.Material>
 		</Mesh>
 	</GameObject>
-
-	<GameObject>
-		<Transform>
-			<Transform.Position x="2" y="-3" z="2"/>
-			<Transform.Rotation x="-20" z="20"/>
-		</Transform>
-		<SpotLight Angle="1" Radius="10"/>
-	</GameObject>
-
 </Scene>

@@ -162,9 +162,12 @@ namespace Engine.BaseAssets.Components
         }
         private void recalculateInertiaTensor()
         {
-            Collider[] colliders = gameObject.getComponents<Collider>();
-            if (colliders.Length == 0)
+            IEnumerable<Collider> colliders = gameObject.getComponents<Collider>().Where(coll => coll.Enabled);
+            if (colliders.Count() == 0)
+            {
                 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
+                return;
+            }
             double massSum = 0.0;
             foreach (Collider collider in colliders)
                 massSum += collider.MassPart;
@@ -243,8 +246,8 @@ namespace Engine.BaseAssets.Components
             if (!Enabled || !otherRigidbody.Enabled || IsStatic && otherRigidbody.IsStatic)
                 return;
 
-            Collider[] colliders = gameObject.getComponents<Collider>();
-            Collider[] otherColliders = otherRigidbody.gameObject.getComponents<Collider>();
+            IEnumerable<Collider> colliders = gameObject.getComponents<Collider>().Where(coll => coll.Enabled);
+            IEnumerable<Collider> otherColliders = otherRigidbody.gameObject.getComponents<Collider>().Where(coll => coll.Enabled);
 
             foreach (Collider collider in colliders)
                 foreach (Collider otherCollider in otherColliders)

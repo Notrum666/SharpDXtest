@@ -136,7 +136,7 @@ namespace Engine.BaseAssets.Components
             Vector3 centersVector = collider.globalCenter - globalCenter;
             return centersVector.squaredLength() <= SquaredOuterSphereRadius + 2 * OuterSphereRadius * collider.OuterSphereRadius + collider.SquaredOuterSphereRadius;
         }
-        private bool getCollisionExitVector_SAT(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        public bool getCollisionExitVector_SAT(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             collisionExitVector = null;
             exitDirectionVector = null;
@@ -330,6 +330,10 @@ namespace Engine.BaseAssets.Components
             void addPolygon(Polygon polygon)
             {
                 polygon.normal = (initialSimplex[polygon.indexB] - initialSimplex[polygon.indexA]).cross(initialSimplex[polygon.indexC] - initialSimplex[polygon.indexA]);
+                if (polygon.normal.x == 0 && polygon.normal.y == 0 && polygon.normal.z == 0)
+                {
+
+                }
                 polygons.Add(initialSimplex[polygon.indexA].projectOnVector(polygon.normal).squaredLength(), polygon);
             }
 
@@ -502,7 +506,7 @@ namespace Engine.BaseAssets.Components
             getBoundaryPointsInDirection(direction, out _, out _colliderEndPoint);
             colliderEndPoint = _colliderEndPoint;
         }
-        private bool getCollisionExitVector_GJK_EPA(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        public bool getCollisionExitVector_GJK_EPA(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             collisionExitVector = null;
             exitDirectionVector = null;
