@@ -102,6 +102,8 @@ namespace SharpDXtest
         {
             GameCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
 
+            GameCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Level1.xml");
+
             GameCore.Run();
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPaused"));

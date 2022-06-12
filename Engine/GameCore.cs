@@ -11,7 +11,7 @@ namespace Engine
 {
     public static class GameCore
     {
-        public static Scene CurrentScene { get; private set; }
+        public static Scene CurrentScene { get; set; }
         private static double accumulator = 0.0;
         private static bool isAlive = false;
         public static bool IsAlive { get => isAlive; }
@@ -45,8 +45,6 @@ namespace Engine
             SoundCore.Init(); // 1
             Time.Init(); // 1
             InputManager.Init(); // 2
-
-            CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Level1.xml");
         }
         public static async void Run()
         {
@@ -106,6 +104,9 @@ namespace Engine
         }
         public static void Update()
         {
+            if (CurrentScene == null)
+                return;
+
             update();
 
             accumulator += Time.DeltaTime;

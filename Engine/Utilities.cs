@@ -54,6 +54,26 @@ namespace Engine
             public Vector3f n;
             public Vector3f tx;
         }
+        private struct ModelVertexWithIndex
+        {
+            public ModelVertex v;
+            public uint index;
+            public ModelVertexWithIndex(ModelVertex v, uint index)
+            {
+                this.v = v;
+                this.index = index;
+            }
+            public override bool Equals(object obj)
+            {
+                if (obj is ModelVertexWithIndex)
+                    return v.Equals(((ModelVertexWithIndex)obj).v);
+                return false;
+            }
+            public override int GetHashCode()
+            {
+                return v.GetHashCode();
+            }
+        }
 
         public void updateModel()
         {
@@ -61,6 +81,7 @@ namespace Engine
                 throw new Exception("Model can't be empty.");
 
             List<ModelVertex> vertexes = new List<ModelVertex>();
+            HashSet<ModelVertexWithIndex> vertexesHashTable = new HashSet<ModelVertexWithIndex>(v.Count);
             ModelVertex[] curPolygon = new ModelVertex[3];
             int polygonsCount = v_i.Count;
             uint[] indexes = new uint[3 * polygonsCount];
@@ -120,20 +141,15 @@ namespace Engine
                 for (int j = 0; j < 3; j++)
                 {
                     ModelVertex curVertex = curPolygon[j];
-                    uint k;
-                    for (k = 0; k < vertexes.Count; k++)
+                    uint k = (uint)vertexes.Count;
+                    ModelVertexWithIndex actualVertex;
+                    if (vertexesHashTable.TryGetValue(new ModelVertexWithIndex(curVertex, 0), out actualVertex))
                     {
-                        if (vertexes[(int)k].Equals(curVertex))
-                        {
-                            indexes[i * 3 + j] = k;
-                            break;
-                        }
+                        k = actualVertex.index;
                     }
-                    if (k == vertexes.Count)
-                    {
-                        indexes[i * 3 + j] = k;
-                        vertexes.Add(curVertex);
-                    }
+                    indexes[i * 3 + j] = k;
+                    vertexes.Add(curVertex);
+                    vertexesHashTable.Add(new ModelVertexWithIndex(curVertex, k));
                 }
             }
 

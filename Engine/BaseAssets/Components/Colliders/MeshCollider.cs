@@ -153,6 +153,38 @@ namespace Engine.BaseAssets.Components.Colliders
         {
 
         }
+        public void FromModel(Model model)
+        {
+            vertexes = new List<Vector3>(model.v);
+            polygons = new List<int[]>(model.v_i);
+
+            normals = new List<Vector3>(polygons.Count);
+            edges = new List<(int a, int b)>();
+            int a, b;
+            bool exists;
+            foreach (int[] poly in polygons)
+            {
+                normals.Add((vertexes[poly[1]] - vertexes[poly[0]]).cross(vertexes[poly[2]] - vertexes[poly[0]]));
+                for (int i = 0; i < poly.Length; i++)
+                {
+                    a = poly[i];
+                    b = poly[(i + 1) % poly.Length];
+
+                    exists = false;
+                    foreach ((int a, int b) edge in edges)
+                        if (a == edge.a && b == edge.b || a == edge.b && b == edge.a)
+                        {
+                            exists = true;
+                            break;
+                        }
+
+                    if (!exists)
+                        edges.Add((a, b));
+                }
+            }
+
+            recalculateOuterSphere();
+        }
         public override void updateData()
         {
             base.updateData();
