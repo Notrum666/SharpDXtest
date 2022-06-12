@@ -27,10 +27,6 @@ namespace SharpDXtest
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         public bool IsPaused { get => GameCore.IsPaused; }
-        public string CollisionExitSAT { get; private set; }
-        public string CollisionNormalSAT { get; private set; }
-        public string CollisionExitGJK { get; private set; }
-        public string CollisionNormalGJK { get; private set; }
         public event PropertyChangedEventHandler PropertyChanged;
 
         private bool isCursorShown = true;
@@ -83,25 +79,7 @@ namespace SharpDXtest
         }
         private void GameCore_OnFrameEnded()
         {
-            List<Engine.BaseAssets.Components.Collider> colliders =
-                GameCore.CurrentScene.objects.Where(obj => obj.Components.Any(comp => comp is Engine.BaseAssets.Components.Collider))
-                .Select(obj => obj.getComponent<Engine.BaseAssets.Components.Collider>()).ToList();
-            colliders[0].fixedUpdate();
-            colliders[1].fixedUpdate();
-            Vector3? collisionExitSAT, collisionNormalSAT, collisionExitGJK, collisionNormalGJK;
-            colliders[0].getCollisionExitVector_SAT(colliders[1], out collisionExitSAT, out collisionNormalSAT, out _);
-            colliders[0].getCollisionExitVector_GJK_EPA(colliders[1], out collisionExitGJK, out collisionNormalGJK, out _);
-            if (collisionExitSAT != null && collisionExitGJK != null && collisionNormalSAT != null && collisionNormalGJK != null)
-            {
-                CollisionExitSAT = collisionExitSAT.Value.ToString("f2");
-                CollisionNormalSAT = collisionNormalSAT.Value.normalized().ToString("f2");
-                CollisionExitGJK = collisionExitGJK.Value.ToString("f2");
-                CollisionNormalGJK = collisionNormalGJK.Value.normalized().ToString("f2");
-            }
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CollisionExitSAT"));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CollisionNormalSAT"));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CollisionExitGJK"));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CollisionNormalGJK"));
+
         }
         private void GameCore_OnPaused()
         {

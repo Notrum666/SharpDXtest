@@ -135,6 +135,8 @@ namespace Engine
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
             for (int i = 0; i < CurrentScene.objects.Count; i++)
             {
+                if (!CurrentScene.objects[i].Enabled)
+                    continue;
                 Rigidbody rigidbody = CurrentScene.objects[i].getComponent<Rigidbody>();
                 if (rigidbody != null)
                 {

@@ -118,7 +118,11 @@ namespace Engine.BaseAssets.Components
                     switch (col2)
                     {
                         case SphereCollider sphere2:
-                            result.Add(sphere2.globalCenter - sphere1.globalCenter);
+                            Vector3 tmp = sphere2.globalCenter - sphere1.globalCenter;
+                            if (tmp.isZero())
+                                result.Add(Vector3.UnitX);
+                            else
+                                result.Add(tmp);
                             return result;
                     }
                     break;
@@ -431,34 +435,33 @@ namespace Engine.BaseAssets.Components
             Polygon currentPolygon;
             Vector3 tmp;
             int tmpIndex;
-            Polygon AB_left, AB_right, BC_left, BC_right, CA_left, CA_right;
             Polygon adjLeft, adjRight;
             int adjVertexIndex;
             int i = 0;
-            void resolveCurrentPolygonSide(Polygon adjacentToResolve, int leftVertexIndex, int rightVertexIndex, out Polygon leftPolygonResult, out Polygon rightPolygonResult)
+            List<int> hole = new List<int>();
+            List<Polygon> adjacentPolygons = new List<Polygon>();
+            List<Polygon> polygonsToReplace = new List<Polygon>();
+            List<Polygon> newPolygons = new List<Polygon>();
+
+            void createHolePart(Polygon adjacentPolygon, int indexLeft, int indexRight)
             {
-                if ((tmp - initialSimplex[adjacentToResolve.indexA]).dot(adjacentToResolve.normal) >= -Constants.SqrEpsilon)
+                if ((tmp - initialSimplex[adjacentPolygon.indexA]).dot(adjacentPolygon.normal) >= -Constants.SqrEpsilon)
                 {
-                    getAdjacentPolygons(adjacentToResolve, leftVertexIndex, rightVertexIndex, out adjLeft, out adjRight, out adjVertexIndex);
-                    leftPolygonResult = new Polygon(leftVertexIndex, adjVertexIndex, tmpIndex);
-                    rightPolygonResult = new Polygon(adjVertexIndex, rightVertexIndex, tmpIndex);
-                    leftPolygonResult.adjacentAB = adjLeft;
-                    rightPolygonResult.adjacentAB = adjRight;
-                    leftPolygonResult.adjacentBC = rightPolygonResult;
-                    rightPolygonResult.adjacentCA = leftPolygonResult;
-                    replaceAdjacent(adjLeft, adjacentToResolve, leftPolygonResult);
-                    replaceAdjacent(adjRight, adjacentToResolve, rightPolygonResult);
-                    polygons.RemoveAt(polygons.IndexOfValue(adjacentToResolve));
-                    addPolygon(leftPolygonResult);
-                    addPolygon(rightPolygonResult);
+                    getAdjacentPolygons(adjacentPolygon, indexLeft, indexRight, out adjLeft, out adjRight, out adjVertexIndex);
+                    hole.Add(indexLeft);
+                    hole.Add(adjVertexIndex);
+                    adjacentPolygons.Add(adjLeft);
+                    adjacentPolygons.Add(adjRight);
+                    polygonsToReplace.Add(adjacentPolygon);
+                    polygonsToReplace.Add(adjacentPolygon);
+
+                    polygons.RemoveAt(polygons.IndexOfValue(adjacentPolygon));
                 }
                 else
                 {
-                    rightPolygonResult = new Polygon(leftVertexIndex, rightVertexIndex, tmpIndex);
-                    leftPolygonResult = rightPolygonResult;
-                    rightPolygonResult.adjacentAB = adjacentToResolve;
-                    replaceAdjacent(adjacentToResolve, currentPolygon, rightPolygonResult);
-                    addPolygon(rightPolygonResult);
+                    hole.Add(indexLeft);
+                    adjacentPolygons.Add(adjacentPolygon);
+                    polygonsToReplace.Add(currentPolygon);
                 }
             }
             do
@@ -474,18 +477,52 @@ namespace Engine.BaseAssets.Components
                 initialSimplex.Add(tmp);
                 tmpIndex = initialSimplex.Count - 1;
 
-                resolveCurrentPolygonSide(currentPolygon.adjacentAB, currentPolygon.indexA, currentPolygon.indexB, out AB_left, out AB_right);
-                resolveCurrentPolygonSide(currentPolygon.adjacentBC, currentPolygon.indexB, currentPolygon.indexC, out BC_left, out BC_right);
-                resolveCurrentPolygonSide(currentPolygon.adjacentCA, currentPolygon.indexC, currentPolygon.indexA, out CA_left, out CA_right);
+                //resolveCurrentPolygonSide(currentPolygon.adjacentAB, currentPolygon.indexA, currentPolygon.indexB, out AB_left, out AB_right);
+                //resolveCurrentPolygonSide(currentPolygon.adjacentBC, currentPolygon.indexB, currentPolygon.indexC, out BC_left, out BC_right);
+                //resolveCurrentPolygonSide(currentPolygon.adjacentCA, currentPolygon.indexC, currentPolygon.indexA, out CA_left, out CA_right);
+                //
+                //AB_right.adjacentBC = BC_left;
+                //BC_left.adjacentCA = AB_right;
+                //
+                //BC_right.adjacentBC = CA_left;
+                //CA_left.adjacentCA = BC_right;
+                //
+                //CA_right.adjacentBC = AB_left;
+                //AB_left.adjacentCA = CA_right;
 
-                AB_right.adjacentBC = BC_left;
-                BC_left.adjacentCA = AB_right;
+                hole.Clear();
+                adjacentPolygons.Clear();
+                polygonsToReplace.Clear();
+                newPolygons.Clear();
 
-                BC_right.adjacentBC = CA_left;
-                CA_left.adjacentCA = BC_right;
+                createHolePart(currentPolygon.adjacentAB, currentPolygon.indexA, currentPolygon.indexB);
+                createHolePart(currentPolygon.adjacentBC, currentPolygon.indexB, currentPolygon.indexC);
+                createHolePart(currentPolygon.adjacentCA, currentPolygon.indexC, currentPolygon.indexA);
 
-                CA_right.adjacentBC = AB_left;
-                AB_left.adjacentCA = CA_right;
+                for (int j = 1; j < hole.Count - 2; j++)
+                {
+                    if (hole[j] == hole[j + 2])
+                    {
+                        hole.RemoveRange(j, 2);
+                        adjacentPolygons.RemoveRange(j, 2);
+                        polygonsToReplace.RemoveRange(j, 2);
+                    }
+                }
+
+                for (int j = 0; j < hole.Count; j++)
+                {
+                    Polygon polygon = new Polygon(hole[j], hole[(j + 1) % hole.Count], tmpIndex);
+                    polygon.adjacentAB = adjacentPolygons[j];
+                    replaceAdjacent(adjacentPolygons[j], polygonsToReplace[j], polygon);
+                    addPolygon(polygon);
+                    newPolygons.Add(polygon);
+                }
+
+                for (int j = 0; j < newPolygons.Count; j++)
+                {
+                    newPolygons[j].adjacentBC = newPolygons[(j + 1) % newPolygons.Count];
+                    newPolygons[(j + 1) % newPolygons.Count].adjacentCA = newPolygons[j];
+                }
 
                 i++;
             } while (i < EPA_MAX_ITER);
@@ -523,8 +560,8 @@ namespace Engine.BaseAssets.Components
         }
         public bool getCollisionExitVector(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
-            //return getCollisionExitVector_SAT(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
-            return getCollisionExitVector_GJK_EPA(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+            return getCollisionExitVector_SAT(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+            //return getCollisionExitVector_GJK_EPA(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
         }
         protected abstract List<Vector3> getVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon);
 
@@ -704,10 +741,11 @@ namespace Engine.BaseAssets.Components
 
         public static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
         {
-            Vector3 point = GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.Epsilon);
-            return double.IsNaN(point.x) || double.IsNaN(point.y) || double.IsNaN(point.z) ?
-                GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.FloatEpsilon) :
-                point;
+            Vector3 point = GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.FloatEpsilon);
+            return point;
+            //return double.IsNaN(point.x) || double.IsNaN(point.y) || double.IsNaN(point.z) ?
+            //    GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.FloatEpsilon) :
+            //    point;
         }
 
         public virtual void updateData()

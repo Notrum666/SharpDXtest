@@ -32,6 +32,7 @@ namespace Engine
         private static Sampler sampler;
         private static Sampler shadowsSampler;
 
+        private static Color backgroundColor;
         public static Camera CurrentCamera
         {
             get
@@ -73,6 +74,9 @@ namespace Engine
 
             AssetsManager.LoadShaderPipeline("tex_to_screen", Shader.Create("BaseAssets\\Shaders\\tex_to_screen.vsh"),
                                                               Shader.Create("BaseAssets\\Shaders\\tex_to_screen.fsh"));
+
+            backgroundColor = Color.FromRgba(0xFF202020);
+            //backgroundColor = Color.FromRgba(0xFFFFFFFF);
         }
         private static void InitDirectX(IntPtr HWND, int width, int height)
         {
@@ -223,7 +227,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(backbuffer.DepthTexture.DepthStencil, backbuffer.ColorTexture.RenderTarget);
 
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(backbuffer.ColorTexture.RenderTarget, Color.FromRgba(0xFF202020));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(backbuffer.ColorTexture.RenderTarget, backgroundColor);
             CurrentDevice.ImmediateContext.ClearDepthStencilView(backbuffer.DepthTexture.DepthStencil, DepthStencilClearFlags.Depth, 1.0f, 0);
 
             if (GameCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
