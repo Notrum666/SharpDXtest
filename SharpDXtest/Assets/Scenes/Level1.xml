@@ -3,7 +3,8 @@
 	<Assets>
 		<Models>
 			<Model path="cube.obj"/>
-			<Model path="sphere.obj"/>
+			<Model path="sphere.obj" scaleFactor="1.5"/>
+			<Model path="plane.obj"/>
 		</Models>
 
 		<Textures>
@@ -18,27 +19,45 @@
 
 	<GameObject>
 		<Transform>
-			<Transform.Position x="5" y="2"/>
+			<Transform.Position x="5" z="0"/>
 			<Transform.Rotation z="90"/>
 		</Transform>
-		<Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.5"/>
+		<Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.7777"/>
 		<SoundListener IsCurrent="true"/>
 		<Controller speed="5" cube="{Reference Cube}"/>
-		<SpotLight Angle="1.7777" Radius="10"/>
+		<!--<SpotLight Angle="2" Radius="100" Intensity="0.8" AngularIntensity="0.8"/>-->
+		<DirectionalLight Radius="100" Brightness="1.0"/>
 	</GameObject>
 
-	<GameObject x.Name="Cube">
+	<GameObject>
 		<Transform>
 			<Transform.Position y="0"/>
 			<Transform.Rotation/>
 		</Transform>
-		<Rigidbody Mass="1">
-			<Rigidbody.Material Bounciness="1.0"/>
+		<Rigidbody IsStatic="true">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
 		</Rigidbody>
-		<CubeCollider Enabled="false">
-			<CubeCollider.Size x="2" y="2" z="2"/>
+		<CubeCollider>
+			<CubeCollider.Size x="100" y="100" z="2"/>
 		</CubeCollider>
 		<SoundSource/>
+		<Mesh model="{Model plane}">
+			<!--<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>-->
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="2" y="4" x="-2.05"/>
+		</Transform>
+		<Rigidbody IsStatic="false" Mass="1">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
 		<CubeScript/>
 		<Mesh model="{Model cube}">
 			<Mesh.Material>
@@ -49,15 +68,161 @@
 
 	<GameObject>
 		<Transform>
-			<Transform.Position y="4"/>
+			<Transform.Position z="4" y="4" x="-2.05"/>
 		</Transform>
-		<Rigidbody Mass="1">
-			<Rigidbody.Material Bounciness="1.0"/>
+		<Rigidbody IsStatic="false" Mass="1">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
 		</Rigidbody>
-		<CubeCollider Enabled="false">
+		<CubeCollider>
 			<CubeCollider.Size x="2" y="2" z="2"/>
 		</CubeCollider>
+		<CubeScript/>
 		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="6" y="4" x="-2.05"/>
+		</Transform>
+		<Rigidbody IsStatic="false" Mass="1">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
+		<CubeScript/>
+		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="2" y="4" x="0"/>
+		</Transform>
+		<Rigidbody IsStatic="false" Mass="1">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
+		<CubeScript/>
+		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="4" y="4" x="0"/>
+		</Transform>
+		<Rigidbody IsStatic="false" Mass="1">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
+		<CubeScript/>
+		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="6" y="4" x="0"/>
+		</Transform>
+		<Rigidbody IsStatic="false" Mass="1">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
+		<CubeScript/>
+		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="2" y="4" x="2.05"/>
+		</Transform>
+		<Rigidbody IsStatic="false" Mass="1">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
+		<CubeScript/>
+		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="4" y="4" x="2.05"/>
+		</Transform>
+		<Rigidbody IsStatic="false" Mass="1">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
+		<CubeScript/>
+		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="6" y="4" x="2.05"/>
+		</Transform>
+		<Rigidbody IsStatic="false" Mass="1">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
+		</Rigidbody>
+		<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>
+		<CubeScript/>
+		<Mesh model="{Model cube}">
+			<Mesh.Material>
+				<Material Normal="{Texture brick_wall_normal}"/>
+			</Mesh.Material>
+		</Mesh>
+	</GameObject>
+
+	<GameObject x.Name="Cube">
+		<Transform>
+			<Transform.Position z="5" y="-5"/>
+		</Transform>
+		<Rigidbody Mass="10">
+			<Rigidbody.Material Bounciness="0.01" Friction="0.99"/>
+		</Rigidbody>
+		<!--<CubeCollider>
+			<CubeCollider.Size x="2" y="2" z="2"/>
+		</CubeCollider>-->
+		<SphereCollider Radius="1.5"/>
+		<SphereScript/>
+		<Mesh model="{Model Sphere}">
 			<Mesh.Material>
 				<Material Normal="{Texture brick_wall_normal}"/>
 			</Mesh.Material>

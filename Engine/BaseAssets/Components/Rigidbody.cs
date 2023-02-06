@@ -129,6 +129,13 @@ namespace Engine.BaseAssets.Components
         private Vector3 angularVelocityChange = new Vector3();
         private List<Vector3> collisionExitVectors = new List<Vector3>();
 
+        private const int LinearVelocitySleepCounterBase = 5;
+        private const int AngularVelocitySleepCounterBase = 5;
+        private int linearVelocitySleepCounter = 0;
+        private int angularVelocitySleepCounter = 0;
+        private double linearSleepThresholdSquared = 0.005;
+        private double angularSleepThresholdSquared = 0.005;
+
         public override void fixedUpdate()
         {
             recalculateInertiaTensor();
@@ -137,6 +144,26 @@ namespace Engine.BaseAssets.Components
 
             Velocity *= 1.0 - Time.DeltaTime * linearDrag;
             AngularVelocity *= 1.0 - Time.DeltaTime * angularDrag;
+
+            if (Velocity.squaredLength() <= linearSleepThresholdSquared)
+            {
+                if (linearVelocitySleepCounter > 0)
+                    linearVelocitySleepCounter--;
+                else
+                    Velocity = Vector3.Zero;
+            }
+            else
+                linearVelocitySleepCounter = LinearVelocitySleepCounterBase;
+
+            if (AngularVelocity.squaredLength() <= angularSleepThresholdSquared)
+            {
+                if (angularVelocitySleepCounter > 0)
+                    angularVelocitySleepCounter--;
+                else
+                    AngularVelocity = Vector3.Zero;
+            }
+            else
+                angularVelocitySleepCounter = AngularVelocitySleepCounterBase;
 
             if (t.Parent == null)
             {
@@ -238,6 +265,7 @@ namespace Engine.BaseAssets.Components
             for (int i = 1; i < count; i++)
                 result += collisionExitVectors[i];
             result /= count;
+
             gameObject.transform.Position += result;
             collisionExitVectors.Clear();
         }

@@ -23,7 +23,7 @@ namespace Engine.BaseAssets.Components
                 radius = value;
             }
         }
-        private int shadowSize = 2048;
+        private int shadowSize = 8196;
         public int ShadowSize
         {
             get
