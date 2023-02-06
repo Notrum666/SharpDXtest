@@ -477,19 +477,6 @@ namespace Engine.BaseAssets.Components
                 initialSimplex.Add(tmp);
                 tmpIndex = initialSimplex.Count - 1;
 
-                //resolveCurrentPolygonSide(currentPolygon.adjacentAB, currentPolygon.indexA, currentPolygon.indexB, out AB_left, out AB_right);
-                //resolveCurrentPolygonSide(currentPolygon.adjacentBC, currentPolygon.indexB, currentPolygon.indexC, out BC_left, out BC_right);
-                //resolveCurrentPolygonSide(currentPolygon.adjacentCA, currentPolygon.indexC, currentPolygon.indexA, out CA_left, out CA_right);
-                //
-                //AB_right.adjacentBC = BC_left;
-                //BC_left.adjacentCA = AB_right;
-                //
-                //BC_right.adjacentBC = CA_left;
-                //CA_left.adjacentCA = BC_right;
-                //
-                //CA_right.adjacentBC = AB_left;
-                //AB_left.adjacentCA = CA_right;
-
                 hole.Clear();
                 adjacentPolygons.Clear();
                 polygonsToReplace.Clear();

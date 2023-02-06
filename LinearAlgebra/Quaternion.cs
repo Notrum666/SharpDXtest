@@ -215,35 +215,6 @@ namespace LinearAlgebra
         {
             return new Quaternion(lhs.w - rhs.w, lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
         }
-
-        //public static Quaternion operator *(Quaternion q, Vector3 v)
-        //{
-        //    return new Quaternion(-q.x * v.x - q.y - v.y - q.z * v.z,
-        //                          q.w * v.x + q.y * v.z - q.z * v.y,
-        //                          q.w * v.y + q.x * v.z - q.z * v.x,
-        //                          q.w * v.z + q.x * v.y - q.y * v.x);
-        //}
-        ///// <summary>
-        ///// Rotates vector v by quaternion q
-        ///// </summary>
-        //public Vector3 rotateVector(Vector3 vec)
-        //{
-        //    Quaternion result = this * vec * inversed();
-        //    return new Vector3(result.x, result.y, result.z);
-        //}
-        ///// <summary>
-        ///// Returns eulers representation of rotation in this quaternion
-        ///// </summary>
-        //public Vector3 toEuler()
-        //{
-        //    if (x * y + z * w == 0.5)
-        //        return new Vector3(Math.Asin(2 * x * y + 2 * z * w), 2 * Math.Atan2(x, w), 0);
-        //    else
-        //    if (x * y + z * w == -0.5)
-        //        return new Vector3(Math.Asin(2 * x * y + 2 * z * w), -2 * Math.Atan2(x, w), 0);
-        //    else
-        //        return new Vector3(Math.Asin(2 * x * y + 2 * z * w), Math.Atan2(2 * y * w - 2 * x * z, 1 - 2 * y * y - 2 * z * z), Math.Atan2(2 * x * w - 2 * y * z, 1 - 2 * x * x - 2 * z * z));
-        //}
         public override string ToString()
         {
             return "(" + w.ToString() + ", " + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";

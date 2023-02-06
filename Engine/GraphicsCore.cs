@@ -75,8 +75,8 @@ namespace Engine
             AssetsManager.LoadShaderPipeline("tex_to_screen", Shader.Create("BaseAssets\\Shaders\\tex_to_screen.vsh"),
                                                               Shader.Create("BaseAssets\\Shaders\\tex_to_screen.fsh"));
 
-            backgroundColor = Color.FromRgba(0xFF202020);
-            //backgroundColor = Color.FromRgba(0xFFFFFFFF);
+            //backgroundColor = Color.FromRgba(0xFF202020);
+            backgroundColor = Color.FromRgba(0xFFFFFFFF);
         }
         private static void InitDirectX(IntPtr HWND, int width, int height)
         {

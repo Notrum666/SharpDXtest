@@ -229,9 +229,7 @@ float4 main(vert_in v) : SV_Target
 	for (i = 0; i < pointLightsCount; i++)
 	{		
 		float3 lightVec = pointLights[i].position - v.v;
-		//float lightDistSqr = length(lightVec);
-		//lightDistSqr *= lightDistSqr;
-		//float attenuation = 1.0f / lightDistSqr;
+
 		float attenuation = pointLightAttenuation(pointLights[i], lightVec);
 		float3 lightDir = normalize(lightVec);
 		float3 halfway = normalize(lightDir + camDir);
@@ -257,10 +255,5 @@ float4 main(vert_in v) : SV_Target
 	float3 result = ambient + totalRadiance;
 	
 	return float4(pow(result / (result + 1.0f), 1.0f / 2.2f), 1.0f);
-	
-	//float3 baseColor = tex.Sample(texSampler, v.t).rgb * lightColor;
-	//return float4(pow(float3(1.0f, 1.0f, 1.0f) - exp(-baseColor * exposure), float3(1.0f / 2.2f, 1.0f / 2.2f, 1.0f / 2.2f)), 1.0f);
-	
-	//bloomColor = length(outColor.rgb) > 1.0f ? outColor : vec4(0);
 }
 	
