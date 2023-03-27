@@ -40,6 +40,9 @@ namespace SharpDXtest.Assets.Components
                     double randomScale = 0.5 + rng.NextDouble() * 1.5;
                     obj.transform.LocalScale = new Vector3(randomScale, randomScale, randomScale);
 
+                    PointLight light = obj.addComponent<PointLight>();
+                    light.Radius = 10;
+
                     GameCore.AddObject(obj);
                 }
             }

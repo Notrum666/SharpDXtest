@@ -130,7 +130,7 @@ namespace SharpDXtest
 
             copyFramebuffer = new FrameBuffer((int)ActualWidth, (int)ActualHeight);
 
-            GameCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene3.xml");
+            GameCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene4.xml");
             foreach (GameObject obj in GameCore.CurrentScene.objects)
             {
                 BallRestarter comp = obj.getComponent<BallRestarter>();

@@ -277,7 +277,7 @@ float4 main(vert_in v) : SV_Target
 		//	if (cascadeIndex == 2)
 		//		totalRadiance += float3(0.0f, 0.0f, 1.0f);
 		//}
-		if (dot(lightDir, v.n) > 0.0f && shadowFactor > 0.0f)
+		if (dot(lightDir, normal) > 0.0f && shadowFactor > 0.0f)
 		{
 			float attenuation = directionalLightAttenuation(directionalLights[i]);
 			float3 halfway = normalize(lightDir + camDir);

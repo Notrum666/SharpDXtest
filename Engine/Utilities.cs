@@ -229,9 +229,15 @@ namespace Engine
         {
             if (disposed)
                 throw new ObjectDisposedException(nameof(Sampler));
+            bool correctLocation = false;
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
                 if (shader.Locations.ContainsKey(variable))
+                {
+                    correctLocation = true;
                     GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetSampler(shader.Locations[variable], sampler);
+                }
+            if (!correctLocation)
+                throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
         }
 
         protected virtual void Dispose(bool disposing)
@@ -543,14 +549,18 @@ namespace Engine
         {
             if ((texture.Description.BindFlags & BindFlags.ShaderResource) == BindFlags.None)
                 throw new Exception("This texture is not a shader resource");
+            bool correctLocation = false;
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
                 if (shader.Locations.ContainsKey(variable))
                 {
+                    correctLocation = true;
                     if (targetIsTextureArray)
                         GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], (ShaderResourceView)views.First(view => view is ShaderResourceView/* && (view as ShaderResourceView).Description.Texture2DArray.ArraySize > 1*/));
                     else
                         GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], GetView<ShaderResourceView>());
                 }
+            if (!correctLocation)
+                throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
         }
 
         protected virtual void Dispose(bool disposing)

@@ -114,10 +114,22 @@
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BaseAssets\Shaders\deferred_gamma_correction.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="BaseAssets\Shaders\deferred_light_directional.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="BaseAssets\Shaders\depth_only.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="BaseAssets\Shaders\deferred_camera.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="BaseAssets\Shaders\pbr_lighting.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="BaseAssets\Shaders\deferred_light_point.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="BaseAssets\Shaders\tex_to_screen.fsh">
@@ -136,7 +148,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="BaseAssets\Shaders\tex_to_screen.vsh">
+    <None Include="BaseAssets\Shaders\screen_quad.vsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -148,6 +160,11 @@
       <Project>{cca05dce-086a-4c88-873a-48a4a11e305e}</Project>
       <Name>LinearAlgebra</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BaseAssets\Shaders\deferred_camera.vsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

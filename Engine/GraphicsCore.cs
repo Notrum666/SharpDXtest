@@ -22,11 +22,33 @@ using Format = SharpDX.DXGI.Format;
 using Engine.BaseAssets.Components;
 using System.Windows.Interop;
 using LinearAlgebra;
+using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Engine
 {
     public static class GraphicsCore
     {
+        private struct GBuffer
+        {
+            public Texture worldPos;
+            public Texture albedo;
+            public Texture normal;
+            public Texture metallic;
+            public Texture roughness;
+            public Texture ambientOcclusion;
+
+            public GBuffer(int width, int height)
+            {
+                worldPos = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+                albedo = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+                normal = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+                metallic = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+                roughness = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+                ambientOcclusion = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            }
+        }
+
         private static bool disposed = false;
 
         public static Device CurrentDevice { get; private set; }
@@ -34,6 +56,8 @@ namespace Engine
 
         private static RasterizerState defaultRasterizer;
         private static RasterizerState shadowsRasterizer;
+        //private static DepthStencilState depthState_checkDepth;
+        //private static DepthStencilState depthState_skipDepth;
 
         private static Sampler sampler;
         private static Sampler shadowsSampler;
@@ -50,6 +74,11 @@ namespace Engine
                 Camera.Current = value;
             }
         }
+
+        private static GBuffer gbuffer;
+        private static Texture depthBuffer;
+        private static Texture radianceBuffer;
+        private static Texture radianceBufferTarget;
 
         private static FrameBuffer frontbuffer;
         private static FrameBuffer middlebuffer;
@@ -76,16 +105,26 @@ namespace Engine
             AssetsManager.Textures["default_roughness"] = new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource);
             AssetsManager.Textures["default_ambientOcclusion"] = new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource);
 
-            AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"), 
-                                                        Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
+            //AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"), 
+            //                                            Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
             sampler = AssetsManager.Samplers["default"] = new Sampler(TextureAddressMode.Wrap, TextureAddressMode.Wrap);
 
             AssetsManager.LoadShaderPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
                                                            Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
             shadowsSampler = AssetsManager.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.ComparisonMinMagMipLinear, 0, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f), Comparison.LessEqual);
 
-            AssetsManager.LoadShaderPipeline("tex_to_screen", Shader.Create("BaseAssets\\Shaders\\tex_to_screen.vsh"),
-                                                              Shader.Create("BaseAssets\\Shaders\\tex_to_screen.fsh"));
+            AssetsManager.LoadShaderPipeline("deferred_camera", Shader.Create("BaseAssets\\Shaders\\deferred_camera.vsh"), 
+                                                                Shader.Create("BaseAssets\\Shaders\\deferred_camera.fsh"));
+
+            Shader screenQuadShader = Shader.Create("BaseAssets\\Shaders\\screen_quad.vsh");
+            AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\deferred_gamma_correction.fsh"));
+            AssetsManager.LoadShaderPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\deferred_light_point.fsh"));
+            AssetsManager.LoadShaderPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\deferred_light_directional.fsh"));
+
+            gbuffer = new GBuffer(width, height);
+            depthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
+            radianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            radianceBufferTarget = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
 
             backgroundColor = Color.FromRgba(0xFF202020);
             //backgroundColor = Color.FromRgba(0xFFFFFFFF);
@@ -144,6 +183,20 @@ namespace Engine
                 IsMultisampleEnabled = true
             });
             CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+
+            //depthState_checkDepth = new DepthStencilState(CurrentDevice, new DepthStencilStateDescription()
+            //{
+            //    DepthComparison =  Comparison.Less,
+            //    IsDepthEnabled = true,
+            //    IsStencilEnabled = false
+            //});
+            //depthState_skipDepth = new DepthStencilState(CurrentDevice, new DepthStencilStateDescription()
+            //{
+            //    DepthComparison = Comparison.Less,
+            //    IsDepthEnabled = false,
+            //    IsStencilEnabled = false
+            //});
+            //CurrentDevice.ImmediateContext.OutputMerger.DepthStencilState = depthState_checkDepth;
 
             CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
@@ -290,128 +343,191 @@ namespace Engine
 
         private static void RenderScene()
         {
-            CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
-
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(backbuffer.DepthTexture.GetView<DepthStencilView>(), backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
-
             CurrentDevice.ImmediateContext.ClearRenderTargetView(backbuffer.RenderTargetTexture.GetView<RenderTargetView>(), backgroundColor);
-            CurrentDevice.ImmediateContext.ClearDepthStencilView(backbuffer.DepthTexture.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
-
             if (GameCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
             {
                 FlushAndSwapFrameBuffers();
                 return;
             }
 
-            List<GameObject> objects = GameCore.CurrentScene.objects;
+            CameraPass();
+            LightingPass();
+            GammaCorrectionPass();
+            //CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+            //
+            //CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
+            //CurrentDevice.ImmediateContext.OutputMerger.SetTargets(backbuffer.DepthTexture.GetView<DepthStencilView>(), backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
+            //
+            //CurrentDevice.ImmediateContext.ClearRenderTargetView(backbuffer.RenderTargetTexture.GetView<RenderTargetView>(), backgroundColor);
+            //CurrentDevice.ImmediateContext.ClearDepthStencilView(backbuffer.DepthTexture.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
+            //
+            //if (GameCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
+            //{
+            //    FlushAndSwapFrameBuffers();
+            //    return;
+            //}
+            //
+            //List<GameObject> objects = GameCore.CurrentScene.objects;
+            //
+            //ShaderPipeline pipeline = AssetsManager.ShaderPipelines["default"];
+            //pipeline.Use();
+            //
+            //int spotLights = 0;
+            //int directionalLights = 0;
+            //int pointLights = 0;
+            //int ambientLights = 0;
+            //foreach (GameObject obj in objects)
+            //{
+            //    if (!obj.Enabled)
+            //        continue;
+            //    foreach (Light light in obj.getComponents<Light>())
+            //    {
+            //        if (!light.Enabled)
+            //            continue;
+            //
+            //        if (light is SpotLight)
+            //        {
+            //            SpotLight curLight = light as SpotLight;
+            //            string baseLocation = "spotLights[" + spotLights.ToString() + "].";
+            //
+            //            pipeline.UpdateUniform(baseLocation + "position", (Vector3f)obj.transform.Position);
+            //            pipeline.UpdateUniform(baseLocation + "direction", (Vector3f)obj.transform.Forward);
+            //            pipeline.UpdateUniform(baseLocation + "radius", curLight.Radius);
+            //            pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
+            //            pipeline.UpdateUniform(baseLocation + "intensity", curLight.Intensity);
+            //            pipeline.UpdateUniform(baseLocation + "angularIntensity", curLight.AngularIntensity);
+            //            pipeline.UpdateUniform(baseLocation + "angle", curLight.Angle / 2.0f);
+            //            pipeline.UpdateUniform(baseLocation + "color", curLight.color);
+            //
+            //            pipeline.UpdateUniform(baseLocation + "lightSpace", curLight.lightSpace);
+            //
+            //            pipeline.UpdateUniform(baseLocation + "shadowMapSize", new Vector2f(curLight.ShadowSize, curLight.ShadowSize));
+            //
+            //            curLight.ShadowTexture.use(baseLocation + "shadowMap");
+            //
+            //            spotLights++;
+            //        }
+            //        else if (light is DirectionalLight)
+            //        {
+            //            DirectionalLight curLight = light as DirectionalLight;
+            //            string baseLocation = "directionalLights[" + directionalLights.ToString() + "].";
+            //
+            //            pipeline.UpdateUniform(baseLocation + "direction", (Vector3f)curLight.gameObject.transform.Forward);
+            //            pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
+            //            pipeline.UpdateUniform(baseLocation + "color", curLight.color);
+            //
+            //            Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(CurrentCamera);
+            //            for (int i = 0; i < lightSpaces.Length; i++)
+            //                pipeline.UpdateUniform(baseLocation + "lightSpaces[" + i.ToString() + "]", lightSpaces[i]);
+            //            float[] cascadeDepths = DirectionalLight.CascadeFrustumDistances;
+            //            for (int i = 0; i < cascadeDepths.Length; i++)
+            //                pipeline.UpdateUniform(baseLocation + "cascadesDepths[" + i.ToString() + "]", cascadeDepths[i]);
+            //            pipeline.UpdateUniform(baseLocation + "cascadesCount", lightSpaces.Length);
+            //
+            //            pipeline.UpdateUniform(baseLocation + "shadowMapSize", new Vector2f(curLight.ShadowSize, curLight.ShadowSize));
+            //
+            //            curLight.ShadowTexture.use(baseLocation + "shadowMaps", true);
+            //
+            //            directionalLights++;
+            //        }
+            //        else if (light is PointLight)
+            //        {
+            //            PointLight curLight = light as PointLight;
+            //            string baseLocation = "pointLights[" + pointLights.ToString() + "].";
+            //
+            //            pipeline.UpdateUniform(baseLocation + "position", (Vector3f)curLight.gameObject.transform.Position);
+            //            pipeline.UpdateUniform(baseLocation + "radius", curLight.Radius);
+            //            pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
+            //            pipeline.UpdateUniform(baseLocation + "intensity", curLight.Intensity);
+            //            pipeline.UpdateUniform(baseLocation + "color", curLight.color);
+            //
+            //            pointLights++;
+            //        }
+            //        else if (light is AmbientLight)
+            //        {
+            //            AmbientLight curLight = light as AmbientLight;
+            //            string baseLocation = "ambientLights[" + ambientLights.ToString() + "].";
+            //
+            //            pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
+            //            pipeline.UpdateUniform(baseLocation + "color", curLight.color);
+            //
+            //            ambientLights++;
+            //        }
+            //        else
+            //            throw new NotImplementedException("Light type " + light.GetType().Name + " is not supported.");
+            //    }
+            //}
+            //
+            //pipeline.UpdateUniform("spotLightsCount", spotLights);
+            //pipeline.UpdateUniform("directionalLightsCount", directionalLights);
+            //pipeline.UpdateUniform("pointLightsCount", pointLights);
+            //pipeline.UpdateUniform("ambientLightsCount", ambientLights);
+            //
+            //pipeline.UpdateUniform("spotLight_NEAR", SpotLight.NEAR);
+            //
+            //sampler.use("texSampler");
+            //shadowsSampler.use("shadowSampler");
+            //
+            //pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.gameObject.transform.Position);
+            //pipeline.UpdateUniform("cam_NEAR", (float)CurrentCamera.Near);
+            //pipeline.UpdateUniform("cam_FAR", (float)CurrentCamera.Far);
+            //
+            //pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.View);
+            //pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.Proj);
+            //
+            //foreach (GameObject obj in objects)
+            //{
+            //    if (!obj.Enabled)
+            //        continue;
+            //    foreach (Mesh mesh in obj.getComponents<Mesh>())
+            //    {
+            //        if (!mesh.Enabled)
+            //            continue;
+            //        pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
+            //        pipeline.UpdateUniform("modelNorm", (Matrix4x4f)obj.transform.Model.inverse().transposed());
+            //
+            //        pipeline.UploadUpdatedUniforms();
+            //        mesh.Material.Albedo.use("albedoMap");
+            //        mesh.Material.Normal.use("normalMap");
+            //        mesh.Material.Metallic.use("metallicMap");
+            //        mesh.Material.Roughness.use("roughnessMap");
+            //        mesh.Material.AmbientOcclusion.use("ambientOcclusionMap");
+            //        mesh.model.Render();
+            //    }
+            //}
+            //
+            //FlushAndSwapFrameBuffers();
+//#if GraphicsDebugging
+//            swapChain.Present(1, 0);
+//#endif
+        }
 
-            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["default"];
+        private static void CameraPass()
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+            //CurrentDevice.ImmediateContext.OutputMerger.DepthStencilState = depthState_checkDepth;
+            
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(depthBuffer.GetView<DepthStencilView>(), gbuffer.worldPos.GetView<RenderTargetView>(),
+                                                                                                            gbuffer.albedo.GetView<RenderTargetView>(),
+                                                                                                            gbuffer.normal.GetView<RenderTargetView>(),
+                                                                                                            gbuffer.metallic.GetView<RenderTargetView>(),
+                                                                                                            gbuffer.roughness.GetView<RenderTargetView>(),
+                                                                                                            gbuffer.ambientOcclusion.GetView<RenderTargetView>());
+            
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(gbuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearDepthStencilView(depthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
+            
+            List<GameObject> objects = GameCore.CurrentScene.objects;
+            
+            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_camera"];
             pipeline.Use();
 
-            int spotLights = 0;
-            int directionalLights = 0;
-            int pointLights = 0;
-            int ambientLights = 0;
-            foreach (GameObject obj in objects)
-            {
-                if (!obj.Enabled)
-                    continue;
-                foreach (Light light in obj.getComponents<Light>())
-                {
-                    if (!light.Enabled)
-                        continue;
-
-                    if (light is SpotLight)
-                    {
-                        SpotLight curLight = light as SpotLight;
-                        string baseLocation = "spotLights[" + spotLights.ToString() + "].";
-
-                        pipeline.UpdateUniform(baseLocation + "position", (Vector3f)obj.transform.Position);
-                        pipeline.UpdateUniform(baseLocation + "direction", (Vector3f)obj.transform.Forward);
-                        pipeline.UpdateUniform(baseLocation + "radius", curLight.Radius);
-                        pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
-                        pipeline.UpdateUniform(baseLocation + "intensity", curLight.Intensity);
-                        pipeline.UpdateUniform(baseLocation + "angularIntensity", curLight.AngularIntensity);
-                        pipeline.UpdateUniform(baseLocation + "angle", curLight.Angle / 2.0f);
-                        pipeline.UpdateUniform(baseLocation + "color", curLight.color);
-
-                        pipeline.UpdateUniform(baseLocation + "lightSpace", curLight.lightSpace);
-
-                        pipeline.UpdateUniform(baseLocation + "shadowMapSize", new Vector2f(curLight.ShadowSize, curLight.ShadowSize));
-
-                        curLight.ShadowTexture.use(baseLocation + "shadowMap");
-
-                        spotLights++;
-                    }
-                    else if (light is DirectionalLight)
-                    {
-                        DirectionalLight curLight = light as DirectionalLight;
-                        string baseLocation = "directionalLights[" + directionalLights.ToString() + "].";
-
-                        pipeline.UpdateUniform(baseLocation + "direction", (Vector3f)curLight.gameObject.transform.Forward);
-                        pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
-                        pipeline.UpdateUniform(baseLocation + "color", curLight.color);
-
-                        Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(CurrentCamera);
-                        for (int i = 0; i < lightSpaces.Length; i++)
-                            pipeline.UpdateUniform(baseLocation + "lightSpaces[" + i.ToString() + "]", lightSpaces[i]);
-                        float[] cascadeDepths = DirectionalLight.CascadeFrustumDistances;
-                        for (int i = 0; i < cascadeDepths.Length; i++)
-                            pipeline.UpdateUniform(baseLocation + "cascadesDepths[" + i.ToString() + "]", cascadeDepths[i]);
-                        pipeline.UpdateUniform(baseLocation + "cascadesCount", lightSpaces.Length);
-
-                        pipeline.UpdateUniform(baseLocation + "shadowMapSize", new Vector2f(curLight.ShadowSize, curLight.ShadowSize));
-
-                        curLight.ShadowTexture.use(baseLocation + "shadowMaps", true);
-
-                        directionalLights++;
-                    }
-                    else if (light is PointLight)
-                    {
-                        PointLight curLight = light as PointLight;
-                        string baseLocation = "pointLights[" + pointLights.ToString() + "].";
-
-                        pipeline.UpdateUniform(baseLocation + "position", (Vector3f)curLight.gameObject.transform.Position);
-                        pipeline.UpdateUniform(baseLocation + "radius", curLight.Radius);
-                        pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
-                        pipeline.UpdateUniform(baseLocation + "intensity", curLight.Intensity);
-                        pipeline.UpdateUniform(baseLocation + "color", curLight.color);
-
-                        pointLights++;
-                    }
-                    else if (light is AmbientLight)
-                    {
-                        AmbientLight curLight = light as AmbientLight;
-                        string baseLocation = "ambientLights[" + ambientLights.ToString() + "].";
-
-                        pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
-                        pipeline.UpdateUniform(baseLocation + "color", curLight.color);
-
-                        ambientLights++;
-                    }
-                    else
-                        throw new NotImplementedException("Light type " + light.GetType().Name + " is not supported.");
-                }
-            }
-
-            pipeline.UpdateUniform("spotLightsCount", spotLights);
-            pipeline.UpdateUniform("directionalLightsCount", directionalLights);
-            pipeline.UpdateUniform("pointLightsCount", pointLights);
-            pipeline.UpdateUniform("ambientLightsCount", ambientLights);
-
-            pipeline.UpdateUniform("spotLight_NEAR", SpotLight.NEAR);
-
             sampler.use("texSampler");
-            shadowsSampler.use("shadowSampler");
-
-            pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.gameObject.transform.Position);
-            pipeline.UpdateUniform("cam_NEAR", (float)CurrentCamera.Near);
-            pipeline.UpdateUniform("cam_FAR", (float)CurrentCamera.Far);
-
+            
             pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.View);
             pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.Proj);
-
+            
             foreach (GameObject obj in objects)
             {
                 if (!obj.Enabled)
@@ -422,7 +538,7 @@ namespace Engine
                         continue;
                     pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
                     pipeline.UpdateUniform("modelNorm", (Matrix4x4f)obj.transform.Model.inverse().transposed());
-
+            
                     pipeline.UploadUpdatedUniforms();
                     mesh.Material.Albedo.use("albedoMap");
                     mesh.Material.Normal.use("normalMap");
@@ -432,6 +548,124 @@ namespace Engine
                     mesh.model.Render();
                 }
             }
+        }
+
+        private static void LightingPass()
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(radianceBuffer.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(radianceBufferTarget.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: radianceBufferTarget.GetView<RenderTargetView>());
+
+            List<GameObject> objects = GameCore.CurrentScene.objects;
+
+            foreach (GameObject obj in objects)
+            {
+                if (!obj.Enabled)
+                    continue;
+                foreach (Light light in obj.getComponents<Light>())
+                {
+                    if (!light.Enabled)
+                        continue;
+            
+                    if (light is SpotLight)
+                    {
+                        SpotLight curLight = light as SpotLight;
+
+                        continue;
+                    }
+                    else if (light is DirectionalLight)
+                    {
+                        DirectionalLight curLight = light as DirectionalLight;
+                        ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_light_directional"];
+                        pipeline.Use();
+
+                        pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.gameObject.transform.Position);
+
+                        pipeline.UpdateUniform("cam_NEAR", (float)CurrentCamera.Near);
+                        pipeline.UpdateUniform("cam_FAR", (float)CurrentCamera.Far);
+
+                        pipeline.UpdateUniform("directionalLight.direction", (Vector3f)curLight.gameObject.transform.Forward);
+                        pipeline.UpdateUniform("directionalLight.brightness", curLight.Brightness);
+                        pipeline.UpdateUniform("directionalLight.color", curLight.color);
+                        
+                        Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(CurrentCamera);
+                        for (int i = 0; i < lightSpaces.Length; i++)
+                            pipeline.UpdateUniform("directionalLight.lightSpaces[" + i.ToString() + "]", lightSpaces[i]);
+                        float[] cascadeDepths = DirectionalLight.CascadeFrustumDistances;
+                        for (int i = 0; i < cascadeDepths.Length; i++)
+                            pipeline.UpdateUniform("directionalLight.cascadesDepths[" + i.ToString() + "]", cascadeDepths[i]);
+                        pipeline.UpdateUniform("directionalLight.cascadesCount", lightSpaces.Length);
+                        
+                        pipeline.UpdateUniform("directionalLight.shadowMapSize", new Vector2f(curLight.ShadowSize, curLight.ShadowSize));
+
+                        pipeline.UploadUpdatedUniforms();
+
+                        curLight.ShadowTexture.use("directionalLight.shadowMaps", true);
+                        shadowsSampler.use("shadowSampler");
+                        depthBuffer.use("depthTex");
+                    }
+                    else if (light is PointLight)
+                    {
+                        PointLight curLight = light as PointLight;
+                        ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_light_point"];
+                        pipeline.Use();
+
+                        pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.gameObject.transform.Position);
+
+                        pipeline.UpdateUniform("pointLight.position", (Vector3f)curLight.gameObject.transform.Position);
+                        pipeline.UpdateUniform("pointLight.radius", curLight.Radius);
+                        pipeline.UpdateUniform("pointLight.brightness", curLight.Brightness);
+                        pipeline.UpdateUniform("pointLight.intensity", curLight.Intensity);
+                        pipeline.UpdateUniform("pointLight.color", curLight.color);
+
+                        pipeline.UploadUpdatedUniforms();
+                    }
+                    else if (light is AmbientLight)
+                    {
+                        AmbientLight curLight = light as AmbientLight;
+
+                        continue;
+                    }
+                    else
+                        throw new NotImplementedException("Light type " + light.GetType().Name + " is not supported.");
+
+                    gbuffer.worldPos.use("worldPosTex");
+                    gbuffer.albedo.use("albedoTex");
+                    gbuffer.normal.use("normalTex");
+                    gbuffer.metallic.use("metallicTex");
+                    gbuffer.roughness.use("roughnessTex");
+                    radianceBuffer.use("curRadianceTex");
+                    sampler.use("texSampler");
+                    CurrentDevice.ImmediateContext.Draw(6, 0);
+
+                    Texture tmp = radianceBuffer;
+                    radianceBuffer = radianceBufferTarget;
+                    radianceBufferTarget = tmp;
+
+                    CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: radianceBufferTarget.GetView<RenderTargetView>());
+                }
+            }
+        }
+
+        private static void GammaCorrectionPass()
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
+
+            AssetsManager.ShaderPipelines["deferred_gamma_correction"].Use();
+
+            gbuffer.worldPos.use("worldPosTex");
+            gbuffer.albedo.use("albedoTex");
+            gbuffer.ambientOcclusion.use("ambientOcclusionTex");
+            radianceBuffer.use("radianceTex");
+            sampler.use("texSampler");
+            CurrentDevice.ImmediateContext.Draw(6, 0);
 
             FlushAndSwapFrameBuffers();
 #if GraphicsDebugging
