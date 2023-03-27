@@ -89,7 +89,7 @@ float4 main(vert_in v) : SV_Target
 
 	float4 worldPos = worldPosTex.Sample(texSampler, v.t);
 	if (worldPos.w == 0.0f)
-		return float4(curRadiance, 1.0f);
+		return float4(curRadiance, 0.0f);
 
 	float3 albedo = albedoTex.Sample(texSampler, v.t).rgb;
 	float3 normal = normalTex.Sample(texSampler, v.t).xyz;
@@ -100,6 +100,8 @@ float4 main(vert_in v) : SV_Target
 	float ndotc = max(dot(camDir, normal), 0.0f);
 
 	float3 lightVec = pointLight.position - worldPos.xyz;
+	if (dot(lightVec, lightVec) > pointLight.radius * pointLight.radius)
+		return float4(curRadiance, 0.0f);
 
 	float attenuation = pointLightAttenuation(pointLight, lightVec);
 
@@ -122,5 +124,5 @@ float4 main(vert_in v) : SV_Target
 
 	curRadiance += (diffuse * albedo / PI + specular) * radiance * ndotl;
 
-	return float4(curRadiance, 1.0f);
+	return float4(curRadiance, 0.0f);
 }

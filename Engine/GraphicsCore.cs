@@ -78,7 +78,7 @@ namespace Engine
         private static GBuffer gbuffer;
         private static Texture depthBuffer;
         private static Texture radianceBuffer;
-        private static Texture radianceBufferTarget;
+        private static BlendState addBlendState;
 
         private static FrameBuffer frontbuffer;
         private static FrameBuffer middlebuffer;
@@ -124,7 +124,6 @@ namespace Engine
             gbuffer = new GBuffer(width, height);
             depthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
             radianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
-            radianceBufferTarget = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
 
             backgroundColor = Color.FromRgba(0xFF202020);
             //backgroundColor = Color.FromRgba(0xFFFFFFFF);
@@ -183,6 +182,16 @@ namespace Engine
                 IsMultisampleEnabled = true
             });
             CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+
+            BlendStateDescription blendStateDesc = new BlendStateDescription()
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
+            blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.One, BlendOption.One, SharpDX.Direct3D11.BlendOperation.Add,
+                                                                                    BlendOption.Zero, BlendOption.Zero, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
+            addBlendState = new BlendState(CurrentDevice, blendStateDesc);
+            
 
             //depthState_checkDepth = new DepthStencilState(CurrentDevice, new DepthStencilStateDescription()
             //{
@@ -259,6 +268,7 @@ namespace Engine
                 return;
 
             CurrentDevice.ImmediateContext.Rasterizer.State = shadowsRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
             List<GameObject> objects = GameCore.CurrentScene.objects;
 
@@ -505,8 +515,9 @@ namespace Engine
         private static void CameraPass()
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
             //CurrentDevice.ImmediateContext.OutputMerger.DepthStencilState = depthState_checkDepth;
-            
+
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(depthBuffer.GetView<DepthStencilView>(), gbuffer.worldPos.GetView<RenderTargetView>(),
                                                                                                             gbuffer.albedo.GetView<RenderTargetView>(),
@@ -553,12 +564,12 @@ namespace Engine
         private static void LightingPass()
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = addBlendState;
 
             CurrentDevice.ImmediateContext.ClearRenderTargetView(radianceBuffer.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(radianceBufferTarget.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
 
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: radianceBufferTarget.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: radianceBuffer.GetView<RenderTargetView>());
 
             List<GameObject> objects = GameCore.CurrentScene.objects;
 
@@ -641,12 +652,6 @@ namespace Engine
                     radianceBuffer.use("curRadianceTex");
                     sampler.use("texSampler");
                     CurrentDevice.ImmediateContext.Draw(6, 0);
-
-                    Texture tmp = radianceBuffer;
-                    radianceBuffer = radianceBufferTarget;
-                    radianceBufferTarget = tmp;
-
-                    CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: radianceBufferTarget.GetView<RenderTargetView>());
                 }
             }
         }
@@ -654,6 +659,7 @@ namespace Engine
         private static void GammaCorrectionPass()
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: backbuffer.RenderTargetTexture.GetView<RenderTargetView>());

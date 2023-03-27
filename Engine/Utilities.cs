@@ -230,11 +230,12 @@ namespace Engine
             if (disposed)
                 throw new ObjectDisposedException(nameof(Sampler));
             bool correctLocation = false;
+            int location;
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
-                if (shader.Locations.ContainsKey(variable))
+                if (shader.Locations.TryGetValue(variable, out location))
                 {
                     correctLocation = true;
-                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetSampler(shader.Locations[variable], sampler);
+                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetSampler(location, sampler);
                 }
             if (!correctLocation)
                 throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
@@ -550,14 +551,15 @@ namespace Engine
             if ((texture.Description.BindFlags & BindFlags.ShaderResource) == BindFlags.None)
                 throw new Exception("This texture is not a shader resource");
             bool correctLocation = false;
+            int location;
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
-                if (shader.Locations.ContainsKey(variable))
+                if (shader.Locations.TryGetValue(variable, out location))
                 {
                     correctLocation = true;
                     if (targetIsTextureArray)
-                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], (ShaderResourceView)views.First(view => view is ShaderResourceView/* && (view as ShaderResourceView).Description.Texture2DArray.ArraySize > 1*/));
+                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, (ShaderResourceView)views.First(view => view is ShaderResourceView && (view as ShaderResourceView).Description.Texture2DArray.ArraySize > 1));
                     else
-                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], GetView<ShaderResourceView>());
+                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, GetView<ShaderResourceView>());
                 }
             if (!correctLocation)
                 throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
@@ -740,9 +742,7 @@ namespace Engine
                         if (variable.value == null)
                             continue;
 
-                        stream.Position = variable.offset;
-
-                        Marshal.StructureToPtr(variable.value, stream.PositionPointer, true);
+                        Marshal.StructureToPtr(variable.value, stream.PositionPointer + variable.offset, true);
                     }
                     GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.buffer, 0);
                     buf.invalidated = false;
@@ -988,11 +988,9 @@ namespace Engine
         {
             bool exists = false;
             foreach (Shader shader in shaders)
-                if (shader.hasVariable(name))
-                {
-                    shader.updateUniform(name, value);
+                if (shader.tryUpdateUniform(name, value))
                     exists = true;
-                }
+
             if (!exists)
                 throw new ArgumentException("Variable \n" + name + "\n does not exists in this shader pipeline.");
         }
@@ -1000,14 +998,10 @@ namespace Engine
         {
             bool exists = false;
             foreach (Shader shader in shaders)
-                if (shader.hasVariable(name))
-                {
-                    shader.tryUpdateUniform(name, value);
+                if (shader.tryUpdateUniform(name, value))
                     exists = true;
-                }
-            if (!exists)
-                return false;
-            return true;
+
+            return exists;
         }
         public void Use()
         {
