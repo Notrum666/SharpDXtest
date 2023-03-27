@@ -164,15 +164,14 @@ namespace Engine.BaseAssets.Components
                 projectionOther[1] = projectionOther[1].projectOnVector(axis);
 
                 Vector3 segmentVector = projection[1] - projection[0];
-                double segmentVectorSqrLength = segmentVector.squaredLength();
-                double t1 = (projectionOther[0] - projection[0]) * segmentVector;
-                double t2 = (projectionOther[1] - projection[0]) * segmentVector;
-
-                if (t2 < 0 || t1 > segmentVectorSqrLength)
-                    return false;
-
                 Vector3 outVec1 = projectionOther[0] - projection[1];
                 Vector3 outVec2 = projectionOther[1] - projection[0];
+                double t1 = outVec1 * segmentVector;
+                double t2 = outVec2 * segmentVector;
+
+                if (t1 > 0 || t2 < 0)
+                    return false;
+
                 Vector3 outVec;
                 Vector3 newEndPoint;
                 if (outVec1.squaredLength() > outVec2.squaredLength())
@@ -738,10 +737,6 @@ namespace Engine.BaseAssets.Components
         public virtual void updateData()
         {
             globalCenter = (gameObject.transform.Model * new Vector4(Offset, 1)).xyz;
-        }
-        public override void fixedUpdate()
-        {
-            updateData();
         }
     }
 }

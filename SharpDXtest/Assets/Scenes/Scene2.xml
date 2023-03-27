@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Scene>
+	<Assets>
+		<Models>
+			<Model path="Ball.obj"/>
+		</Models>
+
+		<Textures>
+			<Texture path="Sun.jpg"/>
+			<Texture path="Mercury.jpg"/>
+			<Texture path="Venus.jpg"/>
+			<Texture path="Earth.jpg"/>
+			<Texture path="Moon.jpg"/>
+			<Texture path="Mars.jpg"/>
+			<Texture path="Jupiter.jpg"/>
+			<Texture path="Saturn.jpg"/>
+			<Texture path="Uranus.jpg"/>
+			<Texture path="Neptune.jpg"/>
+		</Textures>
+	</Assets>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position x="10"/>
+			<Transform.Rotation z="90"/>
+		</Transform>
+		<Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="500" FOV="1.7777"/>
+		<SoundListener IsCurrent="true"/>
+		<CameraController speed="10"/>
+	</GameObject>
+
+	<GameObject>
+		<GameObject x.Name="Sun">
+			<Transform>
+				<Transform.LocalScale x="3" y="3" z="3"/>
+			</Transform>
+			<Mesh model="{Model Ball}">
+				<Mesh.Material Albedo="{Texture Sun}"/>
+			</Mesh>
+			<SelfRotation periodInDays="26.6"/>
+		</GameObject>
+		
+		<PointLight Radius="500" Brightness="1.0"/>
+		<GameObject x.Name="Mercury">
+			<GameObject>
+				<Mesh model="{Model Ball}">
+					<Mesh.Material Albedo="{Texture Mercury}"/>
+				</Mesh>
+				<SelfRotation periodInDays="58"/>
+			</GameObject>
+			<OrbitalRotation periodInDays="88" radius="5.8"/>
+		</GameObject>
+
+		<GameObject x.Name="Venus">
+			<GameObject>
+				<Mesh model="{Model Ball}">
+					<Mesh.Material Albedo="{Texture Venus}"/>
+				</Mesh>
+				<SelfRotation periodInDays="243"/>
+			</GameObject>
+			<OrbitalRotation periodInDays="225" radius="10.8"/>
+		</GameObject>
+		
+		<GameObject x.Name="Earth">
+			<GameObject>
+				<Mesh model="{Model Ball}">
+					<Mesh.Material Albedo="{Texture Earth}"/>
+				</Mesh>
+				<SelfRotation periodInDays="1"/>
+			</GameObject>
+			<OrbitalRotation periodInDays="365" radius="15"/>
+			
+			<GameObject x.Name="Moon">
+				<GameObject>
+					<Mesh model="{Model Ball}">
+						<Mesh.Material Albedo="{Texture Moon}"/>
+					</Mesh>
+					<SelfRotation periodInDays="29.5"/>
+				</GameObject>
+				<OrbitalRotation periodInDays="27" radius="2"/>
+			</GameObject>
+		</GameObject>
+		
+		<GameObject x.Name="Mars">
+			<GameObject>
+				<Mesh model="{Model Ball}">
+					<Mesh.Material Albedo="{Texture Mars}"/>
+				</Mesh>
+				<SelfRotation periodInDays="1"/>
+			</GameObject>
+			<OrbitalRotation periodInDays="687" radius="22.8"/>
+			<GameObject x.Name="Phobos">
+				<Mesh model="{Model Ball}"/>
+				<OrbitalRotation periodInDays="0.33" radius="2"/>
+			</GameObject>
+			<GameObject x.Name="Deimos">
+				<Mesh model="{Model Ball}"/>
+				<OrbitalRotation periodInDays="1.25" radius="4"/>
+			</GameObject>
+		</GameObject>
+		
+		<GameObject x.Name="Jupiter">
+			<GameObject>
+				<Mesh model="{Model Ball}">
+					<Mesh.Material Albedo="{Texture Jupiter}"/>
+				</Mesh>
+				<SelfRotation periodInDays="0.42"/>
+			</GameObject>
+			<OrbitalRotation periodInDays="4380" radius="77.8"/>
+			<GameObject x.Name="Io">
+				<Mesh model="{Model Ball}"/>
+				<OrbitalRotation periodInDays="1.75" radius="2"/>
+			</GameObject>
+			<GameObject x.Name="Europa">
+				<Mesh model="{Model Ball}"/>
+				<OrbitalRotation periodInDays="3.54" radius="4"/>
+			</GameObject>
+			<GameObject x.Name="Ganymede">
+				<Mesh model="{Model Ball}"/>
+				<OrbitalRotation periodInDays="7.2" radius="6"/>
+			</GameObject>
+			<GameObject x.Name="Callisto">
+				<Mesh model="{Model Ball}"/>
+				<OrbitalRotation periodInDays="17" radius="8"/>
+			</GameObject>
+		</GameObject>
+		
+		<GameObject x.Name="Saturn">
+			<GameObject>
+				<Mesh model="{Model Ball}">
+					<Mesh.Material Albedo="{Texture Saturn}"/>
+				</Mesh>
+				<SelfRotation periodInDays="0.42"/>
+			</GameObject>
+			<OrbitalRotation periodInDays="10585" radius="142.9"/>
+			<GameObject x.Name="Titan">
+				<Mesh model="{Model Ball}"/>
+				<OrbitalRotation periodInDays="16" radius="2"/>
+			</GameObject>
+		</GameObject>
+		
+		<GameObject x.Name="UrAnus">
+			<GameObject>
+				<Mesh model="{Model Ball}">
+					<Mesh.Material Albedo="{Texture Uranus}"/>
+				</Mesh>
+				<SelfRotation periodInDays="0.7"/>
+			</GameObject>
+			<OrbitalRotation periodInDays="30660" radius="287.5"/>
+		</GameObject>
+		
+		<GameObject x.Name="Neptune">
+			<GameObject>
+				<Mesh model="{Model Ball}">
+					<Mesh.Material Albedo="{Texture Neptune}"/>
+				</Mesh>
+				<SelfRotation periodInDays="0.7"/>
+			</GameObject>
+			<OrbitalRotation periodInDays="60225" radius="449.7"/>
+			<GameObject x.Name="Triton">
+				<Mesh model="{Model Ball}"/>
+				<OrbitalRotation periodInDays="5.9" radius="2"/>
+			</GameObject>
+		</GameObject>
+	</GameObject>
+</Scene>

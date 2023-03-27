@@ -91,7 +91,7 @@ namespace Engine.BaseAssets.Components
         public Texture ShadowTexture { get; private set; }
         public SpotLight()
         {
-            ShadowTexture = new Texture(shadowSize, shadowSize, 0.0f, BindFlags.ShaderResource | BindFlags.DepthStencil);
+            ShadowTexture = new Texture(shadowSize, shadowSize, 0.0f.GetBytes(), SharpDX.DXGI.Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil);
         }
     }
 }

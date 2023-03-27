@@ -20,7 +20,7 @@ namespace Engine.BaseAssets.Components
             set
             {
                 fov = value;
-                recalculateMatrixes();
+                InvalidateMatrixes();
             }
         }
         private double aspect;
@@ -33,7 +33,7 @@ namespace Engine.BaseAssets.Components
             set
             {
                 aspect = value;
-                recalculateMatrixes();
+                InvalidateMatrixes();
             }
         }
         private double near;
@@ -46,7 +46,7 @@ namespace Engine.BaseAssets.Components
             set
             {
                 near = value;
-                recalculateMatrixes();
+                InvalidateMatrixes();
             }
         }
         private double far;
@@ -59,7 +59,7 @@ namespace Engine.BaseAssets.Components
             set
             {
                 far = value;
-                recalculateMatrixes();
+                InvalidateMatrixes();
             }
         }
         private static Camera current = null;
@@ -99,10 +99,27 @@ namespace Engine.BaseAssets.Components
         {
             get
             {
+                if (matrixesRequireRecalculation)
+                    RecalculateMatrixes();
                 return proj;
             }
         }
-        private void recalculateMatrixes()
+        private Matrix4x4 invProj;
+        public Matrix4x4 InvProj
+        {
+            get
+            {
+                if (matrixesRequireRecalculation)
+                    RecalculateMatrixes();
+                return invProj;
+            }
+        }
+        private bool matrixesRequireRecalculation;
+        public void InvalidateMatrixes()
+        {
+            matrixesRequireRecalculation = true;
+        }
+        public void RecalculateMatrixes()
         {
             double ctg = 1 / Math.Tan(FOV / 2);
 
@@ -110,6 +127,10 @@ namespace Engine.BaseAssets.Components
                                  0, 0, ctg, 0,
                                  0, far / (far - near), 0, -far * near / (far - near),
                                  0, 1, 0, 0);
+
+            invProj = proj.inverse();
+
+            matrixesRequireRecalculation = false;
         }
     }
 }

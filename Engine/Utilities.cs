@@ -128,15 +128,18 @@ namespace Engine
                 Vector3 edge2 = curPolygon[2].v - curPolygon[0].v;
                 Vector2 UVedge1 = curPolygon[1].t - curPolygon[0].t;
                 Vector2 UVedge2 = curPolygon[2].t - curPolygon[0].t;
-                Vector3 norm = edge1.cross(edge2).normalized();
+                //Vector3 norm = edge1.cross(edge2).normalized();
 
-                Matrix3x3 invB = new Matrix3x3(new Vector3(UVedge1), new Vector3(UVedge2), Vector3.UnitZ, false).inverse();
-                Matrix3x3 A = new Matrix3x3(edge1, edge2, norm, false);
-                Matrix3x3 invP = A * invB;
-                Vector3f tangent = new Vector3f((float)invP.v00, (float)invP.v10, (float)invP.v20);//(Vector3f)(invP * Vector3.UnitX);
-                curPolygon[0].tx = tangent;
-                curPolygon[1].tx = tangent;
-                curPolygon[2].tx = tangent;
+                //Matrix3x3 invB = new Matrix3x3(new Vector3(UVedge1), new Vector3(UVedge2), Vector3.UnitZ, false).inverse();
+                //Matrix3x3 A = new Matrix3x3(edge1, edge2, norm, false);
+                //Matrix3x3 invP = A * invB;
+                //Vector3f tangent = new Vector3f((float)invP.v00, (float)invP.v20, (float)invP.v10);//(Vector3f)(invP * Vector3.UnitX);
+                //curPolygon[0].tx = tangent;
+                //curPolygon[1].tx = tangent;
+                //curPolygon[2].tx = tangent;
+
+                curPolygon[0].tx = curPolygon[1].tx = curPolygon[2].tx =
+                    (Vector3f)((edge1 * UVedge2.y - edge2 * UVedge1.y) / (UVedge1.x * UVedge2.y - UVedge1.y * UVedge2.x)).normalized();
 
                 for (int j = 0; j < 3; j++)
                 {
@@ -181,8 +184,10 @@ namespace Engine
                     n_i = null;
                 }
 
-                vertexBuffer.Dispose();
-                indexBuffer.Dispose();
+                if (vertexBuffer != null)
+                    vertexBuffer.Dispose();
+                if (indexBuffer != null)
+                    indexBuffer.Dispose();
 
                 disposed = true;
             }
@@ -204,7 +209,7 @@ namespace Engine
         private SamplerState sampler;
         private bool disposed;
 
-        public Sampler(TextureAddressMode addressU, TextureAddressMode addressV, Filter filter = Filter.Anisotropic, int maximumAnisotropy = 8, RawColor4 borderColor = new RawColor4(), TextureAddressMode addressW = TextureAddressMode.Clamp)
+        public Sampler(TextureAddressMode addressU, TextureAddressMode addressV, Filter filter = Filter.Anisotropic, int maximumAnisotropy = 8, RawColor4 borderColor = new RawColor4(), Comparison comparisonFunction = Comparison.Always, TextureAddressMode addressW = TextureAddressMode.Clamp)
         {
             sampler = new SamplerState(GraphicsCore.CurrentDevice, new SamplerStateDescription()
             {
@@ -214,9 +219,10 @@ namespace Engine
                 Filter = filter,
                 MaximumAnisotropy = maximumAnisotropy,
                 MipLodBias = 0,
-                MinimumLod = float.MinValue,
+                MinimumLod = 0,
                 MaximumLod = float.MaxValue,
-                BorderColor = borderColor
+                BorderColor = borderColor,
+                ComparisonFunction = comparisonFunction,
             });
         }
         public void use(string variable)
@@ -252,20 +258,11 @@ namespace Engine
     public class Texture : IDisposable
     {
         private bool disposed = false;
-
         public Texture2D texture { get; private set; }
-        public BindFlags Usage
+        private List<ResourceView> views = new List<ResourceView>();
+        public IReadOnlyCollection<ResourceView> Views { get => views.AsReadOnly(); }
+        public Texture(Bitmap image, bool applyGammaCorrection = true)
         {
-            get => texture.Description.BindFlags;
-        }
-        public ShaderResourceView ShaderResource { get; private set; }
-        public DepthStencilView DepthStencil { get; private set; }
-        public RenderTargetView RenderTarget { get; private set; }
-        public Texture(Bitmap image, bool applyGammaCorrection = true, BindFlags usage = BindFlags.ShaderResource)
-        {
-            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource);
-            if (unsupportedUsage != BindFlags.None)
-                throw new NotImplementedException("Texture with image base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
 
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
                 image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
@@ -276,8 +273,8 @@ namespace Engine
                 Width = image.Width,
                 Height = image.Height,
                 ArraySize = 1,
-                BindFlags = usage,
-                Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
+                BindFlags = BindFlags.ShaderResource,
+                Usage = ResourceUsage.Immutable,
                 CpuAccessFlags = CpuAccessFlags.None,
                 Format = applyGammaCorrection ? Format.B8G8R8A8_UNorm_SRgb : Format.B8G8R8A8_UNorm,
                 MipLevels = 1,
@@ -289,152 +286,271 @@ namespace Engine
 
             generateViews();
         }
-        public Texture(int width, int height, Vector4f color, bool applyGammaCorrection = true, BindFlags usage = BindFlags.ShaderResource)
+        public Texture(int width, int height, IEnumerable<byte> defaultDataPerPixel, Format textureFormat, BindFlags usage, int arraySize = 1)
         {
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
             if (height <= 0)
                 throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
 
-            BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource);
-            if (unsupportedUsage != BindFlags.None)
-                throw new NotImplementedException("Texture with color base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
+            Format[] supportedFormats = { Format.B8G8R8A8_UNorm,
+                                          Format.B8G8R8A8_UNorm_SRgb,
+                                          Format.R32G32B32A32_Float,
+                                          Format.R32_Typeless };
+            if (!supportedFormats.Contains(textureFormat))
+                throw new NotSupportedException("Texture format is not supported: %s" + textureFormat.ToString());
 
-            byte[] data = new byte[width * height * 4];
+            int bytesPerPixel = textureFormat.SizeOfInBytes();
+
+            byte[] data = new byte[width * height * bytesPerPixel];
+
+            IEnumerator<byte> enumerator = defaultDataPerPixel.GetEnumerator();
             for (int i = 0; i < height; i++)
                 for (int j = 0; j < width; j++)
                 {
-                    int pos = (i * width  + j) * 4;
-                    data[pos] = (byte)(color.x * 255);
-                    data[pos + 1] = (byte)(color.y * 255);
-                    data[pos + 2] = (byte)(color.z * 255);
-                    data[pos + 3] = (byte)(color.w * 255);
+                    int pos = (i * width + j) * bytesPerPixel;
+                    for (int k = 0; k < bytesPerPixel && enumerator.MoveNext(); k++)
+                        data[pos + k] = enumerator.Current;
+                    enumerator.Reset();
                 }
 
-            IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
-            Marshal.Copy(data, 0, dataPtr, width * height * 4);
+            IntPtr dataPtr = Marshal.AllocHGlobal(width * height * bytesPerPixel);
+            Marshal.Copy(data, 0, dataPtr, width * height * bytesPerPixel);
 
+            DataRectangle[] rectangles = new DataRectangle[arraySize];
+            for (int i = 0; i < arraySize; i++)
+                rectangles[i] = new DataRectangle(dataPtr, width * bytesPerPixel);
             texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
             {
                 Width = width,
                 Height = height,
-                ArraySize = 1,
+                ArraySize = arraySize,
                 BindFlags = usage,
-                Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
+                Usage = ResourceUsage.Default,
                 CpuAccessFlags = CpuAccessFlags.None,
-                Format = applyGammaCorrection ? Format.B8G8R8A8_UNorm_SRgb : Format.B8G8R8A8_UNorm,
+                Format = textureFormat,
                 MipLevels = 1,
                 OptionFlags = ResourceOptionFlags.Shared,
                 SampleDescription = new SampleDescription(1, 0)
-            }, new DataRectangle(dataPtr, width * 4));
+            }, rectangles);
 
             Marshal.FreeHGlobal(dataPtr);
 
             generateViews();
         }
-        public Texture(int width, int height, float value, BindFlags usage = BindFlags.DepthStencil)
-        {
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
-
-            BindFlags unsupportedUsage = usage & ~(BindFlags.DepthStencil | BindFlags.ShaderResource);
-            if (unsupportedUsage != BindFlags.None)
-                throw new NotImplementedException("Texture with scalar base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
-
-            float[] data = new float[width * height];
-            for (int i = 0; i < height; i++)
-                for (int j = 0; j < width; j++)
-                    data[i * width + j] = value;
-
-            IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
-            Marshal.Copy(data, 0, dataPtr, width * height);
-
-            texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
-            {
-                Width = width,
-                Height = height,
-                ArraySize = 1,
-                BindFlags = usage,
-                Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
-                CpuAccessFlags = CpuAccessFlags.None,
-                Format = Format.R32_Typeless,
-                MipLevels = 1,
-                OptionFlags = ResourceOptionFlags.Shared,
-                SampleDescription = new SampleDescription(1, 0)
-            }, new DataRectangle(dataPtr, width * 4));
-
-            Marshal.FreeHGlobal(dataPtr);
-
-            generateViews();
-        }
+        //public Texture(int width, int height, Vector4f color, bool applyGammaCorrection = true, BindFlags usage = BindFlags.ShaderResource)
+        //{
+        //    if (width <= 0)
+        //        throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
+        //    if (height <= 0)
+        //        throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
+        //
+        //    BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource);
+        //    if (unsupportedUsage != BindFlags.None)
+        //        throw new NotImplementedException("Texture with color base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
+        //
+        //    byte[] data = new byte[width * height * 4];
+        //    for (int i = 0; i < height; i++)
+        //        for (int j = 0; j < width; j++)
+        //        {
+        //            int pos = (i * width  + j) * 4;
+        //            data[pos] = (byte)(color.z * 255);
+        //            data[pos + 1] = (byte)(color.y * 255);
+        //            data[pos + 2] = (byte)(color.x * 255);
+        //            data[pos + 3] = (byte)(color.w * 255);
+        //        }
+        //
+        //    IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
+        //    Marshal.Copy(data, 0, dataPtr, width * height * 4);
+        //
+        //    texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+        //    {
+        //        Width = width,
+        //        Height = height,
+        //        ArraySize = 1,
+        //        BindFlags = usage,
+        //        Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
+        //        CpuAccessFlags = CpuAccessFlags.None,
+        //        Format = applyGammaCorrection ? Format.B8G8R8A8_UNorm_SRgb : Format.B8G8R8A8_UNorm,
+        //        MipLevels = 1,
+        //        OptionFlags = ResourceOptionFlags.Shared,
+        //        SampleDescription = new SampleDescription(1, 0)
+        //    }, new DataRectangle(dataPtr, width * 4));
+        //
+        //    Marshal.FreeHGlobal(dataPtr);
+        //
+        //    generateViews();
+        //}
+        //public Texture(int width, int height, float value, BindFlags usage = BindFlags.DepthStencil)
+        //{
+        //    if (width <= 0)
+        //        throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
+        //    if (height <= 0)
+        //        throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
+        //
+        //    BindFlags unsupportedUsage = usage & ~(BindFlags.DepthStencil | BindFlags.ShaderResource);
+        //    if (unsupportedUsage != BindFlags.None)
+        //        throw new NotImplementedException("Texture with scalar base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
+        //
+        //    float[] data = new float[width * height];
+        //    for (int i = 0; i < height; i++)
+        //        for (int j = 0; j < width; j++)
+        //            data[i * width + j] = value;
+        //
+        //    IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
+        //    Marshal.Copy(data, 0, dataPtr, width * height);
+        //
+        //    texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
+        //    {
+        //        Width = width,
+        //        Height = height,
+        //        ArraySize = 1,
+        //        BindFlags = usage,
+        //        Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
+        //        CpuAccessFlags = CpuAccessFlags.None,
+        //        Format = Format.R32_Typeless,
+        //        MipLevels = 1,
+        //        OptionFlags = ResourceOptionFlags.Shared,
+        //        SampleDescription = new SampleDescription(1, 0)
+        //    }, new DataRectangle(dataPtr, width * 4));
+        //
+        //    Marshal.FreeHGlobal(dataPtr);
+        //
+        //    generateViews();
+        //}
         private void generateViews()
         {
             Format format = texture.Description.Format;
-            if (format == Format.B8G8R8A8_UNorm || format == Format.B8G8R8A8_UNorm_SRgb || 
-                format == Format.R8G8B8A8_UNorm || format == Format.R8G8B8A8_UNorm_SRgb)
+            if (format == Format.R32_Typeless)
+                format = Format.R32_Float;
+            BindFlags usage = texture.Description.BindFlags;
+            int arraySize = texture.Description.ArraySize;
+
+            if (usage.HasFlag(BindFlags.RenderTarget))
             {
-                if (Usage.HasFlag(BindFlags.RenderTarget))
-                    RenderTarget = new RenderTargetView(GraphicsCore.CurrentDevice, texture,
-                    new RenderTargetViewDescription()
-                    {
-                        Format = format,
-                        Dimension = RenderTargetViewDimension.Texture2D,
-                        Texture2D = new RenderTargetViewDescription.Texture2DResource()
+                if (arraySize > 1)
+                {
+                    views.Add(new RenderTargetView(GraphicsCore.CurrentDevice, texture,
+                        new RenderTargetViewDescription()
                         {
-                            MipSlice = 0
-                        }
-                    });
-                if (Usage.HasFlag(BindFlags.ShaderResource))
-                    ShaderResource = new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
+                            Format = format,
+                            Dimension = RenderTargetViewDimension.Texture2DArray,
+                            Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource()
+                            {
+                                MipSlice = 0,
+                                ArraySize = texture.Description.ArraySize,
+                                FirstArraySlice = 0
+                            }
+                        }));
+                }
+                for (int i = 0; i < arraySize; i++)
+                {
+                    views.Add(new RenderTargetView(GraphicsCore.CurrentDevice, texture,
+                        new RenderTargetViewDescription()
+                        {
+                            Format = format,
+                            Dimension = RenderTargetViewDimension.Texture2DArray,
+                            Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource()
+                            {
+                                MipSlice = 0,
+                                ArraySize = 1,
+                                FirstArraySlice = i
+                            }
+                        }));
+                }
+            }
+
+            if (usage.HasFlag(BindFlags.DepthStencil))
+            {
+                if (arraySize > 1)
+                {
+                    views.Add(new DepthStencilView(GraphicsCore.CurrentDevice, texture,
+                        new DepthStencilViewDescription()
+                        {
+                            Format = Format.D32_Float,
+                            Dimension = DepthStencilViewDimension.Texture2DArray,
+                            Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                            {
+                                MipSlice = 0,
+                                ArraySize = texture.Description.ArraySize,
+                                FirstArraySlice = 0
+                            }
+                        }));
+                }
+                for (int i = 0; i < arraySize; i++)
+                {
+                    views.Add(new DepthStencilView(GraphicsCore.CurrentDevice, texture,
+                        new DepthStencilViewDescription()
+                        {
+                            Format = Format.D32_Float,
+                            Dimension = DepthStencilViewDimension.Texture2DArray,
+                            Flags = DepthStencilViewFlags.None,
+                            Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                            {
+                                MipSlice = 0,
+                                ArraySize = 1,
+                                FirstArraySlice = i
+                            }
+                        }));
+                }
+            }
+
+            if (usage.HasFlag(BindFlags.ShaderResource))
+            {
+                if (arraySize > 1)
+                {
+                    views.Add(new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
                         new ShaderResourceViewDescription()
                         {
                             Format = format,
-                            Dimension = ShaderResourceViewDimension.Texture2D,
-                            Texture2D = new ShaderResourceViewDescription.Texture2DResource()
+                            Dimension = ShaderResourceViewDimension.Texture2DArray,
+                            Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
                             {
                                 MipLevels = texture.Description.MipLevels,
-                                MostDetailedMip = texture.Description.MipLevels - 1
+                                MostDetailedMip = texture.Description.MipLevels - 1,
+                                ArraySize = texture.Description.ArraySize,
+                                FirstArraySlice = 0
                             }
-                        });
-            }
-            else if (texture.Description.Format.HasFlag(Format.R32_Typeless))
-            {
-                DepthStencil = new DepthStencilView(GraphicsCore.CurrentDevice, texture,
-                    new DepthStencilViewDescription()
-                    {
-                        Format = Format.D32_Float,
-                        Dimension = DepthStencilViewDimension.Texture2D,
-                        Flags = DepthStencilViewFlags.None,
-                        Texture2D = new DepthStencilViewDescription.Texture2DResource()
-                        {
-                            MipSlice = 0
-                        }
-                    });
-                if (Usage.HasFlag(BindFlags.ShaderResource))
-                    ShaderResource = new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
+                        }));
+                }
+                for (int i = 0; i < arraySize; i++)
+                {
+                    views.Add(new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
                         new ShaderResourceViewDescription()
                         {
-                            Format = Format.R32_Float,
-                            Dimension = ShaderResourceViewDimension.Texture2D,
-                            Texture2D = new ShaderResourceViewDescription.Texture2DResource()
+                            Format = format,
+                            Dimension = ShaderResourceViewDimension.Texture2DArray,
+                            Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
                             {
                                 MipLevels = texture.Description.MipLevels,
-                                MostDetailedMip = texture.Description.MipLevels - 1
+                                MostDetailedMip = texture.Description.MipLevels - 1,
+                                ArraySize = 1,
+                                FirstArraySlice = i
                             }
-                        });
+                        }));
+                }
             }
-            else
-                throw new NotImplementedException("Texture format \"" + texture.Description.Format.ToString() + "\" is not supported.");
         }
-        public void use(string variable)
+        public T GetView<T>() where T : ResourceView
+        {
+            return (T)views.First(view => view is T);
+        }
+        public IList<T> GetViews<T>() where T : ResourceView
+        {
+            return views.Where(view => view is T).Cast<T>().ToList();
+        }
+        public void use(string variable, bool targetIsTextureArray = false)
         {
             if ((texture.Description.BindFlags & BindFlags.ShaderResource) == BindFlags.None)
                 throw new Exception("This texture is not a shader resource");
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
                 if (shader.Locations.ContainsKey(variable))
-                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], ShaderResource);
+                {
+                    if (targetIsTextureArray)
+                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], (ShaderResourceView)views.First(view => view is ShaderResourceView/* && (view as ShaderResourceView).Description.Texture2DArray.ArraySize > 1*/));
+                    else
+                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(shader.Locations[variable], GetView<ShaderResourceView>());
+                }
         }
 
         protected virtual void Dispose(bool disposing)
@@ -701,7 +817,7 @@ namespace Engine
                             switch (shaderParameterDescription.ComponentType)
                             {
                                 case RegisterComponentType.Float32:
-                                    inputElementDescription.Format = Format.R32_Float;
+                                    inputElementDescription.Format = Format.R32_Typeless;
                                     break;
                                 case RegisterComponentType.UInt32:
                                     inputElementDescription.Format = Format.R32_UInt;
@@ -937,10 +1053,12 @@ namespace Engine
                         {
                             if (models.ContainsKey(modelName))
                                 throw new ArgumentException("File can't have more than one model with the same name.");
-                            if (Models.ContainsKey(modelName))
-                                throw new ArgumentException("Model with name \"" + modelName + "\" already loaded.");
-                            models[modelName] = model;
-                            Models[modelName] = model;
+                            if (!Models.ContainsKey(modelName))
+                            {
+                                //throw new ArgumentException("Model with name \"" + modelName + "\" already loaded.");
+                                models[modelName] = model;
+                                Models[modelName] = model;
+                            }
                             offset_v += model.v.Count;
                             if (model.t != null)
                                 offset_t += model.t.Count;
@@ -1020,10 +1138,12 @@ namespace Engine
             {
                 if (models.ContainsKey(modelName))
                     throw new ArgumentException("File can't have more than one model with the same name.");
-                if (Models.ContainsKey(modelName))
-                    throw new ArgumentException("Model with name \"" + modelName + "\" already loaded.");
-                models[modelName] = model;
-                Models[modelName] = model;
+                if (!Models.ContainsKey(modelName))
+                {
+                    //throw new ArgumentException("Model with name \"" + modelName + "\" already loaded.");
+                    models[modelName] = model;
+                    Models[modelName] = model;
+                }
             }
             foreach (Model mdl in models.Values)
                 mdl.updateModel();
@@ -1042,7 +1162,8 @@ namespace Engine
             if (textureName == "")
                 textureName = Path.GetFileNameWithoutExtension(path);
             if (Textures.ContainsKey(textureName))
-                throw new ArgumentException("Texture with name \"" + textureName + "\" is already loaded.");
+                return Textures[textureName];
+                //throw new ArgumentException("Texture with name \"" + textureName + "\" is already loaded.");
         
             Texture texture = new Texture(new Bitmap(path), applyGammaCorrection);
         
@@ -1055,7 +1176,8 @@ namespace Engine
             if (soundName == "")
                 soundName = Path.GetFileNameWithoutExtension(path);
             if (Sounds.ContainsKey(soundName))
-                throw new ArgumentException("Sound with name \"" + soundName + "\" is already loaded.");
+                return Sounds[soundName];
+                //throw new ArgumentException("Sound with name \"" + soundName + "\" is already loaded.");
 
             SoundStream stream = new SoundStream(File.OpenRead(path));
             AudioBuffer buffer = new AudioBuffer
@@ -1108,7 +1230,7 @@ namespace Engine
                     case "Model":
                         {
                             if (!Models.ContainsKey(words[1]))
-                                throw new Exception("Model " + words[1] + " not loaded.");
+                                throw new Exception("Model " + words[1] + " is not loaded.");
                             PropertyInfo property = objType.GetProperty(name);
                             if (property != null)
                                 property.SetValue(obj, Models[words[1]]);
@@ -1118,7 +1240,7 @@ namespace Engine
                                 if (field != null)
                                     field.SetValue(obj, Models[words[1]]);
                                 else
-                                    throw new Exception(objType.Name + " don't have " + name + ".");
+                                    throw new Exception(objType.Name + " doesn't have " + name + ".");
                             }
                             break;
                         }

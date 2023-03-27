@@ -30,6 +30,10 @@ namespace Engine
         private static MouseState mouseState;
         private static MouseState prevFixedMouseState;
         private static MouseState fixedMouseState;
+        private static Vector2 mouseDelta;
+        private static Vector2 nextMouseDelta;
+        private static Vector2 fixedMouseDelta;
+        private static Vector2 nextFixedMouseDelta;
 
         internal static void Init()
         {
@@ -44,10 +48,7 @@ namespace Engine
 
             mouse = new Mouse(inputListener);
             mouse.Acquire();
-            mouseState = mouse.GetCurrentState();
-            prevMouseState = mouseState;
-            fixedMouseState = mouseState;
-            prevFixedMouseState = mouseState;
+            mouse.GetCurrentState();
         }
         internal static void Update()
         {
@@ -55,7 +56,14 @@ namespace Engine
             keyboardState = keyboard.GetCurrentState();
 
             prevMouseState = mouseState;
-            mouseState = mouse.GetCurrentState();
+            mouseState =  mouse.GetCurrentState();
+
+            Vector2 mouseDeltaFromLastState = new Vector2(mouseState.X, mouseState.Y);
+            nextMouseDelta += mouseDeltaFromLastState;
+            nextFixedMouseDelta += mouseDeltaFromLastState;
+
+            mouseDelta = nextMouseDelta;
+            nextMouseDelta = Vector2.Zero;
         }
         internal static void FixedUpdate()
         {
@@ -64,6 +72,13 @@ namespace Engine
 
             prevFixedMouseState = fixedMouseState;
             fixedMouseState = mouse.GetCurrentState();
+
+            Vector2 mouseDeltaFromLastState = new Vector2(fixedMouseState.X, fixedMouseState.Y);
+            nextMouseDelta += mouseDeltaFromLastState;
+            nextFixedMouseDelta += mouseDeltaFromLastState;
+
+            fixedMouseDelta = nextFixedMouseDelta;
+            nextFixedMouseDelta = Vector2.Zero;
         }
         public static bool IsKeyDown(Key key)
         {
@@ -117,8 +132,8 @@ namespace Engine
         public static Vector2 GetMouseDelta()
         {
             if (Time.IsFixed)
-                return new Vector2(fixedMouseState.X, fixedMouseState.Y);
-            return new Vector2(mouseState.X, mouseState.Y);
+                return fixedMouseDelta;
+            return mouseDelta;
         }
     }
 }

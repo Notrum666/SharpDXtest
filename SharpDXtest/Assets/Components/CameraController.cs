@@ -11,49 +11,54 @@ using Engine.BaseAssets.Components;
 
 namespace SharpDXtest.Assets.Components
 {
-    public class Controller : Component
+    public class CameraController : Component
     {
-        public float speed = 3f;
-        public GameObject cube;
+        public float speed;
         public override void update()
         {
-            if (InputManager.IsKeyPressed(Key.F))
-                cube.getComponent<Rigidbody>().addImpulse(new Vector3(0.0, 1.0, 0.0));
-            if (InputManager.IsKeyPressed(Key.E))
-                cube.getComponent<Rigidbody>().addAngularImpulse(new Vector3(0.5, 0.0, 0.0));
-
             float curSpeed = speed * (float)Time.DeltaTime;
+
+            if (InputManager.IsKeyPressed(Key.E))
+            {
+                Time.TimeScale *= 2;
+                speed /= 2;
+            }
+            if (InputManager.IsKeyPressed(Key.Q))
+            {
+                Time.TimeScale /= 2;
+                speed *= 2;
+            }
 
             if (InputManager.IsKeyDown(Key.LeftShift))
                 curSpeed *= 5f;
             if (InputManager.IsKeyDown(Key.A))
-                gameObject.transform.localPosition -= gameObject.transform.LocalRight * curSpeed;
+                gameObject.transform.LocalPosition -= gameObject.transform.LocalRight * curSpeed;
             if (InputManager.IsKeyDown(Key.D))
-                gameObject.transform.localPosition += gameObject.transform.LocalRight * curSpeed;
+                gameObject.transform.LocalPosition += gameObject.transform.LocalRight * curSpeed;
             if (InputManager.IsKeyDown(Key.S))
-                gameObject.transform.localPosition -= gameObject.transform.LocalForward * curSpeed;
+                gameObject.transform.LocalPosition -= gameObject.transform.LocalForward * curSpeed;
             if (InputManager.IsKeyDown(Key.W))
-                gameObject.transform.localPosition += gameObject.transform.LocalForward * curSpeed;
+                gameObject.transform.LocalPosition += gameObject.transform.LocalForward * curSpeed;
             if (InputManager.IsKeyDown(Key.C))
                 // faster
-                gameObject.transform.localPosition -= (gameObject.transform.Parent == null ? Vector3.Up : (gameObject.transform.Parent.View * Vector4.UnitZ).xyz) * curSpeed;
+                gameObject.transform.LocalPosition -= (gameObject.transform.Parent == null ? Vector3.Up : (gameObject.transform.Parent.View * Vector4.UnitZ).xyz) * curSpeed;
                 // simpler
                 //gameObject.transform.Position -= Vector3.Up * curSpeed;
             if (InputManager.IsKeyDown(Key.Space))
                 // faster
-                gameObject.transform.localPosition += (gameObject.transform.Parent == null ? Vector3.Up : (gameObject.transform.Parent.View * Vector4.UnitZ).xyz) * curSpeed;
+                gameObject.transform.LocalPosition += (gameObject.transform.Parent == null ? Vector3.Up : (gameObject.transform.Parent.View * Vector4.UnitZ).xyz) * curSpeed;
                 // simpler
                 //gameObject.transform.Position += Vector3.Up * curSpeed;
-
+            
             Vector2 mouseDelta = InputManager.GetMouseDelta() / 1000;
-
+            
             if (!mouseDelta.isZero())
             {
                 // faster
-                gameObject.transform.localRotation = Quaternion.FromAxisAngle(gameObject.transform.Parent == null ? Vector3.Up :
+                gameObject.transform.LocalRotation = Quaternion.FromAxisAngle(gameObject.transform.Parent == null ? Vector3.Up :
                                                             (gameObject.transform.Parent.View * Vector4.UnitZ).xyz, -mouseDelta.x) *
                                                      Quaternion.FromAxisAngle(gameObject.transform.LocalRight, -mouseDelta.y) *
-                                                     gameObject.transform.localRotation;
+                                                     gameObject.transform.LocalRotation;
                 // simpler
                 //gameObject.transform.Rotation = Quaternion.FromAxisAngle(Vector3.Up, -mouseDelta.x) *
                 //                                     Quaternion.FromAxisAngle(gameObject.transform.right, -mouseDelta.y) *

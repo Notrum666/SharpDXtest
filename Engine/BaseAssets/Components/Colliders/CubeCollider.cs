@@ -64,7 +64,6 @@ namespace Engine.BaseAssets.Components.Colliders
             generateNormals();
             buildEdges();
             buildPolygons();
-            recalculateOuterSphere();
         }
 
         private void generateVertexes()

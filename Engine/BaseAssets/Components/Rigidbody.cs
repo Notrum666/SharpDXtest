@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Deployment.Internal;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Forms;
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
@@ -16,6 +17,7 @@ namespace Engine.BaseAssets.Components
         Y = 2,
         Z = 4
     }
+
     sealed public class Rigidbody : Component
     {
         private double mass = 1.0;
@@ -123,7 +125,7 @@ namespace Engine.BaseAssets.Components
         private double inverseMass = 1.0;
         private Matrix3x3 inverseGlobalInertiaTensor = Matrix3x3.Identity;
 
-        public PhysicalMaterial Material { get; set; }
+        public PhysicalMaterial Material { get; set; } = new PhysicalMaterial();
 
         private Vector3 velocityChange = new Vector3();
         private Vector3 angularVelocityChange = new Vector3();
@@ -135,6 +137,14 @@ namespace Engine.BaseAssets.Components
         private int angularVelocitySleepCounter = 0;
         private double linearSleepThresholdSquared = 0.005;
         private double angularSleepThresholdSquared = 0.005;
+
+
+        private List<KeyValuePair<Collider, Collider>> prevCollidingPairs = new List<KeyValuePair<Collider, Collider>>();
+        private List<KeyValuePair<Collider, Collider>> collidingPairs = new List<KeyValuePair<Collider, Collider>>();
+        public delegate void onCollision_del(Rigidbody sender, Collider col, Collider other);
+        public event onCollision_del OnCollisionBegin;
+        public event onCollision_del OnCollision;
+        public event onCollision_del OnCollisionEnd;
 
         public override void fixedUpdate()
         {
@@ -167,20 +177,20 @@ namespace Engine.BaseAssets.Components
 
             if (t.Parent == null)
             {
-                t.localPosition += Velocity * Time.DeltaTime;
+                t.LocalPosition += Velocity * Time.DeltaTime;
 
-                t.localRotation = (t.localRotation +
-                    0.5 * new Quaternion(0.0, AngularVelocity.x, AngularVelocity.y, AngularVelocity.z) * t.localRotation * Time.DeltaTime).normalized();
+                t.LocalRotation = (t.LocalRotation +
+                    0.5 * new Quaternion(0.0, AngularVelocity.x, AngularVelocity.y, AngularVelocity.z) * t.LocalRotation * Time.DeltaTime).normalized();
             }
             else
             {
-                t.localPosition += t.Parent.Rotation.inverse() * Velocity * Time.DeltaTime;
+                t.LocalPosition += t.Parent.Rotation.inverse() * Velocity * Time.DeltaTime;
 
                 // faster
                 Vector3 localAngularVelocity = t.Parent.Rotation.inverse() * AngularVelocity;
-                t.localRotation = (t.localRotation +
+                t.LocalRotation = (t.LocalRotation +
                     0.5 * new Quaternion(0.0, localAngularVelocity.x, localAngularVelocity.y, localAngularVelocity.z) * 
-                    t.localRotation * Time.DeltaTime).normalized();
+                    t.LocalRotation * Time.DeltaTime).normalized();
                 // simpler
                 //t.Rotation = (t.Rotation +
                 //    0.5 * new Quaternion(0.0, angularVelocity.x, angularVelocity.y, angularVelocity.z) *
@@ -290,6 +300,9 @@ namespace Engine.BaseAssets.Components
                     Vector3 collisionExitNormal = (Vector3)_collisionExitNormal;
                     Vector3 colliderEndPoint = (Vector3)_colliderEndPoint;
                     collisionExitNormal.normalize();
+
+                    collidingPairs.Add(new KeyValuePair<Collider, Collider>(collider, otherCollider));
+                    otherRigidbody.collidingPairs.Add(new KeyValuePair<Collider, Collider>(otherCollider, collider));
 
                     Vector3 moveVector, otherMoveVector;
                     if (IsStatic)
@@ -406,6 +419,21 @@ namespace Engine.BaseAssets.Components
                         otherCollider.updateData();
                     }
                 }
+        }
+        internal void updateCollidingPairs()
+        {
+            foreach (KeyValuePair<Collider, Collider> pair in prevCollidingPairs)
+                if (!collidingPairs.Contains(pair))
+                    OnCollisionEnd?.Invoke(this, pair.Key, pair.Value);
+            foreach (KeyValuePair<Collider, Collider> pair in collidingPairs)
+            {
+                if (!prevCollidingPairs.Contains(pair))
+                    OnCollisionBegin?.Invoke(this, pair.Key, pair.Value);
+                OnCollision?.Invoke(this, pair.Key, pair.Value);
+            }
+
+            prevCollidingPairs = new List<KeyValuePair<Collider, Collider>>(collidingPairs);
+            collidingPairs.Clear();
         }
     }
 }

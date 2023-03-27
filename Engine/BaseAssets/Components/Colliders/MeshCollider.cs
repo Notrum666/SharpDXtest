@@ -5,11 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 
 using LinearAlgebra;
+//using SharpDX;
 
 namespace Engine.BaseAssets.Components.Colliders
 {
     public class MeshCollider : Collider
     {
+        public Model Model 
+        { 
+            set
+            {
+                FromModel(value);
+            } 
+        }
+
         protected List<Vector3> vertexes = new List<Vector3>();
         protected List<Vector3> normals = new List<Vector3>();
         protected List<Vector3> nonCollinearNormals = new List<Vector3>();
@@ -100,20 +109,6 @@ namespace Engine.BaseAssets.Components.Colliders
             }
         }
 
-        protected void recalculateOuterSphere()
-        {
-            double curSqrRadius;
-            foreach (Vector3 vertex in vertexes)
-            {
-                curSqrRadius = vertex.dot(vertex);
-                if (curSqrRadius > squaredOuterSphereRadius)
-                {
-                    squaredOuterSphereRadius = curSqrRadius;
-                    outerSphereRadius = Math.Sqrt(curSqrRadius);
-                }
-            }
-        }
-
         protected override void getBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest)
         {
             if (globalVertexes.Count == 0)
@@ -183,7 +178,21 @@ namespace Engine.BaseAssets.Components.Colliders
                 }
             }
 
-            recalculateOuterSphere();
+            void addUnique(Vector3 vec)
+            {
+                exists = false;
+                foreach (Vector3 vector in nonCollinearNormals)
+                    if (vector.isCollinearTo(vec))
+                    {
+                        exists = true;
+                        break;
+                    }
+                if (!exists)
+                    nonCollinearNormals.Add(vec);
+            }
+
+            foreach (Vector3 normal in normals)
+                addUnique(normal);
         }
         public override void updateData()
         {
@@ -200,6 +209,15 @@ namespace Engine.BaseAssets.Components.Colliders
                 globalNormals.Add((model * new Vector4(normal, 0.0)).xyz);
             foreach (Vector3 normal in nonCollinearNormals)
                 globalNonCollinearNormals.Add((model * new Vector4(normal, 0.0)).xyz);
+
+            double curSqrRadius;
+            foreach (Vector3 vertex in globalVertexes)
+            {
+                curSqrRadius = (vertex - GlobalCenter).squaredLength();
+                if (curSqrRadius > squaredOuterSphereRadius)
+                    squaredOuterSphereRadius = curSqrRadius;
+            }
+            outerSphereRadius = Math.Sqrt(squaredOuterSphereRadius);
         }
     }
 }

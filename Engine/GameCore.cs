@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Interop;
@@ -12,6 +13,7 @@ namespace Engine
     public static class GameCore
     {
         public static Scene CurrentScene { get; set; }
+        private static List<GameObject> newObjects = new List<GameObject>();
         private static double accumulator = 0.0;
         private static bool isAlive = false;
         public static bool IsAlive { get => isAlive; }
@@ -79,6 +81,11 @@ namespace Engine
                             OnResumed?.Invoke();
                         }
                     }
+
+                    if (Time.DeltaTime < 1.0/144.0)
+                    {
+                        Thread.Sleep((int)((1.0 / 144.0 - Time.DeltaTime) * 1000));
+                    }
                 }
             });
             try
@@ -102,22 +109,37 @@ namespace Engine
             GraphicsCore.Dispose();
             SoundCore.Dispose();
         }
+        public static void AddObject(GameObject obj)
+        {
+            if (CurrentScene == null || CurrentScene.objects.Contains(obj) || newObjects.Contains(obj))
+                return;
+
+            newObjects.Add(obj);
+        }
         public static void Update()
         {
             if (CurrentScene == null)
                 return;
 
-            update();
+            CurrentScene.objects.RemoveAll(obj => obj.PendingDestroy);
+            CurrentScene.objects.AddRange(newObjects);
+            newObjects.Clear();
 
             accumulator += Time.DeltaTime;
 
-            Time.SwitchToFixed();
-            while (accumulator >= Time.FixedDeltaTime)
+            if (accumulator >= Time.FixedDeltaTime)
             {
-                fixedUpdate();
-                accumulator -= Time.FixedDeltaTime;
+                Time.SwitchToFixed();
+                do
+                {
+                    fixedUpdate();
+                    accumulator -= Time.FixedDeltaTime;
+                }
+                while (accumulator >= Time.FixedDeltaTime);
+                Time.SwitchToVariating();
             }
-            Time.SwitchToVariating();
+
+            update();
         }
         private static void update()
         {
@@ -141,11 +163,15 @@ namespace Engine
                 Rigidbody rigidbody = CurrentScene.objects[i].getComponent<Rigidbody>();
                 if (rigidbody != null)
                 {
+                    foreach (Collider collider in CurrentScene.objects[i].getComponents<Collider>())
+                        collider.updateData();
                     foreach (Rigidbody otherRigidbody in rigidbodies)
                         rigidbody.solveCollisionWith(otherRigidbody);
                     rigidbodies.Add(rigidbody);
                 }
             }
+            foreach (Rigidbody rb in rigidbodies)
+                rb.updateCollidingPairs();
 
             foreach (Rigidbody rigidbody in rigidbodies)
                 rigidbody.applyChanges();

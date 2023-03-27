@@ -11,45 +11,86 @@ namespace Engine.BaseAssets.Components
     public class Transform : Component
     {
         public Transform Parent { get; private set; }
-        public Vector3 localPosition;
+        private Vector3 localPosition;
+        public Vector3 LocalPosition
+        {
+            get
+            {
+                return localPosition;
+            }
+            set
+            {
+                localPosition = value;
+                InvalidateMatrixes();
+            }
+        }
         public Vector3 Position 
         { 
             get 
             {
-                return Parent == null ? localPosition : (Parent.Model * new Vector4(localPosition, 1.0)).xyz;
+                return Parent == null ? LocalPosition : (Parent.Model * new Vector4(LocalPosition, 1.0)).xyz;
             } 
             set
             {
                 if (Parent == null)
-                    localPosition = value;
+                    LocalPosition = value;
                 else
-                    localPosition = (Parent.View * new Vector4(value, 1.0)).xyz;
+                    LocalPosition = (Parent.View * new Vector4(value, 1.0)).xyz;
             }
         }
-        public Quaternion localRotation;
+        private Quaternion localRotation;
+        public Quaternion LocalRotation
+        {
+            get
+            {
+                return localRotation;
+            }
+            set
+            {
+                localRotation = value;
+                InvalidateMatrixes();
+            }
+        }
         public Quaternion Rotation
         {
             get
             {
-                return Parent == null ? localRotation : Parent.Rotation * localRotation;
+                return Parent == null ? LocalRotation : Parent.Rotation * LocalRotation;
             }
             set
             {
                 if (Parent == null)
-                    localRotation = value;
+                    LocalRotation = value;
                 else
-                    localRotation = Parent.Rotation.inverse() * value;
+                    LocalRotation = Parent.Rotation.inverse() * value;
             }
         }
+        private Vector3 localScale;
+        public Vector3 LocalScale
+        {
+            get
+            {
+                return localScale;
+            }
+            set
+            {
+                if (Math.Abs(value.x) <= Constants.Epsilon ||
+                    Math.Abs(value.y) <= Constants.Epsilon ||
+                    Math.Abs(value.z) <= Constants.Epsilon)
+                    throw new ArgumentOutOfRangeException(nameof(LocalScale), "Scale can't be zero in any direction.");
+                localScale = value;
+                InvalidateMatrixes();
+            }
+        }
+
+        private Matrix4x4 localModel;
         public Matrix4x4 LocalModel
         {
             get
             {
-                Matrix4x4 mat = Matrix4x4.FromQuaternion(localRotation);
-                mat.v03 = localPosition.x;
-                mat.v13 = localPosition.y;
-                mat.v23 = localPosition.z;
-                return mat;
+                if (matrixesRequireRecalculation)
+                    RecalculateMatrixes();
+                return localModel;
             }
         }
         public Matrix4x4 Model
@@ -59,15 +100,14 @@ namespace Engine.BaseAssets.Components
                 return Parent == null ? LocalModel : Parent.Model * LocalModel;
             }
         }
+        private Matrix4x4 localView;
         public Matrix4x4 LocalView
         {
             get
             {
-                Matrix4x4 view = Matrix4x4.FromQuaternion(localRotation).transposed();
-                view.v03 = -localPosition.x * view.v00 - localPosition.y * view.v01 - localPosition.z * view.v02;
-                view.v13 = -localPosition.x * view.v10 - localPosition.y * view.v11 - localPosition.z * view.v12;
-                view.v23 = -localPosition.x * view.v20 - localPosition.y * view.v21 - localPosition.z * view.v22;
-                return view;
+                if (matrixesRequireRecalculation)
+                    RecalculateMatrixes();
+                return localView;
             }
         }
         public Matrix4x4 View
@@ -77,16 +117,53 @@ namespace Engine.BaseAssets.Components
                 return Parent == null ? LocalView : LocalView * Parent.View;
             }
         }
-        public Vector3 LocalForward { get { return localRotation * Vector3.Forward; } }
-        public Vector3 LocalRight { get { return localRotation * Vector3.Right; } }
-        public Vector3 LocalUp { get { return localRotation * Vector3.Up; } }
+        public Vector3 LocalForward { get { return LocalRotation * Vector3.Forward; } }
+        public Vector3 LocalRight { get { return LocalRotation * Vector3.Right; } }
+        public Vector3 LocalUp { get { return LocalRotation * Vector3.Up; } }
         public Vector3 Forward { get { return Rotation * Vector3.Forward; } }
         public Vector3 Right { get { return Rotation * Vector3.Right; } }
         public Vector3 Up { get { return Rotation * Vector3.Up; } }
+        private bool matrixesRequireRecalculation;
+        public void InvalidateMatrixes()
+        {
+            matrixesRequireRecalculation = true;
+        }
+        public void RecalculateMatrixes()
+        {
+            // Model * vec => Move * Rotate * Scale * vec
+            localModel = Matrix4x4.FromQuaternion(LocalRotation);
+
+            localModel.v00 *= localScale.x; localModel.v01 *= localScale.y; localModel.v02 *= localScale.z;
+            localModel.v10 *= localScale.x; localModel.v11 *= localScale.y; localModel.v12 *= localScale.z;
+            localModel.v20 *= localScale.x; localModel.v21 *= localScale.y; localModel.v22 *= localScale.z;
+
+            localModel.v03 = LocalPosition.x;
+            localModel.v13 = LocalPosition.y;
+            localModel.v23 = LocalPosition.z;
+
+            // View * vec => Scale^(-1) * Rotate^(-1) * Move^(-1) * vec
+            localView = Matrix4x4.FromQuaternion(LocalRotation).transposed();
+
+            double invScaleX = 1.0 / localScale.x;
+            double invScaleY = 1.0 / localScale.y;
+            double invScaleZ = 1.0 / localScale.z;
+            localView.v00 *= invScaleX; localView.v01 *= invScaleX; localView.v02 *= invScaleX;
+            localView.v10 *= invScaleY; localView.v11 *= invScaleY; localView.v12 *= invScaleY;
+            localView.v20 *= invScaleZ; localView.v21 *= invScaleZ; localView.v22 *= invScaleZ;
+
+            localView.v03 = -LocalPosition.x * localView.v00 - LocalPosition.y * localView.v01 - LocalPosition.z * localView.v02;
+            localView.v13 = -LocalPosition.x * localView.v10 - LocalPosition.y * localView.v11 - LocalPosition.z * localView.v12;
+            localView.v23 = -LocalPosition.x * localView.v20 - LocalPosition.y * localView.v21 - LocalPosition.z * localView.v22;
+
+            matrixesRequireRecalculation = false;
+        }
         public Transform()
         {
-            localPosition = Vector3.Zero;
-            localRotation = Quaternion.Identity;
+            LocalPosition = Vector3.Zero;
+            LocalRotation = Quaternion.Identity;
+            localScale = new Vector3(1.0, 1.0, 1.0);
+
+            RecalculateMatrixes();
         }
         public void setParent(Transform transform)
         {

@@ -16,6 +16,7 @@ namespace Engine
         public Transform transform { get; }
         private List<Component> components = new List<Component>();
         public ReadOnlyCollection<Component> Components { get => components.AsReadOnly(); }
+        internal bool PendingDestroy { get; private set; }
         public GameObject()
         {
             transform = new Transform();
@@ -84,6 +85,10 @@ namespace Engine
             foreach (Component component in components)
                 if (component.Enabled)
                     component.fixedUpdate();
+        }
+        public void Destroy()
+        {
+            PendingDestroy = true;
         }
     }
 }
