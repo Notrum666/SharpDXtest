@@ -101,9 +101,10 @@ namespace LinearAlgebra
         {
             if (value == 0)
                 throw new DivideByZeroException();
-            return new Matrix3x3(mat.v00 / value, mat.v01 / value, mat.v02 / value,
-                                 mat.v10 / value, mat.v11 / value, mat.v12 / value,
-                                 mat.v20 / value, mat.v21 / value, mat.v22 / value);
+            value = 1.0 / value;
+            return new Matrix3x3(mat.v00 * value, mat.v01 * value, mat.v02 * value,
+                                 mat.v10 * value, mat.v11 * value, mat.v12 * value,
+                                 mat.v20 * value, mat.v21 * value, mat.v22 * value);
         }
         public static Vector3 operator *(Matrix3x3 mat, Vector3 vec)
         {
@@ -163,9 +164,9 @@ namespace LinearAlgebra
             double det21 = v00 * v12 - v02 * v10;
             double det22 = v00 * v11 - v01 * v10;
 
-            return new Matrix3x3(det00 / determinant, -det10 / determinant, det20 / determinant,
-                                -det01 / determinant, det11 / determinant, -det21 / determinant,
-                                 det02 / determinant, -det12 / determinant, det22 / determinant);
+            return new Matrix3x3(det00, -det10, det20,
+                                -det01, det11, -det21,
+                                 det02, -det12, det22) / determinant;
         }
         /// <summary>
         /// Inverts this matrix
@@ -187,15 +188,17 @@ namespace LinearAlgebra
             double det21 = v00 * v12 - v02 * v10;
             double det22 = v00 * v11 - v01 * v10;
 
-            v00 = det00 / determinant;
-            v01 = -det10 / determinant;
-            v02 = det20 / determinant;
-            v10 = -det01 / determinant;
-            v11 = det11 / determinant;
-            v12 = -det21 / determinant;
-            v20 = det02 / determinant;
-            v21 = -det12 / determinant;
-            v22 = det22 / determinant;
+            determinant = 1.0 / determinant;
+
+            v00 = det00 * determinant;
+            v01 = -det10 * determinant;
+            v02 = det20 * determinant;
+            v10 = -det01 * determinant;
+            v11 = det11 * determinant;
+            v12 = -det21 * determinant;
+            v20 = det02 * determinant;
+            v21 = -det12 * determinant;
+            v22 = det22 * determinant;
         }
         public static Matrix3x3 FromQuaternion(Quaternion q)
         {

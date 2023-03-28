@@ -41,12 +41,12 @@ namespace SharpDXtest.Assets.Components
                 gameObject.transform.LocalPosition += gameObject.transform.LocalForward * curSpeed;
             if (InputManager.IsKeyDown(Key.C))
                 // faster
-                gameObject.transform.LocalPosition -= (gameObject.transform.Parent == null ? Vector3.Up : (gameObject.transform.Parent.View * Vector4.UnitZ).xyz) * curSpeed;
+                gameObject.transform.LocalPosition -= (gameObject.transform.Parent == null ? Vector3.Up : gameObject.transform.Parent.View.TransformDirection(Vector3.UnitZ)) * curSpeed;
                 // simpler
                 //gameObject.transform.Position -= Vector3.Up * curSpeed;
             if (InputManager.IsKeyDown(Key.Space))
                 // faster
-                gameObject.transform.LocalPosition += (gameObject.transform.Parent == null ? Vector3.Up : (gameObject.transform.Parent.View * Vector4.UnitZ).xyz) * curSpeed;
+                gameObject.transform.LocalPosition += (gameObject.transform.Parent == null ? Vector3.Up : gameObject.transform.Parent.View.TransformDirection(Vector3.UnitZ)) * curSpeed;
                 // simpler
                 //gameObject.transform.Position += Vector3.Up * curSpeed;
             
@@ -56,7 +56,7 @@ namespace SharpDXtest.Assets.Components
             {
                 // faster
                 gameObject.transform.LocalRotation = Quaternion.FromAxisAngle(gameObject.transform.Parent == null ? Vector3.Up :
-                                                            (gameObject.transform.Parent.View * Vector4.UnitZ).xyz, -mouseDelta.x) *
+                                                            gameObject.transform.Parent.View.TransformDirection(Vector3.UnitZ), -mouseDelta.x) *
                                                      Quaternion.FromAxisAngle(gameObject.transform.LocalRight, -mouseDelta.y) *
                                                      gameObject.transform.LocalRotation;
                 // simpler

@@ -30,18 +30,15 @@ namespace Engine.BaseAssets.Components
         }
         private Matrix4x4f getLightSpaceForFrustumSlice(Matrix4x4f frustumToView, float fromZ, float toZ, float lightSpaceDepthScale)
         {
-            Vector4f[] corners = new Vector4f[8];
-            corners[0] = frustumToView * new Vector4f(-1.0f, -1.0f, fromZ, 1.0f);
-            corners[1] = frustumToView * new Vector4f( 1.0f, -1.0f, fromZ, 1.0f);
-            corners[2] = frustumToView * new Vector4f(-1.0f,  1.0f, fromZ, 1.0f);
-            corners[3] = frustumToView * new Vector4f( 1.0f,  1.0f, fromZ, 1.0f);
-            corners[4] = frustumToView * new Vector4f(-1.0f, -1.0f, toZ, 1.0f);
-            corners[5] = frustumToView * new Vector4f( 1.0f, -1.0f, toZ, 1.0f);
-            corners[6] = frustumToView * new Vector4f(-1.0f,  1.0f, toZ, 1.0f);
-            corners[7] = frustumToView * new Vector4f( 1.0f,  1.0f, toZ, 1.0f);
-
-            for (int i = 0; i < 8; i++)
-                corners[i] = corners[i] / corners[i].w;
+            Vector3f[] corners = new Vector3f[8];
+            corners[0] = frustumToView.TransformPoint(new Vector3f(-1.0f, -1.0f, fromZ));
+            corners[1] = frustumToView.TransformPoint(new Vector3f( 1.0f, -1.0f, fromZ));
+            corners[2] = frustumToView.TransformPoint(new Vector3f(-1.0f,  1.0f, fromZ));
+            corners[3] = frustumToView.TransformPoint(new Vector3f( 1.0f,  1.0f, fromZ));
+            corners[4] = frustumToView.TransformPoint(new Vector3f(-1.0f, -1.0f, toZ));
+            corners[5] = frustumToView.TransformPoint(new Vector3f( 1.0f, -1.0f, toZ));
+            corners[6] = frustumToView.TransformPoint(new Vector3f(-1.0f,  1.0f, toZ));
+            corners[7] = frustumToView.TransformPoint(new Vector3f( 1.0f,  1.0f, toZ));
 
             float minX = corners[0].x;
             float maxX = corners[0].x;

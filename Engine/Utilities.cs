@@ -120,7 +120,6 @@ namespace Engine
                         curVertex.n.z = (float)normal.z;
                     }
 
-                    //curPolygon.Add(curVertex);
                     curPolygon[j] = curVertex;
                 }
 
@@ -128,15 +127,6 @@ namespace Engine
                 Vector3 edge2 = curPolygon[2].v - curPolygon[0].v;
                 Vector2 UVedge1 = curPolygon[1].t - curPolygon[0].t;
                 Vector2 UVedge2 = curPolygon[2].t - curPolygon[0].t;
-                //Vector3 norm = edge1.cross(edge2).normalized();
-
-                //Matrix3x3 invB = new Matrix3x3(new Vector3(UVedge1), new Vector3(UVedge2), Vector3.UnitZ, false).inverse();
-                //Matrix3x3 A = new Matrix3x3(edge1, edge2, norm, false);
-                //Matrix3x3 invP = A * invB;
-                //Vector3f tangent = new Vector3f((float)invP.v00, (float)invP.v20, (float)invP.v10);//(Vector3f)(invP * Vector3.UnitX);
-                //curPolygon[0].tx = tangent;
-                //curPolygon[1].tx = tangent;
-                //curPolygon[2].tx = tangent;
 
                 curPolygon[0].tx = curPolygon[1].tx = curPolygon[2].tx =
                     (Vector3f)((edge1 * UVedge2.y - edge2 * UVedge1.y) / (UVedge1.x * UVedge2.y - UVedge1.y * UVedge2.x)).normalized();
@@ -345,86 +335,6 @@ namespace Engine
 
             generateViews();
         }
-        //public Texture(int width, int height, Vector4f color, bool applyGammaCorrection = true, BindFlags usage = BindFlags.ShaderResource)
-        //{
-        //    if (width <= 0)
-        //        throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
-        //    if (height <= 0)
-        //        throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
-        //
-        //    BindFlags unsupportedUsage = usage & ~(BindFlags.RenderTarget | BindFlags.ShaderResource);
-        //    if (unsupportedUsage != BindFlags.None)
-        //        throw new NotImplementedException("Texture with color base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
-        //
-        //    byte[] data = new byte[width * height * 4];
-        //    for (int i = 0; i < height; i++)
-        //        for (int j = 0; j < width; j++)
-        //        {
-        //            int pos = (i * width  + j) * 4;
-        //            data[pos] = (byte)(color.z * 255);
-        //            data[pos + 1] = (byte)(color.y * 255);
-        //            data[pos + 2] = (byte)(color.x * 255);
-        //            data[pos + 3] = (byte)(color.w * 255);
-        //        }
-        //
-        //    IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
-        //    Marshal.Copy(data, 0, dataPtr, width * height * 4);
-        //
-        //    texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
-        //    {
-        //        Width = width,
-        //        Height = height,
-        //        ArraySize = 1,
-        //        BindFlags = usage,
-        //        Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
-        //        CpuAccessFlags = CpuAccessFlags.None,
-        //        Format = applyGammaCorrection ? Format.B8G8R8A8_UNorm_SRgb : Format.B8G8R8A8_UNorm,
-        //        MipLevels = 1,
-        //        OptionFlags = ResourceOptionFlags.Shared,
-        //        SampleDescription = new SampleDescription(1, 0)
-        //    }, new DataRectangle(dataPtr, width * 4));
-        //
-        //    Marshal.FreeHGlobal(dataPtr);
-        //
-        //    generateViews();
-        //}
-        //public Texture(int width, int height, float value, BindFlags usage = BindFlags.DepthStencil)
-        //{
-        //    if (width <= 0)
-        //        throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
-        //    if (height <= 0)
-        //        throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
-        //
-        //    BindFlags unsupportedUsage = usage & ~(BindFlags.DepthStencil | BindFlags.ShaderResource);
-        //    if (unsupportedUsage != BindFlags.None)
-        //        throw new NotImplementedException("Texture with scalar base does not support \"" + unsupportedUsage.ToString() + "\" usage.");
-        //
-        //    float[] data = new float[width * height];
-        //    for (int i = 0; i < height; i++)
-        //        for (int j = 0; j < width; j++)
-        //            data[i * width + j] = value;
-        //
-        //    IntPtr dataPtr = Marshal.AllocHGlobal(width * height * 4);
-        //    Marshal.Copy(data, 0, dataPtr, width * height);
-        //
-        //    texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
-        //    {
-        //        Width = width,
-        //        Height = height,
-        //        ArraySize = 1,
-        //        BindFlags = usage,
-        //        Usage = ((usage & ~BindFlags.ShaderResource) == BindFlags.None) ? ResourceUsage.Immutable : ResourceUsage.Default,
-        //        CpuAccessFlags = CpuAccessFlags.None,
-        //        Format = Format.R32_Typeless,
-        //        MipLevels = 1,
-        //        OptionFlags = ResourceOptionFlags.Shared,
-        //        SampleDescription = new SampleDescription(1, 0)
-        //    }, new DataRectangle(dataPtr, width * 4));
-        //
-        //    Marshal.FreeHGlobal(dataPtr);
-        //
-        //    generateViews();
-        //}
         private void generateViews()
         {
             Format format = texture.Description.Format;

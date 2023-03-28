@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 
-namespace LinearAlgebra.Tests
+namespace LinearAlgebra.Test
 {
     [TestClass]
-    public class Matrix4x4Tests
+    public class Matrix4x4Test
     {
 
         /////////////////////////////////_*_/////////////////////////////////

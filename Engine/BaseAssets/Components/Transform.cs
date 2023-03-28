@@ -28,14 +28,14 @@ namespace Engine.BaseAssets.Components
         { 
             get 
             {
-                return Parent == null ? LocalPosition : (Parent.Model * new Vector4(LocalPosition, 1.0)).xyz;
+                return Parent == null ? LocalPosition : Parent.Model.TransformPoint(LocalPosition);
             } 
             set
             {
                 if (Parent == null)
                     LocalPosition = value;
                 else
-                    LocalPosition = (Parent.View * new Vector4(value, 1.0)).xyz;
+                    LocalPosition = Parent.View.TransformPoint(value);
             }
         }
         private Quaternion localRotation;

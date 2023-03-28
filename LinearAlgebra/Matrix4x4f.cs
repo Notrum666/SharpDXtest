@@ -141,10 +141,11 @@ namespace LinearAlgebra
         {
             if (value == 0)
                 throw new DivideByZeroException();
-            return new Matrix4x4f(mat.v00 / value, mat.v01 / value, mat.v02 / value, mat.v03 / value,
-                                  mat.v10 / value, mat.v11 / value, mat.v12 / value, mat.v13 / value,
-                                  mat.v20 / value, mat.v21 / value, mat.v22 / value, mat.v23 / value,
-                                  mat.v30 / value, mat.v31 / value, mat.v32 / value, mat.v33 / value);
+            value = 1.0f / value;
+            return new Matrix4x4f(mat.v00 * value, mat.v01 * value, mat.v02 * value, mat.v03 * value,
+                                  mat.v10 * value, mat.v11 * value, mat.v12 * value, mat.v13 * value,
+                                  mat.v20 * value, mat.v21 * value, mat.v22 * value, mat.v23 * value,
+                                  mat.v30 * value, mat.v31 * value, mat.v32 * value, mat.v33 * value);
         }
         public static Vector4f operator *(Matrix4x4f mat, Vector4f vec)
         {
@@ -159,6 +160,19 @@ namespace LinearAlgebra
                                 mat.v01 * vec.x + mat.v11 * vec.y + mat.v21 * vec.z + mat.v31 * vec.w,
                                 mat.v02 * vec.x + mat.v12 * vec.y + mat.v22 * vec.z + mat.v32 * vec.w,
                                 mat.v03 * vec.x + mat.v13 * vec.y + mat.v23 * vec.z + mat.v33 * vec.w);
+        }
+        public Vector3f TransformPoint(Vector3f point)
+        {
+            float invW = 1.0f / (v30 * point.x + v31 * point.y + v32 * point.z + v33);
+            return new Vector3f((v00 * point.x + v01 * point.y + v02 * point.z + v03) * invW,
+                                (v10 * point.x + v11 * point.y + v12 * point.z + v13) * invW,
+                                (v20 * point.x + v21 * point.y + v22 * point.z + v23) * invW);
+        }
+        public Vector3f TransformDirection(Vector3f dir)
+        {
+            return new Vector3f(v00 * dir.x + v01 * dir.y + v02 * dir.z,
+                               v10 * dir.x + v11 * dir.y + v12 * dir.z,
+                               v20 * dir.x + v21 * dir.y + v22 * dir.z);
         }
         /// <summary>
         /// Returns transposed copy of this matrix
@@ -258,25 +272,27 @@ namespace LinearAlgebra
             float det32 = (v00 * (v11 * v23 - v13 * v21) - v01 * (v10 * v23 - v13 * v20) + v03 * (v10 * v21 - v11 * v20));
             float det33 = (v00 * (v11 * v22 - v12 * v21) - v01 * (v10 * v22 - v12 * v20) + v02 * (v10 * v21 - v11 * v20));
 
-            v00 = det00 / determinant;
-            v01 = -det10 / determinant;
-            v02 = det20 / determinant;
-            v03 = -det30 / determinant;
+            determinant = 1.0f / determinant;
 
-            v10 = -det01 / determinant;
-            v11 = det11 / determinant;
-            v12 = -det21 / determinant;
-            v13 = det31 / determinant;
+            v00 = det00 * determinant;
+            v01 = -det10 * determinant;
+            v02 = det20 * determinant;
+            v03 = -det30 * determinant;
 
-            v20 = det02 / determinant;
-            v21 = -det12 / determinant;
-            v22 = det22 / determinant;
-            v23 = -det32 / determinant;
+            v10 = -det01 * determinant;
+            v11 = det11 * determinant;
+            v12 = -det21 * determinant;
+            v13 = det31 * determinant;
 
-            v30 = -det03 / determinant;
-            v31 = det13 / determinant;
-            v32 = -det23 / determinant;
-            v33 = det33 / determinant;
+            v20 = det02 * determinant;
+            v21 = -det12 * determinant;
+            v22 = det22 * determinant;
+            v23 = -det32 * determinant;
+
+            v30 = -det03 * determinant;
+            v31 = det13 * determinant;
+            v32 = -det23 * determinant;
+            v33 = det33 * determinant;
         }
         public static Matrix4x4f FromQuaternion(Quaternion q)
         {

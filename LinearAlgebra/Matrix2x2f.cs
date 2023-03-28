@@ -69,8 +69,9 @@ namespace LinearAlgebra
         {
             if (value == 0)
                 throw new DivideByZeroException();
-            return new Matrix2x2f(mat.v00 / value, mat.v01 / value,
-                                  mat.v10 / value, mat.v11 / value);
+            value = 1.0f / value;
+            return new Matrix2x2f(mat.v00 * value, mat.v01 * value,
+                                  mat.v10 * value, mat.v11 * value);
         }
         public static Vector2f operator *(Matrix2x2f mat, Vector2f vec)
         {
@@ -106,8 +107,8 @@ namespace LinearAlgebra
             if (determinant == 0)
                 throw new Exception("This matrix is singular. (determinant = 0)");
 
-            return new Matrix2x2f(v11 / determinant, -v01 / determinant,
-                                  -v10 / determinant, v00 / determinant);
+            return new Matrix2x2f(v11, -v01,
+                                  -v10, v00) / determinant;
         }
         /// <summary>
         /// Inverts this matrix
@@ -118,11 +119,13 @@ namespace LinearAlgebra
             if (determinant == 0)
                 throw new Exception("This matrix is singular. (determinant = 0)");
 
+            determinant = 1.0f / determinant;
+
             float tmp = v00;
-            v00 = v11 / determinant;
-            v11 = tmp / determinant;
-            v01 = -v01 / determinant;
-            v10 = -v10 / determinant;
+            v00 = v11 * determinant;
+            v11 = tmp * determinant;
+            v01 = -v01 * determinant;
+            v10 = -v10 * determinant;
         }
         public override string ToString()
         {

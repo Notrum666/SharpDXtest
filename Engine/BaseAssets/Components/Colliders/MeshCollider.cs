@@ -204,11 +204,11 @@ namespace Engine.BaseAssets.Components.Colliders
 
             Matrix4x4 model = gameObject.transform.Model;
             foreach (Vector3 vertex in vertexes)
-                globalVertexes.Add((model * new Vector4(vertex + Offset, 1.0)).xyz);
+                globalVertexes.Add(model.TransformPoint(vertex + Offset));
             foreach (Vector3 normal in normals)
-                globalNormals.Add((model * new Vector4(normal, 0.0)).xyz);
+                globalNormals.Add(model.TransformDirection(normal));
             foreach (Vector3 normal in nonCollinearNormals)
-                globalNonCollinearNormals.Add((model * new Vector4(normal, 0.0)).xyz);
+                globalNonCollinearNormals.Add(model.TransformDirection(normal));
 
             double curSqrRadius;
             foreach (Vector3 vertex in globalVertexes)
