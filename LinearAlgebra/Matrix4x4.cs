@@ -62,7 +62,7 @@ namespace LinearAlgebra
             v32 = values[14];
             v33 = values[15];
         }
-        public Matrix4x4(Vector4 vec1, Vector4 vec2, Vector4 vec3, Vector4 vec4, bool rows = true)
+        public Matrix4x4(in Vector4 vec1, in Vector4 vec2, in Vector4 vec3, in Vector4 vec4, bool rows = true)
         {
             if (rows)
             {
@@ -103,11 +103,11 @@ namespace LinearAlgebra
                 v33 = vec4.w;
             }
         }
-        public static implicit operator Matrix4x4(Matrix4x4f mat) => new Matrix4x4(mat.v00, mat.v01, mat.v02, mat.v03,
-                                                                                   mat.v10, mat.v11, mat.v12, mat.v13,
-                                                                                   mat.v20, mat.v21, mat.v22, mat.v23,
-                                                                                   mat.v30, mat.v31, mat.v32, mat.v33);
-        public static Matrix4x4 operator *(Matrix4x4 m1, Matrix4x4 m2)
+        public static implicit operator Matrix4x4(in Matrix4x4f mat) => new Matrix4x4(mat.v00, mat.v01, mat.v02, mat.v03,
+                                                                                      mat.v10, mat.v11, mat.v12, mat.v13,
+                                                                                      mat.v20, mat.v21, mat.v22, mat.v23,
+                                                                                      mat.v30, mat.v31, mat.v32, mat.v33);
+        public static Matrix4x4 operator *(in Matrix4x4 m1, in Matrix4x4 m2)
         {
             return new Matrix4x4(m1.v00 * m2.v00 + m1.v01 * m2.v10 + m1.v02 * m2.v20 + m1.v03 * m2.v30,
                                  m1.v00 * m2.v01 + m1.v01 * m2.v11 + m1.v02 * m2.v21 + m1.v03 * m2.v31,
@@ -129,14 +129,32 @@ namespace LinearAlgebra
                                  m1.v30 * m2.v02 + m1.v31 * m2.v12 + m1.v32 * m2.v22 + m1.v33 * m2.v32,
                                  m1.v30 * m2.v03 + m1.v31 * m2.v13 + m1.v32 * m2.v23 + m1.v33 * m2.v33);
         }
-        public static Matrix4x4 operator *(Matrix4x4 mat, double value)
+        public static Matrix4x4 operator +(in Matrix4x4 lhs, in Matrix4x4 rhs)
+        {
+            return new Matrix4x4(lhs.v00 + rhs.v00, lhs.v01 + rhs.v01, lhs.v02 + rhs.v02, lhs.v03 + rhs.v03,
+                                 lhs.v10 + rhs.v10, lhs.v11 + rhs.v11, lhs.v12 + rhs.v12, lhs.v13 + rhs.v13,
+                                 lhs.v20 + rhs.v20, lhs.v21 + rhs.v21, lhs.v22 + rhs.v22, lhs.v23 + rhs.v23,
+                                 lhs.v30 + rhs.v30, lhs.v31 + rhs.v31, lhs.v32 + rhs.v32, lhs.v33 + rhs.v33);
+        }
+        public static Matrix4x4 operator -(in Matrix4x4 lhs, in Matrix4x4 rhs)
+        {
+            return new Matrix4x4(lhs.v00 - rhs.v00, lhs.v01 - rhs.v01, lhs.v02 - rhs.v02, lhs.v03 - rhs.v03,
+                                 lhs.v10 - rhs.v10, lhs.v11 - rhs.v11, lhs.v12 - rhs.v12, lhs.v13 - rhs.v13,
+                                 lhs.v20 - rhs.v20, lhs.v21 - rhs.v21, lhs.v22 - rhs.v22, lhs.v23 - rhs.v23,
+                                 lhs.v30 - rhs.v30, lhs.v31 - rhs.v31, lhs.v32 - rhs.v32, lhs.v33 - rhs.v33);
+        }
+        public static Matrix4x4 operator *(in Matrix4x4 mat, double value)
         {
             return new Matrix4x4(mat.v00 * value, mat.v01 * value, mat.v02 * value, mat.v03 * value,
                                  mat.v10 * value, mat.v11 * value, mat.v12 * value, mat.v13 * value,
                                  mat.v20 * value, mat.v21 * value, mat.v22 * value, mat.v23 * value,
                                  mat.v30 * value, mat.v31 * value, mat.v32 * value, mat.v33 * value);
         }
-        public static Matrix4x4 operator /(Matrix4x4 mat, double value)
+        public static Matrix4x4 operator *(double value, in Matrix4x4 mat)
+        {
+            return mat * value;
+        }
+        public static Matrix4x4 operator /(in Matrix4x4 mat, double value)
         {
             if (value == 0)
                 throw new DivideByZeroException();
@@ -146,28 +164,28 @@ namespace LinearAlgebra
                                  mat.v20 * value, mat.v21 * value, mat.v22 * value, mat.v23 * value,
                                  mat.v30 * value, mat.v31 * value, mat.v32 * value, mat.v33 * value);
         }
-        public static Vector4 operator *(Matrix4x4 mat, Vector4 vec)
+        public static Vector4 operator *(in Matrix4x4 mat, in Vector4 vec)
         {
             return new Vector4(mat.v00 * vec.x + mat.v01 * vec.y + mat.v02 * vec.z + mat.v03 * vec.w,
                                mat.v10 * vec.x + mat.v11 * vec.y + mat.v12 * vec.z + mat.v13 * vec.w,
                                mat.v20 * vec.x + mat.v21 * vec.y + mat.v22 * vec.z + mat.v23 * vec.w,
                                mat.v30 * vec.x + mat.v31 * vec.y + mat.v32 * vec.z + mat.v33 * vec.w);
         }
-        public static Vector4 operator *(Vector4 vec, Matrix4x4 mat)
+        public static Vector4 operator *(in Vector4 vec, in Matrix4x4 mat)
         {
             return new Vector4(mat.v00 * vec.x + mat.v10 * vec.y + mat.v20 * vec.z + mat.v30 * vec.w,
                                mat.v01 * vec.x + mat.v11 * vec.y + mat.v21 * vec.z + mat.v31 * vec.w,
                                mat.v02 * vec.x + mat.v12 * vec.y + mat.v22 * vec.z + mat.v32 * vec.w,
                                mat.v03 * vec.x + mat.v13 * vec.y + mat.v23 * vec.z + mat.v33 * vec.w);
         }
-        public Vector3 TransformPoint(Vector3 point)
+        public Vector3 TransformPoint(in Vector3 point)
         {
             double invW = 1.0 / (v30 * point.x + v31 * point.y + v32 * point.z + v33);
             return new Vector3((v00 * point.x + v01 * point.y + v02 * point.z + v03) * invW,
                                (v10 * point.x + v11 * point.y + v12 * point.z + v13) * invW,
                                (v20 * point.x + v21 * point.y + v22 * point.z + v23) * invW);
         }
-        public Vector3 TransformDirection(Vector3 dir)
+        public Vector3 TransformDirection(in Vector3 dir)
         {
             return new Vector3(v00 * dir.x + v01 * dir.y + v02 * dir.z,
                                v10 * dir.x + v11 * dir.y + v12 * dir.z,
@@ -293,7 +311,7 @@ namespace LinearAlgebra
             v32 = -det23 * determinant;
             v33 = det33 * determinant;
         }
-        public static Matrix4x4 FromQuaternion(Quaternion q)
+        public static Matrix4x4 FromQuaternion(in Quaternion q)
         {
             double s2 = 2.0 / q.norm();
             return new Matrix4x4(1 - s2 * (q.y * q.y + q.z * q.z), s2 * (q.x * q.y - q.w * q.z), s2 * (q.x * q.z + q.w * q.y), 0,

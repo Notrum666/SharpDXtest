@@ -47,7 +47,7 @@ namespace LinearAlgebra
             v21 = values[7];
             v22 = values[8];
         }
-        public Matrix3x3(Vector3 vec1, Vector3 vec2, Vector3 vec3, bool rows = true)
+        public Matrix3x3(in Vector3 vec1, in Vector3 vec2, in Vector3 vec3, bool rows = true)
         {
             if (rows)
             {
@@ -74,10 +74,10 @@ namespace LinearAlgebra
                 v22 = vec3.z;
             }
         }
-        public static implicit operator Matrix3x3(Matrix3x3f mat) => new Matrix3x3(mat.v00, mat.v01, mat.v02,
-                                                                                   mat.v10, mat.v11, mat.v12,
-                                                                                   mat.v20, mat.v21, mat.v22);
-        public static Matrix3x3 operator *(Matrix3x3 m1, Matrix3x3 m2)
+        public static implicit operator Matrix3x3(in Matrix3x3f mat) => new Matrix3x3(mat.v00, mat.v01, mat.v02,
+                                                                                      mat.v10, mat.v11, mat.v12,
+                                                                                      mat.v20, mat.v21, mat.v22);
+        public static Matrix3x3 operator *(in Matrix3x3 m1, in Matrix3x3 m2)
         {
             return new Matrix3x3(m1.v00 * m2.v00 + m1.v01 * m2.v10 + m1.v02 * m2.v20,
                                  m1.v00 * m2.v01 + m1.v01 * m2.v11 + m1.v02 * m2.v21,
@@ -91,13 +91,29 @@ namespace LinearAlgebra
                                  m1.v20 * m2.v01 + m1.v21 * m2.v11 + m1.v22 * m2.v21,
                                  m1.v20 * m2.v02 + m1.v21 * m2.v12 + m1.v22 * m2.v22);
         }
-        public static Matrix3x3 operator *(Matrix3x3 mat, double value)
+        public static Matrix3x3 operator +(in Matrix3x3 lhs, in Matrix3x3 rhs)
+        {
+            return new Matrix3x3(lhs.v00 + rhs.v00, lhs.v01 + rhs.v01, lhs.v02 + rhs.v02,
+                                 lhs.v10 + rhs.v10, lhs.v11 + rhs.v11, lhs.v12 + rhs.v12,
+                                 lhs.v20 + rhs.v20, lhs.v21 + rhs.v21, lhs.v22 + rhs.v22);
+        }
+        public static Matrix3x3 operator -(in Matrix3x3 lhs, in Matrix3x3 rhs)
+        {
+            return new Matrix3x3(lhs.v00 - rhs.v00, lhs.v01 - rhs.v01, lhs.v02 - rhs.v02,
+                                 lhs.v10 - rhs.v10, lhs.v11 - rhs.v11, lhs.v12 - rhs.v12,
+                                 lhs.v20 - rhs.v20, lhs.v21 - rhs.v21, lhs.v22 - rhs.v22);
+        }
+        public static Matrix3x3 operator *(in Matrix3x3 mat, double value)
         {
             return new Matrix3x3(mat.v00 * value, mat.v01 * value, mat.v02 * value,
                                  mat.v10 * value, mat.v11 * value, mat.v12 * value,
                                  mat.v20 * value, mat.v21 * value, mat.v22 * value);
         }
-        public static Matrix3x3 operator /(Matrix3x3 mat, double value)
+        public static Matrix3x3 operator *(double value, in Matrix3x3 mat)
+        {
+            return mat * value;
+        }
+        public static Matrix3x3 operator /(in Matrix3x3 mat, double value)
         {
             if (value == 0)
                 throw new DivideByZeroException();
@@ -106,13 +122,13 @@ namespace LinearAlgebra
                                  mat.v10 * value, mat.v11 * value, mat.v12 * value,
                                  mat.v20 * value, mat.v21 * value, mat.v22 * value);
         }
-        public static Vector3 operator *(Matrix3x3 mat, Vector3 vec)
+        public static Vector3 operator *(in Matrix3x3 mat, Vector3 vec)
         {
             return new Vector3(mat.v00 * vec.x + mat.v01 * vec.y + mat.v02 * vec.z,
                                mat.v10 * vec.x + mat.v11 * vec.y + mat.v12 * vec.z,
                                mat.v20 * vec.x + mat.v21 * vec.y + mat.v22 * vec.z);
         }
-        public static Vector3 operator *(Vector3 vec, Matrix3x3 mat)
+        public static Vector3 operator *(Vector3 vec, in Matrix3x3 mat)
         {
             return new Vector3(mat.v00 * vec.x + mat.v10 * vec.y + mat.v20 * vec.z,
                                mat.v01 * vec.x + mat.v11 * vec.y + mat.v21 * vec.z,

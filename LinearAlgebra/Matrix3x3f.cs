@@ -47,7 +47,7 @@ namespace LinearAlgebra
             v21 = values[7];
             v22 = values[8];
         }
-        public Matrix3x3f(Vector3f vec1, Vector3f vec2, Vector3f vec3, bool rows = true)
+        public Matrix3x3f(in Vector3f vec1, in Vector3f vec2, in Vector3f vec3, bool rows = true)
         {
             if (rows)
             {
@@ -74,10 +74,10 @@ namespace LinearAlgebra
                 v22 = vec3.z;
             }
         }
-        public static explicit operator Matrix3x3f(Matrix3x3 mat) => new Matrix3x3f((float)mat.v00, (float)mat.v01, (float)mat.v02,
-                                                                                    (float)mat.v10, (float)mat.v11, (float)mat.v12,
-                                                                                    (float)mat.v20, (float)mat.v21, (float)mat.v22);
-        public static Matrix3x3f operator *(Matrix3x3f m1, Matrix3x3f m2)
+        public static explicit operator Matrix3x3f(in Matrix3x3 mat) => new Matrix3x3f((float)mat.v00, (float)mat.v01, (float)mat.v02,
+                                                                                       (float)mat.v10, (float)mat.v11, (float)mat.v12,
+                                                                                       (float)mat.v20, (float)mat.v21, (float)mat.v22);
+        public static Matrix3x3f operator *(in Matrix3x3f m1, in Matrix3x3f m2)
         {
             return new Matrix3x3f(m1.v00 * m2.v00 + m1.v01 * m2.v10 + m1.v02 * m2.v20,
                                   m1.v00 * m2.v01 + m1.v01 * m2.v11 + m1.v02 * m2.v21,
@@ -91,13 +91,29 @@ namespace LinearAlgebra
                                   m1.v20 * m2.v01 + m1.v21 * m2.v11 + m1.v22 * m2.v21,
                                   m1.v20 * m2.v02 + m1.v21 * m2.v12 + m1.v22 * m2.v22);
         }
-        public static Matrix3x3f operator *(Matrix3x3f mat, float value)
+        public static Matrix3x3f operator +(in Matrix3x3f lhs, in Matrix3x3f rhs)
+        {
+            return new Matrix3x3f(lhs.v00 + rhs.v00, lhs.v01 + rhs.v01, lhs.v02 + rhs.v02,
+                                 lhs.v10 + rhs.v10, lhs.v11 + rhs.v11, lhs.v12 + rhs.v12,
+                                 lhs.v20 + rhs.v20, lhs.v21 + rhs.v21, lhs.v22 + rhs.v22);
+        }
+        public static Matrix3x3f operator -(in Matrix3x3f lhs, in Matrix3x3f rhs)
+        {
+            return new Matrix3x3f(lhs.v00 - rhs.v00, lhs.v01 - rhs.v01, lhs.v02 - rhs.v02,
+                                 lhs.v10 - rhs.v10, lhs.v11 - rhs.v11, lhs.v12 - rhs.v12,
+                                 lhs.v20 - rhs.v20, lhs.v21 - rhs.v21, lhs.v22 - rhs.v22);
+        }
+        public static Matrix3x3f operator *(in Matrix3x3f mat, float value)
         {
             return new Matrix3x3f(mat.v00 * value, mat.v01 * value, mat.v02 * value,
                                   mat.v10 * value, mat.v11 * value, mat.v12 * value,
                                   mat.v20 * value, mat.v21 * value, mat.v22 * value);
         }
-        public static Matrix3x3f operator /(Matrix3x3f mat, float value)
+        public static Matrix3x3f operator *(float value, in Matrix3x3f mat)
+        {
+            return mat * value;
+        }
+        public static Matrix3x3f operator /(in Matrix3x3f mat, float value)
         {
             if (value == 0)
                 throw new DivideByZeroException();
@@ -106,13 +122,13 @@ namespace LinearAlgebra
                                   mat.v10 * value, mat.v11 * value, mat.v12 * value,
                                   mat.v20 * value, mat.v21 * value, mat.v22 * value);
         }
-        public static Vector3f operator *(Matrix3x3f mat, Vector3f vec)
+        public static Vector3f operator *(in Matrix3x3f mat, in Vector3f vec)
         {
             return new Vector3f(mat.v00 * vec.x + mat.v01 * vec.y + mat.v02 * vec.z,
                                 mat.v10 * vec.x + mat.v11 * vec.y + mat.v12 * vec.z,
                                 mat.v20 * vec.x + mat.v21 * vec.y + mat.v22 * vec.z);
         }
-        public static Vector3f operator *(Vector3f vec, Matrix3x3f mat)
+        public static Vector3f operator *(in Vector3f vec, in Matrix3x3f mat)
         {
             return new Vector3f(mat.v00 * vec.x + mat.v10 * vec.y + mat.v20 * vec.z,
                                 mat.v01 * vec.x + mat.v11 * vec.y + mat.v21 * vec.z,

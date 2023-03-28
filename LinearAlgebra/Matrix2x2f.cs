@@ -36,7 +36,7 @@ namespace LinearAlgebra
             v10 = values[2];
             v11 = values[3];
         }
-        public Matrix2x2f(Vector2f vec1, Vector2f vec2, bool rows = true)
+        public Matrix2x2f(in Vector2f vec1, in Vector2f vec2, bool rows = true)
         {
             if (rows)
             {
@@ -53,19 +53,33 @@ namespace LinearAlgebra
                 v11 = vec2.y;
             }
         }
-        public static explicit operator Matrix2x2f(Matrix2x2 mat) => new Matrix2x2f((float)mat.v00, (float)mat.v01,
-                                                                                    (float)mat.v10, (float)mat.v11);
-        public static Matrix2x2f operator *(Matrix2x2f m1, Matrix2x2f m2)
+        public static explicit operator Matrix2x2f(in Matrix2x2 mat) => new Matrix2x2f((float)mat.v00, (float)mat.v01,
+                                                                                       (float)mat.v10, (float)mat.v11);
+        public static Matrix2x2f operator *(in Matrix2x2f m1, in Matrix2x2f m2)
         {
             return new Matrix2x2f(m1.v00 * m2.v00 + m1.v01 * m2.v10, m1.v00 * m2.v01 + m1.v01 * m2.v11,
                                   m1.v10 * m2.v00 + m1.v11 * m2.v10, m1.v10 * m2.v01 + m1.v11 * m2.v11);
         }
-        public static Matrix2x2f operator *(Matrix2x2f mat, float value)
+        public static Matrix2x2f operator +(in Matrix2x2f lhs, in Matrix2x2f rhs)
+        {
+            return new Matrix2x2f(lhs.v00 + rhs.v00, lhs.v01 + rhs.v01,
+                                 lhs.v10 + rhs.v10, lhs.v11 + rhs.v11);
+        }
+        public static Matrix2x2f operator -(in Matrix2x2f lhs, in Matrix2x2f rhs)
+        {
+            return new Matrix2x2f(lhs.v00 - rhs.v00, lhs.v01 - rhs.v01,
+                                 lhs.v10 - rhs.v10, lhs.v11 - rhs.v11);
+        }
+        public static Matrix2x2f operator *(in Matrix2x2f mat, float value)
         {
             return new Matrix2x2f(mat.v00 * value, mat.v01 * value,
                                   mat.v10 * value, mat.v11 * value);
         }
-        public static Matrix2x2f operator /(Matrix2x2f mat, float value)
+        public static Matrix2x2f operator *(float value, in Matrix2x2f mat)
+        {
+            return mat * value;
+        }
+        public static Matrix2x2f operator /(in Matrix2x2f mat, float value)
         {
             if (value == 0)
                 throw new DivideByZeroException();
@@ -73,11 +87,11 @@ namespace LinearAlgebra
             return new Matrix2x2f(mat.v00 * value, mat.v01 * value,
                                   mat.v10 * value, mat.v11 * value);
         }
-        public static Vector2f operator *(Matrix2x2f mat, Vector2f vec)
+        public static Vector2f operator *(in Matrix2x2f mat, in Vector2f vec)
         {
             return new Vector2f(mat.v00 * vec.x + mat.v01 * vec.y, mat.v10 * vec.x + mat.v11 * vec.y);
         }
-        public static Vector2f operator *(Vector2f vec, Matrix2x2f mat)
+        public static Vector2f operator *(in Vector2f vec, in Matrix2x2f mat)
         {
             return new Vector2f(mat.v00 * vec.x + mat.v10 * vec.y, mat.v01 * vec.x + mat.v11 * vec.y);
         }
