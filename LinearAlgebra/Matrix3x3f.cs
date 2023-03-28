@@ -117,10 +117,7 @@ namespace LinearAlgebra
         {
             if (value == 0)
                 throw new DivideByZeroException();
-            value = 1.0f / value;
-            return new Matrix3x3f(mat.v00 * value, mat.v01 * value, mat.v02 * value,
-                                  mat.v10 * value, mat.v11 * value, mat.v12 * value,
-                                  mat.v20 * value, mat.v21 * value, mat.v22 * value);
+            return mat * (1.0f / value);
         }
         public static Vector3f operator *(in Matrix3x3f mat, in Vector3f vec)
         {
@@ -226,6 +223,22 @@ namespace LinearAlgebra
             return new Matrix3x3f(1 - s2 * (y * y + z * z), s2 * (x * y - w * z), s2 * (x * z + w * y),
                                   s2 * (x * y + w * z), 1 - s2 * (x * x + z * z), s2 * (y * z - w * x),
                                   s2 * (x * z - w * y), s2 * (y * z + w * x), 1 - s2 * (x * x + y * y));
+        }
+        public bool IsIdentity()
+        {
+            if (Math.Abs(v00 - 1.0f) > Constants.FloatEpsilon || Math.Abs(v01) > Constants.FloatEpsilon || Math.Abs(v02) > Constants.FloatEpsilon ||
+                Math.Abs(v10) > Constants.FloatEpsilon || Math.Abs(v11 - 1.0f) > Constants.FloatEpsilon || Math.Abs(v12) > Constants.FloatEpsilon ||
+                Math.Abs(v20) > Constants.FloatEpsilon || Math.Abs(v21) > Constants.FloatEpsilon || Math.Abs(v22 - 1.0f) > Constants.FloatEpsilon)
+                return false;
+            return true;
+        }
+        public bool IsZero()
+        {
+            if (Math.Abs(v00) > Constants.FloatEpsilon || Math.Abs(v01) > Constants.FloatEpsilon || Math.Abs(v02) > Constants.FloatEpsilon ||
+                Math.Abs(v10) > Constants.FloatEpsilon || Math.Abs(v11) > Constants.FloatEpsilon || Math.Abs(v12) > Constants.FloatEpsilon ||
+                Math.Abs(v20) > Constants.FloatEpsilon || Math.Abs(v21) > Constants.FloatEpsilon || Math.Abs(v22) > Constants.FloatEpsilon)
+                return false;
+            return true;
         }
         public override string ToString()
         {

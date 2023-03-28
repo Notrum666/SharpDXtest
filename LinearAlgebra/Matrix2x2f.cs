@@ -83,9 +83,7 @@ namespace LinearAlgebra
         {
             if (value == 0)
                 throw new DivideByZeroException();
-            value = 1.0f / value;
-            return new Matrix2x2f(mat.v00 * value, mat.v01 * value,
-                                  mat.v10 * value, mat.v11 * value);
+            return mat * (1.0f / value);
         }
         public static Vector2f operator *(in Matrix2x2f mat, in Vector2f vec)
         {
@@ -140,6 +138,20 @@ namespace LinearAlgebra
             v11 = tmp * determinant;
             v01 = -v01 * determinant;
             v10 = -v10 * determinant;
+        }
+        public bool IsIdentity()
+        {
+            if (Math.Abs(v00 - 1.0f) > Constants.FloatEpsilon || Math.Abs(v01) > Constants.FloatEpsilon ||
+                Math.Abs(v10) > Constants.FloatEpsilon || Math.Abs(v11 - 1.0f) > Constants.FloatEpsilon)
+                return false;
+            return true;
+        }
+        public bool IsZero()
+        {
+            if (Math.Abs(v00) > Constants.FloatEpsilon || Math.Abs(v01) > Constants.FloatEpsilon ||
+                Math.Abs(v10) > Constants.FloatEpsilon || Math.Abs(v11) > Constants.FloatEpsilon)
+                return false;
+            return true;
         }
         public override string ToString()
         {

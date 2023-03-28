@@ -40,7 +40,7 @@ namespace LinearAlgebra
             y = values[1];
         }
 
-        public static implicit operator Vector2(Vector2f vec) => new Vector2(vec.x, vec.y);
+        public static implicit operator Vector2(in Vector2f vec) => new Vector2(vec.x, vec.y);
 
         /// <summary>
         /// Magnitude of vector. Same as length
@@ -77,48 +77,48 @@ namespace LinearAlgebra
         {
             return squaredMagnitude() < Constants.SqrEpsilon;
         }
-        public static Vector2 operator +(Vector2 v1, Vector2 v2)
+        public static Vector2 operator +(in Vector2 v1, in Vector2 v2)
         {
             return new Vector2(v1.x + v2.x, v1.y + v2.y);
         }
-        public static Vector2 operator -(Vector2 v1, Vector2 v2)
+        public static Vector2 operator -(in Vector2 v1, in Vector2 v2)
         {
             return new Vector2(v1.x - v2.x, v1.y - v2.y);
         }
-        public static Vector2 operator *(Vector2 vec, double value)
+        public static Vector2 operator *(in Vector2 vec, double value)
         {
             return new Vector2(vec.x * value, vec.y * value);
         }
-        public static Vector2 operator *(double value, Vector2 vec)
+        public static Vector2 operator *(double value, in Vector2 vec)
         {
             return new Vector2(vec.x * value, vec.y * value);
         }
-        public static Vector2 operator /(Vector2 vec, double value)
+        public static Vector2 operator /(in Vector2 vec, double value)
         {
             return new Vector2(vec.x / value, vec.y / value);
         }
-        public static Vector2 operator -(Vector2 vec)
+        public static Vector2 operator -(in Vector2 vec)
         {
             return new Vector2(-vec.x, -vec.y);
         }
         /// <summary>
         /// Cross product
         /// </summary>
-        public static double operator %(Vector2 v1, Vector2 v2)
+        public static double operator %(in Vector2 v1, in Vector2 v2)
         {
             return v1.vecMul(v2);
         }
         /// <summary>
         /// Dot product
         /// </summary>
-        public static double operator *(Vector2 v1, Vector2 v2)
+        public static double operator *(in Vector2 v1, in Vector2 v2)
         {
             return v1.dot(v2);
         }
         /// <summary>
         /// Dot product
         /// </summary>
-        public double dot(Vector2 vec)
+        public double dot(in Vector2 vec)
         {
             return x * vec.x + y * vec.y;
         }
@@ -126,7 +126,7 @@ namespace LinearAlgebra
         /// Component multiplication
         /// </summary>
         /// <returns>New vector: (x1*x2, y1*y2)</returns>
-        public Vector2 compMul(Vector2 vec)
+        public Vector2 compMul(in Vector2 vec)
         {
             return new Vector2(x * vec.x, y * vec.y);
         }
@@ -134,7 +134,7 @@ namespace LinearAlgebra
         /// Component division
         /// </summary>
         /// <returns>New vector: (x1/x2, y1/y2)</returns>
-        public Vector2 compDiv(Vector2 vec)
+        public Vector2 compDiv(in Vector2 vec)
         {
             return new Vector2(x / vec.x, y / vec.y);
         }
@@ -157,14 +157,14 @@ namespace LinearAlgebra
         /// <summary>
         /// Checks if vectors are equal enough to be considered equal
         /// </summary>
-        public bool equals(Vector2 vec)
+        public bool equals(in Vector2 vec)
         {
             return (vec - this).isZero();
         }
         /// <summary>
         /// Projects vector on another vector
         /// </summary>
-        public Vector2 projectOnVector(Vector2 vec)
+        public Vector2 projectOnVector(in Vector2 vec)
         {
             if (vec.isZero())
                 return Vector2.Zero;
@@ -173,14 +173,14 @@ namespace LinearAlgebra
         /// <summary>
         /// Cross product. Same as cross
         /// </summary>
-        public double vecMul(Vector2 vec)
+        public double vecMul(in Vector2 vec)
         {
             return x * vec.y - y * vec.x;
         }
         /// <summary>
         /// Cross product. Same as vecMul
         /// </summary>
-        public double cross(Vector2 vec)
+        public double cross(in Vector2 vec)
         {
             return vecMul(vec);
         }
@@ -188,7 +188,7 @@ namespace LinearAlgebra
         /// Checks if vectors are parallel enough to be considered collinear
         /// </summary>
         /// <returns>True if vectors are collinear, false otherwise</returns>
-        public bool isCollinearTo(Vector2 vec)
+        public bool isCollinearTo(in Vector2 vec)
         {
             return Math.Abs(this % vec) < Constants.Epsilon;
         }

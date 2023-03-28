@@ -52,7 +52,7 @@ namespace LinearAlgebra
             this.y = y;
             this.z = z;
         }
-        public Vector3f(Vector2f vec, float z = 0f)
+        public Vector3f(in Vector2f vec, float z = 0f)
         {
             x = vec.x;
             y = vec.y;
@@ -68,7 +68,7 @@ namespace LinearAlgebra
             z = values[2];
         }
 
-        public static explicit operator Vector3f(Vector3 vec) => new Vector3f((float)vec.x, (float)vec.y, (float)vec.z);
+        public static explicit operator Vector3f(in Vector3 vec) => new Vector3f((float)vec.x, (float)vec.y, (float)vec.z);
 
         /// <summary>
         /// Magnitude of vector. Same as length
@@ -105,48 +105,48 @@ namespace LinearAlgebra
         {
             return squaredMagnitude() < Constants.SqrFloatEpsilon;
         }
-        public static Vector3f operator +(Vector3f v1, Vector3f v2)
+        public static Vector3f operator +(in Vector3f v1, in Vector3f v2)
         {
             return new Vector3f(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
         }
-        public static Vector3f operator -(Vector3f v1, Vector3f v2)
+        public static Vector3f operator -(in Vector3f v1, in Vector3f v2)
         {
             return new Vector3f(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
         }
-        public static Vector3f operator *(Vector3f vec, float value)
+        public static Vector3f operator *(in Vector3f vec, float value)
         {
             return new Vector3f(vec.x * value, vec.y * value, vec.z * value);
         }
-        public static Vector3f operator *(float value, Vector3f vec)
+        public static Vector3f operator *(float value, in Vector3f vec)
         {
             return new Vector3f(vec.x * value, vec.y * value, vec.z * value);
         }
-        public static Vector3f operator /(Vector3f vec, float value)
+        public static Vector3f operator /(in Vector3f vec, float value)
         {
             return new Vector3f(vec.x / value, vec.y / value, vec.z / value);
         }
-        public static Vector3f operator -(Vector3f vec)
+        public static Vector3f operator -(in Vector3f vec)
         {
             return new Vector3f(-vec.x, -vec.y, -vec.z);
         }
         /// <summary>
         /// Cross product
         /// </summary>
-        public static Vector3f operator %(Vector3f v1, Vector3f v2)
+        public static Vector3f operator %(in Vector3f v1, in Vector3f v2)
         {
             return v1.vecMul(v2);
         }
         /// <summary>
         /// Dot product
         /// </summary>
-        public static float operator *(Vector3f v1, Vector3f v2)
+        public static float operator *(in Vector3f v1, in Vector3f v2)
         {
             return v1.dot(v2);
         }
         /// <summary>
         /// Dot product
         /// </summary>
-        public float dot(Vector3f vec)
+        public float dot(in Vector3f vec)
         {
             return x * vec.x + y * vec.y + z * vec.z;
         }
@@ -154,7 +154,7 @@ namespace LinearAlgebra
         /// Component multiplication
         /// </summary>
         /// <returns>New vector: (x1*x2, y1*y2, z1*z2)</returns>
-        public Vector3f compMul(Vector3f vec)
+        public Vector3f compMul(in Vector3f vec)
         {
             return new Vector3f(x * vec.x, y * vec.y, z * vec.z);
         }
@@ -162,7 +162,7 @@ namespace LinearAlgebra
         /// Component division
         /// </summary>
         /// <returns>New vector: (x1/x2, y1/y2, z1/z2)</returns>
-        public Vector3f compDiv(Vector3f vec)
+        public Vector3f compDiv(in Vector3f vec)
         {
             return new Vector3f(x / vec.x, y / vec.y, z / vec.z);
         }
@@ -186,14 +186,14 @@ namespace LinearAlgebra
         /// <summary>
         /// Checks if vectors are equal enough to be considered equal
         /// </summary>
-        public bool equals(Vector3f vec)
+        public bool equals(in Vector3f vec)
         {
             return (vec - this).isZero();
         }
         /// <summary>
         /// Projects vector on another vector
         /// </summary>
-        public Vector3f projectOnVector(Vector3f vec)
+        public Vector3f projectOnVector(in Vector3f vec)
         {
             if (vec.isZero())
                 return Vector3f.Zero;
@@ -204,21 +204,21 @@ namespace LinearAlgebra
         /// </summary>
         /// <param name="flatNorm">Normal vector to flat (not necessary normalized)</param>
         /// <returns></returns>
-        public Vector3f projectOnFlat(Vector3f flatNorm)
+        public Vector3f projectOnFlat(in Vector3f flatNorm)
         {
             return this - flatNorm * (this * flatNorm / flatNorm.squaredMagnitude());
         }
         /// <summary>
         /// Cross product. Same as cross
         /// </summary>
-        public Vector3f vecMul(Vector3f vec)
+        public Vector3f vecMul(in Vector3f vec)
         {
             return new Vector3f(y * vec.z - z * vec.y, z * vec.x - x * vec.z, x * vec.y - y * vec.x);
         }
         /// <summary>
         /// Cross product. Same as vecMul
         /// </summary>
-        public Vector3f cross(Vector3f vec)
+        public Vector3f cross(in Vector3f vec)
         {
             return vecMul(vec);
         }
@@ -226,7 +226,7 @@ namespace LinearAlgebra
         /// Checks if vectors are parallel enough to be considered collinear
         /// </summary>
         /// <returns>True if vectors are collinear, false otherwise</returns>
-        public bool isCollinearTo(Vector3f vec)
+        public bool isCollinearTo(in Vector3f vec)
         {
             return (this % vec).isZero();
         }

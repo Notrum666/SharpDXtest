@@ -117,10 +117,7 @@ namespace LinearAlgebra
         {
             if (value == 0)
                 throw new DivideByZeroException();
-            value = 1.0 / value;
-            return new Matrix3x3(mat.v00 * value, mat.v01 * value, mat.v02 * value,
-                                 mat.v10 * value, mat.v11 * value, mat.v12 * value,
-                                 mat.v20 * value, mat.v21 * value, mat.v22 * value);
+            return mat * (1.0 / value);
         }
         public static Vector3 operator *(in Matrix3x3 mat, Vector3 vec)
         {
@@ -222,6 +219,22 @@ namespace LinearAlgebra
             return new Matrix3x3(1 - s2 * (q.y * q.y + q.z * q.z), s2 * (q.x * q.y - q.w * q.z), s2 * (q.x * q.z + q.w * q.y),
                                  s2 * (q.x * q.y + q.w * q.z), 1 - s2 * (q.x * q.x + q.z * q.z), s2 * (q.y * q.z - q.w * q.x),
                                  s2 * (q.x * q.z - q.w * q.y), s2 * (q.y * q.z + q.w * q.x), 1 - s2 * (q.x * q.x + q.y * q.y));
+        }
+        public bool IsIdentity()
+        {
+            if (Math.Abs(v00 - 1.0) > Constants.Epsilon || Math.Abs(v01) > Constants.Epsilon || Math.Abs(v02) > Constants.Epsilon ||
+                Math.Abs(v10) > Constants.Epsilon || Math.Abs(v11 - 1.0) > Constants.Epsilon || Math.Abs(v12) > Constants.Epsilon ||
+                Math.Abs(v20) > Constants.Epsilon || Math.Abs(v21) > Constants.Epsilon || Math.Abs(v22 - 1.0) > Constants.Epsilon)
+                return false;
+            return true;
+        }
+        public bool IsZero()
+        {
+            if (Math.Abs(v00) > Constants.Epsilon || Math.Abs(v01) > Constants.Epsilon || Math.Abs(v02) > Constants.Epsilon ||
+                Math.Abs(v10) > Constants.Epsilon || Math.Abs(v11) > Constants.Epsilon || Math.Abs(v12) > Constants.Epsilon ||
+                Math.Abs(v20) > Constants.Epsilon || Math.Abs(v21) > Constants.Epsilon || Math.Abs(v22) > Constants.Epsilon)
+                return false;
+            return true;
         }
         public override string ToString()
         {

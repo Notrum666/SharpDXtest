@@ -158,11 +158,7 @@ namespace LinearAlgebra
         {
             if (value == 0)
                 throw new DivideByZeroException();
-            value = 1.0 / value;
-            return new Matrix4x4(mat.v00 * value, mat.v01 * value, mat.v02 * value, mat.v03 * value,
-                                 mat.v10 * value, mat.v11 * value, mat.v12 * value, mat.v13 * value,
-                                 mat.v20 * value, mat.v21 * value, mat.v22 * value, mat.v23 * value,
-                                 mat.v30 * value, mat.v31 * value, mat.v32 * value, mat.v33 * value);
+            return mat * (1.0 / value);
         }
         public static Vector4 operator *(in Matrix4x4 mat, in Vector4 vec)
         {
@@ -318,6 +314,24 @@ namespace LinearAlgebra
                                    s2 * (q.x * q.y + q.w * q.z), 1 - s2 * (q.x * q.x + q.z * q.z), s2 * (q.y * q.z - q.w * q.x), 0,
                                    s2 * (q.x * q.z - q.w * q.y), s2 * (q.y * q.z + q.w * q.x), 1 - s2 * (q.x * q.x + q.y * q.y), 0,
                                              0, 0, 0, 1);
+        }
+        public bool IsIdentity()
+        {
+            if (Math.Abs(v00 - 1.0) > Constants.Epsilon || Math.Abs(v01) > Constants.Epsilon || Math.Abs(v02) > Constants.Epsilon || Math.Abs(v03) > Constants.Epsilon ||
+                Math.Abs(v10) > Constants.Epsilon || Math.Abs(v11 - 1.0) > Constants.Epsilon || Math.Abs(v12) > Constants.Epsilon || Math.Abs(v13) > Constants.Epsilon ||
+                Math.Abs(v20) > Constants.Epsilon || Math.Abs(v21) > Constants.Epsilon || Math.Abs(v22 - 1.0) > Constants.Epsilon || Math.Abs(v23) > Constants.Epsilon ||
+                Math.Abs(v30) > Constants.Epsilon || Math.Abs(v31) > Constants.Epsilon || Math.Abs(v32) > Constants.Epsilon || Math.Abs(v33 - 1.0) > Constants.Epsilon)
+                return false;
+            return true;
+        }
+        public bool IsZero()
+        {
+            if (Math.Abs(v00) > Constants.Epsilon || Math.Abs(v01) > Constants.Epsilon || Math.Abs(v02) > Constants.Epsilon || Math.Abs(v03) > Constants.Epsilon ||
+                Math.Abs(v10) > Constants.Epsilon || Math.Abs(v11) > Constants.Epsilon || Math.Abs(v12) > Constants.Epsilon || Math.Abs(v13) > Constants.Epsilon ||
+                Math.Abs(v20) > Constants.Epsilon || Math.Abs(v21) > Constants.Epsilon || Math.Abs(v22) > Constants.Epsilon || Math.Abs(v23) > Constants.Epsilon ||
+                Math.Abs(v30) > Constants.Epsilon || Math.Abs(v31) > Constants.Epsilon || Math.Abs(v32) > Constants.Epsilon || Math.Abs(v33) > Constants.Epsilon)
+                return false;
+            return true;
         }
         public override string ToString()
         {

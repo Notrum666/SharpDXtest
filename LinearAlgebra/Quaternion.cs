@@ -32,7 +32,7 @@ namespace LinearAlgebra
         /// <summary>
         /// Dot product
         /// </summary>
-        public double dot(Quaternion q)
+        public double dot(in Quaternion q)
         {
             return w * q.w + x * q.x + y * q.y + z * q.z;
         }
@@ -101,7 +101,7 @@ namespace LinearAlgebra
         /// <summary>
         /// Cross product
         /// </summary>
-        public Quaternion cross(Quaternion q)
+        public Quaternion cross(in Quaternion q)
         {
             return new Quaternion(0.0, y * q.z - z * q.y, z * q.x - x * q.z, x * q.y - y * q.x);
         }
@@ -109,7 +109,7 @@ namespace LinearAlgebra
         /// Checks if quaternions are parallel enough to be considered collinear
         /// </summary>
         /// <returns>True if vectors are collinear, false otherwise</returns>
-        public bool isCollinearTo(Quaternion q)
+        public bool isCollinearTo(in Quaternion q)
         {
             return cross(q).isZero();
         }
@@ -135,17 +135,67 @@ namespace LinearAlgebra
         /// <summary>
         /// Creates quaternion that represents rotation around axis for angle
         /// </summary>
-        public static Quaternion FromAxisAngle(Vector3 axis, double angle)
+        public static Quaternion FromAxisAngle(in Vector3 axis, double angle)
         {
             if (Math.Abs(axis.squaredLength() - 1.0) > Constants.SqrEpsilon)
                 throw new ArgumentException("Axis is not normalized.");
             double sinhalf = Math.Sin(angle / 2.0);
             return new Quaternion(Math.Cos(angle / 2.0), axis.x * sinhalf, axis.y * sinhalf, axis.z * sinhalf);
         }
+        public static Quaternion FromMatrix(in Matrix3x3 rot)
+        {
+            double trace = rot.v00 + rot.v11 + rot.v22;
+
+            if (trace > 0)
+            {
+                double S = 0.5 / Math.Sqrt(trace + 1.0); // S=1/4qw
+                return new Quaternion(0.25 / S, (rot.v21 - rot.v12) * S, (rot.v02 - rot.v20) * S, (rot.v10 - rot.v01) * S);
+            }
+            else if ((rot.v00 > rot.v11) && (rot.v00 > rot.v22))
+            {
+                double S = 0.5 / Math.Sqrt(1.0 + rot.v00 - rot.v11 - rot.v22); // S=1/4qx
+                return new Quaternion((rot.v21 - rot.v12) * S, 0.25 / S, (rot.v01 + rot.v10) * S, (rot.v02 + rot.v20) * S);
+            }
+            else if (rot.v11 > rot.v22)
+            {
+                double S = 0.5 / Math.Sqrt(1.0 - rot.v00 + rot.v11 - rot.v22); // S=1/4qy
+                return new Quaternion((rot.v02 - rot.v20) * S, (rot.v01 + rot.v10) * S, 0.25 / S, (rot.v12 + rot.v21) * S);
+            }
+            else
+            {
+                double S = 0.5 / Math.Sqrt(1.0 - rot.v00 - rot.v11 + rot.v22); // S=1/4qz
+                return new Quaternion((rot.v10 - rot.v01) * S, (rot.v02 + rot.v20) * S, (rot.v12 + rot.v21) * S, 0.25 / S);
+            }
+        }
+        public static Quaternion FromMatrix(in Matrix4x4 rot)
+        {
+            double trace = rot.v00 + rot.v11 + rot.v22;
+
+            if (trace > 0)
+            {
+                double S = 0.5 / Math.Sqrt(trace + 1.0); // S=1/4qw
+                return new Quaternion(0.25 / S, (rot.v21 - rot.v12) * S, (rot.v02 - rot.v20) * S, (rot.v10 - rot.v01) * S);
+            }
+            else if ((rot.v00 > rot.v11) && (rot.v00 > rot.v22))
+            {
+                double S = 0.5 / Math.Sqrt(1.0 + rot.v00 - rot.v11 - rot.v22); // S=1/4qx
+                return new Quaternion((rot.v21 - rot.v12) * S, 0.25 / S, (rot.v01 + rot.v10) * S, (rot.v02 + rot.v20) * S);
+            }
+            else if (rot.v11 > rot.v22)
+            {
+                double S = 0.5 / Math.Sqrt(1.0 - rot.v00 + rot.v11 - rot.v22); // S=1/4qy
+                return new Quaternion((rot.v02 - rot.v20) * S, (rot.v01 + rot.v10) * S, 0.25 / S, (rot.v12 + rot.v21) * S);
+            }
+            else
+            {
+                double S = 0.5 / Math.Sqrt(1.0 - rot.v00 - rot.v11 + rot.v22); // S=1/4qz
+                return new Quaternion((rot.v10 - rot.v01) * S, (rot.v02 + rot.v20) * S, (rot.v12 + rot.v21) * S, 0.25 / S);
+            }
+        }
         /// <summary>
         /// Creates quaternion from euler angles in specified order
         /// </summary>
-        public static Quaternion FromEuler(Vector3 euler, EulerOrder order = EulerOrder.ZXY)
+        public static Quaternion FromEuler(in Vector3 euler, EulerOrder order = EulerOrder.ZXY)
         {
             double sinhalfx = Math.Sin(euler.x / 2.0);
             double sinhalfy = Math.Sin(euler.y / 2.0);
@@ -183,37 +233,46 @@ namespace LinearAlgebra
             throw new NotImplementedException();
         }
 
-        public static Quaternion operator /(Quaternion lhs, double rhs)
+        public static Quaternion operator /(in Quaternion lhs, double rhs)
         {
             return new Quaternion(lhs.w / rhs, lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
         }
-        public static Quaternion operator *(Quaternion lhs, double rhs)
+        public static Quaternion operator *(in Quaternion lhs, double rhs)
         {
             return new Quaternion(lhs.w * rhs, lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
         }
-        public static Quaternion operator *(double lhs, Quaternion rhs)
+        public static Quaternion operator *(double lhs, in Quaternion rhs)
         {
             return new Quaternion(lhs * rhs.w, lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
         }
-        public static Quaternion operator *(Quaternion lhs, Quaternion rhs)
+        public static Quaternion operator *(in Quaternion lhs, in Quaternion rhs)
         {
             return new Quaternion(lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z,
                                   lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y,
                                   lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x,
                                   lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w);
         }
-        public static Vector3 operator *(Quaternion lhs, Vector3 rhs)
+        public static Vector3 operator *(in Quaternion lhs, in Vector3 rhs)
         {
             Quaternion q = lhs * new Quaternion(0.0, rhs.x, rhs.y, rhs.z) * lhs.inverse();
             return new Vector3(q.x, q.y, q.z);
         }
-        public static Quaternion operator +(Quaternion lhs, Quaternion rhs)
+        public static Quaternion operator +(in Quaternion lhs, in Quaternion rhs)
         {
             return new Quaternion(lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
         }
-        public static Quaternion operator -(Quaternion lhs, Quaternion rhs)
+        public static Quaternion operator -(in Quaternion lhs, in Quaternion rhs)
         {
             return new Quaternion(lhs.w - rhs.w, lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
+        }
+        public bool Equals(in Quaternion q)
+        {
+            if (Math.Abs(w - q.w) > Constants.Epsilon ||
+                Math.Abs(x - q.x) > Constants.Epsilon ||
+                Math.Abs(y - q.y) > Constants.Epsilon ||
+                Math.Abs(z - q.z) > Constants.Epsilon)
+                return false;
+            return true;
         }
         public override string ToString()
         {

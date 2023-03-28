@@ -44,14 +44,14 @@ namespace LinearAlgebra
             this.z = z;
             this.w = w;
         }
-        public Vector4f(Vector2f vec, float z = 0f, float w = 0f)
+        public Vector4f(in Vector2f vec, float z = 0f, float w = 0f)
         {
             x = vec.x;
             y = vec.y;
             this.z = z;
             this.w = w;
         }
-        public Vector4f(Vector3f vec, float w = 0f)
+        public Vector4f(in Vector3f vec, float w = 0f)
         {
             x = vec.x;
             y = vec.y;
@@ -69,7 +69,7 @@ namespace LinearAlgebra
             w = values[3];
         }
 
-        public static explicit operator Vector4f(Vector4 vec) => new Vector4f((float)vec.x, (float)vec.y, (float)vec.z, (float)vec.w);
+        public static explicit operator Vector4f(in Vector4 vec) => new Vector4f((float)vec.x, (float)vec.y, (float)vec.z, (float)vec.w);
 
         /// <summary>
         /// Magnitude of vector. Same as length
@@ -106,41 +106,41 @@ namespace LinearAlgebra
         {
             return squaredMagnitude() < Constants.SqrFloatEpsilon;
         }
-        public static Vector4f operator +(Vector4f v1, Vector4f v2)
+        public static Vector4f operator +(in Vector4f v1, in Vector4f v2)
         {
             return new Vector4f(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w);
         }
-        public static Vector4f operator -(Vector4f v1, Vector4f v2)
+        public static Vector4f operator -(in Vector4f v1, in Vector4f v2)
         {
             return new Vector4f(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
         }
-        public static Vector4f operator *(Vector4f vec, float value)
+        public static Vector4f operator *(in Vector4f vec, float value)
         {
             return new Vector4f(vec.x * value, vec.y * value, vec.z * value, vec.w * value);
         }
-        public static Vector4f operator *(float value, Vector4f vec)
+        public static Vector4f operator *(float value, in Vector4f vec)
         {
             return new Vector4f(vec.x * value, vec.y * value, vec.z * value, vec.w * value);
         }
-        public static Vector4f operator /(Vector4f vec, float value)
+        public static Vector4f operator /(in Vector4f vec, float value)
         {
             return new Vector4f(vec.x / value, vec.y / value, vec.z / value, vec.w / value);
         }
-        public static Vector4f operator -(Vector4f vec)
+        public static Vector4f operator -(in Vector4f vec)
         {
             return new Vector4f(-vec.x, -vec.y, -vec.z, -vec.w);
         }
         /// <summary>
         /// Dot product
         /// </summary>
-        public static float operator *(Vector4f v1, Vector4f v2)
+        public static float operator *(in Vector4f v1, in Vector4f v2)
         {
             return v1.dotMul(v2);
         }
         /// <summary>
         /// Dot product
         /// </summary>
-        public float dotMul(Vector4f vec)
+        public float dotMul(in Vector4f vec)
         {
             return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
         }
@@ -148,7 +148,7 @@ namespace LinearAlgebra
         /// Component multiplication
         /// </summary>
         /// <returns>New vector: (x1*x2, y1*y2, z1*z2, w1*w2)</returns>
-        public Vector4f compMul(Vector4f vec)
+        public Vector4f compMul(in Vector4f vec)
         {
             return new Vector4f(x * vec.x, y * vec.y, z * vec.z, w * vec.w);
         }
@@ -156,7 +156,7 @@ namespace LinearAlgebra
         /// Component division
         /// </summary>
         /// <returns>New vector: (x1/x2, y1/y2, z1/z2, w1/w2)</returns>
-        public Vector4f compDiv(Vector4f vec)
+        public Vector4f compDiv(in Vector4f vec)
         {
             return new Vector4f(x / vec.x, y / vec.y, z / vec.z, w / vec.w);
         }
@@ -181,14 +181,14 @@ namespace LinearAlgebra
         /// <summary>
         /// Checks if vectors are equal enough to be considered equal
         /// </summary>
-        public bool equals(Vector4f vec)
+        public bool equals(in Vector4f vec)
         {
             return (vec - this).isZero();
         }
         /// <summary>
         /// Projects vector on another vector
         /// </summary>
-        public Vector4f projectOnVector(Vector4f vec)
+        public Vector4f projectOnVector(in Vector4f vec)
         {
             if (vec.isZero())
                 return Vector4f.Zero;
@@ -199,7 +199,7 @@ namespace LinearAlgebra
         /// </summary>
         /// <param name="flatNorm">Normal vector to flat (not necessary normalized)</param>
         /// <returns></returns>
-        public Vector4f projectOnFlat(Vector4f flatNorm)
+        public Vector4f projectOnFlat(in Vector4f flatNorm)
         {
             return this - flatNorm * (this * flatNorm / flatNorm.squaredMagnitude());
         }

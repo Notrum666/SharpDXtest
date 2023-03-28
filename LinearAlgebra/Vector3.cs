@@ -52,7 +52,7 @@ namespace LinearAlgebra
             this.y = y;
             this.z = z;
         }
-        public Vector3(Vector2 vec, double z = 0.0)
+        public Vector3(in Vector2 vec, double z = 0.0)
         {
             x = vec.x;
             y = vec.y;
@@ -68,7 +68,7 @@ namespace LinearAlgebra
             z = values[2];
         }
 
-        public static implicit operator Vector3(Vector3f vec) => new Vector3(vec.x, vec.y, vec.z);
+        public static implicit operator Vector3(in Vector3f vec) => new Vector3(vec.x, vec.y, vec.z);
 
         /// <summary>
         /// Magnitude of vector. Same as length
@@ -105,48 +105,48 @@ namespace LinearAlgebra
         {
             return squaredMagnitude() < Constants.SqrEpsilon;
         }
-        public static Vector3 operator +(Vector3 v1, Vector3 v2)
+        public static Vector3 operator +(in Vector3 v1, in Vector3 v2)
         {
             return new Vector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
         }
-        public static Vector3 operator -(Vector3 v1, Vector3 v2)
+        public static Vector3 operator -(in Vector3 v1, in Vector3 v2)
         {
             return new Vector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
         }
-        public static Vector3 operator *(Vector3 vec, double value)
+        public static Vector3 operator *(in Vector3 vec, double value)
         {
             return new Vector3(vec.x * value, vec.y * value, vec.z * value);
         }
-        public static Vector3 operator *(double value, Vector3 vec)
+        public static Vector3 operator *(double value, in Vector3 vec)
         {
             return new Vector3(vec.x * value, vec.y * value, vec.z * value);
         }
-        public static Vector3 operator /(Vector3 vec, double value)
+        public static Vector3 operator /(in Vector3 vec, double value)
         {
             return new Vector3(vec.x / value, vec.y / value, vec.z / value);
         }
-        public static Vector3 operator -(Vector3 vec)
+        public static Vector3 operator -(in Vector3 vec)
         {
             return new Vector3(-vec.x, -vec.y, -vec.z);
         }
         /// <summary>
         /// Cross product
         /// </summary>
-        public static Vector3 operator %(Vector3 v1, Vector3 v2)
+        public static Vector3 operator %(in Vector3 v1, in Vector3 v2)
         {
             return v1.vecMul(v2);
         }
         /// <summary>
         /// Dot product
         /// </summary>
-        public static double operator *(Vector3 v1, Vector3 v2)
+        public static double operator *(in Vector3 v1, in Vector3 v2)
         {
             return v1.dot(v2);
         }
         /// <summary>
         /// Dot product
         /// </summary>
-        public double dot(Vector3 vec)
+        public double dot(in Vector3 vec)
         {
             return x * vec.x + y * vec.y + z * vec.z;
         }
@@ -154,7 +154,7 @@ namespace LinearAlgebra
         /// Component multiplication
         /// </summary>
         /// <returns>New vector: (x1*x2, y1*y2, z1*z2)</returns>
-        public Vector3 compMul(Vector3 vec)
+        public Vector3 compMul(in Vector3 vec)
         {
             return new Vector3(x * vec.x, y * vec.y, z * vec.z);
         }
@@ -162,7 +162,7 @@ namespace LinearAlgebra
         /// Component division
         /// </summary>
         /// <returns>New vector: (x1/x2, y1/y2, z1/z2)</returns>
-        public Vector3 compDiv(Vector3 vec)
+        public Vector3 compDiv(in Vector3 vec)
         {
             return new Vector3(x / vec.x, y / vec.y, z / vec.z);
         }
@@ -186,14 +186,14 @@ namespace LinearAlgebra
         /// <summary>
         /// Checks if vectors are equal enough to be considered equal
         /// </summary>
-        public bool equals(Vector3 vec)
+        public bool equals(in Vector3 vec)
         {
             return (vec - this).isZero();
         }
         /// <summary>
         /// Projects vector on another vector
         /// </summary>
-        public Vector3 projectOnVector(Vector3 vec)
+        public Vector3 projectOnVector(in Vector3 vec)
         {
             if (vec.isZero())
                 return Vector3.Zero;
@@ -204,21 +204,21 @@ namespace LinearAlgebra
         /// </summary>
         /// <param name="flatNorm">Normal vector to flat (not necessary normalized)</param>
         /// <returns></returns>
-        public Vector3 projectOnFlat(Vector3 flatNorm)
+        public Vector3 projectOnFlat(in Vector3 flatNorm)
         {
             return this - flatNorm * (this * flatNorm / flatNorm.squaredMagnitude());
         }
         /// <summary>
         /// Cross product. Same as cross
         /// </summary>
-        public Vector3 vecMul(Vector3 vec)
+        public Vector3 vecMul(in Vector3 vec)
         {
             return new Vector3(y * vec.z - z * vec.y, z * vec.x - x * vec.z, x * vec.y - y * vec.x);
         }
         /// <summary>
         /// Cross product. Same as vecMul
         /// </summary>
-        public Vector3 cross(Vector3 vec)
+        public Vector3 cross(in Vector3 vec)
         {
             return vecMul(vec);
         }
@@ -226,7 +226,7 @@ namespace LinearAlgebra
         /// Checks if vectors are parallel enough to be considered collinear
         /// </summary>
         /// <returns>True if vectors are collinear, false otherwise</returns>
-        public bool isCollinearTo(Vector3 vec)
+        public bool isCollinearTo(in Vector3 vec)
         {
             return (this % vec).isZero();
         }

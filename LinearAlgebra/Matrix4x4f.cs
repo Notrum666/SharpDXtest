@@ -159,11 +159,7 @@ namespace LinearAlgebra
         {
             if (value == 0)
                 throw new DivideByZeroException();
-            value = 1.0f / value;
-            return new Matrix4x4f(mat.v00 * value, mat.v01 * value, mat.v02 * value, mat.v03 * value,
-                                  mat.v10 * value, mat.v11 * value, mat.v12 * value, mat.v13 * value,
-                                  mat.v20 * value, mat.v21 * value, mat.v22 * value, mat.v23 * value,
-                                  mat.v30 * value, mat.v31 * value, mat.v32 * value, mat.v33 * value);
+            return mat * (1.0f / value);
         }
         public static Vector4f operator *(in Matrix4x4f mat, in Vector4f vec)
         {
@@ -323,6 +319,24 @@ namespace LinearAlgebra
                                   s2 * (x * y + w * z), 1 - s2 * (x * x + z * z), s2 * (y * z - w * x), 0,
                                   s2 * (x * z - w * y), s2 * (y * z + w * x), 1 - s2 * (x * x + y * y), 0,
                                   0, 0, 0, 1);
+        }
+        public bool IsIdentity()
+        {
+            if (Math.Abs(v00 - 1.0f) > Constants.FloatEpsilon || Math.Abs(v01) > Constants.FloatEpsilon || Math.Abs(v02) > Constants.FloatEpsilon || Math.Abs(v03) > Constants.FloatEpsilon ||
+                Math.Abs(v10) > Constants.FloatEpsilon || Math.Abs(v11 - 1.0f) > Constants.FloatEpsilon || Math.Abs(v12) > Constants.FloatEpsilon || Math.Abs(v13) > Constants.FloatEpsilon ||
+                Math.Abs(v20) > Constants.FloatEpsilon || Math.Abs(v21) > Constants.FloatEpsilon || Math.Abs(v22 - 1.0f) > Constants.FloatEpsilon || Math.Abs(v23) > Constants.FloatEpsilon ||
+                Math.Abs(v30) > Constants.FloatEpsilon || Math.Abs(v31) > Constants.FloatEpsilon || Math.Abs(v32) > Constants.FloatEpsilon || Math.Abs(v33 - 1.0f) > Constants.FloatEpsilon)
+                return false;
+            return true;
+        }
+        public bool IsZero()
+        {
+            if (Math.Abs(v00) > Constants.FloatEpsilon || Math.Abs(v01) > Constants.FloatEpsilon || Math.Abs(v02) > Constants.FloatEpsilon || Math.Abs(v03) > Constants.FloatEpsilon ||
+                Math.Abs(v10) > Constants.FloatEpsilon || Math.Abs(v11) > Constants.FloatEpsilon || Math.Abs(v12) > Constants.FloatEpsilon || Math.Abs(v13) > Constants.FloatEpsilon ||
+                Math.Abs(v20) > Constants.FloatEpsilon || Math.Abs(v21) > Constants.FloatEpsilon || Math.Abs(v22) > Constants.FloatEpsilon || Math.Abs(v23) > Constants.FloatEpsilon ||
+                Math.Abs(v30) > Constants.FloatEpsilon || Math.Abs(v31) > Constants.FloatEpsilon || Math.Abs(v32) > Constants.FloatEpsilon || Math.Abs(v33) > Constants.FloatEpsilon)
+                return false;
+            return true;
         }
         public override string ToString()
         {
