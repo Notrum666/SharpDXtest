@@ -13,7 +13,7 @@
 		</Textures>
 	</Assets>
 	
-	<GameObject x.Name="CameraObject">
+	<GameObject>
 		<Transform>
 			<Transform.Position y="-5" z="5"/>
 		</Transform>
@@ -22,6 +22,17 @@
 		<CameraController speed="5"/>
 	</GameObject>
 
+	<GameObject>
+		<Transform>
+			<Transform.Position z="2"/>
+			<Transform.LocalScale x="1" y="1" z="2"/>
+			<Transform.LocalRotation x="0" y="45" z="0"/>
+		</Transform>
+		<Mesh model="{Model Cube}">
+			<Mesh.Material Albedo="{Texture Prototype}"/>
+		</Mesh>
+	</GameObject>
+	
 	<GameObject>
 		<Transform>
 			<Transform.LocalScale x="50" y="50" z="0.5"/>
@@ -33,14 +44,28 @@
 
 	<GameObject>
 		<Transform>
-			<Transform.LocalPosition x="5" z="2"/>
+			<Transform.LocalPosition x="5" z="3"/>
 		</Transform>
 		<PointLight Radius="10"/>
 	</GameObject>
 	
 	<GameObject>
 		<Transform>
-			<Transform.LocalPosition x="-5" z="2"/>
+			<Transform.LocalPosition x="-5" z="3"/>
+		</Transform>
+		<PointLight Radius="10"/>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalPosition y="-5" z="3"/>
+		</Transform>
+		<PointLight Radius="10"/>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalPosition y="-5" z="3"/>
 		</Transform>
 		<PointLight Radius="10"/>
 	</GameObject>

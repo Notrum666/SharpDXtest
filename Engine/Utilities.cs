@@ -1374,7 +1374,7 @@ namespace Engine
                     {
                         curObj = Activator.CreateInstance(typeof(GameObject));
                         if (parent != null && parent.GetType() == typeof(GameObject))
-                            (curObj as GameObject).transform.setParent((parent as GameObject).transform);
+                            (curObj as GameObject).transform.SetParent((parent as GameObject).transform, false);
                         parseAttributes(ref curObj, element.Attributes());
                         gameObjects.Add(curObj as GameObject);
                         foreach (XElement elem in element.Elements())

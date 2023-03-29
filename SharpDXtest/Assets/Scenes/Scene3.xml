@@ -20,7 +20,7 @@
 		<DirectionalLight Brightness="0.5"/>
 	</GameObject>
 	
-	<GameObject>
+	<!--<GameObject>
 		<Transform>
 			<Transform.LocalRotation x="-45" z="135"/>
 		</Transform>
@@ -39,7 +39,7 @@
 			<Transform.LocalRotation x="-45" z="-135"/>
 		</Transform>
 		<DirectionalLight Brightness="0.5"/>
-	</GameObject>
+	</GameObject>-->
 
 	<GameObject x.Name="Ball">
 		<Transform>

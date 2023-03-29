@@ -40,8 +40,8 @@ namespace SharpDXtest.Assets.Components
                     double randomScale = 0.5 + rng.NextDouble() * 1.5;
                     obj.transform.LocalScale = new Vector3(randomScale, randomScale, randomScale);
 
-                    PointLight light = obj.addComponent<PointLight>();
-                    light.Radius = 10;
+                    //PointLight light = obj.addComponent<PointLight>();
+                    //light.Radius = 10;
 
                     GameCore.AddObject(obj);
                 }
@@ -83,11 +83,11 @@ namespace SharpDXtest.Assets.Components
             if (col.OuterSphereRadius * 1.35 < other.OuterSphereRadius)
                 return;
 
-            Vector3 pos = other.gameObject.transform.Position;
-            Quaternion quat = other.gameObject.transform.Rotation;
-            other.gameObject.transform.setParent(gameObject.transform);
-            other.gameObject.transform.Position = pos;
-            other.gameObject.transform.Rotation = quat;
+            //Vector3 pos = other.gameObject.transform.Position;
+            //Quaternion quat = other.gameObject.transform.Rotation;
+            other.gameObject.transform.SetParent(gameObject.transform);
+            //other.gameObject.transform.Position = pos;
+            //other.gameObject.transform.Rotation = quat;
             other.gameObject.getComponent<Rigidbody>().Enabled = false;
             other.gameObject.getComponent<Collider>().Enabled = false;
 

@@ -157,11 +157,11 @@ float4 main(vert_in v) : SV_Target
 	//if (shadowFactor == 0.0f)
 	//{
 	//	if (cascadeIndex == 0)
-	//		totalRadiance += float3(1.0f, 0.0f, 0.0f);
+	//		curRadiance += float3(1.0f, 0.0f, 0.0f);
 	//	if (cascadeIndex == 1)
-	//		totalRadiance += float3(0.0f, 1.0f, 0.0f);
+	//		curRadiance += float3(0.0f, 1.0f, 0.0f);
 	//	if (cascadeIndex == 2)
-	//		totalRadiance += float3(0.0f, 0.0f, 1.0f);
+	//		curRadiance += float3(0.0f, 0.0f, 1.0f);
 	//}
 	if (dot(lightDir, normal) > 0.0f && shadowFactor > 0.0f)
 	{
