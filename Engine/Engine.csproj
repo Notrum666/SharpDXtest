@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseAssets\Components\Material.cs" />
+    <Compile Include="BaseAssets\Components\Particles\ParticleEffect_SphereEmitter.cs" />
     <Compile Include="BaseAssets\Components\Particles\ParticleEffect_PointForce.cs" />
     <Compile Include="BaseAssets\Components\Particles\ParticleEffect_UpdatePhysics.cs" />
     <Compile Include="BaseAssets\Components\Particles\ParticleEffect_ConstantForce.cs" />
@@ -132,6 +133,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <Content Include="BaseAssets\Shaders\Particles\particles_bitonic_sort_step.csh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaseAssets\Shaders\Particles\particles_emit_sphere.csh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="BaseAssets\Shaders\Particles\particles_force_point.csh">

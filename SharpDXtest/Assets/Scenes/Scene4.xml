@@ -28,8 +28,10 @@
 		</Transform>
 		<ParticleSystem WorldSpaceParticles="true">
 			<ParticleSystem.ParticleEffects>
-				<ParticleEffect_PointEmitter Rate="100"/>
-				<ParticleEffect_PointForce Force="2"/>
+				<ParticleEffect_SphereEmitter Rate="100"/>
+				<ParticleEffect_ConstantForce>
+					<ParticleEffect_ConstantForce.Force z="-5"/>
+				</ParticleEffect_ConstantForce>
 				<ParticleEffect_UpdatePhysics/>
 			</ParticleSystem.ParticleEffects>
 		</ParticleSystem>

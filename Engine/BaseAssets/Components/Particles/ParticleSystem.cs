@@ -82,7 +82,11 @@ namespace Engine.BaseAssets.Components
         private Buffer particlesPool;
         private UnorderedAccessView particlesPoolView;
         private ShaderResourceView particlesPoolResourceView;
+        private Buffer rngPool;
+        private UnorderedAccessView rngPoolView;
         private Buffer counterRetrieveBuffer;
+
+        private int kernelsCount = 0;
         public ParticleSystem()
         {
             counterRetrieveBuffer = new Buffer(GraphicsCore.CurrentDevice, sizeof(uint), ResourceUsage.Staging, BindFlags.None, CpuAccessFlags.Read, ResourceOptionFlags.None, 0);
@@ -103,6 +107,8 @@ namespace Engine.BaseAssets.Components
         }
         protected override void Initialized()
         {
+            kernelsCount = (int)Math.Ceiling(maxParticles / 64.0);
+
             int particleStructureSize = Marshal.SizeOf(typeof(Particle));
             particlesPool = new Buffer(GraphicsCore.CurrentDevice, particleStructureSize * MaxParticles, ResourceUsage.Default, BindFlags.UnorderedAccess | BindFlags.ShaderResource, CpuAccessFlags.None, ResourceOptionFlags.BufferStructured, particleStructureSize);
 
@@ -129,6 +135,26 @@ namespace Engine.BaseAssets.Components
                 }
             });
 
+            Random rng = new Random();
+            DataStream rngStream = new DataStream(kernelsCount * sizeof(int), true, true);
+            byte[] rngData = new byte[kernelsCount * sizeof(int)];
+            rng.NextBytes(rngData);
+            rngStream.Write(rngData, 0, kernelsCount * sizeof(int));
+            rngStream.Position = 0;
+            rngPool = new Buffer(GraphicsCore.CurrentDevice, rngStream, kernelsCount * sizeof(int), ResourceUsage.Default, BindFlags.UnorderedAccess, CpuAccessFlags.None, ResourceOptionFlags.BufferStructured, sizeof(int));
+
+            rngPoolView = new UnorderedAccessView(GraphicsCore.CurrentDevice, rngPool, new UnorderedAccessViewDescription()
+            {
+                Dimension = UnorderedAccessViewDimension.Buffer,
+                Format = SharpDX.DXGI.Format.Unknown,
+                Buffer = new UnorderedAccessViewDescription.BufferResource()
+                {
+                    ElementCount = kernelsCount,
+                    FirstElement = 0,
+                    Flags = UnorderedAccessViewBufferFlags.None
+                }
+            });
+
             Shader initShader = AssetsManager.Shaders["particles_init"];
 
             initShader.use();
@@ -137,7 +163,7 @@ namespace Engine.BaseAssets.Components
 
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, particlesPoolView);
 
-            GraphicsCore.CurrentDevice.ImmediateContext.Dispatch((int)Math.Ceiling(maxParticles / 64.0), 1, 1);
+            GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(kernelsCount, 1, 1);
 
             energyUpdater = new ParticleEffect_UpdateEnergy();
         }
@@ -147,6 +173,7 @@ namespace Engine.BaseAssets.Components
                 effect.Update(this);
 
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, particlesPoolView);
+            GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(1, rngPoolView);
 
             applyEffect(energyUpdater);
 
@@ -158,6 +185,7 @@ namespace Engine.BaseAssets.Components
             CurParticles = getParticlesAmount();
 
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, null);
+            GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(1, null);
         }
         private void sortParticles()
         {
@@ -171,7 +199,7 @@ namespace Engine.BaseAssets.Components
                     sortShader.updateUniform("subArraySize", subArraySize);
                     sortShader.updateUniform("compareDist", compareDistance);
                     sortShader.uploadUpdatedUniforms();
-                    GraphicsCore.CurrentDevice.ImmediateContext.Dispatch((int)Math.Ceiling(maxParticles / 64.0), 1, 1);
+                    GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(kernelsCount, 1, 1);
                 }
             }
         }
@@ -181,7 +209,7 @@ namespace Engine.BaseAssets.Components
             effect.EffectShader.updateUniform("deltaTime", (float)Time.DeltaTime);
             effect.EffectShader.updateUniform("maxParticles", maxParticles);
             effect.EffectShader.uploadUpdatedUniforms();
-            GraphicsCore.CurrentDevice.ImmediateContext.Dispatch((int)Math.Ceiling(maxParticles / 64.0), 1, 1);
+            GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(kernelsCount, 1, 1);
         }
     }
 }

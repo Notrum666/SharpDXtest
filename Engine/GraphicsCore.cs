@@ -118,9 +118,10 @@ namespace Engine
                                                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
                                                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
             AssetsManager.LoadShader("particles_bitonic_sort_step", "BaseAssets\\Shaders\\Particles\\particles_bitonic_sort_step.csh");
+            AssetsManager.LoadShader("particles_emit_point",        "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
+            AssetsManager.LoadShader("particles_emit_sphere",       "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
             AssetsManager.LoadShader("particles_force_constant",    "BaseAssets\\Shaders\\Particles\\particles_force_constant.csh");
             AssetsManager.LoadShader("particles_force_point",       "BaseAssets\\Shaders\\Particles\\particles_force_point.csh");
-            AssetsManager.LoadShader("particles_emit_point",        "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
             AssetsManager.LoadShader("particles_init",              "BaseAssets\\Shaders\\Particles\\particles_init.csh");
             AssetsManager.LoadShader("particles_update_energy",     "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
             AssetsManager.LoadShader("particles_update_physics",    "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
