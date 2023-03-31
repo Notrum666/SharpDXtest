@@ -146,11 +146,11 @@ namespace Engine.BaseAssets.Components
         public event onCollision_del OnCollision;
         public event onCollision_del OnCollisionEnd;
 
-        public override void fixedUpdate()
+        public override void FixedUpdate()
         {
             recalculateInertiaTensor();
 
-            Transform t = gameObject.transform;
+            Transform t = GameObject.Transform;
 
             Velocity *= 1.0 - Time.DeltaTime * linearDrag;
             AngularVelocity *= 1.0 - Time.DeltaTime * angularDrag;
@@ -199,7 +199,7 @@ namespace Engine.BaseAssets.Components
         }
         private void recalculateInertiaTensor()
         {
-            IEnumerable<Collider> colliders = gameObject.getComponents<Collider>().Where(coll => coll.Enabled);
+            IEnumerable<Collider> colliders = GameObject.getComponents<Collider>().Where(coll => coll.Enabled);
             if (colliders.Count() == 0)
             {
                 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
@@ -228,7 +228,7 @@ namespace Engine.BaseAssets.Components
                 inverseGlobalInertiaTensor = new Matrix3x3();
                 return;
             }
-            Matrix3x3 model = Matrix3x3.FromQuaternion(gameObject.transform.Rotation);
+            Matrix3x3 model = Matrix3x3.FromQuaternion(GameObject.Transform.Rotation);
             inverseGlobalInertiaTensor = model * new Matrix3x3(FreezeRotation.HasFlag(FreezeRotationFlags.X) ? 0.0 : 1.0 / InertiaTensor.x, 0.0, 0.0,
                                                          0.0, FreezeRotation.HasFlag(FreezeRotationFlags.Y) ? 0.0 : 1.0 / InertiaTensor.y, 0.0,
                                                          0.0, 0.0, FreezeRotation.HasFlag(FreezeRotationFlags.Z) ? 0.0 : 1.0 / InertiaTensor.z) * model.transposed();
@@ -253,13 +253,13 @@ namespace Engine.BaseAssets.Components
         {
             velocityChange += force * Time.DeltaTime * inverseMass;
 
-            angularVelocityChange += (point - gameObject.transform.Position) % force * inverseGlobalInertiaTensor * Time.DeltaTime;
+            angularVelocityChange += (point - GameObject.Transform.Position) % force * inverseGlobalInertiaTensor * Time.DeltaTime;
         }
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
             velocityChange += impulse * inverseMass;
 
-            angularVelocityChange += (point - gameObject.transform.Position) % impulse * inverseGlobalInertiaTensor;
+            angularVelocityChange += (point - GameObject.Transform.Position) % impulse * inverseGlobalInertiaTensor;
         }
         public void applyChanges()
         {
@@ -276,7 +276,7 @@ namespace Engine.BaseAssets.Components
                 result += collisionExitVectors[i];
             result /= count;
 
-            gameObject.transform.Position += result;
+            GameObject.Transform.Position += result;
             collisionExitVectors.Clear();
         }
         public void solveCollisionWith(Rigidbody otherRigidbody)
@@ -284,8 +284,8 @@ namespace Engine.BaseAssets.Components
             if (!Enabled || !otherRigidbody.Enabled || IsStatic && otherRigidbody.IsStatic)
                 return;
 
-            IEnumerable<Collider> colliders = gameObject.getComponents<Collider>().Where(coll => coll.Enabled);
-            IEnumerable<Collider> otherColliders = otherRigidbody.gameObject.getComponents<Collider>().Where(coll => coll.Enabled);
+            IEnumerable<Collider> colliders = GameObject.getComponents<Collider>().Where(coll => coll.Enabled);
+            IEnumerable<Collider> otherColliders = otherRigidbody.GameObject.getComponents<Collider>().Where(coll => coll.Enabled);
 
             foreach (Collider collider in colliders)
                 foreach (Collider otherCollider in otherColliders)
@@ -329,12 +329,12 @@ namespace Engine.BaseAssets.Components
 
                     if (!moveVector.isZero())
                     {
-                        gameObject.transform.Position += moveVector;
+                        GameObject.Transform.Position += moveVector;
                         collider.updateData();
                     }
                     if (!otherMoveVector.isZero())
                     {
-                        otherRigidbody.gameObject.transform.Position += otherMoveVector;
+                        otherRigidbody.GameObject.Transform.Position += otherMoveVector;
                         otherCollider.updateData();
                     }
 
@@ -343,13 +343,13 @@ namespace Engine.BaseAssets.Components
                     {
                         if (!moveVector.isZero())
                         {
-                            gameObject.transform.Position -= moveVector;
+                            GameObject.Transform.Position -= moveVector;
                             collisionExitVectors.Add(moveVector);
                             collider.updateData();
                         }
                         if (!otherMoveVector.isZero())
                         {
-                            otherRigidbody.gameObject.transform.Position -= otherMoveVector;
+                            otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
                             otherRigidbody.collisionExitVectors.Add(otherMoveVector);
                             otherCollider.updateData();
                         }
@@ -376,8 +376,8 @@ namespace Engine.BaseAssets.Components
                         return start + jacobi.inverse() * (-baseValue);
                     }
 
-                    Vector3 r1 = collisionPoint - gameObject.transform.Position;
-                    Vector3 r2 = collisionPoint - otherRigidbody.gameObject.transform.Position;
+                    Vector3 r1 = collisionPoint - GameObject.Transform.Position;
+                    Vector3 r2 = collisionPoint - otherRigidbody.GameObject.Transform.Position;
                     Vector3 vp = Velocity + AngularVelocity % r1;
                     Vector3 othervp = otherRigidbody.Velocity + otherRigidbody.AngularVelocity % r2;
                     Vector3 dvn = vp.projectOnVector(collisionExitNormal) - othervp.projectOnVector(collisionExitNormal);
@@ -408,13 +408,13 @@ namespace Engine.BaseAssets.Components
 
                     if (!moveVector.isZero())
                     {
-                        gameObject.transform.Position -= moveVector;
+                        GameObject.Transform.Position -= moveVector;
                         collisionExitVectors.Add(moveVector);
                         collider.updateData();
                     }
                     if (!otherMoveVector.isZero())
                     {
-                        otherRigidbody.gameObject.transform.Position -= otherMoveVector;
+                        otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
                         otherRigidbody.collisionExitVectors.Add(otherMoveVector);
                         otherCollider.updateData();
                     }

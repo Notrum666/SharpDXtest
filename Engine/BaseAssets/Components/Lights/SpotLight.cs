@@ -85,7 +85,7 @@ namespace Engine.BaseAssets.Components
                                                  0, radius / (radius - NEAR), 0, -radius * NEAR / (radius - NEAR),
                                                  0, 1, 0, 0);
 
-                return proj * (Matrix4x4f)gameObject.transform.View;
+                return proj * (Matrix4x4f)GameObject.Transform.View;
             }
         }
         public Texture ShadowTexture { get; private set; }

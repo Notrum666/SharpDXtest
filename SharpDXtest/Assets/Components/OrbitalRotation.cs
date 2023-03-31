@@ -16,11 +16,11 @@ namespace SharpDXtest.Assets.Components
         public double periodInDays;
         public double radius;
         private double curAngle = 0;
-        public override void update()
+        public override void Update()
         {
             double angularSpeed = 90 * 365.0 / periodInDays * Time.DeltaTime;
             curAngle += angularSpeed;
-            gameObject.transform.LocalPosition = new Vector3(Math.Sin(curAngle / 180.0 * Math.PI), Math.Cos(curAngle / 180.0 * Math.PI), 0.0) * radius;
+            GameObject.Transform.LocalPosition = new Vector3(Math.Sin(curAngle / 180.0 * Math.PI), Math.Cos(curAngle / 180.0 * Math.PI), 0.0) * radius;
         }
     }
 }

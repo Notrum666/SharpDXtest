@@ -12,23 +12,26 @@ namespace Engine
     public sealed class GameObject
     {
         private bool enabled = true;
-        public bool Enabled { get => transform.Parent == null ? enabled : enabled && transform.Parent.gameObject.enabled; set => enabled = value; }
-        public Transform transform { get; }
+        public bool Enabled { get => Transform.Parent == null ? enabled : enabled && Transform.Parent.GameObject.enabled; set => enabled = value; }
+        public Transform Transform { get; private set; }
         private List<Component> components = new List<Component>();
         public ReadOnlyCollection<Component> Components { get => components.AsReadOnly(); }
         internal bool PendingDestroy { get; private set; }
+        public bool Initialized { get; internal set; }
         public GameObject()
         {
-            transform = new Transform();
-            transform.gameObject = this;
-            components.Add(transform);
+            Transform = new Transform();
+            Transform.GameObject = this;
+            components.Add(Transform);
         }
 
         public T addComponent<T>() where T : Component
         {
             Component component = Activator.CreateInstance(typeof(T)) as Component;
-            component.gameObject = this;
+            component.GameObject = this;
             components.Add(component);
+            if (Initialized)
+                component.Initialize();
             return component as T;
         }
         public Component addComponent(Type t)
@@ -36,8 +39,10 @@ namespace Engine
             if (!t.IsSubclassOf(typeof(Component)))
                 throw new ArgumentException("Given type must be a component");
             Component component = Activator.CreateInstance(t) as Component;
-            component.gameObject = this;
+            component.GameObject = this;
             components.Add(component);
+            if (Initialized)
+                component.Initialize();
             return component;
         }
         public T getComponent<T>() where T : Component
@@ -74,17 +79,25 @@ namespace Engine
                     curComponents.Add(component);
             return curComponents.ToArray();
         }
-        public void update()
+        public void Initialize()
         {
+            if (Initialized)
+                return;
+            Initialized = true;
             foreach (Component component in components)
-                if (component.Enabled)
-                    component.update();
+                component.Initialize();
         }
-        public void fixedUpdate()
+        public void Update()
         {
             foreach (Component component in components)
                 if (component.Enabled)
-                    component.fixedUpdate();
+                    component.Update();
+        }
+        public void FixedUpdate()
+        {
+            foreach (Component component in components)
+                if (component.Enabled)
+                    component.FixedUpdate();
         }
         public void Destroy()
         {

@@ -9,26 +9,38 @@ namespace Engine.BaseAssets.Components
     public abstract class Component
     {
         private bool enabled = true;
-        public bool Enabled { get => enabled && gameObject.Enabled; set => enabled = value; }
-        private GameObject _gameObject = null;
-        public GameObject gameObject 
+        public bool Enabled { get => enabled && GameObject.Enabled; set => enabled = value; }
+        private GameObject gameObject = null;
+        public GameObject GameObject 
         { 
             get 
             { 
-                return _gameObject; 
+                return gameObject; 
             }
             set 
             { 
-                if (_gameObject != null) 
+                if (gameObject != null) 
                     throw new Exception("gameObject can be set only once.");
-                _gameObject = value;
+                gameObject = value;
             } 
         }
-        public virtual void update()
+        public bool IsInitialized { get; internal set; }
+        public void Initialize()
+        {
+            if (IsInitialized)
+                return;
+            IsInitialized = true;
+            Initialized();
+        }
+        protected virtual void Initialized()
         {
 
         }
-        public virtual void fixedUpdate()
+        public virtual void Update()
+        {
+
+        }
+        public virtual void FixedUpdate()
         {
 
         }

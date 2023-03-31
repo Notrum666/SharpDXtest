@@ -10,7 +10,7 @@ using Engine.BaseAssets.Components;
 
 namespace Engine
 {
-    public static class GameCore
+    public static class EngineCore
     {
         public static Scene CurrentScene { get; set; }
         private static List<GameObject> newObjects = new List<GameObject>();
@@ -125,6 +125,8 @@ namespace Engine
             CurrentScene.objects.AddRange(newObjects);
             newObjects.Clear();
 
+            initialize();
+
             accumulator += Time.DeltaTime;
 
             if (accumulator >= Time.FixedDeltaTime)
@@ -141,11 +143,16 @@ namespace Engine
 
             update();
         }
+        private static void initialize()
+        {
+            foreach (GameObject obj in CurrentScene.objects)
+                obj.Initialize();
+        }
         private static void update()
         {
             foreach (GameObject obj in CurrentScene.objects)
                 if (obj.Enabled)
-                    obj.update();
+                    obj.Update();
         }
         private static void fixedUpdate()
         {
@@ -153,7 +160,7 @@ namespace Engine
 
             foreach (GameObject obj in CurrentScene.objects)
                 if (obj.Enabled)
-                    obj.fixedUpdate();
+                    obj.FixedUpdate();
 
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
             for (int i = 0; i < CurrentScene.objects.Count; i++)

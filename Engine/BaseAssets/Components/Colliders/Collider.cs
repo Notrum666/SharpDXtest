@@ -736,7 +736,7 @@ namespace Engine.BaseAssets.Components
 
         public virtual void updateData()
         {
-            globalCenter = gameObject.transform.Model.TransformPoint(Offset);
+            globalCenter = GameObject.Transform.Model.TransformPoint(Offset);
         }
     }
 }

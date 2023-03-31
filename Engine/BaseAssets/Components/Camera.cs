@@ -71,7 +71,7 @@ namespace Engine.BaseAssets.Components
             }
             set
             {
-                if (value != null && value.gameObject == null)
+                if (value != null && value.GameObject == null)
                     throw new Exception("Camera component must be attached to a gameobject.");
 
                 current = value;

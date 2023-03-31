@@ -27,21 +27,21 @@ namespace Engine.BaseAssets.Components
         {
             SoundCore.PlayFrom(sound, this);
         }
-        public override void update()
+        public override void Update()
         {
-            Vector3 pos = gameObject.transform.Position;
+            Vector3 pos = GameObject.Transform.Position;
             Source.Position.X = -(float)pos.x;
             Source.Position.Y = (float)pos.y;
             Source.Position.Z = (float)pos.z;
-            Vector3 forward = gameObject.transform.Forward;
+            Vector3 forward = GameObject.Transform.Forward;
             Source.OrientFront.X = -(float)forward.x;
             Source.OrientFront.Y = (float)forward.y;
             Source.OrientFront.Z = (float)forward.z;
-            Vector3 up = gameObject.transform.Up;
+            Vector3 up = GameObject.Transform.Up;
             Source.OrientTop.X = -(float)up.x;
             Source.OrientTop.Y = (float)up.y;
             Source.OrientTop.Z = (float)up.z;
-            Rigidbody rb = gameObject.getComponent<Rigidbody>();
+            Rigidbody rb = GameObject.getComponent<Rigidbody>();
             if (rb != null)
             {
                 Vector3 velocity = rb.Velocity;

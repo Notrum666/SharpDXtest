@@ -76,8 +76,8 @@ namespace Engine.BaseAssets.Components
         }
         public Matrix4x4f[] GetLightSpaces(Camera camera)
         {
-            Matrix4x4f view = (Matrix4x4f)gameObject.transform.View;
-            Matrix4x4f frustumToView = view * (Matrix4x4f)(camera.gameObject.transform.Model * camera.InvProj);
+            Matrix4x4f view = (Matrix4x4f)GameObject.Transform.View;
+            Matrix4x4f frustumToView = view * (Matrix4x4f)(camera.GameObject.Transform.Model * camera.InvProj);
 
             double f = camera.Far;
             double n = camera.Near;

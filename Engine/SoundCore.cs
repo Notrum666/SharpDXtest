@@ -37,13 +37,13 @@ namespace Engine
                 if (value)
                 {
                     isPaused = value;
-                    if (!GameCore.IsPaused)
+                    if (!EngineCore.IsPaused)
                         voice.Start();
                 }
                 else
                 {
                     isPaused = value;
-                    if (!GameCore.IsPaused)
+                    if (!EngineCore.IsPaused)
                         voice.Stop();
                 }
             }
@@ -108,8 +108,8 @@ namespace Engine
                                     Speakers.BackLeft | Speakers.BackRight | Speakers.SideLeft | Speakers.SideRight);
             masteringVoice = new MasteringVoice(device, XAudio2.DefaultChannels, 44100);
 
-            GameCore.OnPaused += OnPaused;
-            GameCore.OnResumed += OnResumed;
+            EngineCore.OnPaused += OnPaused;
+            EngineCore.OnResumed += OnResumed;
         }
         private static void OnPaused()
         {

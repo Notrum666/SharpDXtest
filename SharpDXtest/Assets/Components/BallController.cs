@@ -17,11 +17,11 @@ namespace SharpDXtest.Assets.Components
         public GameObject CameraObject;
         public double Force;
         private bool initialized = false;
-        public override void update()
+        public override void Update()
         {
             if (!initialized) 
             {
-                gameObject.getComponent<Rigidbody>().OnCollisionBegin += OnCollisionBegin;
+                GameObject.getComponent<Rigidbody>().OnCollisionBegin += OnCollisionBegin;
                 initialized = true;
 
                 Random rng = new Random();
@@ -36,47 +36,47 @@ namespace SharpDXtest.Assets.Components
                     mesh.Material.Albedo = AssetsManager.Textures["Prototype_Light"];
                     double angle = rng.NextDouble() * 2 * Math.PI;
                     double distance = 5 + (1.0 - rng.NextDouble() * rng.NextDouble()) * 35;
-                    obj.transform.Position = new Vector3(Math.Cos(angle) * distance, Math.Sin(angle) * distance, 5);
+                    obj.Transform.Position = new Vector3(Math.Cos(angle) * distance, Math.Sin(angle) * distance, 5);
                     double randomScale = 0.5 + rng.NextDouble() * 1.5;
-                    obj.transform.LocalScale = new Vector3(randomScale, randomScale, randomScale);
+                    obj.Transform.LocalScale = new Vector3(randomScale, randomScale, randomScale);
 
                     //PointLight light = obj.addComponent<PointLight>();
                     //light.Radius = 10;
 
-                    GameCore.AddObject(obj);
+                    EngineCore.AddObject(obj);
                 }
             }
         }
 
-        public override void fixedUpdate()
+        public override void FixedUpdate()
         {
-            base.fixedUpdate();
+            base.FixedUpdate();
 
-            Rigidbody rb = gameObject.getComponent<Rigidbody>();
+            Rigidbody rb = GameObject.getComponent<Rigidbody>();
             rb.addForce(new Vector3(0, 0, -9.8 * rb.Mass));
 
-            if (gameObject.transform.Position.z < -10)
+            if (GameObject.Transform.Position.z < -10)
             {
                 rb.Velocity = Vector3.Zero;
                 rb.AngularVelocity = Vector3.Zero;
-                gameObject.transform.Position = new Vector3(0, 0, 5);
+                GameObject.Transform.Position = new Vector3(0, 0, 5);
             }
 
             if (InputManager.IsKeyDown(Key.W))
-                rb.addForce(CameraObject.transform.Forward.projectOnFlat(Vector3.Up).normalized() * Force);
+                rb.addForce(CameraObject.Transform.Forward.projectOnFlat(Vector3.Up).normalized() * Force);
             if (InputManager.IsKeyDown(Key.S))
-                rb.addForce(-CameraObject.transform.Forward.projectOnFlat(Vector3.Up).normalized() * Force);
+                rb.addForce(-CameraObject.Transform.Forward.projectOnFlat(Vector3.Up).normalized() * Force);
             if (InputManager.IsKeyDown(Key.A))
-                rb.addForce(-CameraObject.transform.Right * Force);
+                rb.addForce(-CameraObject.Transform.Right * Force);
             if (InputManager.IsKeyDown(Key.D))
-                rb.addForce(CameraObject.transform.Right * Force);
+                rb.addForce(CameraObject.Transform.Right * Force);
             if (InputManager.IsKeyPressed(Key.Space))
                 rb.addImpulse(Vector3.Up * 5);
         }
 
         private void OnCollisionBegin(Rigidbody sender, Collider col, Collider other)
         {
-            Rigidbody otherRb = other.gameObject.getComponent<Rigidbody>();
+            Rigidbody otherRb = other.GameObject.getComponent<Rigidbody>();
             if (otherRb == null || otherRb.IsStatic)
                 return;
 
@@ -85,11 +85,11 @@ namespace SharpDXtest.Assets.Components
 
             //Vector3 pos = other.gameObject.transform.Position;
             //Quaternion quat = other.gameObject.transform.Rotation;
-            other.gameObject.transform.SetParent(gameObject.transform);
+            other.GameObject.Transform.SetParent(GameObject.Transform);
             //other.gameObject.transform.Position = pos;
             //other.gameObject.transform.Rotation = quat;
-            other.gameObject.getComponent<Rigidbody>().Enabled = false;
-            other.gameObject.getComponent<Collider>().Enabled = false;
+            other.GameObject.getComponent<Rigidbody>().Enabled = false;
+            other.GameObject.getComponent<Collider>().Enabled = false;
 
             //other.gameObject.Destroy();
             //gameObject.transform.LocalScale = gameObject.transform.LocalScale + new Vector3(0.2, 0.2, 0.2);

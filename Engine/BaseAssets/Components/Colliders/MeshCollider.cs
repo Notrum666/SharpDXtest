@@ -202,7 +202,7 @@ namespace Engine.BaseAssets.Components.Colliders
             globalNormals.Clear();
             globalNonCollinearNormals.Clear();
 
-            Matrix4x4 model = gameObject.transform.Model;
+            Matrix4x4 model = GameObject.Transform.Model;
             foreach (Vector3 vertex in vertexes)
                 globalVertexes.Add(model.TransformPoint(vertex + Offset));
             foreach (Vector3 normal in normals)

@@ -20,9 +20,9 @@ namespace SharpDXtest.Assets.Components
         public GameObject leftRacket, rightRacket;
         public int scoreLeft = 0, scoreRight = 0;
         public event Action<int, int> OnScoreChanged;
-        public override void update()
+        public override void Update()
         {
-            Rigidbody rb = gameObject.getComponent<Rigidbody>();
+            Rigidbody rb = GameObject.getComponent<Rigidbody>();
             if (!initialized)
             {
                 initialized = true;
@@ -40,23 +40,23 @@ namespace SharpDXtest.Assets.Components
             if (!rb.Velocity.isZero())
                 rb.Velocity = rb.Velocity.normalized() * speed;
 
-            if (gameObject.transform.Position.y > 21 || gameObject.transform.Position.y < -21)
+            if (GameObject.Transform.Position.y > 21 || GameObject.Transform.Position.y < -21)
             {
-                if (gameObject.transform.Position.y > 21)
+                if (GameObject.Transform.Position.y > 21)
                     scoreLeft++;
                 else
                     scoreRight++;
                 OnScoreChanged?.Invoke(scoreLeft, scoreRight);
                 rb.Velocity = Vector3.Zero;
-                gameObject.transform.Position = Vector3.Zero;
+                GameObject.Transform.Position = Vector3.Zero;
             }
         }
 
         private void onCollisionBegin(Rigidbody sender, Collider col, Collider other)
         {
-            if (other.gameObject == leftRacket || other.gameObject == rightRacket)
+            if (other.GameObject == leftRacket || other.GameObject == rightRacket)
             {
-                double deltaZ = gameObject.transform.Position.z - other.gameObject.transform.Position.z;
+                double deltaZ = GameObject.Transform.Position.z - other.GameObject.Transform.Position.z;
                 sender.Velocity += new Vector3(0, 0, deltaZ * 4);
                 speed += 1;
             }

@@ -14,7 +14,7 @@ namespace SharpDXtest.Assets.Components
     public class CameraController : Component
     {
         public float speed;
-        public override void update()
+        public override void Update()
         {
             float curSpeed = speed * (float)Time.DeltaTime;
 
@@ -32,21 +32,21 @@ namespace SharpDXtest.Assets.Components
             if (InputManager.IsKeyDown(Key.LeftShift))
                 curSpeed *= 5f;
             if (InputManager.IsKeyDown(Key.A))
-                gameObject.transform.LocalPosition -= gameObject.transform.LocalRight * curSpeed;
+                GameObject.Transform.LocalPosition -= GameObject.Transform.LocalRight * curSpeed;
             if (InputManager.IsKeyDown(Key.D))
-                gameObject.transform.LocalPosition += gameObject.transform.LocalRight * curSpeed;
+                GameObject.Transform.LocalPosition += GameObject.Transform.LocalRight * curSpeed;
             if (InputManager.IsKeyDown(Key.S))
-                gameObject.transform.LocalPosition -= gameObject.transform.LocalForward * curSpeed;
+                GameObject.Transform.LocalPosition -= GameObject.Transform.LocalForward * curSpeed;
             if (InputManager.IsKeyDown(Key.W))
-                gameObject.transform.LocalPosition += gameObject.transform.LocalForward * curSpeed;
+                GameObject.Transform.LocalPosition += GameObject.Transform.LocalForward * curSpeed;
             if (InputManager.IsKeyDown(Key.C))
                 // faster
-                gameObject.transform.LocalPosition -= (gameObject.transform.Parent == null ? Vector3.Up : gameObject.transform.Parent.View.TransformDirection(Vector3.UnitZ)) * curSpeed;
+                GameObject.Transform.LocalPosition -= (GameObject.Transform.Parent == null ? Vector3.Up : GameObject.Transform.Parent.View.TransformDirection(Vector3.UnitZ)) * curSpeed;
                 // simpler
                 //gameObject.transform.Position -= Vector3.Up * curSpeed;
             if (InputManager.IsKeyDown(Key.Space))
                 // faster
-                gameObject.transform.LocalPosition += (gameObject.transform.Parent == null ? Vector3.Up : gameObject.transform.Parent.View.TransformDirection(Vector3.UnitZ)) * curSpeed;
+                GameObject.Transform.LocalPosition += (GameObject.Transform.Parent == null ? Vector3.Up : GameObject.Transform.Parent.View.TransformDirection(Vector3.UnitZ)) * curSpeed;
                 // simpler
                 //gameObject.transform.Position += Vector3.Up * curSpeed;
             
@@ -55,10 +55,10 @@ namespace SharpDXtest.Assets.Components
             if (!mouseDelta.isZero())
             {
                 // faster
-                gameObject.transform.LocalRotation = Quaternion.FromAxisAngle(gameObject.transform.Parent == null ? Vector3.Up :
-                                                            gameObject.transform.Parent.View.TransformDirection(Vector3.UnitZ), -mouseDelta.x) *
-                                                     Quaternion.FromAxisAngle(gameObject.transform.LocalRight, -mouseDelta.y) *
-                                                     gameObject.transform.LocalRotation;
+                GameObject.Transform.LocalRotation = Quaternion.FromAxisAngle(GameObject.Transform.Parent == null ? Vector3.Up :
+                                                            GameObject.Transform.Parent.View.TransformDirection(Vector3.UnitZ), -mouseDelta.x) *
+                                                     Quaternion.FromAxisAngle(GameObject.Transform.LocalRight, -mouseDelta.y) *
+                                                     GameObject.Transform.LocalRotation;
                 // simpler
                 //gameObject.transform.Rotation = Quaternion.FromAxisAngle(Vector3.Up, -mouseDelta.x) *
                 //                                     Quaternion.FromAxisAngle(gameObject.transform.right, -mouseDelta.y) *

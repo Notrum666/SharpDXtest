@@ -535,7 +535,8 @@ namespace Engine
         HullShader,
         DomainShader,
         GeometryShader,
-        FragmentShader
+        FragmentShader,
+        ComputeShader
     }
     public abstract class Shader
     {
@@ -584,6 +585,8 @@ namespace Engine
             for (int i = 0; i < reflection.Description.ConstantBuffers; i++)
             {
                 ConstantBuffer buffer = reflection.GetConstantBuffer(i);
+                if (buffer.Description.Type != ConstantBufferType.ConstantBuffer)
+                    continue;
                 ShaderBuffer shaderBuffer = new ShaderBuffer();
                 shaderBuffer.buffer = new Buffer(GraphicsCore.CurrentDevice, buffer.Description.Size, ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
                 for (int j = 0; j < buffer.Description.VariableCount; j++)
@@ -673,6 +676,8 @@ namespace Engine
                     return Create(path, ShaderType.GeometryShader);
                 case ".fsh":
                     return Create(path, ShaderType.FragmentShader);
+                case ".csh":
+                    return Create(path, ShaderType.ComputeShader);
                 default:
                     throw new ArgumentException("Can't get shader type from extension, consider using other Shader.Create() overload.");
             }
@@ -691,6 +696,8 @@ namespace Engine
                     return new Shader_Geometry(path);
                 case ShaderType.FragmentShader:
                     return new Shader_Fragment(path);
+                case ShaderType.ComputeShader:
+                    return new Shader_Compute(path);
                 default:
                     throw new NotImplementedException();
             }
@@ -872,6 +879,23 @@ namespace Engine
                 GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
+        private class Shader_Compute : Shader
+        {
+            public override ShaderType Type { get => ShaderType.ComputeShader; }
+            private ComputeShader shader;
+            public Shader_Compute(string path)
+            {
+                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "cs_5_0");
+                ShaderReflection reflection = new ShaderReflection(bytecode);
+                shader = new ComputeShader(GraphicsCore.CurrentDevice, bytecode);
+                generateBuffersAndLocations(reflection);
+            }
+            public override void use()
+            {
+                GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.Set(shader);
+                GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+            }
+        }
     }
     public class ShaderPipeline
     {
@@ -915,6 +939,9 @@ namespace Engine
         }
         public void Use()
         {
+            GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.Set(null);
+            GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.Set(null);
+            GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.Set(null);
             foreach (Shader shader in shaders)
                 shader.use();
             Current = this;
@@ -933,6 +960,7 @@ namespace Engine
     {
         public static Dictionary<string, Model> Models { get; } = new Dictionary<string, Model>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
+        public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
         public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture>();
         public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
         public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
@@ -1062,6 +1090,22 @@ namespace Engine
             foreach (Model mdl in models.Values)
                 mdl.updateModel();
             return models;
+        }
+        public static Shader LoadShader(string shaderName, string shaderPath)
+        {
+            if (Shaders.ContainsKey(shaderName))
+                throw new ArgumentException("Shader with name \"" + shaderName + "\" is already loaded.");
+            Shader shader = Shader.Create(shaderPath);
+            Shaders[shaderName] = shader;
+            return shader;
+        }
+        public static Shader LoadShader(string shaderName, string shaderPath, ShaderType shaderType)
+        {
+            if (Shaders.ContainsKey(shaderName))
+                throw new ArgumentException("Shader with name \"" + shaderName + "\" is already loaded.");
+            Shader shader = Shader.Create(shaderPath, shaderType);
+            Shaders[shaderName] = shader;
+            return shader;
         }
         public static ShaderPipeline LoadShaderPipeline(string shaderPipelineName, params Shader[] shaders)
         {
@@ -1374,7 +1418,7 @@ namespace Engine
                     {
                         curObj = Activator.CreateInstance(typeof(GameObject));
                         if (parent != null && parent.GetType() == typeof(GameObject))
-                            (curObj as GameObject).transform.SetParent((parent as GameObject).transform, false);
+                            (curObj as GameObject).Transform.SetParent((parent as GameObject).Transform, false);
                         parseAttributes(ref curObj, element.Attributes());
                         gameObjects.Add(curObj as GameObject);
                         foreach (XElement elem in element.Elements())
@@ -1385,7 +1429,7 @@ namespace Engine
                         if (!(parent is GameObject))
                             throw new Exception("Components can only be inside of GameObject.");
                         if (curType == typeof(Transform))
-                            curObj = (parent as GameObject).transform;
+                            curObj = (parent as GameObject).Transform;
                         else
                             curObj = (parent as GameObject).addComponent(curType);
                         parseAttributes(ref curObj, element.Attributes());

@@ -30,7 +30,7 @@ namespace SharpDXtest
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public bool IsPaused { get => GameCore.IsPaused; }
+        public bool IsPaused { get => EngineCore.IsPaused; }
         public event PropertyChangedEventHandler PropertyChanged;
 
         private bool cursorLocking = true;
@@ -56,9 +56,9 @@ namespace SharpDXtest
 
             DataContext = this;
 
-            GameCore.OnPaused += GameCore_OnPaused;
-            GameCore.OnResumed += GameCore_OnResumed;
-            GameCore.OnFrameEnded += GameCore_OnFrameEnded;
+            EngineCore.OnPaused += GameCore_OnPaused;
+            EngineCore.OnResumed += GameCore_OnResumed;
+            EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
 
             CompositionTarget.Rendering += OnRender;
         }
@@ -81,7 +81,7 @@ namespace SharpDXtest
         }
         private void OnRender(object sender, EventArgs e)
         {
-            if (GameCore.IsPaused)
+            if (EngineCore.IsPaused)
                 return;
 
             d3dimage.Lock();
@@ -126,12 +126,12 @@ namespace SharpDXtest
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            GameCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
+            EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
 
             copyFramebuffer = new FrameBuffer((int)ActualWidth, (int)ActualHeight);
 
-            GameCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene4.xml");
-            foreach (GameObject obj in GameCore.CurrentScene.objects)
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene4.xml");
+            foreach (GameObject obj in EngineCore.CurrentScene.objects)
             {
                 BallRestarter comp = obj.getComponent<BallRestarter>();
                 if (comp == null)
@@ -143,7 +143,7 @@ namespace SharpDXtest
             LeftScore.Visibility = Visibility.Hidden;
             RightScore.Visibility = Visibility.Hidden;
 
-            GameCore.Run();
+            EngineCore.Run();
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPaused"));
 
@@ -152,25 +152,25 @@ namespace SharpDXtest
 
         private void MainWindowInst_Closed(object sender, EventArgs e)
         {
-            if (GameCore.IsAlive)
-                GameCore.Stop();
+            if (EngineCore.IsAlive)
+                EngineCore.Stop();
         }
 
         private void MainWindowInst_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
-                GameCore.IsPaused = !GameCore.IsPaused;
+                EngineCore.IsPaused = !EngineCore.IsPaused;
         }
 
         private void PauseMenuButton_Exit_Click(object sender, RoutedEventArgs e)
         {
-            GameCore.Stop();
+            EngineCore.Stop();
             Close();
         }
 
         private void PauseMenuButton_Resume_Click(object sender, RoutedEventArgs e)
         {
-            GameCore.IsPaused = false;
+            EngineCore.IsPaused = false;
         }
 
         private void MainWindowInst_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -190,8 +190,8 @@ namespace SharpDXtest
         {
             LeftScore.Visibility = Visibility.Visible;
             RightScore.Visibility = Visibility.Visible;
-            GameCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene1.xml");
-            foreach (GameObject obj in GameCore.CurrentScene.objects)
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene1.xml");
+            foreach (GameObject obj in EngineCore.CurrentScene.objects)
             {
                 BallRestarter comp = obj.getComponent<BallRestarter>();
                 if (comp == null)
@@ -201,7 +201,7 @@ namespace SharpDXtest
             }
             OnScoreChanged(0, 0);
 
-            GameCore.IsPaused = false;
+            EngineCore.IsPaused = false;
         }
 
         private void OnScoreChanged(int arg1, int arg2)
@@ -217,24 +217,24 @@ namespace SharpDXtest
         {
             LeftScore.Visibility = Visibility.Hidden;
             RightScore.Visibility = Visibility.Hidden;
-            GameCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene2.xml");
-            GameCore.IsPaused = false;
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene2.xml");
+            EngineCore.IsPaused = false;
         }
 
         private void PauseMenuButton_LoadScene3_Click(object sender, RoutedEventArgs e)
         {
             LeftScore.Visibility = Visibility.Hidden;
             RightScore.Visibility = Visibility.Hidden;
-            GameCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene3.xml");
-            GameCore.IsPaused = false;
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene3.xml");
+            EngineCore.IsPaused = false;
         }
 
         private void PauseMenuButton_LoadScene4_Click(object sender, RoutedEventArgs e)
         {
             LeftScore.Visibility = Visibility.Hidden;
             RightScore.Visibility = Visibility.Hidden;
-            GameCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene4.xml");
-            GameCore.IsPaused = false;
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene4.xml");
+            EngineCore.IsPaused = false;
         }
 
         private void ChangeCursorLocking(object sender, RoutedEventArgs e)

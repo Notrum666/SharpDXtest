@@ -93,6 +93,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Assets\Components\ObjectController.cs" />
     <Compile Include="Assets\Components\CameraArm.cs" />
     <Compile Include="Assets\Components\BallController.cs" />
     <Compile Include="Assets\Components\GravityForce.cs" />

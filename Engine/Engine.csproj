@@ -84,6 +84,14 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseAssets\Components\Material.cs" />
+    <Compile Include="BaseAssets\Components\Particles\ParticleEffect_PointForce.cs" />
+    <Compile Include="BaseAssets\Components\Particles\ParticleEffect_UpdatePhysics.cs" />
+    <Compile Include="BaseAssets\Components\Particles\ParticleEffect_ConstantForce.cs" />
+    <Compile Include="BaseAssets\Components\Particles\ParticleEffect_UpdateEnergy.cs" />
+    <Compile Include="BaseAssets\Components\Particles\ParticleEffect_PointEmitter.cs" />
+    <Compile Include="BaseAssets\Components\Particles\ParticleEffect.cs" />
+    <Compile Include="BaseAssets\Components\Particles\ParticleSystem.cs" />
     <Compile Include="BaseAssets\Components\Camera.cs" />
     <Compile Include="BaseAssets\Components\Colliders\Collider.cs" />
     <Compile Include="BaseAssets\Components\Colliders\MeshCollider.cs" />
@@ -104,7 +112,7 @@
     <Compile Include="Extentions.cs" />
     <Compile Include="FrameBuffer.cs" />
     <Compile Include="FramebufferPool.cs" />
-    <Compile Include="GameCore.cs" />
+    <Compile Include="EngineCore.cs" />
     <Compile Include="GameObject.cs" />
     <Compile Include="GraphicsCore.cs" />
     <Compile Include="InputManager.cs" />
@@ -114,22 +122,52 @@
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="BaseAssets\Shaders\deferred_gamma_correction.fsh">
+    <Content Include="BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.gsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="BaseAssets\Shaders\deferred_light_directional.fsh">
+    <None Include="BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.vsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Content Include="BaseAssets\Shaders\Particles\particles_bitonic_sort_step.csh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaseAssets\Shaders\Particles\particles_force_point.csh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaseAssets\Shaders\Particles\particles_init.csh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaseAssets\Shaders\Particles\particles_emit_point.csh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaseAssets\Shaders\Particles\particles_force_constant.csh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaseAssets\Shaders\Particles\particles_update_physics.csh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="BaseAssets\Shaders\Particles\particles_update_energy.csh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="BaseAssets\Shaders\DeferredRender\deferred_gamma_correction.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="BaseAssets\Shaders\DeferredRender\deferred_light_directional.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="BaseAssets\Shaders\depth_only.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="BaseAssets\Shaders\deferred_camera.fsh">
+    <None Include="BaseAssets\Shaders\DeferredRender\deferred_geometry.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="BaseAssets\Shaders\pbr_lighting.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="BaseAssets\Shaders\deferred_light_point.fsh">
+    <None Include="BaseAssets\Shaders\DeferredRender\deferred_light_point.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="BaseAssets\Shaders\tex_to_screen.fsh">
@@ -162,7 +200,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="BaseAssets\Shaders\deferred_camera.vsh">
+    <None Include="BaseAssets\Shaders\DeferredRender\deferred_geometry.vsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -26,8 +26,6 @@ struct DirectionalLight
 
 cbuffer textureBuf
 {
-	Texture2D curRadianceTex;
-
 	Texture2D depthTex;
 
 	Texture2D worldPosTex;
@@ -115,7 +113,7 @@ float PercentageCloserFiltering(Texture2DArray shadowMaps, int slice, float2 sha
 
 float4 main(vert_in v) : SV_Target
 {
-	float3 curRadiance = curRadianceTex.Sample(texSampler, v.t).xyz;
+    float3 curRadiance = float3(0.0f, 0.0f, 0.0f);
 
 	float4 worldPos = worldPosTex.Sample(texSampler, v.t);
 	if (worldPos.w == 0.0f)

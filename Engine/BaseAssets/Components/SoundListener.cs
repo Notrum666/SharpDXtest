@@ -38,21 +38,21 @@ namespace Engine.BaseAssets.Components
         {
             Listener = new Listener();
         }
-        public override void update()
+        public override void Update()
         {
-            Vector3 pos = gameObject.transform.Position;
+            Vector3 pos = GameObject.Transform.Position;
             Listener.Position.X = -(float)pos.x;
             Listener.Position.Y = (float)pos.y;
             Listener.Position.Z = (float)pos.z;
-            Vector3 forward = gameObject.transform.Forward;
+            Vector3 forward = GameObject.Transform.Forward;
             Listener.OrientFront.X = -(float)forward.x;
             Listener.OrientFront.Y = (float)forward.y;
             Listener.OrientFront.Z = (float)forward.z;
-            Vector3 up = gameObject.transform.Up;
+            Vector3 up = GameObject.Transform.Up;
             Listener.OrientTop.X = -(float)up.x;
             Listener.OrientTop.Y = (float)up.y;
             Listener.OrientTop.Z = (float)up.z;
-            Rigidbody rb = gameObject.getComponent<Rigidbody>();
+            Rigidbody rb = GameObject.getComponent<Rigidbody>();
             if (rb != null)
             {
                 Vector3 velocity = rb.Velocity;

@@ -15,7 +15,7 @@ namespace SharpDXtest.Assets.Components
     {
         public float speed;
         public GameObject leftRacket, rightRacket;
-        public override void update()
+        public override void Update()
         {
             //if (InputManager.IsKeyPressed(Key.F))
             //    cube.getComponent<Rigidbody>().addImpulse(new Vector3(0.0, 1.0, 0.0));
@@ -29,18 +29,18 @@ namespace SharpDXtest.Assets.Components
                 delta -= curSpeed;
             if (InputManager.IsKeyDown(Key.W))
                 delta += curSpeed;
-            leftRacket.transform.Position = new Vector3(leftRacket.transform.Position.x, 
-                                                        leftRacket.transform.Position.y, 
-                                                        Math.Min(7.5, Math.Max(-7.5, leftRacket.transform.Position.z + delta)));
+            leftRacket.Transform.Position = new Vector3(leftRacket.Transform.Position.x, 
+                                                        leftRacket.Transform.Position.y, 
+                                                        Math.Min(7.5, Math.Max(-7.5, leftRacket.Transform.Position.z + delta)));
 
             delta = 0;
             if (InputManager.IsKeyDown(Key.Down))
                 delta -= curSpeed;
             if (InputManager.IsKeyDown(Key.Up))
                 delta += curSpeed;
-            rightRacket.transform.Position = new Vector3(rightRacket.transform.Position.x,
-                                                         rightRacket.transform.Position.y,
-                                                         Math.Min(7.5, Math.Max(-7.5, rightRacket.transform.Position.z + delta)));
+            rightRacket.Transform.Position = new Vector3(rightRacket.Transform.Position.x,
+                                                         rightRacket.Transform.Position.y,
+                                                         Math.Min(7.5, Math.Max(-7.5, rightRacket.Transform.Position.z + delta)));
 
             //if (InputManager.IsKeyDown(Key.LeftShift))
             //    curSpeed *= 5f;
