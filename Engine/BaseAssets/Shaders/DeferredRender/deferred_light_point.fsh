@@ -122,5 +122,5 @@ float4 main(vert_in v) : SV_Target
 
 	curRadiance += (diffuse * albedo / PI + specular) * radiance * ndotl;
 
-	return float4(curRadiance, 0.0f);
+	return float4(curRadiance, 1.0f);
 }

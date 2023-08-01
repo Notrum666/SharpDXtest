@@ -97,6 +97,10 @@ namespace LinearAlgebra
         {
             return new Vector2f(vec.x / value, vec.y / value);
         }
+        public static Vector2f operator /(float value, in Vector2f vec)
+        {
+            return new Vector2f(value / vec.x, value / vec.y);
+        }
         public static Vector2f operator -(in Vector2f vec)
         {
             return new Vector2f(-vec.x, -vec.y);

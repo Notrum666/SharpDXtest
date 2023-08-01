@@ -126,6 +126,10 @@ namespace LinearAlgebra
         {
             return new Vector4(vec.x / value, vec.y / value, vec.z / value, vec.w / value);
         }
+        public static Vector4 operator /(float value, in Vector4 vec)
+        {
+            return new Vector4(value / vec.x, value / vec.y, value / vec.z, value / vec.w);
+        }
         public static Vector4 operator -(in Vector4 vec)
         {
             return new Vector4(-vec.x, -vec.y, -vec.z, -vec.w);

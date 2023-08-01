@@ -29,6 +29,8 @@ namespace SharpDXtest.Assets.Components
                 speed *= 2;
             }
 
+            if (InputManager.IsKeyDown(Key.LeftControl))
+                curSpeed /= 5f;
             if (InputManager.IsKeyDown(Key.LeftShift))
                 curSpeed *= 5f;
             if (InputManager.IsKeyDown(Key.A))

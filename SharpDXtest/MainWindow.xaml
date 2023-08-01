@@ -13,15 +13,10 @@
     </Window.Resources>
     <Grid>
         <Grid x:Name="GameGrid">
-            <TextBlock x:Name="LeftScore" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20" Text="0" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
-            <TextBlock x:Name="RightScore" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="20" Text="0" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
+            <TextBlock x:Name="FPSTextBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20" Text="0" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
             <Grid x:Name="PauseGrid" Visibility="{Binding Path=IsPaused, Mode=OneWay, Converter={StaticResource boolToVisibility}}" VerticalAlignment="Center" HorizontalAlignment="Center" Background="#B2000000" Panel.ZIndex="10">
                 <StackPanel Margin="50,55,50,55">
                     <Button x:Name="PauseMenuButton_Resume" Padding="100,10,100,10" Content="Resume" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Resume_Click"/>
-                    <Button x:Name="PauseMenuButton_LoadScene1" Padding="100,10,100,10" Content="Scene 1" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_LoadScene1_Click"/>
-                    <Button x:Name="PauseMenuButton_LoadScene2" Padding="100,10,100,10" Content="Scene 2" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_LoadScene2_Click"/>
-                    <Button x:Name="PauseMenuButton_LoadScene3" Padding="100,10,100,10" Content="Scene 3" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_LoadScene3_Click"/>
-                    <Button x:Name="PauseMenuButton_LoadScene4" Padding="100,10,100,10" Content="Scene 4" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_LoadScene4_Click"/>
                     <Button x:Name="CursorLockingButton" Padding="100,10,100,10" Content="Cursor locking (On)" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="ChangeCursorLocking"/>
                     <Button x:Name="PauseMenuButton_Exit" Padding="100,10,100,10" Content="Exit" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Exit_Click"/>
                 </StackPanel>

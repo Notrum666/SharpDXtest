@@ -203,6 +203,9 @@
     <None Include="Assets\Scenes\Scene4.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Assets\Scenes\Scene5.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <Content Include="Assets\Sounds\sample.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

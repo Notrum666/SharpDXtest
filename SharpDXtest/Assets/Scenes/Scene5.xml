@@ -15,13 +15,15 @@
 	
 	<GameObject>
 		<Transform>
-			<Transform.Position y="-5" z="5"/>
+			<Transform.Position y="-40" z="90"/>
+			<Transform.Rotation x="-45"/>
 		</Transform>
 		<Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="500" FOV="1.7777"/>
 		<SoundListener IsCurrent="true"/>
 		<CameraController speed="5"/>
 	</GameObject>
 
+	<!--
 	<GameObject>
 		<Transform>
 			<Transform.Position z="5"/>
@@ -36,6 +38,16 @@
 			</ParticleSystem.ParticleEffects>
 		</ParticleSystem>
 		<ObjectController/>
+	</GameObject>
+	-->
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="60"/>
+		</Transform>
+		<GasVolume>
+			<GasVolume.Size x="200" y="200" z="50"/>
+		</GasVolume>
 	</GameObject>
 	
 	<GameObject>
@@ -81,7 +93,7 @@
 
 	<GameObject>
 		<Transform>
-			<Transform.LocalPosition y="-5" z="3"/>
+			<Transform.LocalPosition y="5" z="3"/>
 		</Transform>
 		<PointLight Radius="10"/>
 	</GameObject>

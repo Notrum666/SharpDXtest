@@ -110,6 +110,7 @@
     <Compile Include="BaseAssets\Components\SoundListener.cs" />
     <Compile Include="BaseAssets\Components\SoundSource.cs" />
     <Compile Include="BaseAssets\Components\Transform.cs" />
+    <Compile Include="BaseAssets\Components\Volumes\GasVolume.cs" />
     <Compile Include="Extentions.cs" />
     <Compile Include="FrameBuffer.cs" />
     <Compile Include="FramebufferPool.cs" />
@@ -126,6 +127,15 @@
     <Content Include="BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.gsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="BaseAssets\Shaders\DeferredRender\deffered_addLight.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="BaseAssets\Shaders\VolumetricRender\volume.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="BaseAssets\Shaders\VolumetricRender\volume.vsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -28,5 +28,4 @@ void main(uint3 groupID : SV_GroupID, uint groupIndex : SV_GroupIndex)
         return;
     
     particles[index].position += particles[index].velocity * deltaTime;
-    
 }

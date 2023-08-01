@@ -724,7 +724,11 @@ namespace Engine
 
             public Shader_Vertex(string path)
             {
+#if !GraphicsDebugging
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "vs_5_0");
+#else
+                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "vs_5_0", ShaderFlags.Debug | ShaderFlags.SkipOptimization);
+#endif
                 ShaderReflection reflection = new ShaderReflection(bytecode);
                 List<InputElement> inputDescription = new List<InputElement>();
                 for (int i = 0; i < reflection.Description.InputParameters; i++)
@@ -851,7 +855,11 @@ namespace Engine
             private GeometryShader shader;
             public Shader_Geometry(string path)
             {
+#if !GraphicsDebugging
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "gs_5_0");
+#else
+                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "gs_5_0", ShaderFlags.Debug | ShaderFlags.SkipOptimization);
+#endif
                 ShaderReflection reflection = new ShaderReflection(bytecode);
                 shader = new GeometryShader(GraphicsCore.CurrentDevice, bytecode);
                 generateBuffersAndLocations(reflection);
@@ -868,7 +876,11 @@ namespace Engine
             private PixelShader shader;
             public Shader_Fragment(string path)
             {
-                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "ps_5_0");
+#if !GraphicsDebugging
+                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "ps_5_0", ShaderFlags.SkipOptimization);
+#else
+                ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "ps_5_0", ShaderFlags.Debug | ShaderFlags.SkipOptimization);
+#endif
                 ShaderReflection reflection = new ShaderReflection(bytecode);
                 shader = new PixelShader(GraphicsCore.CurrentDevice, bytecode);
                 generateBuffersAndLocations(reflection);

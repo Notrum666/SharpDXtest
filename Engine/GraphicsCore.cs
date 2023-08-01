@@ -54,8 +54,8 @@ namespace Engine
         public static Device CurrentDevice { get; private set; }
         public static SharpDX.Direct3D9.Device D9Device { get; private set; }
 
-        private static RasterizerState defaultRasterizer;
-        private static RasterizerState shadowsRasterizer;
+        private static RasterizerState backCullingRasterizer;
+        private static RasterizerState frontCullingRasterizer;
 
         private static Sampler sampler;
         private static Sampler shadowsSampler;
@@ -76,7 +76,9 @@ namespace Engine
         private static GBuffer gbuffer;
         private static Texture depthBuffer;
         private static Texture radianceBuffer;
-        private static BlendState addBlendState;
+        private static Texture colorBuffer;
+        private static BlendState additiveBlendState;
+        private static BlendState blendingBlendState;
 
         private static FrameBuffer frontbuffer;
         private static FrameBuffer middlebuffer;
@@ -126,16 +128,21 @@ namespace Engine
             AssetsManager.LoadShader("particles_update_energy",     "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
             AssetsManager.LoadShader("particles_update_physics",    "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
 
+            AssetsManager.LoadShaderPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
+                                                       Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
+
             Shader screenQuadShader = Shader.Create("BaseAssets\\Shaders\\screen_quad.vsh");
-            AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
             AssetsManager.LoadShaderPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
             AssetsManager.LoadShaderPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
+            AssetsManager.LoadShaderPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
+            AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
 
             gbuffer = new GBuffer(width, height);
             depthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
             radianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            colorBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
 
-            backgroundColor = Color.FromRgba(0xFF202020);
+            backgroundColor = Color.FromRgba(0xFF010101);
             //backgroundColor = Color.FromRgba(0xFFFFFFFF);
         }
         private static void InitDirectX(IntPtr HWND, int width, int height)
@@ -171,7 +178,7 @@ namespace Engine
             CurrentDevice = device;
 #endif
 
-            defaultRasterizer = new RasterizerState(CurrentDevice, new RasterizerStateDescription()
+            backCullingRasterizer = new RasterizerState(CurrentDevice, new RasterizerStateDescription()
             {
                 FillMode = SharpDX.Direct3D11.FillMode.Solid,
                 CullMode = CullMode.Back,
@@ -181,7 +188,7 @@ namespace Engine
                 IsDepthClipEnabled = true,
                 IsMultisampleEnabled = true
             });
-            shadowsRasterizer = new RasterizerState(CurrentDevice, new RasterizerStateDescription()
+            frontCullingRasterizer = new RasterizerState(CurrentDevice, new RasterizerStateDescription()
             {
                 FillMode = SharpDX.Direct3D11.FillMode.Solid,
                 CullMode = CullMode.Front,
@@ -191,7 +198,7 @@ namespace Engine
                 IsDepthClipEnabled = true,
                 IsMultisampleEnabled = true
             });
-            CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
 
             BlendStateDescription blendStateDesc = new BlendStateDescription()
             {
@@ -199,9 +206,17 @@ namespace Engine
                 IndependentBlendEnable = false
             };
             blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.One, BlendOption.One, SharpDX.Direct3D11.BlendOperation.Add,
-                                                                                    BlendOption.Zero, BlendOption.Zero, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
-            addBlendState = new BlendState(CurrentDevice, blendStateDesc);
-            
+                                                                                    BlendOption.Zero, BlendOption.One, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
+            additiveBlendState = new BlendState(CurrentDevice, blendStateDesc);
+
+            blendStateDesc = new BlendStateDescription()
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
+            blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, SharpDX.Direct3D11.BlendOperation.Add,
+                                                                                    BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
+            blendingBlendState = new BlendState(CurrentDevice, blendStateDesc);
 
             //depthState_checkDepth = new DepthStencilState(CurrentDevice, new DepthStencilStateDescription()
             //{
@@ -277,7 +292,7 @@ namespace Engine
             if (EngineCore.CurrentScene == null)
                 return;
 
-            CurrentDevice.ImmediateContext.Rasterizer.State = shadowsRasterizer;
+            CurrentDevice.ImmediateContext.Rasterizer.State = frontCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
             List<GameObject> objects = EngineCore.CurrentScene.objects;
@@ -372,7 +387,14 @@ namespace Engine
 
             GeometryPass();
             LightingPass();
+            VolumetricPass();
             GammaCorrectionPass();
+
+            FlushAndSwapFrameBuffers();
+#if GraphicsDebugging
+            swapChain.Present(1, 0);
+#endif
+
             //CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
             //
             //CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
@@ -517,14 +539,14 @@ namespace Engine
             //}
             //
             //FlushAndSwapFrameBuffers();
-//#if GraphicsDebugging
-//            swapChain.Present(1, 0);
-//#endif
+            //#if GraphicsDebugging
+            //            swapChain.Present(1, 0);
+            //#endif
         }
 
         private static void GeometryPass()
         {
-            CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
+            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
             //CurrentDevice.ImmediateContext.OutputMerger.DepthStencilState = depthState_checkDepth;
 
@@ -611,10 +633,10 @@ namespace Engine
 
         private static void LightingPass()
         {
-            CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
-            CurrentDevice.ImmediateContext.OutputMerger.BlendState = addBlendState;
+            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = additiveBlendState;
 
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(radianceBuffer.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(radianceBuffer.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 1.0f));
 
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: radianceBuffer.GetView<RenderTargetView>());
@@ -701,17 +723,13 @@ namespace Engine
                     CurrentDevice.ImmediateContext.Draw(6, 0);
                 }
             }
-        }
 
-        private static void GammaCorrectionPass()
-        {
-            CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: colorBuffer.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(colorBuffer.GetView<RenderTargetView>(), backgroundColor);
 
-            AssetsManager.ShaderPipelines["deferred_gamma_correction"].Use();
+            AssetsManager.ShaderPipelines["deferred_addLight"].Use();
 
             gbuffer.worldPos.use("worldPosTex");
             gbuffer.albedo.use("albedoTex");
@@ -719,11 +737,81 @@ namespace Engine
             radianceBuffer.use("radianceTex");
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
+        }
 
-            FlushAndSwapFrameBuffers();
-#if GraphicsDebugging
-            swapChain.Present(1, 0);
-#endif
+        private static void VolumetricPass()
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = frontCullingRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = blendingBlendState;
+
+            Viewport viewport = new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f);
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(viewport);
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: colorBuffer.GetView<RenderTargetView>());
+
+            List<GameObject> objects = EngineCore.CurrentScene.objects;
+
+            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["volume"];
+            pipeline.Use();
+
+            depthBuffer.use("depthTex");
+            sampler.use("texSampler");
+
+            pipeline.UpdateUniform("cam_near", (float)CurrentCamera.Near);
+            pipeline.UpdateUniform("cam_far", (float)CurrentCamera.Far);
+            pipeline.UpdateUniform("cam_farDivFarMinusNear", (float)(CurrentCamera.Far / (CurrentCamera.Far - CurrentCamera.Near)));
+            pipeline.UpdateUniform("invScreenSize", new Vector2f(1.0f / viewport.Width, 1.0f / viewport.Height));
+
+            foreach (GameObject obj in objects)
+            {
+                if (!obj.Enabled)
+                    continue;
+                foreach (GasVolume volume in obj.getComponents<GasVolume>())
+                {
+                    if (!volume.Enabled)
+                        continue;
+
+                    pipeline.UpdateUniform("modelViewProj", (Matrix4x4f)(CurrentCamera.Proj * CurrentCamera.GameObject.Transform.View * obj.Transform.Model));
+                    pipeline.UpdateUniform("invModelViewProj", (Matrix4x4f)(obj.Transform.View * CurrentCamera.GameObject.Transform.Model * CurrentCamera.InvProj));
+
+                    Vector3f halfSize = volume.Size * 0.5f;
+                    Vector3f relativeCamPos = (Vector3f)obj.Transform.View.TransformPoint(CurrentCamera.GameObject.Transform.Position);
+                    pipeline.UpdateUniform("relCamPos", relativeCamPos);
+                    pipeline.UpdateUniform("camToHalfSize", halfSize - relativeCamPos);
+                    pipeline.UpdateUniform("camToMinusHalfSize", -halfSize - relativeCamPos);
+
+                    pipeline.UpdateUniform("absorptionCoef", (float)volume.AbsorptionCoef);
+                    pipeline.UpdateUniform("scatteringCoef", (float)volume.ScatteringCoef);
+                    pipeline.UpdateUniform("halfSize", (Vector3f)(volume.Size * 0.5f));
+
+                    //pipeline.UpdateUniform("ambientLight", new Vector3f(0.001f, 0.001f, 0.001f));
+                    pipeline.UpdateUniform("ambientLight", new Vector3f(0.5f, 0.5f, 0.5f));
+
+                    Vector3f lightDir = new Vector3f(0.0f, 0.0f, -1.0f);
+                    pipeline.UpdateUniform("negLightDir", -lightDir);
+                    pipeline.UpdateUniform("invNegLightDir", -1.0f / lightDir);
+                    pipeline.UpdateUniform("lightIntensity", new Vector3f(5.0f, 5.0f, 5.0f));
+
+                    pipeline.UploadUpdatedUniforms();
+                    volume.Render();
+                }
+            }
+
+            CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+        }
+
+        private static void GammaCorrectionPass()
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
+
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
+
+            AssetsManager.ShaderPipelines["deferred_gamma_correction"].Use();
+
+            colorBuffer.use("colorTex");
+            sampler.use("texSampler");
+            CurrentDevice.ImmediateContext.Draw(6, 0);
         }
 
         private static void RenderTexture(Texture tex)
