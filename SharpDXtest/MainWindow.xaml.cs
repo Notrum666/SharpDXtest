@@ -43,11 +43,6 @@ namespace SharpDXtest
         private int framesCount = 0;
         private double timeCounter = 0.0;
 
-        struct tmp
-        {
-            public Vector4 a;
-            public Vector4 b;
-        }
         public MainWindow()
         {
             InitializeComponent();

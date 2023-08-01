@@ -1,13 +1,13 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32126.317
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpDXtest", "SharpDXtest\SharpDXtest.csproj", "{60876186-23C6-4BF9-AD02-632A9EF767ED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpDXtest", "SharpDXtest\SharpDXtest.csproj", "{60876186-23C6-4BF9-AD02-632A9EF767ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinearAlgebra", "LinearAlgebra\LinearAlgebra.csproj", "{CCA05DCE-086A-4C88-873A-48A4A11E305E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinearAlgebra", "LinearAlgebra\LinearAlgebra.csproj", "{CCA05DCE-086A-4C88-873A-48A4A11E305E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{7BE49A57-9914-4520-A6DE-95195906D7DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine", "Engine\Engine.csproj", "{7BE49A57-9914-4520-A6DE-95195906D7DC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LinearAlgebra.Test", "LinearAlgebra.Test\LinearAlgebra.Test.csproj", "{4B93FD37-F130-418C-B58B-B7B1E61E3DFB}"
 EndProject

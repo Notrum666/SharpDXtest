@@ -11,11 +11,6 @@ using Buffer = SharpDX.Direct3D11.Buffer;
 using System.Runtime.InteropServices;
 using SharpDX;
 using Engine.BaseAssets.Components.Particles;
-using System.Drawing.Drawing2D;
-using SharpDX.Multimedia;
-using System.Runtime.Remoting.Messaging;
-using SharpDX.Direct3D9;
-using System.Runtime.CompilerServices;
 
 namespace Engine.BaseAssets.Components
 {
