@@ -184,5 +184,23 @@ namespace SharpDXtest
 
             CursorLockingButton.Content = cursorLocking ? "Cursor locking (On)" : "Cursor locking (Off)";
         }
+
+        private void PauseMenuButton_Scene1_Click(object sender, RoutedEventArgs e)
+        {
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene5.xml");
+            EngineCore.IsPaused = false;
+        }
+
+        private void PauseMenuButton_Scene2_Click(object sender, RoutedEventArgs e)
+        {
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene4.xml");
+            EngineCore.IsPaused = false;
+        }
+
+        private void PauseMenuButton_Scene3_Click(object sender, RoutedEventArgs e)
+        {
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene3.xml");
+            EngineCore.IsPaused = false;
+        }
     }
 }

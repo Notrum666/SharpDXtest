@@ -93,7 +93,7 @@ float directionalLightAttenuation(DirectionalLight light)
 	return light.brightness;
 }
 
-double delinearizeDepth(double z, float n, float f)
+float delinearizeDepth(float z, float n, float f)
 {
 	z = n + (f - n) * z;
 	return f * (z - n) / ((f - n) * z);

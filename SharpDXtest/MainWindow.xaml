@@ -17,6 +17,9 @@
             <Grid x:Name="PauseGrid" Visibility="{Binding Path=IsPaused, Mode=OneWay, Converter={StaticResource boolToVisibility}}" VerticalAlignment="Center" HorizontalAlignment="Center" Background="#B2000000" Panel.ZIndex="10">
                 <StackPanel Margin="50,55,50,55">
                     <Button x:Name="PauseMenuButton_Resume" Padding="100,10,100,10" Content="Resume" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Resume_Click"/>
+                    <Button x:Name="PauseMenuButton_Scene1" Padding="100,10,100,10" Content="Cloud scene" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Scene1_Click"/>
+                    <Button x:Name="PauseMenuButton_Scene2" Padding="100,10,100,10" Content="Scene2" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Scene2_Click"/>
+                    <Button x:Name="PauseMenuButton_Scene3" Padding="100,10,100,10" Content="Scene3" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Scene3_Click"/>
                     <Button x:Name="CursorLockingButton" Padding="100,10,100,10" Content="Cursor locking (On)" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="ChangeCursorLocking"/>
                     <Button x:Name="PauseMenuButton_Exit" Padding="100,10,100,10" Content="Exit" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Exit_Click"/>
                 </StackPanel>
