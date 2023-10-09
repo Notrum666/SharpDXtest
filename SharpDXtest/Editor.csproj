@@ -110,7 +110,6 @@
     <ProjectReference Include="..\LinearAlgebra\LinearAlgebra.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AirspaceFixer" Version="1.0.5" />
     <PackageReference Include="SharpDX" Version="4.2.0" />
     <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
     <PackageReference Include="SharpDX.Direct3D9" Version="4.2.0" />

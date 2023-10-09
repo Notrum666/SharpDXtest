@@ -28,7 +28,7 @@ using SharpDX;
 
 namespace SharpDXtest
 {
-    public partial class MainWindow : Window, INotifyPropertyChanged
+    public partial class EditorWindow : Window, INotifyPropertyChanged
     {
         public bool IsPaused { get => EngineCore.IsPaused; }
         public event PropertyChangedEventHandler PropertyChanged;
@@ -43,7 +43,7 @@ namespace SharpDXtest
         private int framesCount = 0;
         private double timeCounter = 0.0;
 
-        public MainWindow()
+        public EditorWindow()
         {
             InitializeComponent();
 
@@ -165,19 +165,6 @@ namespace SharpDXtest
             EngineCore.IsPaused = false;
         }
 
-        private void MainWindowInst_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            if (!windowLoaded)
-                return;
-
-            if (GraphicsCore.CurrentCamera != null)
-                GraphicsCore.CurrentCamera.Aspect = RenderControl.ActualWidth / RenderControl.ActualHeight;
-
-            GraphicsCore.Resize((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
-
-            copyFramebuffer = new FrameBuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
-        }
-
         private void ChangeCursorLocking(object sender, RoutedEventArgs e)
         {
             cursorLocking = !cursorLocking;
@@ -201,6 +188,19 @@ namespace SharpDXtest
         {
             EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene3.xml");
             EngineCore.IsPaused = false;
+        }
+
+        private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (!windowLoaded)
+                return;
+
+            if (GraphicsCore.CurrentCamera != null)
+                GraphicsCore.CurrentCamera.Aspect = RenderControl.ActualWidth / RenderControl.ActualHeight;
+
+            GraphicsCore.Resize((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+
+            copyFramebuffer = new FrameBuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
     }
 }
