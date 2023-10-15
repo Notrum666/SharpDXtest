@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="clr-namespace:System.Windows.Interop;assembly=PresentationCore"
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-        xmlns:asf="clr-namespace:AirspaceFixer;assembly=AirspaceFixer"
         mc:Ignorable="d"
         Title="SharpDXtest" Loaded="Window_Loaded" WindowState="Maximized" Width="1280" Height="720" Closed="MainWindowInst_Closed" KeyDown="MainWindowInst_KeyDown">
     <Window.Resources>
