@@ -1,13 +1,12 @@
-﻿<Window x:Name="MainWindowInst" x:Class="SharpDXtest.MainWindow"
+﻿<Window x:Name="EditorWindowInst" x:Class="SharpDXtest.EditorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="clr-namespace:System.Windows.Interop;assembly=PresentationCore"
         xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-        xmlns:asf="clr-namespace:AirspaceFixer;assembly=AirspaceFixer"
         mc:Ignorable="d"
-        Title="Main Window" Loaded="Window_Loaded" WindowState="Maximized" Width="1280" Height="720" Closed="MainWindowInst_Closed" KeyDown="MainWindowInst_KeyDown" SizeChanged="MainWindowInst_SizeChanged">
+        Title="SharpDXtest" Loaded="Window_Loaded" WindowState="Maximized" Width="1280" Height="720" Closed="MainWindowInst_Closed" KeyDown="MainWindowInst_KeyDown">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
     </Window.Resources>
@@ -17,11 +16,14 @@
             <Grid x:Name="PauseGrid" Visibility="{Binding Path=IsPaused, Mode=OneWay, Converter={StaticResource boolToVisibility}}" VerticalAlignment="Center" HorizontalAlignment="Center" Background="#B2000000" Panel.ZIndex="10">
                 <StackPanel Margin="50,55,50,55">
                     <Button x:Name="PauseMenuButton_Resume" Padding="100,10,100,10" Content="Resume" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Resume_Click"/>
+                    <Button x:Name="PauseMenuButton_Scene1" Padding="100,10,100,10" Content="Cloud scene" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Scene1_Click"/>
+                    <Button x:Name="PauseMenuButton_Scene2" Padding="100,10,100,10" Content="Scene2" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Scene2_Click"/>
+                    <Button x:Name="PauseMenuButton_Scene3" Padding="100,10,100,10" Content="Scene3" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Scene3_Click"/>
                     <Button x:Name="CursorLockingButton" Padding="100,10,100,10" Content="Cursor locking (On)" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="ChangeCursorLocking"/>
                     <Button x:Name="PauseMenuButton_Exit" Padding="100,10,100,10" Content="Exit" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Exit_Click"/>
                 </StackPanel>
             </Grid>
-            <Image x:Name="RenderControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Fill">
+            <Image x:Name="RenderControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Fill" SizeChanged="RenderControl_SizeChanged">
                 <Image.Source>
                     <i:D3DImage x:Name="d3dimage"/>
                 </Image.Source>

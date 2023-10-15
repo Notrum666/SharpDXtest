@@ -141,11 +141,6 @@ namespace Engine
             AssetsManager.LoadShaderPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
             AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
 
-            gbuffer = new GBuffer(width, height);
-            depthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
-            radianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
-            colorBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
-
             bloomEffect = new PixelShaderBloom(width, height, 5);
 
             backgroundColor = Color.FromRgba(0xFF010101);
@@ -255,11 +250,19 @@ namespace Engine
                                              PresentationInterval = PresentInterval.Default,
                                          });
 
+            GenerateBuffers(width, height);
+
+            synchQuery = new Query(CurrentDevice, new QueryDescription() { Type = SharpDX.Direct3D11.QueryType.Event, Flags = QueryFlags.None });
+        }
+        private static void GenerateBuffers(int width, int height)
+        {
             frontbuffer = new FrameBuffer(width, height);
             backbuffer = new FrameBuffer(width, height);
             middlebuffer = new FrameBuffer(width, height);
-
-            synchQuery = new Query(CurrentDevice, new QueryDescription() { Type = SharpDX.Direct3D11.QueryType.Event, Flags = QueryFlags.None });
+            gbuffer = new GBuffer(width, height);
+            depthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
+            radianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            colorBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
         }
         public static void Resize(int width, int height)
         {
@@ -281,10 +284,8 @@ namespace Engine
             {
                 lock (resizeLockObject)
                 {
-                    frontbuffer = new FrameBuffer(targetWidth, targetHeight);
-                    middlebuffer = new FrameBuffer(targetWidth, targetHeight);
-                    backbuffer = new FrameBuffer(targetWidth, targetHeight);
-
+                    GenerateBuffers(targetWidth, targetHeight);
+            
                     needsToBeResized = false;
                 }
             }
