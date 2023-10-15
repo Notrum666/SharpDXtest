@@ -24,6 +24,7 @@ using System.Windows.Interop;
 using LinearAlgebra;
 using System.Diagnostics;
 using static System.Net.Mime.MediaTypeNames;
+using Engine.BaseAssets.Components.Postprocessing.Bloom;
 
 namespace Engine
 {
@@ -91,6 +92,8 @@ namespace Engine
         private static int targetHeight;
         private static object resizeLockObject = new object();
 
+        private static PixelShaderBloom bloomEffect;
+
 #if GraphicsDebugging
         private static SharpDX.DXGI.SwapChain swapChain;
 #endif
@@ -127,11 +130,12 @@ namespace Engine
             AssetsManager.LoadShader("particles_init",              "BaseAssets\\Shaders\\Particles\\particles_init.csh");
             AssetsManager.LoadShader("particles_update_energy",     "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
             AssetsManager.LoadShader("particles_update_physics",    "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
+            AssetsManager.LoadShader("screen_quad",                 "BaseAssets\\Shaders\\screen_quad.vsh");
 
             AssetsManager.LoadShaderPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
                                                        Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
 
-            Shader screenQuadShader = Shader.Create("BaseAssets\\Shaders\\screen_quad.vsh");
+            Shader screenQuadShader = AssetsManager.Shaders["screen_quad"];
             AssetsManager.LoadShaderPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
             AssetsManager.LoadShaderPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
             AssetsManager.LoadShaderPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
@@ -141,6 +145,8 @@ namespace Engine
             depthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
             radianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
             colorBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+
+            bloomEffect = new PixelShaderBloom(width, height, 5);
 
             backgroundColor = Color.FromRgba(0xFF010101);
             //backgroundColor = Color.FromRgba(0xFFFFFFFF);
@@ -278,11 +284,11 @@ namespace Engine
                     frontbuffer = new FrameBuffer(targetWidth, targetHeight);
                     middlebuffer = new FrameBuffer(targetWidth, targetHeight);
                     backbuffer = new FrameBuffer(targetWidth, targetHeight);
-            
+
                     needsToBeResized = false;
                 }
             }
-            
+
             RenderShadows();
             RenderScene();
         }
@@ -388,6 +394,7 @@ namespace Engine
             GeometryPass();
             LightingPass();
             VolumetricPass();
+            PrePostProcessingPass();
             GammaCorrectionPass();
 
             FlushAndSwapFrameBuffers();
@@ -797,6 +804,11 @@ namespace Engine
             }
 
             CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+        }
+
+        private static void PrePostProcessingPass()
+        {
+            bloomEffect.Process(colorBuffer);
         }
 
         private static void GammaCorrectionPass()
