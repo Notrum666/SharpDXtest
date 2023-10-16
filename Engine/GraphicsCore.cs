@@ -52,6 +52,9 @@ namespace Engine
 
         private static bool disposed = false;
 
+        public static event Action<int, int> OnInitialized;
+        public static event Action<int, int> OnResized;
+
         public static Device CurrentDevice { get; private set; }
         public static SharpDX.Direct3D9.Device D9Device { get; private set; }
 
@@ -142,10 +145,14 @@ namespace Engine
             AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
 
             bloomEffect = new PixelShaderBloom(width, height, 5);
+            OnResized += bloomEffect.Resize;
 
             backgroundColor = Color.FromRgba(0xFF010101);
             //backgroundColor = Color.FromRgba(0xFFFFFFFF);
+
+            OnInitialized?.Invoke(width, height);
         }
+
         private static void InitDirectX(IntPtr HWND, int width, int height)
         {
 #if !GraphicsDebugging
@@ -254,6 +261,7 @@ namespace Engine
 
             synchQuery = new Query(CurrentDevice, new QueryDescription() { Type = SharpDX.Direct3D11.QueryType.Event, Flags = QueryFlags.None });
         }
+
         private static void GenerateBuffers(int width, int height)
         {
             frontbuffer = new FrameBuffer(width, height);
@@ -264,6 +272,7 @@ namespace Engine
             radianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
             colorBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
         }
+
         public static void Resize(int width, int height)
         {
             if (width <= 0)
@@ -278,6 +287,7 @@ namespace Engine
                 needsToBeResized = true;
             }
         }
+
         public static void Update()
         {
             if (needsToBeResized)
@@ -287,6 +297,8 @@ namespace Engine
                     GenerateBuffers(targetWidth, targetHeight);
             
                     needsToBeResized = false;
+
+                    OnResized?.Invoke(targetWidth, targetHeight);
                 }
             }
 
