@@ -24,7 +24,7 @@ using System.Windows.Interop;
 using LinearAlgebra;
 using System.Diagnostics;
 using static System.Net.Mime.MediaTypeNames;
-using Engine.BaseAssets.Components.Postprocessing.Bloom;
+using Engine.BaseAssets.Components.Postprocessing;
 
 namespace Engine
 {
@@ -95,7 +95,7 @@ namespace Engine
         private static int targetHeight;
         private static object resizeLockObject = new object();
 
-        private static PixelShaderBloom bloomEffect;
+        private static PostProcessEffect_Bloom bloomEffect;
 
 #if GraphicsDebugging
         private static SharpDX.DXGI.SwapChain swapChain;
@@ -144,8 +144,7 @@ namespace Engine
             AssetsManager.LoadShaderPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
             AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
 
-            bloomEffect = new PixelShaderBloom(width, height, 5);
-            OnResized += bloomEffect.Resize;
+            bloomEffect = new PostProcessEffect_Bloom();
 
             backgroundColor = Color.FromRgba(0xFF010101);
             //backgroundColor = Color.FromRgba(0xFFFFFFFF);

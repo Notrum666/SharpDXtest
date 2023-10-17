@@ -18,7 +18,7 @@ namespace Engine.BaseAssets.Components
             set
             {
                 if (value < 0.0f)
-                    throw new ArgumentOutOfRangeException("Brightness", "Brightness can't be negative or more than 1");
+                    throw new ArgumentOutOfRangeException("Brightness", "Brightness can't be negative");
                 brightness = value;
             }
         }

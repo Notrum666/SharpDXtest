@@ -9,6 +9,5 @@ namespace Engine.BaseAssets.Components.Postprocessing
     public abstract class PostProcessEffect
     {
         public abstract void Process(Texture texture);
-        public abstract void Resize(int width, int height);
     }
 }

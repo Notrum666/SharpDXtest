@@ -3,13 +3,25 @@ using SharpDX;
 using SharpDX.DXGI;
 using SharpDX.Direct3D11;
 using System;
-using System.Windows.Documents;
 using System.Collections.Generic;
 
-namespace Engine.BaseAssets.Components.Postprocessing.Bloom
+namespace Engine.BaseAssets.Components.Postprocessing
 {
-    public class PixelShaderBloom : PostProcessEffect
+    public class PostProcessEffect_Bloom : PostProcessEffect
     {
+        public int Iterations 
+        {
+            get => iterations;
+            set
+            {
+                if(value < 1 || value > MaxIterationsCount)
+                    throw new ArgumentOutOfRangeException("Iterations", "Iterations must be greater than 1 and less or equal than MaxIterationsCount");
+                iterations = value;
+            } 
+        }
+
+        private int iterations = 5;
+
         private const int MaxIterationsCount = 16;
         private SharpDX.Direct3D11.Device device => GraphicsCore.CurrentDevice;
 
@@ -22,15 +34,12 @@ namespace Engine.BaseAssets.Components.Postprocessing.Bloom
         private ShaderPipeline upsampleBoxPipeline;
         private ShaderPipeline prefilterPipeline;
 
-        private int samplingsCount;
+        private int inputTextureWidth;
+        private int inputTextureHeight;
 
-        public PixelShaderBloom(int screenWidth, int screenHeight, int iterationsCount = 5)
+
+        public PostProcessEffect_Bloom()
         {
-            if(iterationsCount <= 0 && iterationsCount > MaxIterationsCount)
-                throw new ArgumentOutOfRangeException(nameof(iterationsCount));
-
-            samplingsCount = iterationsCount;
-
             sampler = new Sampler(TextureAddressMode.Clamp, TextureAddressMode.Clamp, Filter.MinMagMipLinear);
 
             backCullingRasterizerState = new RasterizerState(device, new RasterizerStateDescription()
@@ -67,21 +76,24 @@ namespace Engine.BaseAssets.Components.Postprocessing.Bloom
             downsampleBoxPipeline = new ShaderPipeline(new Shader[] { screenQuadShader, Shader.Create("BaseAssets\\Shaders\\Bloom\\bloom_downsample_box.fsh") });
             upsampleBoxPipeline = new ShaderPipeline(new Shader[] { screenQuadShader, Shader.Create("BaseAssets\\Shaders\\Bloom\\bloom_upsample_box.fsh") });
             prefilterPipeline = new ShaderPipeline(new Shader[] { screenQuadShader, Shader.Create("BaseAssets\\Shaders\\Bloom\\bloom_prefilter.fsh") });
-
-            Resize(screenWidth, screenHeight);
         }
 
-        public override void Resize(int width, int height)
+        public override void Process(Texture inputTexture)
         {
-            samplingsTextures = CreateSamplingTextures(width, height);
-        }
+            if(inputTextureWidth != inputTexture.texture.Description.Width 
+                || inputTextureHeight != inputTexture.texture.Description.Height
+                || samplingsTextures == null)
+            {
+                inputTextureWidth = inputTexture.texture.Description.Width;
+                inputTextureHeight = inputTexture.texture.Description.Height;
 
-        public override void Process(Texture targetTexture)
-        {
+                CreateSamplingTextures(inputTextureWidth, inputTextureHeight);
+            }
+
             device.ImmediateContext.Rasterizer.State = backCullingRasterizerState;
             device.ImmediateContext.OutputMerger.BlendState = null;
 
-            Prefilter(targetTexture, samplingsTextures[0], 1.0f);
+            Prefilter(inputTexture, samplingsTextures[0], 1.0f);
 
             for (int i = 0; i < samplingsTextures.Length - 1; i++)
                 DownsampleBox(samplingsTextures[i], samplingsTextures[i + 1]);
@@ -91,14 +103,14 @@ namespace Engine.BaseAssets.Components.Postprocessing.Bloom
             for (int i = samplingsTextures.Length - 1; i > 0; i--)
                 UpsampleBox(samplingsTextures[i], samplingsTextures[i - 1]);
 
-            UpsampleBox(samplingsTextures[0], targetTexture);
+            UpsampleBox(samplingsTextures[0], inputTexture);
         }
 
-        private Texture[] CreateSamplingTextures(int width, int height)
+        private void CreateSamplingTextures(int width, int height)
         {
-            List<Texture> textures = new List<Texture>(samplingsCount);
+            List<Texture> textures = new List<Texture>(iterations);
 
-            for (int i = 0; i < samplingsCount; i++)
+            for (int i = 0; i < iterations; i++)
             {
                 width /= 2;
                 height /= 2;
@@ -120,7 +132,7 @@ namespace Engine.BaseAssets.Components.Postprocessing.Bloom
             if (textures.Count == 0)
                 throw new Exception("Failed to create sample textures: target texture size is very small");
 
-            return textures.ToArray();
+            samplingsTextures = textures.ToArray();
         }
 
         private void SetRenderTargetTexture(Texture texture)
