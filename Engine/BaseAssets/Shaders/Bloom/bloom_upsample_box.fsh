@@ -11,7 +11,7 @@ cbuffer textureBuf
 
 cbuffer textureParams
 {
-    float2 texSize;
+    float2 texelSize;
 };
 
 SamplerState texSampler;
@@ -30,7 +30,5 @@ float3 box(float2 uv, float2 texelSize, float delta)
 
 float4 main(vert_in v) : SV_Target
 {
-    float2 texelSize = float2(1, 1) / texSize;
-	
     return float4(box(v.t, texelSize, 0.5f), 1.0f);
 }

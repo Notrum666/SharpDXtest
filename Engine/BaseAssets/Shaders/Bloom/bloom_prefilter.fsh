@@ -11,7 +11,7 @@ cbuffer textureBuf
 
 cbuffer textureParams
 {
-    float2 texSize;
+    float2 texelSize;
     float treshold;
 };
 
@@ -39,7 +39,5 @@ float3 prefilter(float3 color)
 
 float4 main(vert_in v) : SV_Target
 {
-    float2 texelSize = float2(1, 1) / texSize;
-	
     return float4(prefilter(box(v.t, texelSize, 1.0f)), 1.0f);
 }

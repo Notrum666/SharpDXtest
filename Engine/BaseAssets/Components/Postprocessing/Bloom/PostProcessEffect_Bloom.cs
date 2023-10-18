@@ -9,6 +9,8 @@ namespace Engine.BaseAssets.Components.Postprocessing
 {
     public class PostProcessEffect_Bloom : PostProcessEffect
     {
+        public const int MaxIterationsCount = 16;
+
         public int Iterations 
         {
             get => iterations;
@@ -19,26 +21,37 @@ namespace Engine.BaseAssets.Components.Postprocessing
                 iterations = value;
             } 
         }
-
         private int iterations = 5;
 
-        private const int MaxIterationsCount = 16;
-        private SharpDX.Direct3D11.Device device => GraphicsCore.CurrentDevice;
+        public float Treshold
+        {
+            get => treshold;
+            set
+            {
+                if(value < 0)
+                    throw new ArgumentOutOfRangeException("Treshold", "Treshold can't be negative");
+
+                treshold = value;
+            }
+        }
+        private float treshold = 1.0f;
+
+        private static SharpDX.Direct3D11.Device device => GraphicsCore.CurrentDevice;
+
+        private static Sampler sampler;
+        private static RasterizerState backCullingRasterizerState;
+        private static BlendState additiveBlendState;
+
+        private static ShaderPipeline downsampleBoxPipeline;
+        private static ShaderPipeline upsampleBoxPipeline;
+        private static ShaderPipeline prefilterPipeline;
+
 
         private Texture[] samplingsTextures;
-        private Sampler sampler;
-        private RasterizerState backCullingRasterizerState;
-        private BlendState additiveBlendState;
-
-        private ShaderPipeline downsampleBoxPipeline;
-        private ShaderPipeline upsampleBoxPipeline;
-        private ShaderPipeline prefilterPipeline;
-
         private int inputTextureWidth;
         private int inputTextureHeight;
 
-
-        public PostProcessEffect_Bloom()
+        static PostProcessEffect_Bloom()
         {
             sampler = new Sampler(TextureAddressMode.Clamp, TextureAddressMode.Clamp, Filter.MinMagMipLinear);
 
@@ -60,13 +73,13 @@ namespace Engine.BaseAssets.Components.Postprocessing
             };
 
             blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(
-                true, 
-                BlendOption.One, 
-                BlendOption.One, 
+                true,
+                BlendOption.One,
+                BlendOption.One,
                 BlendOperation.Add,
-                BlendOption.Zero, 
-                BlendOption.One, 
-                BlendOperation.Add, 
+                BlendOption.Zero,
+                BlendOption.One,
+                BlendOperation.Add,
                 ColorWriteMaskFlags.All
             );
 
@@ -93,7 +106,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
             device.ImmediateContext.Rasterizer.State = backCullingRasterizerState;
             device.ImmediateContext.OutputMerger.BlendState = null;
 
-            Prefilter(inputTexture, samplingsTextures[0], 1.0f);
+            Prefilter(inputTexture, samplingsTextures[0], treshold);
 
             for (int i = 0; i < samplingsTextures.Length - 1; i++)
                 DownsampleBox(samplingsTextures[i], samplingsTextures[i + 1]);
@@ -203,10 +216,10 @@ namespace Engine.BaseAssets.Components.Postprocessing
         private void BindSourceTexture(Texture texture, ShaderPipeline pipeline)
         {
             pipeline.UpdateUniform(
-                "texSize",
+                "texelSize",
                 new Vector2f(
-                    texture.texture.Description.Width,
-                    texture.texture.Description.Height
+                    1.0f / texture.texture.Description.Width,
+                    1.0f / texture.texture.Description.Height
                 )
             );
 

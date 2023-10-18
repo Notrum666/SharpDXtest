@@ -52,7 +52,6 @@ namespace Engine
 
         private static bool disposed = false;
 
-        public static event Action<int, int> OnInitialized;
         public static event Action<int, int> OnResized;
 
         public static Device CurrentDevice { get; private set; }
@@ -148,8 +147,6 @@ namespace Engine
 
             backgroundColor = Color.FromRgba(0xFF010101);
             //backgroundColor = Color.FromRgba(0xFFFFFFFF);
-
-            OnInitialized?.Invoke(width, height);
         }
 
         private static void InitDirectX(IntPtr HWND, int width, int height)
