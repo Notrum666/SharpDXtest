@@ -2,8 +2,6 @@
 <Scene>
 	<Assets>
 		<Models>
-			<Model path="Ball.obj"/>
-			<Model path="Cube.obj"/>
 		</Models>
 
 		<Textures>
@@ -44,18 +42,18 @@
 			<Transform.LocalScale x="1" y="1" z="2"/>
 			<Transform.LocalRotation x="0" y="45" z="0"/>
 		</Transform>
-		<Mesh model="{Model Cube}">
+		<!--<Mesh model="{Model Cube}">
 			<Mesh.Material Albedo="{Texture Prototype}"/>
-		</Mesh>
+		</Mesh>-->
 	</GameObject>
 	
 	<GameObject>
 		<Transform>
 			<Transform.LocalScale x="50" y="50" z="0.5"/>
 		</Transform>
-		<Mesh model="{Model Cube}">
+		<!--<Mesh model="{Model Cube}">
 			<Mesh.Material Albedo="{Texture Prototype}"/>
-		</Mesh>
+		</Mesh>-->
 	</GameObject>
 
 	<GameObject>

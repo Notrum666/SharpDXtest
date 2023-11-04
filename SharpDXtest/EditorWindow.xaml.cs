@@ -133,7 +133,7 @@ namespace SharpDXtest
 
             copyFramebuffer = new FrameBuffer((int)ActualWidth, (int)ActualHeight);
 
-            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene5.xml");
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene1.xml");
 
             EngineCore.Run();
 

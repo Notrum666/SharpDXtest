@@ -2,9 +2,7 @@
 <Scene>
 	<Assets>
 		<Models>
-			<Model path="Racket.obj"/>
-			<Model path="Ball.obj"/>
-			<Model path="Wall.obj"/>
+			<Model path="rgb_sphere.gltf"/>
 		</Models>
 
 		<Textures>

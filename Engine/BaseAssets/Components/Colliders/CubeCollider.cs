@@ -68,19 +68,19 @@ namespace Engine.BaseAssets.Components.Colliders
 
         private void generateVertexes()
         {
-            vertexes.Clear();
+            vertices.Clear();
 
-            vertexes.Add(-0.5 * Size);
-            vertexes.Add(0.5 * new Vector3(-Size.x, -Size.y, Size.z));
+            vertices.Add(-0.5 * Size);
+            vertices.Add(0.5 * new Vector3(-Size.x, -Size.y, Size.z));
 
-            vertexes.Add(0.5 * new Vector3(-Size.x, Size.y, -Size.z));
-            vertexes.Add(0.5 * new Vector3(-Size.x, Size.y, Size.z));
+            vertices.Add(0.5 * new Vector3(-Size.x, Size.y, -Size.z));
+            vertices.Add(0.5 * new Vector3(-Size.x, Size.y, Size.z));
 
-            vertexes.Add(0.5 * new Vector3(Size.x, Size.y, -Size.z));
-            vertexes.Add(0.5 * Size);
+            vertices.Add(0.5 * new Vector3(Size.x, Size.y, -Size.z));
+            vertices.Add(0.5 * Size);
 
-            vertexes.Add(0.5 * new Vector3(Size.x, -Size.y, -Size.z));
-            vertexes.Add(0.5 * new Vector3(Size.x, -Size.y, Size.z));
+            vertices.Add(0.5 * new Vector3(Size.x, -Size.y, -Size.z));
+            vertices.Add(0.5 * new Vector3(Size.x, -Size.y, Size.z));
         }
         private void generateNormals()
         {

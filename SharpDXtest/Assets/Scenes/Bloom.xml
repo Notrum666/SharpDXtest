@@ -2,8 +2,6 @@
 <Scene>
   <Assets>
     <Models>
-      <Model path="Cube.obj"/>
-      <Model path="Ball.obj"/>
     </Models>
 
     <Textures>
@@ -30,9 +28,9 @@
     <Transform>
       <Transform.Position x="10" y="0" z="0"/>
     </Transform>
-    <Mesh model="{Model Cube}">
+    <!--Mesh model="{Model Cube}">
       <Mesh.Material Albedo="{Texture Prototype}"/>
-    </Mesh>
+    </Mesh-->
     <PointLight Radius="1000" Brightness="10"/>
   </GameObject>
   
@@ -41,9 +39,9 @@
       <Transform.Position x="0" y="0" z="0"/>
       <Transform.LocalScale x="10" y="10" z="10"/>
     </Transform>
-    <Mesh model="{Model Ball}">
+    <!--Mesh model="{Model Ball}">
       <Mesh.Material Albedo="{Texture Sun}"/>
-    </Mesh>
+    </Mesh-->
   </GameObject>
 
   <GameObject x.Name="Uranus">
@@ -51,29 +49,29 @@
       <Transform.Position x="10" y="-20" z="0"/>
       <Transform.LocalScale x="5" y="5" z="5"/>
     </Transform>
-    <Mesh model="{Model Ball}">
+    <!--Mesh model="{Model Ball}">
       <Mesh.Material Albedo="{Texture Uranus}"/>
-    </Mesh>
+    </Mesh-->
   </GameObject>
-  
+
   <GameObject x.Name="Jupiter">
     <Transform>
       <Transform.Position x="10" y="20" z="0"/>
       <Transform.LocalScale x="5" y="5" z="5"/>
     </Transform>
-    <Mesh model="{Model Ball}">
+    <!--Mesh model="{Model Ball}">
       <Mesh.Material Albedo="{Texture Jupiter}"/>
-    </Mesh>
+    </Mesh-->
   </GameObject>
 
-<GameObject x.Name="Cube_1">
+  <GameObject x.Name="Cube_1">
     <Transform>
       <Transform.Position x="10" y="0" z="20"/>
       <Transform.LocalScale x="10" y="10" z="10"/>
     </Transform>
-    <Mesh model="{Model Cube}">
+    <!--Mesh model="{Model Cube}">
       <Mesh.Material Albedo="{Texture blue}"/>
-    </Mesh>
+    </Mesh-->
   </GameObject>
 
 <GameObject x.Name="Cube_2">
@@ -81,8 +79,8 @@
       <Transform.Position x="10" y="0" z="-20"/>
       <Transform.LocalScale x="10" y="10" z="10"/>
     </Transform>
-    <Mesh model="{Model Cube}">
+    <!--Mesh model="{Model Cube}">
       <Mesh.Material Albedo="{Texture red}"/>
-    </Mesh>
+    </Mesh-->
   </GameObject>
 </Scene>

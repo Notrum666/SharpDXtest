@@ -19,19 +19,7 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <None Update="Assets\Models\Ball.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Models\Cube.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Models\Racket.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Models\triangle.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Models\Wall.obj">
+    <None Update="Assets\Models\rgb_sphere.gltf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Scenes\Bloom.xml">

@@ -2,8 +2,6 @@
 <Scene>
 	<Assets>
 		<Models>
-			<Model path="Ball.obj"/>
-			<Model path="Cube.obj"/>
 		</Models>
 
 		<Textures>
@@ -45,9 +43,9 @@
 		<Transform>
 			<Transform.Position z="3"/>
 		</Transform>
-		<Mesh model="{Model Ball}">
+		<!--<Mesh model="{Model Ball}">
 			<Mesh.Material Albedo="{Texture Sun}"/>
-		</Mesh>
+		</Mesh>-->
 		<Rigidbody AngularDrag="0.8">
 			<Rigidbody.Material Friction="0.8" Bounciness="0.1"/>
 		</Rigidbody>
@@ -60,9 +58,9 @@
 		<Transform>
 			<Transform.LocalScale x="100" y="100" z="0.5"/>
 		</Transform>
-		<Mesh model="{Model Cube}">
+		<!--<Mesh model="{Model Cube}">
 			<Mesh.Material Albedo="{Texture Prototype}"/>
-		</Mesh>
+		</Mesh>-->
 		<Rigidbody IsStatic="true">
 			<Rigidbody.Material Friction="0.8" Bounciness="0.1"/>
 		</Rigidbody>

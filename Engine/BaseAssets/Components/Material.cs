@@ -78,6 +78,20 @@ namespace Engine.BaseAssets.Components
                 ambientOcclusion = value;
             }
         }
+        private Texture emissive;
+        public Texture Emissive
+        {
+            get
+            {
+                return emissive;
+            }
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Emissive", "Texture can't be null.");
+                emissive = value;
+            }
+        }
         public Material()
         {
             albedo = AssetsManager.Textures["default_albedo"];
@@ -85,6 +99,7 @@ namespace Engine.BaseAssets.Components
             metallic = AssetsManager.Textures["default_metallic"];
             roughness = AssetsManager.Textures["default_roughness"];
             ambientOcclusion = AssetsManager.Textures["default_ambientOcclusion"];
+            emissive = AssetsManager.Textures["default_emissive"];
         }
         public Material(Texture albedo, Texture normal, Texture metallic, Texture roughness, Texture ambientOcclusion)
         {

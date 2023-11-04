@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Linq;
+using System.Text.Json;
 
 using SharpDX;
 using SharpDX.Direct3D;
@@ -30,145 +31,163 @@ using Vector3 = LinearAlgebra.Vector3;
 using Vector2 = LinearAlgebra.Vector2;
 using Matrix3x3 = LinearAlgebra.Matrix3x3;
 using Quaternion = LinearAlgebra.Quaternion;
+using System.Windows.Media.Media3D;
+using System.Windows.Media.Imaging;
+using Windows.Media.Audio;
+using System.Windows;
 
 namespace Engine
 {
+    // Json file reader
+    public static class JsonReader
+    {
+        public static Dictionary<string, object> Read(string path)
+        {
+            StreamReader reader = new StreamReader(File.OpenRead(path));
+            var json = reader.ReadToEnd();
+            return JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+        }
+    }
+
+    // model in OBJ file contains o-bjects
+    // each of them should be parsed as separate mesh
+    // so Model represents a container with meshes
     public class Model : IDisposable
     {
-        public List<Vector3> v = null;
-        public List<Vector2> t = null;
-        public List<Vector3> n = null;
-        public List<int[]> v_i = null;
-        public List<int[]> t_i = null;
-        public List<int[]> n_i = null;
-
-        private Buffer vertexBuffer;
-        private VertexBufferBinding vertexBufferBinding;
-        private Buffer indexBuffer;
-        private bool disposed;
-
-        private struct ModelVertex
+        public class Mesh
         {
-            public Vector3f v;
-            public Vector2f t;
-            public Vector3f n;
-            public Vector3f tx;
-        }
-        private struct ModelVertexWithIndex
-        {
-            public ModelVertex v;
-            public uint index;
-            public ModelVertexWithIndex(ModelVertex v, uint index)
+            public string Name { set; get; }
+            public Mesh(string name)
             {
-                this.v = v;
-                this.index = index;
+                Name = name;
             }
-            public override bool Equals(object obj)
-            {
-                if (obj is ModelVertexWithIndex)
-                    return v.Equals(((ModelVertexWithIndex)obj).v);
-                return false;
-            }
-            public override int GetHashCode()
-            {
-                return v.GetHashCode();
-            }
-        }
+            public List<Vector3> v = null;
+            public List<Vector3> n = null;
+            public List<Vector2> t = null;
 
-        public void updateModel()
-        {
-            if (v == null || v_i == null)
-                throw new Exception("Model can't be empty.");
+            public List<int[]> v_i = null;
+            public List<int[]> t_i = null;
+            public List<int[]> n_i = null;
 
-            List<ModelVertex> vertexes = new List<ModelVertex>();
-            HashSet<ModelVertexWithIndex> vertexesHashTable = new HashSet<ModelVertexWithIndex>(v.Count);
-            ModelVertex[] curPolygon = new ModelVertex[3];
-            int polygonsCount = v_i.Count;
-            uint[] indexes = new uint[3 * polygonsCount];
-            for (int i = 0; i < polygonsCount; i++)
+            private Buffer vertexBuffer;
+            private VertexBufferBinding vertexBufferBinding;
+            private Buffer indexBuffer;
+            // init with default material, then override particular textures
+            private BaseAssets.Components.Material material = new BaseAssets.Components.Material();
+
+            private struct MeshVertex
             {
-                for (int j = 0; j < 3; j++)
+                public Vector3f v;
+                public Vector2f t;
+                public Vector3f n;
+                public Vector3f tx;
+            }
+
+            private struct MeshVertexWithIndex
+            {
+                public MeshVertex v;
+                public uint index;
+                public MeshVertexWithIndex(MeshVertex v, uint index)
                 {
-                    ModelVertex curVertex = new ModelVertex();
-                    curVertex.v.x = (float)v[v_i[i][j]].x;
-                    curVertex.v.y = (float)v[v_i[i][j]].y;
-                    curVertex.v.z = (float)v[v_i[i][j]].z;
-                    if (t != null)
-                    {
-                        curVertex.t.x = (float)t[t_i[i][j]].x;
-                        curVertex.t.y = (float)t[t_i[i][j]].y;
-                    }
-                    else
-                    {
-                        curVertex.t.x = 0;
-                        curVertex.t.y = 0;
-                    }
-                    if (n != null)
-                    {
-                        curVertex.n.x = (float)n[n_i[i][j]].x;
-                        curVertex.n.y = (float)n[n_i[i][j]].y;
-                        curVertex.n.z = (float)n[n_i[i][j]].z;
-                    }
-                    else
-                    {
-                        Vector3 p1 = v[v_i[i][0]];
-                        Vector3 p2 = v[v_i[i][1]];
-                        Vector3 p3 = v[v_i[i][2]];
-                        Vector3 normal = (p2 - p1).vecMul(p3 - p1).normalized();
-                        curVertex.n.x = (float)normal.x;
-                        curVertex.n.y = (float)normal.y;
-                        curVertex.n.z = (float)normal.z;
-                    }
-
-                    curPolygon[j] = curVertex;
+                    this.v = v;
+                    this.index = index;
                 }
-
-                Vector3 edge1 = curPolygon[1].v - curPolygon[0].v;
-                Vector3 edge2 = curPolygon[2].v - curPolygon[0].v;
-                Vector2 UVedge1 = curPolygon[1].t - curPolygon[0].t;
-                Vector2 UVedge2 = curPolygon[2].t - curPolygon[0].t;
-
-                curPolygon[0].tx = curPolygon[1].tx = curPolygon[2].tx =
-                    (Vector3f)((edge1 * UVedge2.y - edge2 * UVedge1.y) / (UVedge1.x * UVedge2.y - UVedge1.y * UVedge2.x)).normalized();
-
-                for (int j = 0; j < 3; j++)
+                public override bool Equals(object obj)
                 {
-                    ModelVertex curVertex = curPolygon[j];
-                    uint k = (uint)vertexes.Count;
-                    ModelVertexWithIndex actualVertex;
-                    if (vertexesHashTable.TryGetValue(new ModelVertexWithIndex(curVertex, 0), out actualVertex))
-                    {
-                        k = actualVertex.index;
-                    }
-                    indexes[i * 3 + j] = k;
-                    vertexes.Add(curVertex);
-                    vertexesHashTable.Add(new ModelVertexWithIndex(curVertex, k));
+                    if (obj is MeshVertexWithIndex)
+                        return v.Equals(((MeshVertexWithIndex)obj).v);
+                    return false;
+                }
+                public override int GetHashCode()
+                {
+                    return v.GetHashCode();
                 }
             }
 
-            vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, vertexes.ToArray());
-            vertexBufferBinding = new VertexBufferBinding(vertexBuffer, Utilities.SizeOf<ModelVertex>(), 0);
-            indexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.IndexBuffer, indexes);
-        }
+            public void UpdateGeometry()
+            {
+                if (v == null || v_i == null)
+                    throw new Exception("Model can't be empty.");
 
-        public void Render()
-        {
-            if (disposed)
-                throw new ObjectDisposedException(nameof(Model));
-            GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
-            GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
-            GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(v_i.Count * 3, 0, 0);
-        }
+                List<MeshVertex> vertexes = new List<MeshVertex>();
+                HashSet<MeshVertexWithIndex> vertexesHashTable = new HashSet<MeshVertexWithIndex>(v.Count);
+                MeshVertex[] curPolygon = new MeshVertex[3];
+                int polygonsCount = v_i.Count;
+                uint[] indexes = new uint[3 * polygonsCount];
+                for (int i = 0; i < polygonsCount; i++)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        MeshVertex curVertex = new MeshVertex();
+                        curVertex.v.x = (float)v[v_i[i][j]].x;
+                        curVertex.v.y = (float)v[v_i[i][j]].y;
+                        curVertex.v.z = (float)v[v_i[i][j]].z;
+                        if (t != null)
+                        {
+                            curVertex.t.x = (float)t[t_i[i][j]].x;
+                            curVertex.t.y = (float)t[t_i[i][j]].y;
+                        }
+                        else
+                        {
+                            curVertex.t.x = 0;
+                            curVertex.t.y = 0;
+                        }
+                        if (n != null)
+                        {
+                            curVertex.n.x = (float)n[n_i[i][j]].x;
+                            curVertex.n.y = (float)n[n_i[i][j]].y;
+                            curVertex.n.z = (float)n[n_i[i][j]].z;
+                        }
+                        else
+                        {
+                            Vector3 p1 = v[v_i[i][0]];
+                            Vector3 p2 = v[v_i[i][1]];
+                            Vector3 p3 = v[v_i[i][2]];
+                            Vector3 normal = (p2 - p1).vecMul(p3 - p1).normalized();
+                            curVertex.n.x = (float)normal.x;
+                            curVertex.n.y = (float)normal.y;
+                            curVertex.n.z = (float)normal.z;
+                        }
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
+                        curPolygon[j] = curVertex;
+                    }
+
+                    Vector3 edge1 = curPolygon[1].v - curPolygon[0].v;
+                    Vector3 edge2 = curPolygon[2].v - curPolygon[0].v;
+                    Vector2 UVedge1 = curPolygon[1].t - curPolygon[0].t;
+                    Vector2 UVedge2 = curPolygon[2].t - curPolygon[0].t;
+
+                    curPolygon[0].tx = curPolygon[1].tx = curPolygon[2].tx =
+                        (Vector3f)((edge1 * UVedge2.y - edge2 * UVedge1.y) / (UVedge1.x * UVedge2.y - UVedge1.y * UVedge2.x)).normalized();
+
+                    for (int j = 0; j < 3; j++)
+                    {
+                        MeshVertex curVertex = curPolygon[j];
+                        uint k = (uint)vertexes.Count;
+                        MeshVertexWithIndex actualVertex;
+                        if (vertexesHashTable.TryGetValue(new MeshVertexWithIndex(curVertex, 0), out actualVertex))
+                        {
+                            k = actualVertex.index;
+                        }
+                        indexes[i * 3 + j] = k;
+                        vertexes.Add(curVertex);
+                        vertexesHashTable.Add(new MeshVertexWithIndex(curVertex, k));
+                    }
+                }
+
+                vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, vertexes.ToArray());
+                vertexBufferBinding = new VertexBufferBinding(vertexBuffer, Utilities.SizeOf<MeshVertex>(), 0);
+                indexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.IndexBuffer, indexes);
+            }
+
+            public virtual void Dispose(bool disposing)
             {
                 if (disposing)
                 {
                     v = null;
                     t = null;
                     n = null;
+
                     v_i = null;
                     t_i = null;
                     n_i = null;
@@ -178,9 +197,47 @@ namespace Engine
                     vertexBuffer.Dispose();
                 if (indexBuffer != null)
                     indexBuffer.Dispose();
+            }
 
+            public void Render()
+            {
+                GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
+                GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
+                GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(v_i.Count * 3, 0, 0);
+            }
+        };
+
+        private bool disposed;
+        private List<Mesh> meshes = new List<Mesh>();
+        public List<Mesh> Meshes { get { return meshes; } }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                foreach(Mesh mesh in meshes)
+                    mesh.Dispose(disposing);
                 disposed = true;
             }
+        }
+
+        public void Render()
+        {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(Model));
+            foreach (Mesh mesh in meshes)
+                mesh.Render();
+        }
+
+        public void AddMesh(Mesh mesh)
+        {
+            meshes.Add(mesh);
+        }
+
+        public void UpdateMeshes()
+        {
+            foreach(Mesh mesh in meshes)
+                mesh.UpdateGeometry();
         }
 
         ~Model()
@@ -258,9 +315,28 @@ namespace Engine
         public Texture2D texture { get; private set; }
         private List<ResourceView> views = new List<ResourceView>();
         public IReadOnlyCollection<ResourceView> Views { get => views.AsReadOnly(); }
+
+        public static Bitmap GetBitmap(BitmapSource source)
+        {
+            Bitmap bmp = new Bitmap(
+              source.PixelWidth,
+              source.PixelHeight,
+              PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(
+              new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp.Size),
+              ImageLockMode.WriteOnly,
+              PixelFormat.Format32bppPArgb);
+            source.CopyPixels(
+              Int32Rect.Empty,
+              data.Scan0,
+              data.Height * data.Stride,
+              data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
+        }
+
         public Texture(Bitmap image, bool applyGammaCorrection = true)
         {
-
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
                 image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
             BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
@@ -978,14 +1054,275 @@ namespace Engine
         public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
         public static Dictionary<string, Sound> Sounds { get; } = new Dictionary<string, Sound>();
 
-        public static Dictionary<string, Model> LoadModelsFile(string path, float scaleFactor = 1.0f, bool reverse = false)
+        public class GLTFLoader
+        {
+            float scaleFactor;
+            JsonElement scene;
+            JsonElement scenes;
+            JsonElement nodes;
+            JsonElement materials;
+            JsonElement meshes;
+            JsonElement textures;
+            JsonElement images;
+            JsonElement accessors;
+            JsonElement bufferViews;
+            JsonElement samplers;
+            JsonElement buffers;
+
+            public GLTFLoader(string path, float scaleFactor)
+            {
+                this.scaleFactor = scaleFactor;
+
+                var json = JsonReader.Read(path);
+
+                scene = (JsonElement)json["scene"];
+                scenes = (JsonElement)json["scenes"];
+                nodes = (JsonElement)json["nodes"];
+                materials = (JsonElement)json["materials"];
+                meshes = (JsonElement)json["meshes"];
+                textures = (JsonElement)json["textures"];
+                images = (JsonElement)json["images"];
+                accessors = (JsonElement)json["accessors"];
+                bufferViews = (JsonElement)json["bufferViews"];
+                samplers = (JsonElement)json["samplers"];
+                buffers = (JsonElement)json["buffers"];
+            }
+
+            public Model Load()
+            {
+                Model model = new Model();
+
+                JsonElement rootScene = scenes.EnumerateArray().ToArray()[scene.GetInt32()];
+                JsonElement[] nodes = rootScene.GetProperty("nodes").EnumerateArray().ToArray();
+                foreach (JsonElement node in nodes)
+                    LoadNode(node.GetInt32(), model);
+
+                return model;
+            }
+
+            private byte[] LoadBuffer(Int32 bufferIndex)
+            {
+                JsonElement buffer = buffers.EnumerateArray().ToArray()[bufferIndex];
+                JsonElement byteLength = buffer.GetProperty("byteLength");
+                JsonElement uri = buffer.GetProperty("uri");
+                string data = uri.ToString();
+                if (data.StartsWith("data:application/octet-stream;"))
+                {
+                    data = data.Substring(30);
+                }
+                if (data.StartsWith("base64,"))
+                {
+                    data = data.Substring(7);
+                    return Convert.FromBase64String(data);
+                }
+
+                // TODO: research
+                // unhandled case
+                return new byte[1];
+            }
+
+            private byte[] LoadBufferView(Int32 bufferViewIndex, out int stride)
+            {
+                JsonElement view = bufferViews.EnumerateArray().ToArray()[bufferViewIndex];
+                JsonElement buffer = view.GetProperty("buffer");
+                JsonElement byteOffset = view.GetProperty("byteOffset");
+                JsonElement byteLength = view.GetProperty("byteLength");
+                JsonElement byteStride;
+                if (view.TryGetProperty("byteStride", out byteStride))
+                    stride = byteStride.GetInt32();
+                else
+                    stride = 0;
+
+                byte[] bufferData = LoadBuffer(buffer.GetInt32());
+
+                byte[] ret = new byte[byteLength.GetInt32()];
+                for (int i = 0; i < byteLength.GetInt32(); ++i)
+                    ret[i] = bufferData[i + byteOffset.GetInt32()];
+
+                return ret;
+            }
+
+            private T[] LoadAccessor<T>(Int32 bufferAccessorIndex) where T : struct
+            {
+                JsonElement accessor = accessors.EnumerateArray().ToArray()[bufferAccessorIndex];
+                JsonElement bufferView = accessor.GetProperty("bufferView");
+                int byteOffset;
+                JsonElement byteOffsetElement;
+                if (accessor.TryGetProperty("byteOffset", out byteOffsetElement))
+                    byteOffset = byteOffsetElement.GetInt32();
+                else
+                    byteOffset = 0;
+                JsonElement count = accessor.GetProperty("count");
+                int stride = 0;
+                byte[] data = LoadBufferView(bufferView.GetInt32(), out stride);
+                T[] ret = new T[count.GetInt32()];
+                int dataSize = Marshal.SizeOf(typeof(T));
+                if (stride == 0)
+                    stride = dataSize;
+
+                byte[] dataStrided = new byte[count.GetInt32() * dataSize];
+                for (int i = 0; i < count.GetInt32(); ++i)
+                    for (int j = 0; j < dataSize; ++j)
+                        dataStrided[i * dataSize + j] = data[byteOffset + i * stride + j];
+
+                for (int i = 0; i < count.GetInt32(); ++i)
+                    ret[i] = dataStrided.Skip(i * dataSize).ToArray().To<T>();
+
+                return ret;
+            }
+
+            private Engine.Texture LoadImage(Int32 imageIndex)
+            {
+                JsonElement imageNode = images[imageIndex];
+                int stride;
+                byte[] buffer = LoadBufferView(imageNode.GetProperty("bufferView").GetInt32(), out stride);
+                string mimeType = imageNode.GetProperty("mimeType").GetString();
+                switch (mimeType)
+                {
+                    case "image/png":
+                        MemoryStream bufferStream = new MemoryStream(buffer);
+                        PngBitmapDecoder decoder = new PngBitmapDecoder(bufferStream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+                        BitmapSource bitmap = decoder.Frames[0];
+                        return new Texture(Texture.GetBitmap(bitmap));
+                }
+
+                return null;
+            }
+
+            private Engine.Texture LoadTexture(Int32 textureIndex)
+            {
+                JsonElement textureNode = textures[textureIndex];
+
+                Int32 sampler = textureNode.GetProperty("sampler").GetInt32();
+                Int32 source = textureNode.GetProperty("source").GetInt32();
+
+                return LoadImage(source);
+            }
+
+            private BaseAssets.Components.Material LoadMaterial(Int32 materialIndex)
+            {
+                JsonElement materialNode = materials[materialIndex];
+                bool doubleSided = materialNode.GetProperty("doubleSided").GetBoolean();
+                string name = materialNode.GetProperty("name").GetString();
+
+                BaseAssets.Components.Material material = new BaseAssets.Components.Material();
+
+                JsonElement pbrMetallicRoughness;
+                if (materialNode.TryGetProperty("pbrMetallicRoughness", out pbrMetallicRoughness))
+                {
+                    Int32 baseColorTexture = pbrMetallicRoughness.GetProperty("baseColorTexture").GetProperty("index").GetInt32();
+                    material.Albedo = LoadTexture(baseColorTexture);
+                    double metallicFactor;
+                    pbrMetallicRoughness.GetProperty("metallicFactor").TryGetDouble(out metallicFactor);
+                    double roughnessFactor;
+                    pbrMetallicRoughness.GetProperty("roughnessFactor").TryGetDouble(out roughnessFactor);
+                }
+
+                JsonElement normalTexture;
+                if (materialNode.TryGetProperty("normalTexture", out normalTexture))
+                {
+                    Int32 index = normalTexture.GetProperty("index").GetInt32();
+                    material.Normal = LoadTexture(index);
+                }
+
+                JsonElement occlusionTexture;
+                if (materialNode.TryGetProperty("occlusionTexture", out occlusionTexture))
+                {
+                    Int32 index = occlusionTexture.GetProperty("index").GetInt32();
+                    material.AmbientOcclusion = LoadTexture(index);
+                }
+
+                JsonElement emissiveTexture;
+                if (materialNode.TryGetProperty("emissiveTexture", out emissiveTexture))
+                {
+                    Int32 index = emissiveTexture.GetProperty("index").GetInt32();
+                    material.Emissive = LoadTexture(index);
+                }
+
+                return material;
+            }
+
+            private Model.Mesh LoadMesh(Int32 meshIndexNode)
+            {
+                JsonElement meshNode = meshes.EnumerateArray().ToArray()[meshIndexNode];
+                JsonElement meshName = meshNode.GetProperty("name");
+
+                Model.Mesh mesh = new Model.Mesh(meshName.ToString());
+                JsonElement meshPrimitives = meshNode.GetProperty("primitives");
+                foreach (JsonElement primitive in meshPrimitives.EnumerateArray().ToArray())
+                {
+                    // load inidices buffer
+                    JsonElement indicesBuffer = primitive.GetProperty("indices");
+                    short[] indices = LoadAccessor<short>(indicesBuffer.GetInt32());
+
+                    // load material
+                    JsonElement material = primitive.GetProperty("material");
+                    LoadMaterial(material.GetInt32());
+
+                    // load geometry data
+                    JsonElement primitiveAttributes = primitive.GetProperty("attributes");
+                    JsonElement position;
+                    if (primitiveAttributes.TryGetProperty("POSITION", out position))
+                    {
+                        double[] v = LoadAccessor<double>(position.GetInt32());
+                        for (int i = 0; i < v.Length / 3; ++i)
+                            mesh.v.Add(new Vector3(v[i * 3], v[i * 3 + 1], v[i * 3 + 2]));
+                    }
+                    JsonElement normal;
+                    if (primitiveAttributes.TryGetProperty("NORMAL", out normal))
+                    {
+                        double[] n = LoadAccessor<double>(normal.GetInt32());
+                        for (int i = 0; i < n.Length / 3; ++i)
+                            mesh.n.Add(new Vector3(n[i * 3], n[i * 3 + 1], n[i * 3 + 2]));
+                    }
+
+                    JsonElement texcoord_0;
+                    if (primitiveAttributes.TryGetProperty("TEXCOORD_0", out texcoord_0))
+                    {
+
+                    }
+
+                    JsonElement texcoord_1;
+                    if (primitiveAttributes.TryGetProperty("TEXCOORD_1", out texcoord_1))
+                    {
+
+                    }
+                }
+
+                return mesh;
+            }
+
+            private void LoadNode(Int32 node, Model model)
+            {
+                // JsonElement name = node.GetProperty("name");
+                model.AddMesh(LoadMesh(nodes[node].GetProperty("mesh").GetInt32()));
+            }
+        }
+
+        public static Model LoadModel(string path, float scaleFactor = 1.0f)
+        {
+            switch (Path.GetExtension(path))
+            {
+                case ".gltf":
+                    GLTFLoader gltfLoader = new GLTFLoader(path, scaleFactor);
+                    return gltfLoader.Load();
+            }
+
+            return null;
+        }
+
+#if false
+        // mb get rid of scaleFactor on loading and handle it with transform matrix?
+        public static Model LoadModelsFile(string path, float scaleFactor = 1.0f, bool reverse = false)
         {
             StreamReader reader = new StreamReader(File.OpenRead(path));
 
-            Dictionary<string, Model> models = new Dictionary<string, Model>();
-
-            string modelName = Path.GetFileNameWithoutExtension(path);
+            //Dictionary<string, Model> models = new Dictionary<string, Model>();
             Model model = new Model();
+            model.v = new List<Vector3>(); // vertices MUST exist, so allocate instantly
+            Model.Mesh mesh = null;
+            string modelName = Path.GetFileNameWithoutExtension(path);
+            Models.Add(modelName, model);
             string line;
             int offset_v = 0;
             int offset_t = 0;
@@ -1002,107 +1339,90 @@ namespace Engine
                     continue;
                 switch (words[0])
                 {
+                    case "mtllib":
+                        /// TODO: handle materials loading
+                        break;
                     case "o":
-                        if (model.v != null)
-                        {
-                            if (models.ContainsKey(modelName))
-                                throw new ArgumentException("File can't have more than one model with the same name.");
-                            if (!Models.ContainsKey(modelName))
-                            {
-                                //throw new ArgumentException("Model with name \"" + modelName + "\" already loaded.");
-                                models[modelName] = model;
-                                Models[modelName] = model;
-                            }
-                            offset_v += model.v.Count;
-                            if (model.t != null)
-                                offset_t += model.t.Count;
-                            if (model.n != null)
-                                offset_n += model.n.Count;
-                            model = new Model();
-                        }
-                        modelName = line.Substring(2);
+                        mesh = new Model.Mesh(line.Substring(2));
+                        model.AddMesh(mesh);
                         break;
                     case "v":
-                        if (model.v == null)
-                        {
-                            model.v = new List<Vector3>();
-                            model.v_i = new List<int[]>();
+                        { 
+                            double x = double.Parse(words[1]);
+                            double y = double.Parse(words[2]);
+                            double z = double.Parse(words[3]);
+
+                            model.v.Add(new Vector3(x * scaleFactor, y * scaleFactor, z * scaleFactor));
                         }
-                        model.v.Add(new Vector3(double.Parse(words[1]) * scaleFactor, double.Parse(words[2]) * scaleFactor, double.Parse(words[3]) * scaleFactor));
                         break;
                     case "vt":
                         if (model.t == null)
                         {
                             model.t = new List<Vector2>();
-                            model.t_i = new List<int[]>();
                         }
-                        model.t.Add(new Vector2(double.Parse(words[1]), double.Parse(words[2])));
+                        {
+                            double u = double.Parse(words[1]);
+                            double v = double.Parse(words[2]);
+                            model.t.Add(new Vector2(u, v));
+                        }
                         break;
                     case "vn":
                         if (model.n == null)
                         {
                             model.n = new List<Vector3>();
-                            model.n_i = new List<int[]>();
                         }
-                        model.n.Add(new Vector3(double.Parse(words[1]), double.Parse(words[2]), double.Parse(words[3])));
+                        {
+                            double x = double.Parse(words[1]);
+                            double y = double.Parse(words[2]);
+                            double z = double.Parse(words[3]);
+                            Vector3 normal = new Vector3(x, y, z);
+                            // don't trust anyone
+                            model.n.Add(normal.normalized());
+                        }
                         break;
                     case "f":
-                        int vertexesCount = words.Length - 1;
-                        if (vertexesCount > 3)
-                            throw new NotSupportedException("DirectX does not support non-triangulated models.");
-                        int[] v_i = new int[vertexesCount];
-                        int[] t_i = null;
-                        int[] n_i = null;
-                        if (model.t_i != null)
-                            t_i = new int[vertexesCount];
-                        if (model.n_i != null)
-                            n_i = new int[vertexesCount];
-                        if (reverse)
-                            for (int i = 0; i < vertexesCount; i++)
-                            {
-                                string[] values = words[1 + i].Split('/');
-                                v_i[vertexesCount - i - 1] = int.Parse(values[0]) - offset_v - 1;
-                                if (t_i != null)
-                                    t_i[vertexesCount - i - 1] = int.Parse(values[1]) - offset_t - 1;
-                                if (n_i != null)
-                                    n_i[vertexesCount - i - 1] = int.Parse(values[2]) - offset_n - 1;
-                            }
-                        else
-                            for (int i = 0; i < vertexesCount; i++)
-                            {
-                                string[] values = words[1 + i].Split('/');
-                                v_i[i] = int.Parse(values[0]) - offset_v - 1;
-                                if (t_i != null)
-                                    t_i[i] = int.Parse(values[1]) - offset_t - 1;
-                                if (n_i != null)
-                                    n_i[i] = int.Parse(values[2]) - offset_n - 1;
-                            }
-                        for (int i = 1; i < vertexesCount - 1; i++)
                         {
-                            model.v_i.Add(new int[3] { v_i[0], v_i[i], v_i[i + 1] });
-                            if (t_i != null)
-                                model.t_i.Add(new int[3] { t_i[0], t_i[i], t_i[i + 1] });
-                            if (n_i != null)
-                                model.n_i.Add(new int[3] { n_i[0], n_i[i], n_i[i + 1] });
+                            // it looks like 'f 0// 1// 2//'
+                            int verticesCount = words.Length - 1;
+                            if (verticesCount > 3)
+                                throw new NotSupportedException("DirectX does not support non-triangulated models.");
+                            int[] v_i = new int[verticesCount];
+                            int[] t_i = null;
+                            int[] n_i = null;
+                            if (mesh.t_i != null)
+                                t_i = new int[verticesCount];
+                            if (mesh.n_i != null)
+                                n_i = new int[verticesCount];
+
+                            // parse face vertices data to local arrays
+                            for (int i = 0; i < verticesCount; i++)
+                            {
+                                int index = reverse ? verticesCount - i - 1 : i;
+                                string[] values = words[1 + i].Split('/');
+                                v_i[index] = int.Parse(values[0]) - offset_v - 1;
+                                if (t_i != null)
+                                    t_i[index] = int.Parse(values[1]) - offset_t - 1;
+                                if (n_i != null)
+                                    n_i[index] = int.Parse(values[2]) - offset_n - 1;
+                            }
+
+                            // expecting only one triangle here
+                            // for (int i = 1; i < verticesCount - 1; i++)
+                            // {
+                                mesh.v_i.Add(new int[3] { v_i[0], v_i[1], v_i[2] });
+                                if (t_i != null)
+                                    mesh.t_i.Add(new int[3] { t_i[0], t_i[1], t_i[2] });
+                                if (n_i != null)
+                                    mesh.n_i.Add(new int[3] { n_i[0], n_i[1], n_i[2] });
+                            // }
                         }
                         break;
                 }
             }
-            if (model.v != null)
-            {
-                if (models.ContainsKey(modelName))
-                    throw new ArgumentException("File can't have more than one model with the same name.");
-                if (!Models.ContainsKey(modelName))
-                {
-                    //throw new ArgumentException("Model with name \"" + modelName + "\" already loaded.");
-                    models[modelName] = model;
-                    Models[modelName] = model;
-                }
-            }
-            foreach (Model mdl in models.Values)
-                mdl.updateModel();
-            return models;
+            model.UpdateMeshes();
+            return model;
         }
+#endif
         public static Shader LoadShader(string shaderName, string shaderPath)
         {
             if (Shaders.ContainsKey(shaderName))
@@ -1134,11 +1454,10 @@ namespace Engine
             if (Textures.ContainsKey(textureName))
                 return Textures[textureName];
                 //throw new ArgumentException("Texture with name \"" + textureName + "\" is already loaded.");
-        
+
             Texture texture = new Texture(new Bitmap(path), applyGammaCorrection);
-        
             Textures[textureName] = texture;
-        
+
             return texture;
         }
         public static Sound LoadSound(string path, string soundName = "")
@@ -1333,7 +1652,7 @@ namespace Engine
                                 {
                                     foreach (XElement model in assetsSet.Elements())
                                     {
-                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadModelsFile");
+                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadModel");
                                         ParameterInfo[] parameters = method.GetParameters();
                                         Dictionary<string, object> parameterValues = new Dictionary<string, object>();
                                         foreach (XAttribute attrib in model.Attributes())
