@@ -1,11 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
 	<Assets>
-		<Models>
-			<Model path="Racket.obj"/>
-			<Model path="Ball.obj"/>
-			<Model path="Wall.obj"/>
-		</Models>
+		<Meshes>
+			<Mesh path="Racket.obj"/>
+			<Mesh path="Ball.obj"/>
+			<Mesh path="Wall.obj"/>
+		</Meshes>
 
 		<Textures>
 			<Texture path="brick_wall_normal.png"/>
@@ -27,8 +27,8 @@
 		<Transform>
 			<Transform.Position y="-20"/>
 		</Transform>
-		<Mesh model="{Model Racket}"/>
-		<MeshCollider Model="{Model Racket}"/>
+		<Mesh mesh="{Mesh Racket}"/>
+		<MeshCollider mesh="{Mesh Racket}"/>
 		<Rigidbody IsStatic="True">
 			<Rigidbody.Material Friction="0" Bounciness="1"/>
 		</Rigidbody>
@@ -38,15 +38,15 @@
 		<Transform>
 			<Transform.Position y="20"/>
 		</Transform>
-		<Mesh model="{Model Racket}"/>
-		<MeshCollider Model="{Model Racket}"/>
+		<Mesh mesh="{Mesh Racket}"/>
+		<MeshCollider mesh="{Mesh Racket}"/>
 		<Rigidbody IsStatic="True">
 			<Rigidbody.Material Friction="0" Bounciness="1"/>
 		</Rigidbody>
 	</GameObject>
 
 	<GameObject x.Name="Ball">
-		<Mesh model="{Model Ball}"/>
+		<Mesh mesh="{Mesh Ball}"/>
 		<SphereCollider Radius="0.5"/>
 		<Rigidbody LinearDrag="0" AngularDrag="0" FreezeRotation="X,Y,Z">
 			<Rigidbody.Material Friction="0" Bounciness="1"/>
@@ -60,8 +60,8 @@
 		<Transform>
 			<Transform.Position z="15"/>
 		</Transform>
-		<Mesh model="{Model Wall}"/>
-		<MeshCollider Model="{Model Wall}"/>
+		<Mesh mesh="{Mesh Wall}"/>
+		<MeshCollider mesh="{Mesh Wall}"/>
 		<Rigidbody IsStatic="True">
 			<Rigidbody.Material Friction="0" Bounciness="1"/>
 		</Rigidbody>
@@ -71,8 +71,8 @@
 		<Transform>
 			<Transform.Position z="-15"/>
 		</Transform>
-		<Mesh model="{Model Wall}"/>
-		<MeshCollider Model="{Model Wall}"/>
+		<Mesh mesh="{Mesh Wall}"/>
+		<MeshCollider mesh="{Mesh Wall}"/>
 		<Rigidbody IsStatic="True">
 			<Rigidbody.Material Friction="0" Bounciness="1"/>
 		</Rigidbody>

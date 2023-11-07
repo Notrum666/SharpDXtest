@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Engine.BaseAssets.Components
 {
-    public class Mesh : Component
+    public class MeshComponent : Component
     {
-        public Model model;
+        public Mesh mesh;
         private Material material = new Material();
         public Material Material
         {

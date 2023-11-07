@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
 	<Assets>
-		<Models>
-			<Model path="Ball.obj"/>
-			<Model path="Cube.obj"/>
-		</Models>
+		<Meshes>
+			<Mesh path="Ball.obj"/>
+			<Mesh path="Cube.obj"/>
+		</Meshes>
 
 		<Textures>
 			<Texture path="Sun.jpg"/>
@@ -45,7 +45,7 @@
 		<Transform>
 			<Transform.Position z="3"/>
 		</Transform>
-		<Mesh model="{Model Ball}">
+		<Mesh mesh="{Mesh Ball}">
 			<Mesh.Material Albedo="{Texture Sun}"/>
 		</Mesh>
 		<Rigidbody AngularDrag="0.8">
@@ -60,7 +60,7 @@
 		<Transform>
 			<Transform.LocalScale x="100" y="100" z="0.5"/>
 		</Transform>
-		<Mesh model="{Model Cube}">
+		<Mesh mesh="{Mesh Cube}">
 			<Mesh.Material Albedo="{Texture Prototype}"/>
 		</Mesh>
 		<Rigidbody IsStatic="true">

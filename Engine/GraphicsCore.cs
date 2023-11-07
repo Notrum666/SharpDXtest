@@ -16,7 +16,6 @@ using Device = SharpDX.Direct3D11.Device;
 using Filter = SharpDX.Direct3D11.Filter;
 using Query = SharpDX.Direct3D11.Query;
 using Light = Engine.BaseAssets.Components.Light;
-using Mesh = Engine.BaseAssets.Components.Mesh;
 using Format = SharpDX.DXGI.Format;
 
 using Engine.BaseAssets.Components;
@@ -109,6 +108,7 @@ namespace Engine
             AssetsManager.Textures["default_metallic"] = new Texture(64, 64, 0.1f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource);
             AssetsManager.Textures["default_roughness"] = new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource);
             AssetsManager.Textures["default_ambientOcclusion"] = new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource);
+            AssetsManager.Textures["default_emissive"] = new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource);
 
             //AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"), 
             //                                            Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
@@ -320,15 +320,15 @@ namespace Engine
                 {
                     if (!obj.Enabled)
                         continue;
-                    foreach (Mesh mesh in obj.getComponents<Mesh>())
+                    foreach (MeshComponent meshComponent in obj.getComponents<MeshComponent>())
                     {
-                        if (!mesh.Enabled)
+                        if (!meshComponent.Enabled)
                             continue;
                         pipeline.UpdateUniform("model", (Matrix4x4f)obj.Transform.Model);
 
                         pipeline.UploadUpdatedUniforms();
 
-                        mesh.model.Render();
+                        meshComponent.mesh.Render();
                     }
                 }
             }
@@ -591,20 +591,16 @@ namespace Engine
             {
                 if (!obj.Enabled)
                     continue;
-                foreach (Mesh mesh in obj.getComponents<Mesh>())
+                foreach (MeshComponent meshComponent in obj.getComponents<MeshComponent>())
                 {
-                    if (!mesh.Enabled)
+                    if (!meshComponent.Enabled)
                         continue;
                     pipeline.UpdateUniform("model", (Matrix4x4f)obj.Transform.Model);
                     pipeline.UpdateUniform("modelNorm", (Matrix4x4f)obj.Transform.Model.inverse().transposed());
             
                     pipeline.UploadUpdatedUniforms();
-                    mesh.Material.Albedo.use("albedoMap");
-                    mesh.Material.Normal.use("normalMap");
-                    mesh.Material.Metallic.use("metallicMap");
-                    mesh.Material.Roughness.use("roughnessMap");
-                    mesh.Material.AmbientOcclusion.use("ambientOcclusionMap");
-                    mesh.model.Render();
+                    meshComponent.Material.Use();
+                    meshComponent.mesh.Render();
                 }
             }
 

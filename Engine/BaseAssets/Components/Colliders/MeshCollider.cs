@@ -11,15 +11,15 @@ namespace Engine.BaseAssets.Components.Colliders
 {
     public class MeshCollider : Collider
     {
-        public Model Model 
+        public MeshComponent Mesh
         { 
             set
             {
-                FromModel(value);
-            } 
+                FromMesh(value.mesh);
+            }
         }
 
-        protected List<Vector3> vertexes = new List<Vector3>();
+        protected List<Vector3> vertices = new List<Vector3>();
         protected List<Vector3> normals = new List<Vector3>();
         protected List<Vector3> nonCollinearNormals = new List<Vector3>();
         protected List<int[]> polygons = new List<int[]>();
@@ -28,7 +28,7 @@ namespace Engine.BaseAssets.Components.Colliders
         {
             get
             {
-                return vertexes.AsReadOnly();
+                return vertices.AsReadOnly();
             }
         }
         public IReadOnlyList<Vector3> Normals
@@ -114,7 +114,7 @@ namespace Engine.BaseAssets.Components.Colliders
             if (globalVertexes.Count == 0)
                 throw new Exception("No vertexes present in this collider.");
 
-            hindmost = Vector3.Zero; 
+            hindmost = Vector3.Zero;
             furthest = Vector3.Zero;
             double furthestValue = double.MinValue, hindmostValue = double.MaxValue;
 
@@ -148,10 +148,15 @@ namespace Engine.BaseAssets.Components.Colliders
         {
 
         }
-        public void FromModel(Model model)
+        public void FromMesh(Mesh mesh)
         {
-            vertexes = new List<Vector3>(model.v);
-            polygons = new List<int[]>(model.v_i);
+            vertices = new List<Vector3>();
+            foreach (Primitive primitive in mesh.Primitives)
+            {
+                vertices.AddRange(primitive.v);
+            }
+
+            //polygons = new List<int[]>(model.v_i);
 
             normals = new List<Vector3>(polygons.Count);
             edges = new List<(int a, int b)>();
@@ -159,7 +164,7 @@ namespace Engine.BaseAssets.Components.Colliders
             bool exists;
             foreach (int[] poly in polygons)
             {
-                normals.Add((vertexes[poly[1]] - vertexes[poly[0]]).cross(vertexes[poly[2]] - vertexes[poly[0]]));
+                normals.Add((vertices[poly[1]] - vertices[poly[0]]).cross(vertices[poly[2]] - vertices[poly[0]]));
                 for (int i = 0; i < poly.Length; i++)
                 {
                     a = poly[i];
@@ -203,7 +208,7 @@ namespace Engine.BaseAssets.Components.Colliders
             globalNonCollinearNormals.Clear();
 
             Matrix4x4 model = GameObject.Transform.Model;
-            foreach (Vector3 vertex in vertexes)
+            foreach (Vector3 vertex in vertices)
                 globalVertexes.Add(model.TransformPoint(vertex + Offset));
             foreach (Vector3 normal in normals)
                 globalNormals.Add(model.TransformDirection(normal));

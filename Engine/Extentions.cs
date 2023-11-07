@@ -24,5 +24,15 @@ namespace Engine
             Marshal.FreeHGlobal(ptr);
             return array;
         }
+        public static T To<T>(this byte[] data, int offset = 0) where T : struct
+        {
+            int size = Marshal.SizeOf<T>();
+            nint buffer = Marshal.AllocHGlobal(size);
+            Marshal.Copy(data, offset, buffer, size);
+            T obj = Marshal.PtrToStructure<T>(buffer);
+            Marshal.FreeHGlobal(buffer);
+            return obj;
+        }
+
     }
 }
