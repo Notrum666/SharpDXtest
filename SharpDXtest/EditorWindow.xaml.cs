@@ -133,7 +133,7 @@ namespace SharpDXtest
 
             copyFramebuffer = new FrameBuffer((int)ActualWidth, (int)ActualHeight);
 
-            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene5.xml");
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Sponza.xml");
 
             EngineCore.Run();
 
@@ -186,7 +186,7 @@ namespace SharpDXtest
 
         private void PauseMenuButton_Scene3_Click(object sender, RoutedEventArgs e)
         {
-            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene3.xml");
+            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Sponza.xml");
             EngineCore.IsPaused = false;
         }
 

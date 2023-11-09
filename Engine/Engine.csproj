@@ -37,6 +37,12 @@
     <None Update="BaseAssets\Shaders\DeferredRender\deffered_addLight.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="BaseAssets\Shaders\ssao.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="BaseAssets\Shaders\ssao_blur.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="BaseAssets\Shaders\VolumetricRender\volume.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
