@@ -1,19 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Globalization;
 using System.ComponentModel;
@@ -59,6 +47,8 @@ namespace SharpDXtest
             EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
 
             CompositionTarget.Rendering += OnRender;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+            throw new InvalidOperationException("exception");
         }
         private void HideCursor()
         {
@@ -201,6 +191,10 @@ namespace SharpDXtest
             GraphicsCore.Resize((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
 
             copyFramebuffer = new FrameBuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+        }
+        private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Logger.CurrentDomainOnUnhandledException(sender, e);
         }
     }
 }
