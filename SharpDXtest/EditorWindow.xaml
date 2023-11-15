@@ -13,6 +13,7 @@
     <Grid>
         <Grid x:Name="GameGrid">
             <TextBlock x:Name="FPSTextBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20" Text="0" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
+            <TextBlock x:Name="MessageBlock" HorizontalAlignment="Right" VerticalAlignment="Top" Padding="20" Text="" FontSize="48" FontWeight="Bold" Foreground="White" Panel.ZIndex="10"/>
             <Grid x:Name="PauseGrid" Visibility="{Binding Path=IsPaused, Mode=OneWay, Converter={StaticResource boolToVisibility}}" VerticalAlignment="Center" HorizontalAlignment="Center" Background="#B2000000" Panel.ZIndex="10">
                 <StackPanel Margin="50,55,50,55">
                     <Button x:Name="PauseMenuButton_Resume" Padding="100,10,100,10" Content="Resume" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Resume_Click"/>
@@ -21,6 +22,7 @@
                     <Button x:Name="PauseMenuButton_Scene3" Padding="100,10,100,10" Content="Scene3" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Scene3_Click"/>
                     <Button x:Name="CursorLockingButton" Padding="100,10,100,10" Content="Cursor locking (On)" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="ChangeCursorLocking"/>
                     <Button x:Name="PauseMenuButton_Exit" Padding="100,10,100,10" Content="Exit" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="PauseMenuButton_Exit_Click"/>
+                    <Button x:Name="MessageErrorButton" Padding="100,10,100,10" Content="Ошибка" FontSize="30" Margin="10,5,10,5" Background="#FF151515" Foreground="White" Click="MessageErrorButton_Click"/>
                 </StackPanel>
             </Grid>
             <Image x:Name="RenderControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Fill" SizeChanged="RenderControl_SizeChanged">

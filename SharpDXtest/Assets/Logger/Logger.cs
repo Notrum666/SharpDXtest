@@ -1,17 +1,24 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
+using SharpDX.Text;
 
 namespace SharpDXtest.Assets.Components;
-public static class Logger
+public static class Logger 
 {
     public static string NameLogger { get; set; }
-    private static string DirectoryPath { get; set; } = Environment.CurrentDirectory + "/Logs";
+    private static string DirectoryPath { get; set; } = Environment.CurrentDirectory + @"\Logs\";
+    private static StreamWriter FileStream { get; set; }
 
-    //TODO: нужно обсудить что именно еще добавить при использовании разных типов.
-    public static async Task AddMessage(LogType type, string message)  
+    static Logger()
     {
-        string typeLog = "";
+        FileStream = CreateFilePath();
+    }
+
+    public static async Task<string> AddMessage(LogType type, string message)  
+    {
+        string typeLog = NameLogger + ": ";
         switch (type)
         {
             case LogType.Info:
@@ -30,14 +37,27 @@ public static class Logger
                 break;
             }
         }
-        using StreamWriter writer = new StreamWriter(DirectoryPath, true);
-        await writer.WriteLineAsync(typeLog + message);
+        string errorMessage = typeLog + message;
+        await FileStream.WriteLineAsync(errorMessage);
+        return errorMessage;
     }
 
-    public static async Task CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    public static async Task<string> CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        using StreamWriter writer = new StreamWriter(DirectoryPath, true);
-        await writer.WriteLineAsync("Error: " + e.ExceptionObject);
+        string errorMessage = "Error: " + e.ExceptionObject;
+        await FileStream.WriteLineAsync(errorMessage);
+        return errorMessage;
+    }
+    
+    private static StreamWriter CreateFilePath()
+    {
+        string path = DirectoryPath + (DateTime.Now.ToString(CultureInfo.InvariantCulture) + ".txt")
+            .Replace("/", ".")
+            .Replace(" ", "_")
+            .Replace(":", ""); 
+        StreamWriter writer = new StreamWriter(path, true);
+        writer.AutoFlush = true;
+        return writer;
     }
 }
 

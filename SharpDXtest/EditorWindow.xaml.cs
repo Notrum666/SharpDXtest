@@ -48,7 +48,6 @@ namespace SharpDXtest
 
             CompositionTarget.Rendering += OnRender;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            throw new InvalidOperationException("exception");
         }
         private void HideCursor()
         {
@@ -149,6 +148,17 @@ namespace SharpDXtest
             EngineCore.Stop();
             Close();
         }
+        
+        private async void MessageErrorButton_Click(object sender, RoutedEventArgs e)
+        {
+            await Logger.AddMessage(LogType.Info, "NJ RFHEUIHEFO");
+            await Logger.AddMessage(LogType.Info, "NJ few344");
+            await Logger.AddMessage(LogType.Info, "NJ dvfdb");
+            await Logger.AddMessage(LogType.Info, "NJ gr34");
+            await Logger.AddMessage(LogType.Info, "NJ ef");
+            await Logger.AddMessage(LogType.Info, "NJ RFHEUIHEFO");
+            throw new Exception("Exception message");
+        }
 
         private void PauseMenuButton_Resume_Click(object sender, RoutedEventArgs e)
         {
@@ -192,9 +202,9 @@ namespace SharpDXtest
 
             copyFramebuffer = new FrameBuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
-        private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private async void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Logger.CurrentDomainOnUnhandledException(sender, e);
+            MessageBlock.Text = await Logger.CurrentDomainOnUnhandledException(sender, e);
         }
     }
 }
