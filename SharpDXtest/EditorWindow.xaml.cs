@@ -151,12 +151,12 @@ namespace SharpDXtest
         
         private async void MessageErrorButton_Click(object sender, RoutedEventArgs e)
         {
-            await Logger.AddMessage(LogType.Info, "NJ RFHEUIHEFO");
-            await Logger.AddMessage(LogType.Info, "NJ few344");
-            await Logger.AddMessage(LogType.Info, "NJ dvfdb");
-            await Logger.AddMessage(LogType.Info, "NJ gr34");
-            await Logger.AddMessage(LogType.Info, "NJ ef");
-            await Logger.AddMessage(LogType.Info, "NJ RFHEUIHEFO");
+            await Logger.AddMessage(LogType.Info, "Test 1");
+            await Logger.AddMessage(LogType.Info, "Test 2");
+            await Logger.AddMessage(LogType.Info, "Test 3");
+            await Logger.AddMessage(LogType.Info, "Test 4");
+            await Logger.AddMessage(LogType.Info, "Test 5");
+            await Logger.AddMessage(LogType.Info, "Test 6");
             throw new Exception("Exception message");
         }
 
