@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using Exception = ABI.System.Exception;
+using Exception = System.Exception;
 
 namespace SharpDXtest.Assets.Components;
 public static class Logger 
@@ -52,7 +52,9 @@ public static class Logger
 
     public static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        FileStream.WriteLine(GetDataString(DateTime.Now) +  "Error: " + e.ExceptionObject);
+        Exception ex = (Exception)e.ExceptionObject;
+        FileStream.WriteLine(GetDataString(DateTime.Now) +  "Error: " + ex.Message);
+        FileStream.WriteLine("Full Error: " + e.ExceptionObject);
     }
     
     private static StreamWriter CreateFilePath()
