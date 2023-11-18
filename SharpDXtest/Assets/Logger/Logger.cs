@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
-using System.Threading.Tasks;
-using SharpDX.Text;
 using Exception = ABI.System.Exception;
 
 namespace SharpDXtest.Assets.Components;
