@@ -3,23 +3,25 @@ using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using SharpDX.Text;
+using Exception = ABI.System.Exception;
 
 namespace SharpDXtest.Assets.Components;
 public static class Logger 
 {
-    public static string NameLogger { get; set; }
-    private static string DirectoryPath { get; set; } = Environment.CurrentDirectory + @"\Logs\";
+    private static string DirectoryPath { get; } = Environment.CurrentDirectory + @"\Logs\";
     private static StreamWriter FileStream { get; set; }
+    public static event Action<LogMessage> OnLog;
 
     static Logger()
     {
         FileStream = CreateFilePath();
+        OnLog += LogAdd;
     }
 
-    public static async Task<string> AddMessage(LogType type, string message)  
+    private static void LogAdd(LogMessage obj)  
     {
-        string typeLog = NameLogger + ": ";
-        switch (type)
+        string typeLog = "";
+        switch (obj.Type)
         {
             case LogType.Info:
             {
@@ -37,16 +39,22 @@ public static class Logger
                 break;
             }
         }
-        string errorMessage = typeLog + message;
-        await FileStream.WriteLineAsync(errorMessage);
-        return errorMessage;
+        var errorMessage = GetDataString(obj.DateTime) + typeLog + obj.Message;
+        if (obj.Exception != null)
+        {
+            errorMessage += " " + obj.Exception;
+        }
+        FileStream.WriteLine(errorMessage);
     }
 
-    public static async Task<string> CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    public static void Log(LogType type, string message)
     {
-        string errorMessage = "Error: " + e.ExceptionObject;
-        await FileStream.WriteLineAsync(errorMessage);
-        return errorMessage;
+         OnLog?.Invoke(new LogMessage(type, DateTime.Now, message));
+    }
+
+    public static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        FileStream.WriteLine(GetDataString(DateTime.Now) +  "Error: " + e.ExceptionObject);
     }
     
     private static StreamWriter CreateFilePath()
@@ -59,8 +67,33 @@ public static class Logger
         writer.AutoFlush = true;
         return writer;
     }
+    private static string GetDataString(DateTime dateTime)
+    {
+        string dateTimeString = dateTime.ToString(CultureInfo.InvariantCulture)
+            .Replace("/", ".") + ": "; 
+        return dateTimeString;
+    }
 }
+public class LogMessage
+{
+    public LogType Type { get; }
+    public DateTime DateTime { get; }
+    public string Message { get; }
+    public Exception? Exception { get; }
 
+    public LogMessage(LogType type, DateTime dateTime, string errorMessage)
+    {
+        Type = type;
+        DateTime = dateTime;
+        Message = errorMessage;
+    }
+    public LogMessage(LogType type, DateTime dateTime, Exception? exception)
+    {
+        Type = type;
+        DateTime = dateTime;
+        Exception = exception;
+    }
+}
 public enum LogType
 {
     Info = 0,

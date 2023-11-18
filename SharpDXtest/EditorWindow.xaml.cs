@@ -148,17 +148,6 @@ namespace SharpDXtest
             EngineCore.Stop();
             Close();
         }
-        
-        private async void MessageErrorButton_Click(object sender, RoutedEventArgs e)
-        {
-            await Logger.AddMessage(LogType.Info, "Test 1");
-            await Logger.AddMessage(LogType.Info, "Test 2");
-            await Logger.AddMessage(LogType.Info, "Test 3");
-            await Logger.AddMessage(LogType.Info, "Test 4");
-            await Logger.AddMessage(LogType.Info, "Test 5");
-            await Logger.AddMessage(LogType.Info, "Test 6");
-            throw new Exception("Exception message");
-        }
 
         private void PauseMenuButton_Resume_Click(object sender, RoutedEventArgs e)
         {
@@ -202,9 +191,9 @@ namespace SharpDXtest
 
             copyFramebuffer = new FrameBuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
-        private async void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            MessageBlock.Text = await Logger.CurrentDomainOnUnhandledException(sender, e);
+            Logger.CurrentDomainOnUnhandledException(sender, e);
         }
     }
 }
