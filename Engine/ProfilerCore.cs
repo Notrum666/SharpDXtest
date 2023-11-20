@@ -65,21 +65,21 @@ namespace Engine
     public class ProfilingResult
     {
         public string DisplayName { get; private set; }
-        public long StartTickCount { get; private set; }
-        public long EndTickCount { get; private set; }
+        public long StartTick { get; private set; }
+        public long EndTick { get; private set; }
 
         public int ThreadId { get; private set; }
         public StackTrace StackTrace { get; private set; }
 
-        public long DeltaTicks => EndTickCount - StartTickCount;
-        public double DeltaSeconds => (double)DeltaTicks / Stopwatch.Frequency;
-        public double DeltaMilliseconds => DeltaSeconds * 1000;
+        public long DeltaTicks => EndTick - StartTick;
+        public double DeltaMilliseconds => (double)DeltaTicks / Stopwatch.Frequency * 1000;
+        public double StartMilliseconds => (double)StartTick / Stopwatch.Frequency * 1000;
 
         public ProfilingResult(string displayName, long startTickCount)
         {
             DisplayName = displayName;
-            StartTickCount = startTickCount;
-            EndTickCount = Stopwatch.GetTimestamp();
+            StartTick = startTickCount;
+            EndTick = Stopwatch.GetTimestamp();
 
             ThreadId = Environment.CurrentManagedThreadId;
             StackTrace = new StackTrace(2, true);
