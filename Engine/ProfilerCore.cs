@@ -26,23 +26,12 @@ namespace Engine
                 _methodsToPatch.AddRange(profiledMethods);
             }
 
-            Debug.WriteLine($"Found {_methodsToPatch.Count} profileable methods in {assemblies.Length} assemblies");
-
             PatchAll();
-
-            Debug.WriteLine("Profiler initialized");
         }
 
         public static void AddProfilingResult(ProfilingResult result)
         {
             _results.Add(result);
-            Debug.WriteLine($"{result.DisplayName} took {result.DeltaTicks} ticks | {result.DeltaMilliseconds} ms to execute");
-
-            if (result.DisplayName == "Stop")
-            {
-                Debug.WriteLine($"ThreadId = {result.ThreadId} | DiagStackTraceTrue:");
-                Debug.WriteLine(result.StackTrace);
-            }
         }
 
         private static void PatchAll()
@@ -56,8 +45,6 @@ namespace Engine
                 _harmony.Patch(method, new HarmonyMethod(profilerPrefix), new HarmonyMethod(profilerPostfix));
                 patchedMethods++;
             }
-
-            Debug.WriteLine($"Patched {patchedMethods} methods");
         }
 
         private static void StartProfiling(out long __state)
