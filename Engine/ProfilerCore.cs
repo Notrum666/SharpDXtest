@@ -34,6 +34,11 @@ namespace Engine
             _results.Add(result);
         }
 
+        public static IReadOnlyList<ProfilingResult> GetResults()
+        {
+            return _results;
+        }
+
         private static void PatchAll()
         {
             MethodInfo profilerPrefix = AccessTools.Method(typeof(ProfilerCore), nameof(StartProfiling));
