@@ -36,7 +36,7 @@ namespace Engine
         public static void AddProfilingResult(ProfilingResult result)
         {
             _results.Add(result);
-            Debug.WriteLine($"{result.DisplayName} took {result.Time.Ticks} ticks | {result.Time.TotalMilliseconds} ms to execute");
+            Debug.WriteLine($"{result.DisplayName} took {result.DeltaTicks} ticks | {result.DeltaMilliseconds} ms to execute");
         }
 
         private static void PatchAll()
@@ -54,19 +54,16 @@ namespace Engine
             Debug.WriteLine($"Patched {patchedMethods} methods");
         }
 
-        private static void StartProfiling(out Stopwatch __state)
+        private static void StartProfiling(out long __state)
         {
-            __state = new Stopwatch();
-            __state.Start();
+            __state = Stopwatch.GetTimestamp();
         }
 
-        private static void StopProfiling(Stopwatch __state, MethodInfo __originalMethod)
+        private static void StopProfiling(long __state, MethodInfo __originalMethod)
         {
-            __state.Stop();
-
             ProfileMeAttribute profileAttribute = __originalMethod.GetCustomAttribute<ProfileMeAttribute>();
 
-            ProfilingResult result = new ProfilingResult(profileAttribute.DisplayName, DateTime.Now, __state.Elapsed);
+            ProfilingResult result = new ProfilingResult(profileAttribute.DisplayName, __state);
 
             AddProfilingResult(result);
         }
@@ -75,14 +72,18 @@ namespace Engine
     public class ProfilingResult
     {
         public string DisplayName { get; private set; }
-        public DateTime Occurence { get; private set; }
-        public TimeSpan Time { get; private set; }
+        public long StartTickCount { get; private set; }
+        public long EndTickCount { get; private set; }
 
-        public ProfilingResult(string displayName, DateTime occurence, TimeSpan time)
+        public long DeltaTicks => EndTickCount - StartTickCount;
+        public float DeltaSeconds => (float)DeltaTicks / Stopwatch.Frequency;
+        public float DeltaMilliseconds => DeltaSeconds * 1000;
+
+        public ProfilingResult(string displayName, long startTickCount)
         {
             DisplayName = displayName;
-            Occurence = occurence;
-            Time = time;
+            StartTickCount = startTickCount;
+            EndTickCount = Stopwatch.GetTimestamp();
         }
     }
 
