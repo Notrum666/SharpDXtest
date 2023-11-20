@@ -12,15 +12,15 @@ namespace Engine
     {
         private static readonly Harmony _harmony = new("Profiler");
         private static readonly List<MethodInfo> _methodsToPatch = new();
-        private static readonly List<MyProfilingResult> _results = new();
+        private static readonly List<ProfilingResult> _results = new();
 
         public static void Init()
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            foreach (var assembly in assemblies)
+            foreach (Assembly assembly in assemblies)
             {
-                var profiledMethods = assembly.GetTypes()
+                IEnumerable<MethodInfo> profiledMethods = assembly.GetTypes()
                     .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
                     .Where(m => m.GetCustomAttribute<ProfileMeAttribute>() != null);
                 _methodsToPatch.AddRange(profiledMethods);
@@ -33,7 +33,7 @@ namespace Engine
             Debug.WriteLine("Profiler initialized");
         }
 
-        public static void AddProfilingResult(MyProfilingResult result)
+        public static void AddProfilingResult(ProfilingResult result)
         {
             _results.Add(result);
             Debug.WriteLine($"{result.DisplayName} took {result.Time.Ticks} ticks | {result.Time.TotalMilliseconds} ms to execute");
@@ -41,11 +41,11 @@ namespace Engine
 
         private static void PatchAll()
         {
-            var profilerPrefix = AccessTools.Method(typeof(ProfilerCore), nameof(StartProfiling));
-            var profilerPostfix = AccessTools.Method(typeof(ProfilerCore), nameof(StopProfiling));
+            MethodInfo profilerPrefix = AccessTools.Method(typeof(ProfilerCore), nameof(StartProfiling));
+            MethodInfo profilerPostfix = AccessTools.Method(typeof(ProfilerCore), nameof(StopProfiling));
 
             int patchedMethods = 0;
-            foreach (var method in _methodsToPatch)
+            foreach (MethodInfo method in _methodsToPatch)
             {
                 try
                 {
@@ -72,21 +72,21 @@ namespace Engine
         {
             __state.Stop();
 
-            var profileAttribute = __originalMethod.GetCustomAttribute<ProfileMeAttribute>();
+            ProfileMeAttribute profileAttribute = __originalMethod.GetCustomAttribute<ProfileMeAttribute>();
 
-            var result = new MyProfilingResult(profileAttribute.DisplayName, DateTime.Now, __state.Elapsed);
+            ProfilingResult result = new ProfilingResult(profileAttribute.DisplayName, DateTime.Now, __state.Elapsed);
 
             AddProfilingResult(result);
         }
     }
 
-    public class MyProfilingResult
+    public class ProfilingResult
     {
         public string DisplayName { get; private set; }
         public DateTime Occurence { get; private set; }
         public TimeSpan Time { get; private set; }
 
-        public MyProfilingResult(string displayName, DateTime occurence, TimeSpan time)
+        public ProfilingResult(string displayName, DateTime occurence, TimeSpan time)
         {
             DisplayName = displayName;
             Occurence = occurence;
