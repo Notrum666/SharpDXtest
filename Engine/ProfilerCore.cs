@@ -47,16 +47,8 @@ namespace Engine
             int patchedMethods = 0;
             foreach (MethodInfo method in _methodsToPatch)
             {
-                try
-                {
-                    Debug.WriteLine($"Trying to patch {method.Name}");
-                    _harmony.Patch(method, new HarmonyMethod(profilerPrefix), new HarmonyMethod(profilerPostfix));
-                    patchedMethods++;
-                }
-                catch (Exception e)
-                {
-                    Debug.WriteLine($"Failed to patch {method.Name}, exception: {e}");
-                }
+                _harmony.Patch(method, new HarmonyMethod(profilerPrefix), new HarmonyMethod(profilerPostfix));
+                patchedMethods++;
             }
 
             Debug.WriteLine($"Patched {patchedMethods} methods");
