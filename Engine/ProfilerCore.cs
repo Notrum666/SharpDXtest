@@ -37,6 +37,12 @@ namespace Engine
         {
             _results.Add(result);
             Debug.WriteLine($"{result.DisplayName} took {result.DeltaTicks} ticks | {result.DeltaMilliseconds} ms to execute");
+
+            if (result.DisplayName == "Stop")
+            {
+                Debug.WriteLine($"ThreadId = {result.ThreadId} | DiagStackTraceTrue:");
+                Debug.WriteLine(result.StackTrace);
+            }
         }
 
         private static void PatchAll()
@@ -75,15 +81,21 @@ namespace Engine
         public long StartTickCount { get; private set; }
         public long EndTickCount { get; private set; }
 
+        public int ThreadId { get; private set; }
+        public StackTrace StackTrace { get; private set; }
+
         public long DeltaTicks => EndTickCount - StartTickCount;
-        public float DeltaSeconds => (float)DeltaTicks / Stopwatch.Frequency;
-        public float DeltaMilliseconds => DeltaSeconds * 1000;
+        public double DeltaSeconds => (double)DeltaTicks / Stopwatch.Frequency;
+        public double DeltaMilliseconds => DeltaSeconds * 1000;
 
         public ProfilingResult(string displayName, long startTickCount)
         {
             DisplayName = displayName;
             StartTickCount = startTickCount;
             EndTickCount = Stopwatch.GetTimestamp();
+
+            ThreadId = Environment.CurrentManagedThreadId;
+            StackTrace = new StackTrace(2, true);
         }
     }
 
