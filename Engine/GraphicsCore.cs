@@ -42,7 +42,7 @@ namespace Engine
 
             public GBuffer(int width, int height)
             {
-                worldPos = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+                worldPos = new Texture(width, height, new Vector4f(float.NaN, float.NaN, float.NaN, float.NaN).GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
                 albedo = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
                 normal = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
                 metallic = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
@@ -82,7 +82,10 @@ namespace Engine
         private static Texture depthBuffer;
         private static Texture radianceBuffer;
         private static Texture colorBuffer;
+
         private static Texture ssaoBuffer;
+        private static Texture ssaoDepth;
+
         private static BlendState additiveBlendState;
         private static BlendState blendingBlendState;
 
@@ -148,6 +151,7 @@ namespace Engine
             AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
             AssetsManager.LoadShaderPipeline("ssao", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao.fsh"));
             AssetsManager.LoadShaderPipeline("ssao_blur", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao_blur.fsh"));
+            AssetsManager.LoadShaderPipeline("ssao_depth", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao_depth.fsh"));
 
             bloomEffect = new PostProcessEffect_Bloom();
 
@@ -273,7 +277,9 @@ namespace Engine
             depthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
             radianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
             colorBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
-            ssaoBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            
+            ssaoBuffer = new Texture(width / 2, height / 2, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            ssaoDepth = new Texture(width / 2, height / 2, float.NaN.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.RenderTarget);
         }
 
         public static void Resize(int width, int height)
@@ -582,7 +588,7 @@ namespace Engine
                                                                                                             gbuffer.roughness.GetView<RenderTargetView>(),
                                                                                                             gbuffer.ambientOcclusion.GetView<RenderTargetView>());
             
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(gbuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(gbuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(float.NaN, float.NaN, float.NaN, float.NaN));
             CurrentDevice.ImmediateContext.ClearDepthStencilView(depthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
             
             List<GameObject> objects = EngineCore.CurrentScene.objects;
@@ -826,10 +832,35 @@ namespace Engine
         private static void SSAOPass()
         {
             SSAODepthPass();
+            SSAOOccludePass();
             SSAOBlurPass();
         }
 
         private static void SSAODepthPass()
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
+
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, ssaoDepth.texture.Description.Width, ssaoDepth.texture.Description.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: ssaoDepth.GetView<RenderTargetView>());
+
+            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["ssao_depth"];
+
+            pipeline.Use();
+
+            Matrix4x4f view = (Matrix4x4f)CurrentCamera.GameObject.Transform.View;
+
+            pipeline.UpdateUniform("camView", view);
+
+            pipeline.UploadUpdatedUniforms();
+
+            gbuffer.worldPos.use("inputTex");
+            ssaoSampler.use("texSampler");
+
+            CurrentDevice.ImmediateContext.Draw(6, 0);
+        }
+
+        private static void SSAOOccludePass()
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
@@ -849,25 +880,25 @@ namespace Engine
                 )
             );
 
-            Matrix4x4f viewProj = (Matrix4x4f)(CurrentCamera.Proj * CurrentCamera.GameObject.Transform.View);
             Matrix4x4f view = (Matrix4x4f)CurrentCamera.GameObject.Transform.View;
             Matrix4x4f proj = (Matrix4x4f)CurrentCamera.Proj;
+            Matrix4x4f invProj = (Matrix4x4f)CurrentCamera.InvProj;
 
-            pipeline.UpdateUniform("camViewProj", viewProj);
             pipeline.UpdateUniform("camView", view);
             pipeline.UpdateUniform("camProj", proj);
+            pipeline.UpdateUniform("camInvProj", invProj);
 
             const int samplesCount = 64;
 
             Random rnd = new Random();
-            float r = 1.0f;
+            float sampleRadius = 1.0f;
             for (int i = 0; i < samplesCount; i++)
             {
                 Vector3f v = new Vector3f(
                     rnd.NextFloat(-1, 1),
                     rnd.NextFloat(0, 1),
                     rnd.NextFloat(-1, 1)
-                );// todo: even distribution on half-sphere
+                );// half sphere distribution
 
                 v.normalize();
 
@@ -889,10 +920,13 @@ namespace Engine
 
             for(int i = 0; i < 16; i++)
             {
+                float rAngle = rnd.NextFloat(0.0f, MathF.PI * 2.0f);
+                float rRadius = MathF.Sqrt(rnd.NextFloat(0.0f, 1.0f));
+
                 Vector3f v = new Vector3f(
-                    rnd.NextFloat(-1, 1),
+                    MathF.Sin(rAngle) * rRadius,
                     0.0f,
-                    rnd.NextFloat(-1, 1)
+                    MathF.Cos(rAngle) * rRadius
                 );
 
                 pipeline.UpdateUniform(
@@ -901,17 +935,16 @@ namespace Engine
                 );
             }
 
-            pipeline.UpdateUniform("sampleRad", r);
+            pipeline.UpdateUniform("sampleRad", sampleRadius);
 
             pipeline.UploadUpdatedUniforms();
 
             gbuffer.worldPos.use("worldPosTex");
             gbuffer.normal.use("normalTex");
-            //ssaoSampler.use("texSampler");
+            ssaoDepth.use("depthTex");
+            ssaoSampler.use("texSampler");
 
             CurrentDevice.ImmediateContext.Draw(6, 0);
-
-            // unity render pipeline 
         }
 
         private static void SSAOBlurPass()
@@ -927,16 +960,17 @@ namespace Engine
             pipeline.Use();
 
             pipeline.UpdateUniform(
-                "texSize",
+                "texelSize",
                 new Vector2f(
-                    gbuffer.worldPos.texture.Description.Width,
-                    gbuffer.worldPos.texture.Description.Height
+                    1.0f / ssaoBuffer.texture.Description.Width,
+                    1.0f / ssaoBuffer.texture.Description.Height
                 )
             );
 
             pipeline.UploadUpdatedUniforms();
 
             ssaoBuffer.use("inputTex");
+            ssaoSampler.use("texSampler");
 
             CurrentDevice.ImmediateContext.Draw(6, 0);
         }

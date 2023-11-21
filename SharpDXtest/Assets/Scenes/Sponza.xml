@@ -11,7 +11,7 @@
 
   <GameObject x.Name="Camera">
     <Transform>
-      <Transform.Position x="30"/>
+      <Transform.Position x="10" z="10"/>
       <Transform.Rotation z="90"/>
     </Transform>
     <Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.7777"/>
