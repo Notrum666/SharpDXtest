@@ -239,7 +239,7 @@
                                     Command="{Binding CloseButton_ClickCommand, RelativeSource={RelativeSource AncestorType=this:ToolsHost}}" 
                                     CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=TabControl}}"/>
                         </Grid>
-                        <ScrollViewer x:Name="TabPanelScrollViewer" Grid.Row="0" Panel.ZIndex="1" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Hidden"
+                        <ScrollViewer Focusable="False" x:Name="TabPanelScrollViewer" Grid.Row="0" Panel.ZIndex="1" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Hidden"
                                       Visibility="{Binding Items.Count, RelativeSource={RelativeSource AncestorType=this:ToolsHost}, Converter={StaticResource TabPanelVisibilityConverter}}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="PreviewMouseWheel">
@@ -247,7 +247,7 @@
                                         RelativeSource={RelativeSource AncestorType=this:ToolsHost}}" Sender="{Binding ElementName=TabPanelScrollViewer}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
-                            <TabPanel IsItemsHost="True" Background="Transparent"/>
+                            <TabPanel IsItemsHost="True"/>
                         </ScrollViewer>
                         <Border x:Name="Border" Grid.Row="1" BorderThickness="1" 
                                 Background="{StaticResource ResourceKey=BackgroundBrush}"
