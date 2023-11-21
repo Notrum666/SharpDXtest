@@ -2,18 +2,18 @@
 using System.Globalization;
 using System.IO;
 
-namespace SharpDXtest.Assets.Logger
+namespace Engine.Logger
 {
     public static class Logger 
     {
         private static string DirectoryPath { get; } = Environment.CurrentDirectory + @"\Logs\";
         private static StreamWriter FileStream { get; set; }
         public static event Action<LogMessage> OnLog;
-
         static Logger()
         {
             FileStream = CreateFilePath();
             OnLog += LogToFile;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
         }
 
         private static void LogToFile(LogMessage obj)  
@@ -32,7 +32,7 @@ namespace SharpDXtest.Assets.Logger
              OnLog?.Invoke(new LogMessage(type, DateTime.Now, message));
         }
 
-        public static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
             FileStream.WriteLine(GetDateTimeString(DateTime.Now) +  "Error: " + ex.Message);

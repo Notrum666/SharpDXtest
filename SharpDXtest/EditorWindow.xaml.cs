@@ -12,7 +12,6 @@ using LinearAlgebra;
 
 using SharpDX.Direct3D11;
 using SharpDX;
-using SharpDXtest.Assets.Logger;
 
 namespace SharpDXtest
 {
@@ -47,7 +46,6 @@ namespace SharpDXtest
             EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
 
             CompositionTarget.Rendering += OnRender;
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
         }
         private void HideCursor()
         {
@@ -190,10 +188,6 @@ namespace SharpDXtest
             GraphicsCore.Resize((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
 
             copyFramebuffer = new FrameBuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
-        }
-        private void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
-        {
-            Logger.CurrentDomainOnUnhandledException(sender, e);
         }
     }
 }
