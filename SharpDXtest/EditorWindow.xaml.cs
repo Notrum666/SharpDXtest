@@ -9,10 +9,10 @@ using System.Windows.Interop;
 
 using Engine;
 using LinearAlgebra;
-using SharpDXtest.Assets.Components;
 
 using SharpDX.Direct3D11;
 using SharpDX;
+using SharpDXtest.Assets.Logger;
 
 namespace SharpDXtest
 {
