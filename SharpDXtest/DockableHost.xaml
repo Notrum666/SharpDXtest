@@ -1,0 +1,86 @@
+﻿<UserControl x:Class="Editor.DockableHost"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Editor"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <UserControl.Resources>
+        <local:BoolToVisibilityConverter x:Key="VisConv"/>
+        <local:ComplexConverter x:Key="ItemsCountToVisConv">
+            <local:ComplexConverter.ConvertersSequence>
+                <local:IntToBoolConverter TargetValue="0" Mode="NotEqual"/>
+                <local:BoolToVisibilityConverter/>
+            </local:ComplexConverter.ConvertersSequence>
+        </local:ComplexConverter>
+    </UserControl.Resources>
+    <Grid Background="Transparent" DragEnter="UserControl_DragEnter" DragLeave="UserControl_DragLeave" AllowDrop="True" Drop="Grid_Drop">
+        <Grid Panel.ZIndex="2" IsHitTestVisible="False" Visibility="{Binding ShowPlaceholder, Converter={StaticResource VisConv}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Rectangle x:Name="Placeholder" Fill="Blue" Opacity="0.2"/>
+        </Grid>
+        <Grid Panel.ZIndex="1" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="{Binding ShowDockingOverlay, Converter={StaticResource VisConv}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Control x:Name="DockingCenter" AllowDrop="True" Grid.Row="1" Grid.Column="1" 
+                     Style="{StaticResource ResourceKey=DockingSpot}" 
+                     DragEnter="DockingCenter_DragEnter" 
+                     DragLeave="DockingSpot_DragLeave" 
+                     Drop="DockingCenter_Drop"/>
+            <Control x:Name="DockingLeft" AllowDrop="True" Grid.Row="1" Grid.Column="0" 
+                     Style="{StaticResource ResourceKey=DockingSpot_Left}" 
+                     Visibility="{Binding Items.Count, Converter={StaticResource ItemsCountToVisConv}}"
+                     DragEnter="DockingLeft_DragEnter" 
+                     DragLeave="DockingSpot_DragLeave" 
+                     Drop="DockingLeft_Drop"/>
+            <Control x:Name="DockingTop" AllowDrop="True" Grid.Row="0" Grid.Column="1" 
+                     Style="{StaticResource ResourceKey=DockingSpot_Top}" 
+                     Visibility="{Binding Items.Count, Converter={StaticResource ItemsCountToVisConv}}"
+                     DragEnter="DockingTop_DragEnter" 
+                     DragLeave="DockingSpot_DragLeave" 
+                     Drop="DockingTop_Drop"/>
+            <Control x:Name="DockingRight" AllowDrop="True" Grid.Row="1" Grid.Column="2" 
+                     Style="{StaticResource ResourceKey=DockingSpot_Right}" 
+                     Visibility="{Binding Items.Count, Converter={StaticResource ItemsCountToVisConv}}"
+                     DragEnter="DockingRight_DragEnter" 
+                     DragLeave="DockingSpot_DragLeave" 
+                     Drop="DockingRight_Drop"/>
+            <Control x:Name="DockingBottom" AllowDrop="True" Grid.Row="2" Grid.Column="1" 
+                     Style="{StaticResource ResourceKey=DockingSpot_Bottom}" 
+                     Visibility="{Binding Items.Count, Converter={StaticResource ItemsCountToVisConv}}"
+                     DragEnter="DockingBottom_DragEnter" 
+                     DragLeave="DockingSpot_DragLeave" 
+                     Drop="DockingBottom_Drop"   />
+        </Grid>
+        <Grid x:Name="ContentGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition MinHeight="10"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition MinHeight="10"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition MinWidth="10"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition MinWidth="10"/>
+            </Grid.ColumnDefinitions>
+            <GridSplitter x:Name="ColumnsSplitter" Width="5" Grid.Column="1" Grid.RowSpan="3" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Stretch" DragDelta="ColumnsSplitter_DragDelta"/>
+            <GridSplitter x:Name="RowsSplitter" Height="5" Grid.Row="1" Grid.ColumnSpan="3" Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Center" DragDelta="RowsSplitter_DragDelta"/>
+        </Grid>
+    </Grid>
+</UserControl>
