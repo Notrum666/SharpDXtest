@@ -88,14 +88,7 @@ namespace Engine
                     }
                 }
             });
-            try
-            {
-                await loopTask;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            await loopTask;
         }
         public static void Stop()
         {

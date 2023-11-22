@@ -265,4 +265,127 @@
         </Setter>
     </Style>
 
+    <!-- Top-level without children -->
+    <ControlTemplate x:Key="MenuItem_TopLevelItem" TargetType="MenuItem">
+        <Grid Name="HeaderHost" Background="{StaticResource BackgroundBrush}" WindowChrome.IsHitTestVisibleInChrome="True">
+            <ContentPresenter TextElement.Foreground="{StaticResource MenuForegroundBrush}" Margin="12,2,12,2" ContentSource="Header"/>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="true">
+                <Setter TargetName="HeaderHost" Property="Background" Value="{StaticResource SelectedMenuItemBrush}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- Top-level with children -->
+    <ControlTemplate x:Key="MenuItem_TopLevelHeader" TargetType="MenuItem">
+        <Grid Name="HeaderHost" Background="{StaticResource BackgroundBrush}" WindowChrome.IsHitTestVisibleInChrome="True">
+            <ContentPresenter TextElement.Foreground="{StaticResource MenuForegroundBrush}" Margin="12,2,12,2" ContentSource="Header"/>
+            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsSubmenuOpen}" Focusable="False" PopupAnimation="Fade" WindowChrome.IsHitTestVisibleInChrome="True">
+                <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1"
+                        Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource BorderBrush}">
+                    <StackPanel Margin="4,4,4,2" x:Name="ItemsPresenter" IsItemsHost="True"/>
+                </Border>
+            </Popup>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="true">
+                <Setter TargetName="HeaderHost" Property="Background" Value="{StaticResource SelectedMenuItemBrush}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- Sub-level without children -->
+    <ControlTemplate x:Key="MenuItem_SubmenuItem" TargetType="MenuItem">
+        <Grid x:Name="SubmenuGrid" Background="Transparent" WindowChrome.IsHitTestVisibleInChrome="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
+                <ColumnDefinition Width="13"/>
+            </Grid.ColumnDefinitions>
+            <ContentPresenter x:Name="Icon" Margin="6,0,6,0" Grid.Column="0" VerticalAlignment="Center" ContentSource="Icon"/>
+            <ContentPresenter x:Name="HeaderHost" Grid.Column="1" Margin="10,0,0,0" TextElement.Foreground="{StaticResource MenuForegroundBrush}" 
+                              VerticalAlignment="Stretch" ContentSource="Header"/>
+            <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="10,2,0,2" VerticalAlignment="Stretch"/>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="true">
+                <Setter Property="Background" TargetName="SubmenuGrid" Value="{StaticResource SelectedMenuItemBrush}"/>
+            </Trigger>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="TextElement.Foreground" TargetName="HeaderHost" Value="{StaticResource InactiveMenuForegroundBrush}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <!-- Sub-level with children -->
+    <ControlTemplate x:Key="MenuItem_SubmenuHeader" TargetType="MenuItem">
+        <Grid x:Name="MenuElementGrid" Background="Transparent" WindowChrome.IsHitTestVisibleInChrome="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
+                <ColumnDefinition Width="13" />
+            </Grid.ColumnDefinitions>
+            <ContentPresenter x:Name="Icon" Margin="6,0,6,0" Grid.Column="0" VerticalAlignment="Center" ContentSource="Icon"/>
+            <ContentPresenter x:Name="HeaderHost" Grid.Column="1" Margin="10,0,0,0" TextElement.Foreground="{StaticResource MenuForegroundBrush}"
+                              VerticalAlignment="Stretch" ContentSource="Header"/>
+            <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="10,0,0,2" VerticalAlignment="Stretch"/>
+            <Path x:Name="SubmenuArrow" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                  Data="M 0 0 L 0 8 L 6 4 Z" Fill="{StaticResource MenuForegroundBrush}"/>
+            <Popup x:Name="Popup" Placement="Right" IsOpen="{TemplateBinding IsSubmenuOpen}" Focusable="False" PopupAnimation="Fade" WindowChrome.IsHitTestVisibleInChrome="True">
+                <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1"
+                        Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource BorderBrush}">
+                    <StackPanel Margin="4,4,4,2" x:Name="ItemsPresenter" IsItemsHost="True"/>
+                </Border>
+            </Popup>
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="true">
+                <Setter Property="Background" TargetName="MenuElementGrid" Value="{StaticResource SelectedMenuItemBrush}"/>
+            </Trigger>
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="TextElement.Foreground" TargetName="HeaderHost" Value="{StaticResource InactiveMenuForegroundBrush}"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style TargetType="MenuItem">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Menu">
+                    <Grid Background="{Binding Background}" VerticalAlignment="Center">
+                        <ItemsPresenter/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <!-- Top-level without children -->
+            <Trigger Property="Role" Value="TopLevelItem">
+                <Setter Property="Template" Value="{StaticResource MenuItem_TopLevelItem}" />
+            </Trigger>
+            <!-- Top-level with children -->
+            <Trigger Property="Role" Value="TopLevelHeader">
+                <Setter Property="Template" Value="{StaticResource MenuItem_TopLevelHeader}" />
+                <Setter Property="Grid.IsSharedSizeScope" Value="true" />
+            </Trigger>
+            <!-- Sub-level without children -->
+            <Trigger Property="Role" Value="SubmenuItem">
+                <Setter Property="Template" Value="{StaticResource MenuItem_SubmenuItem}" />
+            </Trigger>
+            <!-- Sub-level with children -->
+            <Trigger Property="Role" Value="SubmenuHeader">
+                <Setter Property="Template" Value="{StaticResource MenuItem_SubmenuHeader}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 </ResourceDictionary>

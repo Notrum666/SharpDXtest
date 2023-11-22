@@ -89,7 +89,6 @@ namespace Engine
         private static bool needsToBeResized;
         private static int targetWidth;
         private static int targetHeight;
-        private static object resizeLockObject = new object();
 
 #if GraphicsDebugging
         private static SharpDX.DXGI.SwapChain swapChain;
@@ -265,23 +264,16 @@ namespace Engine
             if (height <= 0)
                 throw new ArgumentOutOfRangeException(nameof(height));
 
-            lock (resizeLockObject)
-            {
-                targetHeight = height;
-                targetWidth = width;
-                needsToBeResized = true;
-            }
+            targetHeight = height;
+            targetWidth = width;
+            needsToBeResized = true;
         }
         public static void Update()
         {
             if (needsToBeResized)
             {
-                lock (resizeLockObject)
-                {
-                    GenerateBuffers(targetWidth, targetHeight);
-            
-                    needsToBeResized = false;
-                }
+                needsToBeResized = false;
+                GenerateBuffers(targetWidth, targetHeight);
             }
             
             RenderShadows();

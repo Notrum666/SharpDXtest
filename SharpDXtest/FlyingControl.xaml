@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Editor"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" x:Name="ThisFlyingControl" 
-             HorizontalAlignment="Left" VerticalAlignment="Top" MinHeight="10" MinWidth="10"
+             HorizontalAlignment="Left" VerticalAlignment="Top" MinHeight="64" MinWidth="64"
              MouseDown="ThisFlyingControl_MouseDown">
     <UserControl.Resources>
         <local:ComplexConverter x:Key="HeaderVisibilityConverter">

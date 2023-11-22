@@ -2,10 +2,16 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Color x:Key="BackgroundColor">#FF202020</Color>
     <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+
+    <Color x:Key="SelectedMenuItemColor">#FF505050</Color>
+    <SolidColorBrush x:Key="SelectedMenuItemBrush" Color="{StaticResource SelectedMenuItemColor}"/>
     
     <Color x:Key="BorderColor">#FF606060</Color>
     <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
 
+    <Color x:Key="InactiveBorderColor">#FF303030</Color>
+    <SolidColorBrush x:Key="InactiveBorderBrush" Color="{StaticResource InactiveBorderColor}"/>
+    
     <Color x:Key="ItemTabColor">#FF303030</Color>
     <SolidColorBrush x:Key="ItemTabBrush" Color="{StaticResource ItemTabColor}"/>
     
@@ -23,9 +29,18 @@
     
     <Color x:Key="InactiveForegroundColor">#FFB0B0B0</Color>
     <SolidColorBrush x:Key="InactiveForegroundBrush" Color="{StaticResource InactiveForegroundColor}"/>
+    
+    <Color x:Key="MenuForegroundColor">#FFE0E0E0</Color>
+    <SolidColorBrush x:Key="MenuForegroundBrush" Color="{StaticResource MenuForegroundColor}"/>
+
+    <Color x:Key="InactiveMenuForegroundColor">#FF909090</Color>
+    <SolidColorBrush x:Key="InactiveMenuForegroundBrush" Color="{StaticResource InactiveMenuForegroundColor}"/>
 
     <SolidColorBrush x:Key="ButtonBackgroundBrush" Color="Transparent"/>
 
-    <Color x:Key="HoverButtonBackgroundColor">#FFD0D0D0</Color>
+    <Color x:Key="HoverButtonBackgroundColor">#FF606060</Color>
     <SolidColorBrush x:Key="HoverButtonBackgroundBrush" Color="{StaticResource HoverButtonBackgroundColor}"/>
+
+    <Color x:Key="PressButtonBackgroundColor">#FF404040</Color>
+    <SolidColorBrush x:Key="PressButtonBackgroundBrush" Color="{StaticResource PressButtonBackgroundColor}"/>
 </ResourceDictionary>

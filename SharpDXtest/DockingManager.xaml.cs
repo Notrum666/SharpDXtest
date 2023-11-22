@@ -50,14 +50,21 @@ namespace Editor
             else
             {
                 Items.Add(control);
-                if (control.Margin.Left == 0 && control.Margin.Top == 0)
-                    control.Margin = new Thickness((ActualWidth - control.Width) / 2.0, (ActualHeight - control.Height) / 2.0, 0.0, 0.0);
+                control.Loaded += FlyingControl_Loaded;
                 control.PreviewMouseDown += FlyingControl_PreviewMouseDown;
                 control.OnBecameEmpty += FlyingControl_OnBecameEmpty;
             }
 
             flyingControls.Add(control);
             updateFlyingControlsOrder();
+        }
+
+        private void FlyingControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            FlyingControl control = sender as FlyingControl;
+            control.Loaded -= FlyingControl_Loaded;
+            if (control.Margin.Left == 0 && control.Margin.Top == 0)
+                control.Margin = new Thickness((ActualWidth - control.ActualWidth) / 2.0, (ActualHeight - control.ActualHeight) / 2.0, 0.0, 0.0);
         }
 
         private void FlyingControl_OnBecameEmpty(FlyingControl sender)
