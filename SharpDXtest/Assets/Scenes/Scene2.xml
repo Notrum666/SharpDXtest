@@ -35,7 +35,7 @@
 			<Transform>
 				<Transform.LocalScale x="3" y="3" z="3"/>
 			</Transform>
-			<MeshComponent mesh="{Mesh Sphere}">
+			<MeshComponent mesh="{Mesh Ball}">
 				<MeshComponent.Material Albedo="{Texture Sun}"/>
 			</MeshComponent>
 			<SelfRotation periodInDays="26.6"/>
