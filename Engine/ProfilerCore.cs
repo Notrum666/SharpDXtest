@@ -10,9 +10,9 @@ namespace Engine
 {
     public static class ProfilerCore
     {
-        private static readonly Harmony _harmony = new("Profiler");
-        private static readonly List<MethodInfo> _methodsToPatch = new();
-        private static readonly List<ProfilingResult> _results = new();
+        private static readonly Harmony harmony = new("Profiler");
+        private static readonly List<MethodInfo> methodsToPatch = new();
+        private static readonly List<ProfilingResult> results = new();
 
         public static void Init()
         {
@@ -23,7 +23,7 @@ namespace Engine
                 IEnumerable<MethodInfo> profiledMethods = assembly.GetTypes()
                     .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
                     .Where(m => m.GetCustomAttribute<ProfileMeAttribute>() != null);
-                _methodsToPatch.AddRange(profiledMethods);
+                methodsToPatch.AddRange(profiledMethods);
             }
 
             PatchAll();
@@ -31,12 +31,12 @@ namespace Engine
 
         public static void AddProfilingResult(ProfilingResult result)
         {
-            _results.Add(result);
+            results.Add(result);
         }
 
         public static IReadOnlyList<ProfilingResult> GetResults()
         {
-            return _results;
+            return results.AsReadOnly();
         }
 
         private static void PatchAll()
@@ -44,11 +44,9 @@ namespace Engine
             MethodInfo profilerPrefix = AccessTools.Method(typeof(ProfilerCore), nameof(StartProfiling));
             MethodInfo profilerPostfix = AccessTools.Method(typeof(ProfilerCore), nameof(StopProfiling));
 
-            int patchedMethods = 0;
-            foreach (MethodInfo method in _methodsToPatch)
+            foreach (MethodInfo method in methodsToPatch)
             {
-                _harmony.Patch(method, new HarmonyMethod(profilerPrefix), new HarmonyMethod(profilerPostfix));
-                patchedMethods++;
+                harmony.Patch(method, new HarmonyMethod(profilerPrefix), new HarmonyMethod(profilerPostfix));
             }
         }
 
