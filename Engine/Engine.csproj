@@ -25,6 +25,15 @@
     <Content Include="BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.gsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Update="BaseAssets\Shaders\Bloom\bloom_prefilter.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="BaseAssets\Shaders\Bloom\bloom_downsample_box.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="BaseAssets\Shaders\Bloom\bloom_upsample_box.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="BaseAssets\Shaders\DeferredRender\deffered_addLight.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
