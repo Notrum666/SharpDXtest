@@ -4,11 +4,12 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Interop;
-
-using Engine;
-
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+
+using Engine;
+using Engine.BaseAssets.Components;
+using SharpDXtest.Assets.Components;
 
 namespace Editor
 {
@@ -22,6 +23,10 @@ namespace Editor
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        private GameObject controlledGameObject;
+        private Camera camera;
+
+        private System.Drawing.Point cursorLockPoint;
         private CursorMode cursorMode;
         public CursorMode CursorMode
         {
@@ -31,6 +36,9 @@ namespace Editor
                 cursorMode = value;
                 if (IsKeyboardFocused)
                     Cursor = value == CursorMode.Normal ? Cursors.Arrow : Cursors.None;
+                if (value == CursorMode.HiddenAndLocked)
+                    cursorLockPoint = System.Windows.Forms.Cursor.Position;
+
                 OnPropertyChanged();
             }
         }
@@ -41,6 +49,7 @@ namespace Editor
         
         private int framesCount = 0;
         private double timeCounter = 0.0;
+        private bool keyboardFocused = false;
         public CameraRenderControl()
         {
             InitializeComponent();
@@ -56,11 +65,26 @@ namespace Editor
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
+            // to prevent errors during xaml designer loading in visual studio
             if (!EngineCore.IsAlive)
                 return;
 
-            if (copyFramebuffer == null)
-                copyFramebuffer = new FrameBuffer((int)ActualWidth, (int)ActualHeight);
+            if (!loaded)
+            {
+
+                Width = double.NaN;
+                Height = double.NaN;
+
+                controlledGameObject = new GameObject();
+                controlledGameObject.Transform.Position = new LinearAlgebra.Vector3(0, -10, 5);
+                EditorCameraController controller = controlledGameObject.AddComponent<EditorCameraController>();
+                controller.speed = 5;
+                camera = controlledGameObject.AddComponent<Camera>();
+                camera.Near = 0.001;
+                camera.Far = 500;
+
+                Resize((int)ActualWidth, (int)ActualHeight);
+            }
 
             EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
 
@@ -84,10 +108,7 @@ namespace Editor
                 return;
 
             if (cursorMode == CursorMode.HiddenAndLocked && IsKeyboardFocused)
-            {
-                System.Windows.Point point = PointToScreen(new System.Windows.Point(ActualWidth / 2, ActualHeight / 2));
-                System.Windows.Forms.Cursor.Position = new System.Drawing.Point((int)point.X, (int)point.Y);
-            }
+                System.Windows.Forms.Cursor.Position = cursorLockPoint;
 
             d3dimage.Lock();
         
@@ -100,8 +121,13 @@ namespace Editor
         {
             if (!EngineCore.IsAlive || !IsVisible) 
                 return;
-        
-            FrameBuffer buffer = GraphicsCore.GetNextFrontBuffer();
+
+            if (keyboardFocused)
+                controlledGameObject.Update();
+
+            GraphicsCore.RenderScene(camera);
+
+            FrameBuffer buffer = camera.GetNextFrontBuffer();
         
             GraphicsCore.CurrentDevice.ImmediateContext.ResolveSubresource(buffer.RenderTargetTexture.texture, 0, copyFramebuffer.RenderTargetTexture.texture, 0, SharpDX.DXGI.Format.B8G8R8A8_UNorm);
         
@@ -114,24 +140,31 @@ namespace Editor
                 timeCounter -= 1.0;
                 framesCount = 0;
             }
-        }        
-        private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        }
+        private void Resize(int width, int height)
         {
-            if (!loaded)
-                return;
-        
-            if (GraphicsCore.CurrentCamera != null)
-                GraphicsCore.CurrentCamera.Aspect = RenderControl.ActualWidth / RenderControl.ActualHeight;
-        
-            GraphicsCore.Resize((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
-        
-            copyFramebuffer = new FrameBuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+            camera.Aspect = width / (double)height;
+
+            camera.Resize(width, height);
+
+            copyFramebuffer = new FrameBuffer(width, height);
         }
 
         private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
+
+            if (e.RightButton == MouseButtonState.Pressed)
+                CursorMode = CursorMode.HiddenAndLocked;
+
             Keyboard.Focus(this);
+        }
+        private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+
+            if (e.RightButton == MouseButtonState.Released)
+                CursorMode = CursorMode.Normal;
         }
 
         private void UserControl_KeyDown(object sender, KeyEventArgs e)
@@ -143,11 +176,21 @@ namespace Editor
         private void UserControl_GotKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = cursorMode == CursorMode.Normal ? Cursors.Arrow : Cursors.None;
+            keyboardFocused = true;
         }
 
         private void UserControl_LostKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = Cursors.Arrow;
+            keyboardFocused = false;
+        }
+
+        private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            if (!loaded)
+                return;
+
+            Resize((int)ActualWidth, (int)ActualHeight);
         }
     }
 }

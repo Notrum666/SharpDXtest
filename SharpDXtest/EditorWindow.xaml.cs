@@ -18,7 +18,8 @@ namespace Editor
                 obj =>
                 {
                     FlyingControl flyingControl = new FlyingControl();
-                    flyingControl.Items.Add((FrameworkElement)Activator.CreateInstance((Type)obj));
+                    FrameworkElement item = (FrameworkElement)Activator.CreateInstance((Type)obj);
+                    flyingControl.Items.Add(item);
                     EditorDockingManager.AddFlyingControl(flyingControl);
                 },
                 obj => obj is Type && (obj as Type).IsSubclassOf(typeof(FrameworkElement))
@@ -39,6 +40,8 @@ namespace Editor
             EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene5.xml");
 
             EngineCore.Run();
+
+            EngineCore.IsPaused = true;
         }
         private void MainWindowInst_Closed(object sender, EventArgs e)
         {

@@ -40,10 +40,10 @@ namespace Editor
                 flyingControls.Remove(control);
             else
             {
-                Items.Add(control);
                 control.Loaded += FlyingControl_Loaded;
                 control.PreviewMouseDown += FlyingControl_PreviewMouseDown;
                 control.OnBecameEmpty += FlyingControl_OnBecameEmpty;
+                Items.Add(control);
             }
 
             flyingControls.Add(control);
@@ -54,6 +54,8 @@ namespace Editor
         {
             FlyingControl control = sender as FlyingControl;
             control.Loaded -= FlyingControl_Loaded;
+            control.Width = control.ActualWidth;
+            control.Height = control.ActualHeight;
             if (control.Margin.Left == 0 && control.Margin.Top == 0)
                 control.Margin = new Thickness((ActualWidth - control.ActualWidth) / 2.0, (ActualHeight - control.ActualHeight) / 2.0, 0.0, 0.0);
         }
@@ -82,9 +84,10 @@ namespace Editor
             foreach (UIElement child in Items)
                 if (child is FlyingControl flyingControl)
                 {
-                    flyingControls.Add(flyingControl);
+                    flyingControl.Loaded += FlyingControl_Loaded;
                     flyingControl.OnBecameEmpty += FlyingControl_OnBecameEmpty;
                     flyingControl.PreviewMouseDown += FlyingControl_PreviewMouseDown;
+                    flyingControls.Add(flyingControl);
                 }
 
             updateFlyingControlsOrder();

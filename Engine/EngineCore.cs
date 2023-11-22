@@ -18,6 +18,7 @@ namespace Engine
         private static bool isAlive = false;
         public static bool IsAlive { get => isAlive; }
         private static bool needsToBePaused = false;
+        private static bool needsToBeUnpaused = false;
         private static bool isPaused = false;
         public static bool IsPaused 
         {
@@ -33,7 +34,7 @@ namespace Engine
                 if (value)
                     needsToBePaused = true;
                 else
-                    isPaused = false;
+                    needsToBeUnpaused = true;
             }
         }
         private static Task loopTask;
@@ -63,8 +64,11 @@ namespace Engine
                 {
                     InputManager.Update();
                     Time.Update();
-                    Update();
-                    SoundCore.Update();
+                    if (!isPaused)
+                    {
+                        Update();
+                        SoundCore.Update();
+                    }
                     GraphicsCore.Update();
 
                     OnFrameEnded?.Invoke();
@@ -74,14 +78,13 @@ namespace Engine
                         needsToBePaused = false;
                         isPaused = true;
                         OnPaused?.Invoke();
-                        while (isPaused && IsAlive) ;
+                    }
 
-                        if (IsAlive)
-                        {
-                            InputManager.Update();
-                            Time.Update();
-                            OnResumed?.Invoke();
-                        }
+                    if (needsToBeUnpaused)
+                    {
+                        needsToBeUnpaused = false;
+                        isPaused = false;
+                        OnResumed?.Invoke();
                     }
 
                     if (Time.DeltaTime < 1.0/144.0)
@@ -162,10 +165,10 @@ namespace Engine
             {
                 if (!CurrentScene.objects[i].Enabled)
                     continue;
-                Rigidbody rigidbody = CurrentScene.objects[i].getComponent<Rigidbody>();
+                Rigidbody rigidbody = CurrentScene.objects[i].GetComponent<Rigidbody>();
                 if (rigidbody != null)
                 {
-                    foreach (Collider collider in CurrentScene.objects[i].getComponents<Collider>())
+                    foreach (Collider collider in CurrentScene.objects[i].GetComponents<Collider>())
                         collider.updateData();
                     foreach (Rigidbody otherRigidbody in rigidbodies)
                         rigidbody.solveCollisionWith(otherRigidbody);

@@ -25,7 +25,7 @@ namespace Engine
             components.Add(Transform);
         }
 
-        public T addComponent<T>() where T : Component
+        public T AddComponent<T>() where T : Component
         {
             Component component = Activator.CreateInstance(typeof(T)) as Component;
             component.GameObject = this;
@@ -34,7 +34,7 @@ namespace Engine
                 component.Initialize();
             return component as T;
         }
-        public Component addComponent(Type t)
+        public Component AddComponent(Type t)
         {
             if (!t.IsSubclassOf(typeof(Component)))
                 throw new ArgumentException("Given type must be a component");
@@ -45,14 +45,14 @@ namespace Engine
                 component.Initialize();
             return component;
         }
-        public T getComponent<T>() where T : Component
+        public T GetComponent<T>() where T : Component
         {
             foreach (Component component in components)
                 if (component is T)
                     return component as T;
             return null;
         }
-        public T[] getComponents<T>() where T : Component
+        public T[] GetComponents<T>() where T : Component
         {
             List<T> curComponents = new List<T>();
             foreach (Component component in components)
@@ -60,7 +60,7 @@ namespace Engine
                     curComponents.Add(component as T);
             return curComponents.ToArray();
         }
-        public Component getComponent(Type t)
+        public Component GetComponent(Type t)
         {
             if (!t.IsSubclassOf(typeof(Component)))
                 throw new ArgumentException("Given type must be a component");
@@ -69,7 +69,7 @@ namespace Engine
                     return component;
             return null;
         }
-        public Component[] getComponents(Type t)
+        public Component[] GetComponents(Type t)
         {
             if (!t.IsSubclassOf(typeof(Component)))
                 throw new ArgumentException("Given type must be a component");

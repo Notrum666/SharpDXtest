@@ -6,16 +6,20 @@
              xmlns:i="clr-namespace:System.Windows.Interop;assembly=PresentationCore"
              xmlns:local="clr-namespace:Editor"
              mc:Ignorable="d" 
-             d:DesignHeight="1080" d:DesignWidth="1920" Tag="Camera" Width="1280" Height="720"
+             d:DesignWidth="1280" d:DesignHeight="720" Tag="Camera" Width="1280" Height="720"
              Loaded="UserControl_Loaded" Unloaded="UserControl_Unloaded" Focusable="True"
-             MouseDown="UserControl_MouseDown" KeyDown="UserControl_KeyDown"
-             GotKeyboardFocus="UserControl_GotKeyboardFocus" LostKeyboardFocus="UserControl_LostKeyboardFocus">
+             MouseDown="UserControl_MouseDown" MouseUp="UserControl_MouseUp" 
+             KeyDown="UserControl_KeyDown"
+             GotKeyboardFocus="UserControl_GotKeyboardFocus" 
+             LostKeyboardFocus="UserControl_LostKeyboardFocus">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
     </UserControl.Resources>
     <Grid>
-        <TextBlock x:Name="FPSTextBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20" Text="0" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
-        <Image x:Name="RenderControl" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Stretch="Fill" SizeChanged="RenderControl_SizeChanged">
+        <TextBlock x:Name="FPSTextBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20" 
+                   Text="0" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
+        <Image x:Name="RenderControl" HorizontalAlignment="Stretch" 
+               VerticalAlignment="Stretch" Stretch="Fill" SizeChanged="RenderControl_SizeChanged">
             <Image.Source>
                 <i:D3DImage x:Name="d3dimage"/>
             </Image.Source>

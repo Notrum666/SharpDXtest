@@ -1443,7 +1443,7 @@ namespace Engine
                         if (curType == typeof(Transform))
                             curObj = (parent as GameObject).Transform;
                         else
-                            curObj = (parent as GameObject).addComponent(curType);
+                            curObj = (parent as GameObject).AddComponent(curType);
                         parseAttributes(ref curObj, element.Attributes());
                         foreach (XElement elem in element.Elements())
                             parseElement(curObj, element, elem);

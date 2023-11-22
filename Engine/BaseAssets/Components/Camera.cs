@@ -4,7 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using SharpDX;
+using Format = SharpDX.DXGI.Format;
+
 using LinearAlgebra;
+using SharpDX.Direct3D11;
+using System.Threading;
 
 namespace Engine.BaseAssets.Components
 {
@@ -62,19 +67,15 @@ namespace Engine.BaseAssets.Components
                 InvalidateMatrixes();
             }
         }
-        private static Camera current = null;
         public static Camera Current
         {
             get
             {
-                return current;
+                return GraphicsCore.CurrentCamera;
             }
             set
             {
-                if (value != null && value.GameObject == null)
-                    throw new Exception("Camera component must be attached to a gameobject.");
-
-                current = value;
+                GraphicsCore.CurrentCamera = value;
             }
         }
         public bool IsCurrent
@@ -82,16 +83,6 @@ namespace Engine.BaseAssets.Components
             get
             {
                 return Current == this;
-            }
-            set
-            {
-                if (value)
-                    Current = this;
-                else
-                {
-                    if (Current == this)
-                        Current = null;
-                }
             }
         }
         private Matrix4x4 proj;
@@ -115,6 +106,31 @@ namespace Engine.BaseAssets.Components
             }
         }
         private bool matrixesRequireRecalculation;
+
+        public event Action<int, int> OnResized;
+
+        public Color BackgroundColor { get; set; }
+
+        internal GBuffer GBuffer { get; private set; }
+        internal Texture DepthBuffer { get; private set; }
+        internal Texture RadianceBuffer { get; private set; }
+        internal Texture ColorBuffer { get; private set; }
+        internal FrameBuffer Backbuffer { get; private set; }
+        private FrameBuffer middlebuffer;
+        private FrameBuffer frontbuffer;
+
+        private bool needsToBeResized;
+        private int targetWidth;
+        private int targetHeight;
+        
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+
+        public Camera()
+        {
+            BackgroundColor = Color.FromRgba(0xFF010101);
+            //BackgroundColor = Color.FromRgba(0xFFFFFFFF);
+        }
         public void InvalidateMatrixes()
         {
             matrixesRequireRecalculation = true;
@@ -131,6 +147,80 @@ namespace Engine.BaseAssets.Components
             invProj = proj.inverse();
 
             matrixesRequireRecalculation = false;
+        }
+        public void MakeCurrent()
+        {
+            Current = this;
+            Resize(1280, 720);
+        }
+        public void Resize(int width, int height)
+        {
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException(nameof(width));
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException(nameof(height));
+
+            targetHeight = height;
+            targetWidth = width;
+            needsToBeResized = true;
+        }
+        internal void PreRenderUpdate()
+        {
+            if (needsToBeResized)
+            {
+                needsToBeResized = false;
+                GenerateBuffers(targetWidth, targetHeight);
+            }
+        }
+        private void GenerateBuffers(int width, int height)
+        {
+            Width = width;
+            Height = height;
+            frontbuffer?.Dispose();
+            middlebuffer?.Dispose();
+            Backbuffer?.Dispose();
+            GBuffer.worldPos?.Dispose();
+            GBuffer.albedo?.Dispose();
+            GBuffer.normal?.Dispose();
+            GBuffer.metallic?.Dispose();
+            GBuffer.roughness?.Dispose();
+            GBuffer.ambientOcclusion?.Dispose();
+            DepthBuffer?.Dispose();
+            RadianceBuffer?.Dispose();
+            ColorBuffer?.Dispose();
+            frontbuffer = new FrameBuffer(width, height);
+            middlebuffer = new FrameBuffer(width, height);
+            Backbuffer = new FrameBuffer(width, height);
+            GBuffer = new GBuffer(width, height);
+            DepthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
+            RadianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            ColorBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+        }
+        public void SwapFrameBuffers()
+        {
+            lock (middlebuffer)
+            {
+                FrameBuffer tmp = Backbuffer;
+                Backbuffer = middlebuffer;
+                middlebuffer = tmp;
+            }
+        }
+        public FrameBuffer GetNextFrontBuffer()
+        {
+            try
+            {
+                lock (middlebuffer)
+                {
+                    FrameBuffer tmp = middlebuffer;
+                    middlebuffer = frontbuffer;
+                    frontbuffer = tmp;
+                }
+            }
+            catch (Exception e)
+            {
+
+            }
+            return frontbuffer;
         }
     }
 }

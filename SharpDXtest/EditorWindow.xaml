@@ -43,7 +43,7 @@
         </Grid>
         <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
             <this:DockableHost>
-                <!--<this:CameraRenderControl/>-->
+                <this:CameraRenderControl/>
             </this:DockableHost>
         </this:DockingManager>
     </Grid>
