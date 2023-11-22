@@ -192,9 +192,9 @@ namespace Engine.BaseAssets.Components
             middlebuffer = new FrameBuffer(width, height);
             Backbuffer = new FrameBuffer(width, height);
             GBuffer = new GBuffer(width, height);
-            DepthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
-            RadianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
-            ColorBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            DepthBuffer = new Texture(width, height, null, Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
+            RadianceBuffer = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            ColorBuffer = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
         }
         public void SwapFrameBuffers()
         {

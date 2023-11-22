@@ -58,7 +58,7 @@ namespace Engine
             this.source = source;
         }
 
-        private void onBufferEnd(IntPtr context)
+        private void onBufferEnd(nint context)
         {
             isFinished = true;
             voice.BufferEnd -= onBufferEnd;

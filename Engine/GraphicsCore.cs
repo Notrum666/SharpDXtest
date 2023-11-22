@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 
 using SharpDX;
+using SharpDX.DXGI;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
@@ -32,12 +33,12 @@ namespace Engine
 
         public GBuffer(int width, int height)
         {
-            worldPos = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            albedo = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            normal = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            metallic = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            roughness = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            ambientOcclusion = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            worldPos = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            albedo = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            normal = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            metallic = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            roughness = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            ambientOcclusion = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
         }
     }
 
@@ -66,7 +67,7 @@ namespace Engine
         private static SharpDX.DXGI.SwapChain swapChain;
 #endif
 
-        public static void Init(IntPtr HWND, int width, int height)
+        public static void Init(nint HWND, int width, int height)
         {
             InitDirectX(HWND, width, height);
 
@@ -112,7 +113,7 @@ namespace Engine
             bloomEffect = new PostProcessEffect_Bloom();
         }
 
-        private static void InitDirectX(IntPtr HWND, int width, int height)
+        private static void InitDirectX(nint HWND, int width, int height)
         {
 #if !GraphicsDebugging
             CurrentDevice = new Device(DriverType.Hardware, DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport, FeatureLevel.Level_11_0);
@@ -206,7 +207,7 @@ namespace Engine
             D9Device = new SharpDX.Direct3D9.Device(context,
                                          0,
                                          DeviceType.Hardware,
-                                         IntPtr.Zero,
+                                         0,
                                          CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.FpuPreserve,
                                          new SharpDX.Direct3D9.PresentParameters()
                                          {

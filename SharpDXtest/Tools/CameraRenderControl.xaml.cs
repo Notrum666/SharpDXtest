@@ -104,7 +104,7 @@ namespace Editor
         }
         private void OnRender(object sender, EventArgs e)
         {
-            if (EngineCore.IsPaused || !IsVisible)
+            if (!IsVisible)
                 return;
 
             if (cursorMode == CursorMode.HiddenAndLocked && IsKeyboardFocused)
