@@ -42,11 +42,13 @@ namespace Engine
         public static event Action OnFrameEnded;
         public static void Init(IntPtr HWND, int width, int height)
         {
+            Logger.Log(LogType.Info, "Engine initialization");
             // Order of initialization is important, same number means no difference
             GraphicsCore.Init(HWND, width, height); // 1
             SoundCore.Init(); // 1
             Time.Init(); // 1
             InputManager.Init(); // 2
+            Logger.Log(LogType.Info, "Engine initialization finished");
         }
         public static async void Run()
         {
