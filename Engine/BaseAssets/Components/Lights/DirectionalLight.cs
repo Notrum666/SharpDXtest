@@ -96,7 +96,7 @@ namespace Engine.BaseAssets.Components
         public Texture ShadowTexture { get; private set; }
         public DirectionalLight()
         {
-            ShadowTexture = new Texture(shadowSize, shadowSize, 0.0f.GetBytes(), SharpDX.DXGI.Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil, cascadeFrustumDistances.Length - 1);
+            ShadowTexture = new Texture(shadowSize, shadowSize, null, SharpDX.DXGI.Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil, cascadeFrustumDistances.Length - 1);
         }
     }
 }

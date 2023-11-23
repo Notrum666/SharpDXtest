@@ -41,7 +41,7 @@ namespace Engine.BaseAssets.Components
             Source.OrientTop.X = -(float)up.x;
             Source.OrientTop.Y = (float)up.y;
             Source.OrientTop.Z = (float)up.z;
-            Rigidbody rb = GameObject.getComponent<Rigidbody>();
+            Rigidbody rb = GameObject.GetComponent<Rigidbody>();
             if (rb != null)
             {
                 Vector3 velocity = rb.Velocity;

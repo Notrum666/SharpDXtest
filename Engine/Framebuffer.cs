@@ -18,7 +18,7 @@ namespace Engine
         private SharpDX.Direct3D9.Texture d9texture;
         private bool disposed;
 
-        public IntPtr D9SurfaceNativePointer { get => d9texture.GetSurfaceLevel(0).NativePointer; }
+        public nint D9SurfaceNativePointer { get => d9texture.GetSurfaceLevel(0).NativePointer; }
         public FrameBuffer(Texture renderTargetTexture, Texture depthTexture)
         {
             if (renderTargetTexture == null)
@@ -38,7 +38,7 @@ namespace Engine
             RenderTargetTexture = renderTargetTexture;
             DepthTexture = depthTexture;
 
-            IntPtr renderTextureHandle = renderTargetTexture.texture.QueryInterface<SharpDX.DXGI.Resource>().SharedHandle;
+            nint renderTextureHandle = renderTargetTexture.texture.QueryInterface<SharpDX.DXGI.Resource>().SharedHandle;
             d9texture = new SharpDX.Direct3D9.Texture(GraphicsCore.D9Device,
                                                       Width,
                                                       Height,
@@ -55,10 +55,10 @@ namespace Engine
             if (height <= 0)
                 throw new ArgumentOutOfRangeException(nameof(height));
 
-            RenderTargetTexture = new Texture(width, height, new byte[] { 0, 0, 0, 0 }, SharpDX.DXGI.Format.B8G8R8A8_UNorm, BindFlags.ShaderResource | BindFlags.RenderTarget);
-            DepthTexture = new Texture(width, height, 0.0f.GetBytes(), SharpDX.DXGI.Format.R32_Typeless, BindFlags.DepthStencil);
+            RenderTargetTexture = new Texture(width, height, null, SharpDX.DXGI.Format.B8G8R8A8_UNorm, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            DepthTexture = new Texture(width, height, null, SharpDX.DXGI.Format.R32_Typeless, BindFlags.DepthStencil);
 
-            IntPtr renderTextureHandle = RenderTargetTexture.texture.QueryInterface<SharpDX.DXGI.Resource>().SharedHandle;
+            nint renderTextureHandle = RenderTargetTexture.texture.QueryInterface<SharpDX.DXGI.Resource>().SharedHandle;
             d9texture = new SharpDX.Direct3D9.Texture(GraphicsCore.D9Device,
                                                       Width,
                                                       Height,

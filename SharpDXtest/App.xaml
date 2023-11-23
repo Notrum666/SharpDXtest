@@ -4,6 +4,12 @@
              xmlns:local="clr-namespace:SharpDXtest"
              StartupUri="EditorWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles\DarkTheme.xaml"/>
+                <ResourceDictionary Source="Styles\WindowStyle.xaml"/>
+                <ResourceDictionary Source="Styles\DefaultStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

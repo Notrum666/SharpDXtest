@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.IO;
 
-namespace Engine.Logger
+namespace Engine
 {
     public static class Logger 
     {
@@ -44,7 +44,9 @@ namespace Engine.Logger
             string path = DirectoryPath + (DateTime.Now.ToString(CultureInfo.InvariantCulture) + ".txt")
                 .Replace("/", ".")
                 .Replace(" ", "_")
-                .Replace(":", ""); 
+                .Replace(":", "");
+            if (!Directory.Exists(DirectoryPath))
+                Directory.CreateDirectory(DirectoryPath);
             StreamWriter writer = new StreamWriter(path, true);
             writer.AutoFlush = true;
             return writer;
@@ -63,16 +65,16 @@ namespace Engine.Logger
         public string Message { get; }
         public Exception? Exception { get; }
 
-        public LogMessage(LogType type, DateTime dateTime, string errorMessage)
+        public LogMessage(LogType type, DateTime dateTime, string message)
+            : this(type, dateTime, message, null)
         {
-            Type = type;
-            DateTime = dateTime;
-            Message = errorMessage;
+
         }
-        public LogMessage(LogType type, DateTime dateTime, Exception? exception)
+        public LogMessage(LogType type, DateTime dateTime, string message, Exception? exception)
         {
             Type = type;
             DateTime = dateTime;
+            Message = message;
             Exception = exception;
         }
     }
