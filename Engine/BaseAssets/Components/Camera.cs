@@ -115,6 +115,8 @@ namespace Engine.BaseAssets.Components
         internal Texture DepthBuffer { get; private set; }
         internal Texture RadianceBuffer { get; private set; }
         internal Texture ColorBuffer { get; private set; }
+        internal Texture SsaoBuffer { get; private set; }
+        internal Texture SsaoDepthBuffer { get; private set; }
         internal FrameBuffer Backbuffer { get; private set; }
         private FrameBuffer middlebuffer;
         private FrameBuffer frontbuffer;
@@ -177,6 +179,7 @@ namespace Engine.BaseAssets.Components
         {
             Width = width;
             Height = height;
+
             frontbuffer?.Dispose();
             middlebuffer?.Dispose();
             Backbuffer?.Dispose();
@@ -189,6 +192,9 @@ namespace Engine.BaseAssets.Components
             DepthBuffer?.Dispose();
             RadianceBuffer?.Dispose();
             ColorBuffer?.Dispose();
+            SsaoBuffer?.Dispose();
+            SsaoDepthBuffer?.Dispose();
+
             frontbuffer = new FrameBuffer(width, height);
             middlebuffer = new FrameBuffer(width, height);
             Backbuffer = new FrameBuffer(width, height);
@@ -196,6 +202,8 @@ namespace Engine.BaseAssets.Components
             DepthBuffer = new Texture(width, height, null, Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
             RadianceBuffer = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
             ColorBuffer = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            SsaoBuffer = new Texture(width / 2, height / 2, null, Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            SsaoDepthBuffer = new Texture(width / 2, height / 2, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.RenderTarget);
         }
         public void SwapFrameBuffers()
         {

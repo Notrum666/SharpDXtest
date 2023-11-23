@@ -54,6 +54,7 @@ namespace Engine
 
         private static Sampler sampler;
         private static Sampler shadowsSampler;
+        private static Sampler ssaoSampler;
         public static Camera CurrentCamera { get; set; }
 
         private static BlendState additiveBlendState;
@@ -84,6 +85,7 @@ namespace Engine
             AssetsManager.LoadShaderPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
                                                            Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
             shadowsSampler = AssetsManager.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.ComparisonMinMagMipLinear, 0, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f), Comparison.LessEqual);
+            ssaoSampler = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.ComparisonMinMagMipLinear, 0, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f), Comparison.LessEqual);
 
             AssetsManager.LoadShaderPipeline("deferred_geometry", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.vsh"), 
                                                                   Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.fsh"));
@@ -109,6 +111,10 @@ namespace Engine
             AssetsManager.LoadShaderPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
             AssetsManager.LoadShaderPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
             AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
+
+            AssetsManager.LoadShaderPipeline("ssao_depth", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao_depth.fsh"));
+            AssetsManager.LoadShaderPipeline("ssao", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao.fsh"));
+            AssetsManager.LoadShaderPipeline("ssao_blur", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao_blur.fsh"));
 
             bloomEffect = new PostProcessEffect_Bloom();
         }
@@ -334,7 +340,8 @@ namespace Engine
             GeometryPass(camera);
             LightingPass(camera);
             VolumetricPass(camera);
-            PrePostProcessingPass(camera);
+            SSAOPass(camera);
+            //PrePostProcessingPass(camera);
             GammaCorrectionPass(camera);
 
             FlushAndSwapFrameBuffers(camera);
@@ -357,7 +364,7 @@ namespace Engine
                                                                                                                    camera.GBuffer.roughness.GetView<RenderTargetView>(),
                                                                                                                    camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>());
             
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(float.NaN, float.NaN, float.NaN, float.NaN));
             CurrentDevice.ImmediateContext.ClearDepthStencilView(camera.DepthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
             
             List<GameObject> objects = EngineCore.CurrentScene.objects;
@@ -596,6 +603,152 @@ namespace Engine
             }
 
             CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+        }
+
+        private static void SSAOPass(Camera camera)
+        {
+            SSAODepthPass(camera);
+            SSAOOccludePass(camera);
+            SSAOBlurPass(camera);
+        }
+
+        private static void SSAODepthPass(Camera camera)
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
+
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.SsaoDepthBuffer.texture.Description.Width, camera.SsaoDepthBuffer.texture.Description.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.SsaoDepthBuffer.GetView<RenderTargetView>());
+
+            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["ssao_depth"];
+
+            pipeline.Use();
+
+            Matrix4x4f view = (Matrix4x4f)camera.GameObject.Transform.View;
+
+            pipeline.UpdateUniform("camView", view);
+
+            pipeline.UploadUpdatedUniforms();
+
+            camera.GBuffer.worldPos.use("inputTex");
+            ssaoSampler.use("texSampler");
+
+            CurrentDevice.ImmediateContext.Draw(6, 0);
+        }
+
+        private static void SSAOOccludePass(Camera camera)
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
+
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.SsaoBuffer.texture.Description.Width, camera.SsaoBuffer.texture.Description.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.SsaoBuffer.GetView<RenderTargetView>());
+
+            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["ssao"];
+
+            pipeline.Use();
+
+            pipeline.UpdateUniform(
+                "texSize",
+                new Vector2f(
+                    camera.GBuffer.worldPos.texture.Description.Width,
+                    camera.GBuffer.worldPos.texture.Description.Height
+                )
+            );
+
+            Matrix4x4f view = (Matrix4x4f)camera.GameObject.Transform.View;
+            Matrix4x4f proj = (Matrix4x4f)camera.Proj;
+            Matrix4x4f invProj = (Matrix4x4f)camera.InvProj;
+
+            pipeline.UpdateUniform("camView", view);
+            pipeline.UpdateUniform("camProj", proj);
+            pipeline.UpdateUniform("camInvProj", invProj);
+
+            const int samplesCount = 64;
+
+            Random rnd = new Random();
+            float sampleRadius = 1.0f;
+            for (int i = 0; i < samplesCount; i++)
+            {
+                Vector3f v = new Vector3f(
+                    rnd.NextFloat(-1, 1),
+                    rnd.NextFloat(0, 1),
+                    rnd.NextFloat(-1, 1)
+                );// half sphere distribution
+
+                v.normalize();
+
+                float scale = (float)i / samplesCount;
+
+                float a = 0.1f;
+                float b = 1.0f;
+                float f = scale * scale;
+
+                scale = a + f * (b - a);
+
+                v *= scale;
+
+                pipeline.UpdateUniform(
+                    $"randomVectors[{i}]",
+                    v
+                );
+            }
+
+            for (int i = 0; i < 16; i++)
+            {
+                float rAngle = rnd.NextFloat(0.0f, MathF.PI * 2.0f);
+                float rRadius = MathF.Sqrt(rnd.NextFloat(0.0f, 1.0f));
+
+                Vector3f v = new Vector3f(
+                    MathF.Sin(rAngle) * rRadius,
+                    0.0f,
+                    MathF.Cos(rAngle) * rRadius
+                );
+
+                pipeline.UpdateUniform(
+                    $"noise[{i}]",
+                    v
+                );
+            }
+
+            pipeline.UpdateUniform("sampleRad", sampleRadius);
+
+            pipeline.UploadUpdatedUniforms();
+
+            camera.GBuffer.worldPos.use("worldPosTex");
+            camera.GBuffer.normal.use("normalTex");
+            camera.SsaoDepthBuffer.use("depthTex");
+            ssaoSampler.use("texSampler");
+
+            CurrentDevice.ImmediateContext.Draw(6, 0);
+        }
+
+        private static void SSAOBlurPass(Camera camera)
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
+
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.ColorBuffer.texture.Description.Width, camera.ColorBuffer.texture.Description.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
+
+            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["ssao_blur"];
+
+            pipeline.Use();
+
+            pipeline.UpdateUniform(
+                "texelSize",
+                new Vector2f(
+                    1.0f / camera.SsaoBuffer.texture.Description.Width,
+                    1.0f / camera.SsaoBuffer.texture.Description.Height
+                )
+            );
+
+            pipeline.UploadUpdatedUniforms();
+
+            camera.SsaoBuffer.use("inputTex");
+            ssaoSampler.use("texSampler");
+
+            CurrentDevice.ImmediateContext.Draw(6, 0);
         }
 
         private static void PrePostProcessingPass(Camera camera)
