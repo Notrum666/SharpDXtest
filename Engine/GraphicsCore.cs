@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Linq;
-using System.IO;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Threading;
 
 using SharpDX;
-using SharpDX.D3DCompiler;
+using SharpDX.DXGI;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
-using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using Device = SharpDX.Direct3D11.Device;
 using Filter = SharpDX.Direct3D11.Filter;
@@ -20,40 +17,35 @@ using Mesh = Engine.BaseAssets.Components.Mesh;
 using Format = SharpDX.DXGI.Format;
 
 using Engine.BaseAssets.Components;
-using System.Windows.Interop;
 using LinearAlgebra;
-using System.Diagnostics;
-using static System.Net.Mime.MediaTypeNames;
 using Engine.BaseAssets.Components.Postprocessing;
 
 namespace Engine
 {
+    internal struct GBuffer
+    {
+        public Texture worldPos;
+        public Texture albedo;
+        public Texture normal;
+        public Texture metallic;
+        public Texture roughness;
+        public Texture ambientOcclusion;
+
+        public GBuffer(int width, int height)
+        {
+            worldPos = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            albedo = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            normal = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            metallic = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            roughness = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            ambientOcclusion = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+        }
+    }
+
     public static class GraphicsCore
     {
-        private struct GBuffer
-        {
-            public Texture worldPos;
-            public Texture albedo;
-            public Texture normal;
-            public Texture metallic;
-            public Texture roughness;
-            public Texture ambientOcclusion;
-
-            public GBuffer(int width, int height)
-            {
-                worldPos = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-                albedo = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-                normal = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-                metallic = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-                roughness = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-                ambientOcclusion = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            }
-        }
 
         private static bool disposed = false;
-
-        public static event Action<int, int> OnResized;
-
         public static Device CurrentDevice { get; private set; }
         public static SharpDX.Direct3D9.Device D9Device { get; private set; }
 
@@ -62,37 +54,12 @@ namespace Engine
 
         private static Sampler sampler;
         private static Sampler shadowsSampler;
+        public static Camera CurrentCamera { get; set; }
 
-        private static Color backgroundColor;
-        public static Camera CurrentCamera
-        {
-            get
-            {
-                return Camera.Current;
-            }
-            set
-            {
-                Camera.Current = value;
-            }
-        }
-
-        private static GBuffer gbuffer;
-        private static Texture depthBuffer;
-        private static Texture radianceBuffer;
-        private static Texture colorBuffer;
         private static BlendState additiveBlendState;
         private static BlendState blendingBlendState;
 
-        private static FrameBuffer frontbuffer;
-        private static FrameBuffer middlebuffer;
-        private static FrameBuffer backbuffer;
-
         private static Query synchQuery;
-
-        private static bool needsToBeResized;
-        private static int targetWidth;
-        private static int targetHeight;
-        private static object resizeLockObject = new object();
 
         private static PostProcessEffect_Bloom bloomEffect;
 
@@ -100,7 +67,7 @@ namespace Engine
         private static SharpDX.DXGI.SwapChain swapChain;
 #endif
 
-        public static void Init(IntPtr HWND, int width, int height)
+        public static void Init(nint HWND, int width, int height)
         {
             InitDirectX(HWND, width, height);
 
@@ -144,12 +111,9 @@ namespace Engine
             AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
 
             bloomEffect = new PostProcessEffect_Bloom();
-
-            backgroundColor = Color.FromRgba(0xFF010101);
-            //backgroundColor = Color.FromRgba(0xFFFFFFFF);
         }
 
-        private static void InitDirectX(IntPtr HWND, int width, int height)
+        private static void InitDirectX(nint HWND, int width, int height)
         {
 #if !GraphicsDebugging
             CurrentDevice = new Device(DriverType.Hardware, DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport, FeatureLevel.Level_11_0);
@@ -243,7 +207,7 @@ namespace Engine
             D9Device = new SharpDX.Direct3D9.Device(context,
                                          0,
                                          DeviceType.Hardware,
-                                         IntPtr.Zero,
+                                         0,
                                          CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.FpuPreserve,
                                          new SharpDX.Direct3D9.PresentParameters()
                                          {
@@ -253,53 +217,15 @@ namespace Engine
                                              PresentationInterval = PresentInterval.Default,
                                          });
 
-            GenerateBuffers(width, height);
-
             synchQuery = new Query(CurrentDevice, new QueryDescription() { Type = SharpDX.Direct3D11.QueryType.Event, Flags = QueryFlags.None });
         }
-
-        private static void GenerateBuffers(int width, int height)
-        {
-            frontbuffer = new FrameBuffer(width, height);
-            backbuffer = new FrameBuffer(width, height);
-            middlebuffer = new FrameBuffer(width, height);
-            gbuffer = new GBuffer(width, height);
-            depthBuffer = new Texture(width, height, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
-            radianceBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
-            colorBuffer = new Texture(width, height, Vector4f.Zero.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
-        }
-
-        public static void Resize(int width, int height)
-        {
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException(nameof(width));
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException(nameof(height));
-
-            lock (resizeLockObject)
-            {
-                targetHeight = height;
-                targetWidth = width;
-                needsToBeResized = true;
-            }
-        }
-
         public static void Update()
         {
-            if (needsToBeResized)
+            if (CurrentCamera != null)
             {
-                lock (resizeLockObject)
-                {
-                    GenerateBuffers(targetWidth, targetHeight);
-            
-                    needsToBeResized = false;
-
-                    OnResized?.Invoke(targetWidth, targetHeight);
-                }
+                //RenderShadows();
+                RenderScene(CurrentCamera);
             }
-
-            RenderShadows();
-            RenderScene();
         }
 
         private static void RenderShadows()
@@ -320,7 +246,7 @@ namespace Engine
                 {
                     if (!obj.Enabled)
                         continue;
-                    foreach (Mesh mesh in obj.getComponents<Mesh>())
+                    foreach (Mesh mesh in obj.GetComponents<Mesh>())
                     {
                         if (!mesh.Enabled)
                             continue;
@@ -337,7 +263,7 @@ namespace Engine
             {
                 if (!lightObj.Enabled)
                     continue;
-                foreach (Light light in lightObj.getComponents<Light>())
+                foreach (Light light in lightObj.GetComponents<Light>())
                 {
                     if (!light.Enabled)
                         continue;
@@ -391,191 +317,48 @@ namespace Engine
             }
         }
 
-        private static void RenderScene()
+        public static void RenderScene(Camera camera)
         {
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(backbuffer.RenderTargetTexture.GetView<RenderTargetView>(), backgroundColor);
-            if (EngineCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
+            if (camera == null)
+                throw new ArgumentNullException(nameof(camera));
+
+            camera.PreRenderUpdate();
+
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.Backbuffer.RenderTargetTexture.GetView<RenderTargetView>(), camera.BackgroundColor);
+            if (EngineCore.CurrentScene == null || !camera.Enabled || camera.GameObject == null)
             {
-                FlushAndSwapFrameBuffers();
+                FlushAndSwapFrameBuffers(camera);
                 return;
             }
 
-            GeometryPass();
-            LightingPass();
-            VolumetricPass();
-            PrePostProcessingPass();
-            GammaCorrectionPass();
+            GeometryPass(camera);
+            LightingPass(camera);
+            VolumetricPass(camera);
+            PrePostProcessingPass(camera);
+            GammaCorrectionPass(camera);
 
-            FlushAndSwapFrameBuffers();
+            FlushAndSwapFrameBuffers(camera);
 #if GraphicsDebugging
             swapChain.Present(1, 0);
 #endif
-
-            //CurrentDevice.ImmediateContext.Rasterizer.State = defaultRasterizer;
-            //
-            //CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
-            //CurrentDevice.ImmediateContext.OutputMerger.SetTargets(backbuffer.DepthTexture.GetView<DepthStencilView>(), backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
-            //
-            //CurrentDevice.ImmediateContext.ClearRenderTargetView(backbuffer.RenderTargetTexture.GetView<RenderTargetView>(), backgroundColor);
-            //CurrentDevice.ImmediateContext.ClearDepthStencilView(backbuffer.DepthTexture.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
-            //
-            //if (GameCore.CurrentScene == null || CurrentCamera == null || !CurrentCamera.Enabled)
-            //{
-            //    FlushAndSwapFrameBuffers();
-            //    return;
-            //}
-            //
-            //List<GameObject> objects = GameCore.CurrentScene.objects;
-            //
-            //ShaderPipeline pipeline = AssetsManager.ShaderPipelines["default"];
-            //pipeline.Use();
-            //
-            //int spotLights = 0;
-            //int directionalLights = 0;
-            //int pointLights = 0;
-            //int ambientLights = 0;
-            //foreach (GameObject obj in objects)
-            //{
-            //    if (!obj.Enabled)
-            //        continue;
-            //    foreach (Light light in obj.getComponents<Light>())
-            //    {
-            //        if (!light.Enabled)
-            //            continue;
-            //
-            //        if (light is SpotLight)
-            //        {
-            //            SpotLight curLight = light as SpotLight;
-            //            string baseLocation = "spotLights[" + spotLights.ToString() + "].";
-            //
-            //            pipeline.UpdateUniform(baseLocation + "position", (Vector3f)obj.transform.Position);
-            //            pipeline.UpdateUniform(baseLocation + "direction", (Vector3f)obj.transform.Forward);
-            //            pipeline.UpdateUniform(baseLocation + "radius", curLight.Radius);
-            //            pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
-            //            pipeline.UpdateUniform(baseLocation + "intensity", curLight.Intensity);
-            //            pipeline.UpdateUniform(baseLocation + "angularIntensity", curLight.AngularIntensity);
-            //            pipeline.UpdateUniform(baseLocation + "angle", curLight.Angle / 2.0f);
-            //            pipeline.UpdateUniform(baseLocation + "color", curLight.color);
-            //
-            //            pipeline.UpdateUniform(baseLocation + "lightSpace", curLight.lightSpace);
-            //
-            //            pipeline.UpdateUniform(baseLocation + "shadowMapSize", new Vector2f(curLight.ShadowSize, curLight.ShadowSize));
-            //
-            //            curLight.ShadowTexture.use(baseLocation + "shadowMap");
-            //
-            //            spotLights++;
-            //        }
-            //        else if (light is DirectionalLight)
-            //        {
-            //            DirectionalLight curLight = light as DirectionalLight;
-            //            string baseLocation = "directionalLights[" + directionalLights.ToString() + "].";
-            //
-            //            pipeline.UpdateUniform(baseLocation + "direction", (Vector3f)curLight.gameObject.transform.Forward);
-            //            pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
-            //            pipeline.UpdateUniform(baseLocation + "color", curLight.color);
-            //
-            //            Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(CurrentCamera);
-            //            for (int i = 0; i < lightSpaces.Length; i++)
-            //                pipeline.UpdateUniform(baseLocation + "lightSpaces[" + i.ToString() + "]", lightSpaces[i]);
-            //            float[] cascadeDepths = DirectionalLight.CascadeFrustumDistances;
-            //            for (int i = 0; i < cascadeDepths.Length; i++)
-            //                pipeline.UpdateUniform(baseLocation + "cascadesDepths[" + i.ToString() + "]", cascadeDepths[i]);
-            //            pipeline.UpdateUniform(baseLocation + "cascadesCount", lightSpaces.Length);
-            //
-            //            pipeline.UpdateUniform(baseLocation + "shadowMapSize", new Vector2f(curLight.ShadowSize, curLight.ShadowSize));
-            //
-            //            curLight.ShadowTexture.use(baseLocation + "shadowMaps", true);
-            //
-            //            directionalLights++;
-            //        }
-            //        else if (light is PointLight)
-            //        {
-            //            PointLight curLight = light as PointLight;
-            //            string baseLocation = "pointLights[" + pointLights.ToString() + "].";
-            //
-            //            pipeline.UpdateUniform(baseLocation + "position", (Vector3f)curLight.gameObject.transform.Position);
-            //            pipeline.UpdateUniform(baseLocation + "radius", curLight.Radius);
-            //            pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
-            //            pipeline.UpdateUniform(baseLocation + "intensity", curLight.Intensity);
-            //            pipeline.UpdateUniform(baseLocation + "color", curLight.color);
-            //
-            //            pointLights++;
-            //        }
-            //        else if (light is AmbientLight)
-            //        {
-            //            AmbientLight curLight = light as AmbientLight;
-            //            string baseLocation = "ambientLights[" + ambientLights.ToString() + "].";
-            //
-            //            pipeline.UpdateUniform(baseLocation + "brightness", curLight.Brightness);
-            //            pipeline.UpdateUniform(baseLocation + "color", curLight.color);
-            //
-            //            ambientLights++;
-            //        }
-            //        else
-            //            throw new NotImplementedException("Light type " + light.GetType().Name + " is not supported.");
-            //    }
-            //}
-            //
-            //pipeline.UpdateUniform("spotLightsCount", spotLights);
-            //pipeline.UpdateUniform("directionalLightsCount", directionalLights);
-            //pipeline.UpdateUniform("pointLightsCount", pointLights);
-            //pipeline.UpdateUniform("ambientLightsCount", ambientLights);
-            //
-            //pipeline.UpdateUniform("spotLight_NEAR", SpotLight.NEAR);
-            //
-            //sampler.use("texSampler");
-            //shadowsSampler.use("shadowSampler");
-            //
-            //pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.gameObject.transform.Position);
-            //pipeline.UpdateUniform("cam_NEAR", (float)CurrentCamera.Near);
-            //pipeline.UpdateUniform("cam_FAR", (float)CurrentCamera.Far);
-            //
-            //pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.gameObject.transform.View);
-            //pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.Proj);
-            //
-            //foreach (GameObject obj in objects)
-            //{
-            //    if (!obj.Enabled)
-            //        continue;
-            //    foreach (Mesh mesh in obj.getComponents<Mesh>())
-            //    {
-            //        if (!mesh.Enabled)
-            //            continue;
-            //        pipeline.UpdateUniform("model", (Matrix4x4f)obj.transform.Model);
-            //        pipeline.UpdateUniform("modelNorm", (Matrix4x4f)obj.transform.Model.inverse().transposed());
-            //
-            //        pipeline.UploadUpdatedUniforms();
-            //        mesh.Material.Albedo.use("albedoMap");
-            //        mesh.Material.Normal.use("normalMap");
-            //        mesh.Material.Metallic.use("metallicMap");
-            //        mesh.Material.Roughness.use("roughnessMap");
-            //        mesh.Material.AmbientOcclusion.use("ambientOcclusionMap");
-            //        mesh.model.Render();
-            //    }
-            //}
-            //
-            //FlushAndSwapFrameBuffers();
-            //#if GraphicsDebugging
-            //            swapChain.Present(1, 0);
-            //#endif
         }
 
-        private static void GeometryPass()
+        private static void GeometryPass(Camera camera)
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
             //CurrentDevice.ImmediateContext.OutputMerger.DepthStencilState = depthState_checkDepth;
 
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(depthBuffer.GetView<DepthStencilView>(), gbuffer.worldPos.GetView<RenderTargetView>(),
-                                                                                                            gbuffer.albedo.GetView<RenderTargetView>(),
-                                                                                                            gbuffer.normal.GetView<RenderTargetView>(),
-                                                                                                            gbuffer.metallic.GetView<RenderTargetView>(),
-                                                                                                            gbuffer.roughness.GetView<RenderTargetView>(),
-                                                                                                            gbuffer.ambientOcclusion.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Width, camera.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(camera.DepthBuffer.GetView<DepthStencilView>(), camera.GBuffer.worldPos.GetView<RenderTargetView>(),
+                                                                                                                   camera.GBuffer.albedo.GetView<RenderTargetView>(),
+                                                                                                                   camera.GBuffer.normal.GetView<RenderTargetView>(),
+                                                                                                                   camera.GBuffer.metallic.GetView<RenderTargetView>(),
+                                                                                                                   camera.GBuffer.roughness.GetView<RenderTargetView>(),
+                                                                                                                   camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>());
             
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(gbuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
-            CurrentDevice.ImmediateContext.ClearDepthStencilView(depthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearDepthStencilView(camera.DepthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
             
             List<GameObject> objects = EngineCore.CurrentScene.objects;
             
@@ -584,14 +367,14 @@ namespace Engine
 
             sampler.use("texSampler");
             
-            pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.GameObject.Transform.View);
-            pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.Proj);
+            pipeline.UpdateUniform("view", (Matrix4x4f)camera.GameObject.Transform.View);
+            pipeline.UpdateUniform("proj", (Matrix4x4f)camera.Proj);
             
             foreach (GameObject obj in objects)
             {
                 if (!obj.Enabled)
                     continue;
-                foreach (Mesh mesh in obj.getComponents<Mesh>())
+                foreach (Mesh mesh in obj.GetComponents<Mesh>())
                 {
                     if (!mesh.Enabled)
                         continue;
@@ -615,11 +398,11 @@ namespace Engine
             
             sampler.use("texSampler");
             
-            pipeline.UpdateUniform("view", (Matrix4x4f)CurrentCamera.GameObject.Transform.View);
-            pipeline.UpdateUniform("proj", (Matrix4x4f)CurrentCamera.Proj);
+            pipeline.UpdateUniform("view", (Matrix4x4f)camera.GameObject.Transform.View);
+            pipeline.UpdateUniform("proj", (Matrix4x4f)camera.Proj);
             
-            pipeline.UpdateUniform("camDir", (Vector3f)CurrentCamera.GameObject.Transform.Forward);
-            pipeline.UpdateUniform("camUp", (Vector3f)CurrentCamera.GameObject.Transform.Up);
+            pipeline.UpdateUniform("camDir", (Vector3f)camera.GameObject.Transform.Forward);
+            pipeline.UpdateUniform("camUp", (Vector3f)camera.GameObject.Transform.Up);
             
             pipeline.UpdateUniform("size", new Vector2f(0.1f, 0.1f));
 
@@ -627,7 +410,7 @@ namespace Engine
             {
                 if (!obj.Enabled)
                     continue;
-                foreach (ParticleSystem particleSystem in obj.getComponents<ParticleSystem>())
+                foreach (ParticleSystem particleSystem in obj.GetComponents<ParticleSystem>())
                 {
                     if (!particleSystem.Enabled)
                         continue;
@@ -647,15 +430,15 @@ namespace Engine
             CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         }
 
-        private static void LightingPass()
+        private static void LightingPass(Camera camera)
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = additiveBlendState;
 
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(radianceBuffer.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.RadianceBuffer.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 1.0f));
 
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: radianceBuffer.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.RadianceBuffer.GetView<RenderTargetView>());
 
             List<GameObject> objects = EngineCore.CurrentScene.objects;
 
@@ -663,7 +446,7 @@ namespace Engine
             {
                 if (!obj.Enabled)
                     continue;
-                foreach (Light light in obj.getComponents<Light>())
+                foreach (Light light in obj.GetComponents<Light>())
                 {
                     if (!light.Enabled)
                         continue;
@@ -680,16 +463,16 @@ namespace Engine
                         ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_light_directional"];
                         pipeline.Use();
 
-                        pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.GameObject.Transform.Position);
+                        pipeline.UpdateUniform("camPos", (Vector3f)camera.GameObject.Transform.Position);
 
-                        pipeline.UpdateUniform("cam_NEAR", (float)CurrentCamera.Near);
-                        pipeline.UpdateUniform("cam_FAR", (float)CurrentCamera.Far);
+                        pipeline.UpdateUniform("cam_NEAR", (float)camera.Near);
+                        pipeline.UpdateUniform("cam_FAR", (float)camera.Far);
 
                         pipeline.UpdateUniform("directionalLight.direction", (Vector3f)curLight.GameObject.Transform.Forward);
                         pipeline.UpdateUniform("directionalLight.brightness", curLight.Brightness);
                         pipeline.UpdateUniform("directionalLight.color", curLight.color);
                         
-                        Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(CurrentCamera);
+                        Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(camera);
                         for (int i = 0; i < lightSpaces.Length; i++)
                             pipeline.UpdateUniform("directionalLight.lightSpaces[" + i.ToString() + "]", lightSpaces[i]);
                         float[] cascadeDepths = DirectionalLight.CascadeFrustumDistances;
@@ -703,7 +486,7 @@ namespace Engine
 
                         curLight.ShadowTexture.use("directionalLight.shadowMaps", true);
                         shadowsSampler.use("shadowSampler");
-                        depthBuffer.use("depthTex");
+                        camera.DepthBuffer.use("depthTex");
                     }
                     else if (light is PointLight)
                     {
@@ -711,7 +494,7 @@ namespace Engine
                         ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_light_point"];
                         pipeline.Use();
 
-                        pipeline.UpdateUniform("camPos", (Vector3f)CurrentCamera.GameObject.Transform.Position);
+                        pipeline.UpdateUniform("camPos", (Vector3f)camera.GameObject.Transform.Position);
 
                         pipeline.UpdateUniform("pointLight.position", (Vector3f)curLight.GameObject.Transform.Position);
                         pipeline.UpdateUniform("pointLight.radius", curLight.Radius);
@@ -730,11 +513,11 @@ namespace Engine
                     else
                         throw new NotImplementedException("Light type " + light.GetType().Name + " is not supported.");
 
-                    gbuffer.worldPos.use("worldPosTex");
-                    gbuffer.albedo.use("albedoTex");
-                    gbuffer.normal.use("normalTex");
-                    gbuffer.metallic.use("metallicTex");
-                    gbuffer.roughness.use("roughnessTex");
+                    camera.GBuffer.worldPos.use("worldPosTex");
+                    camera.GBuffer.albedo.use("albedoTex");
+                    camera.GBuffer.normal.use("normalTex");
+                    camera.GBuffer.metallic.use("metallicTex");
+                    camera.GBuffer.roughness.use("roughnessTex");
                     sampler.use("texSampler");
                     CurrentDevice.ImmediateContext.Draw(6, 0);
                 }
@@ -742,55 +525,55 @@ namespace Engine
 
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: colorBuffer.GetView<RenderTargetView>());
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(colorBuffer.GetView<RenderTargetView>(), backgroundColor);
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.ColorBuffer.GetView<RenderTargetView>(), camera.BackgroundColor);
 
             AssetsManager.ShaderPipelines["deferred_addLight"].Use();
 
-            gbuffer.worldPos.use("worldPosTex");
-            gbuffer.albedo.use("albedoTex");
-            gbuffer.ambientOcclusion.use("ambientOcclusionTex");
-            radianceBuffer.use("radianceTex");
+            camera.GBuffer.worldPos.use("worldPosTex");
+            camera.GBuffer.albedo.use("albedoTex");
+            camera.GBuffer.ambientOcclusion.use("ambientOcclusionTex");
+            camera.RadianceBuffer.use("radianceTex");
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
         }
 
-        private static void VolumetricPass()
+        private static void VolumetricPass(Camera camera)
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = frontCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = blendingBlendState;
 
-            Viewport viewport = new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f);
+            Viewport viewport = new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f);
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(viewport);
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: colorBuffer.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
 
             List<GameObject> objects = EngineCore.CurrentScene.objects;
 
             ShaderPipeline pipeline = AssetsManager.ShaderPipelines["volume"];
             pipeline.Use();
 
-            depthBuffer.use("depthTex");
+            camera.DepthBuffer.use("depthTex");
             sampler.use("texSampler");
 
-            pipeline.UpdateUniform("cam_near", (float)CurrentCamera.Near);
-            pipeline.UpdateUniform("cam_far", (float)CurrentCamera.Far);
-            pipeline.UpdateUniform("cam_farDivFarMinusNear", (float)(CurrentCamera.Far / (CurrentCamera.Far - CurrentCamera.Near)));
+            pipeline.UpdateUniform("cam_near", (float)camera.Near);
+            pipeline.UpdateUniform("cam_far", (float)camera.Far);
+            pipeline.UpdateUniform("cam_farDivFarMinusNear", (float)(camera.Far / (camera.Far - camera.Near)));
             pipeline.UpdateUniform("invScreenSize", new Vector2f(1.0f / viewport.Width, 1.0f / viewport.Height));
 
             foreach (GameObject obj in objects)
             {
                 if (!obj.Enabled)
                     continue;
-                foreach (GasVolume volume in obj.getComponents<GasVolume>())
+                foreach (GasVolume volume in obj.GetComponents<GasVolume>())
                 {
                     if (!volume.Enabled)
                         continue;
 
-                    pipeline.UpdateUniform("modelViewProj", (Matrix4x4f)(CurrentCamera.Proj * CurrentCamera.GameObject.Transform.View * obj.Transform.Model));
-                    pipeline.UpdateUniform("invModelViewProj", (Matrix4x4f)(obj.Transform.View * CurrentCamera.GameObject.Transform.Model * CurrentCamera.InvProj));
+                    pipeline.UpdateUniform("modelViewProj", (Matrix4x4f)(camera.Proj * camera.GameObject.Transform.View * obj.Transform.Model));
+                    pipeline.UpdateUniform("invModelViewProj", (Matrix4x4f)(obj.Transform.View * camera.GameObject.Transform.Model * camera.InvProj));
 
                     Vector3f halfSize = volume.Size * 0.5f;
-                    Vector3f relativeCamPos = (Vector3f)obj.Transform.View.TransformPoint(CurrentCamera.GameObject.Transform.Position);
+                    Vector3f relativeCamPos = (Vector3f)obj.Transform.View.TransformPoint(camera.GameObject.Transform.Position);
                     pipeline.UpdateUniform("relCamPos", relativeCamPos);
                     pipeline.UpdateUniform("camToHalfSize", halfSize - relativeCamPos);
                     pipeline.UpdateUniform("camToMinusHalfSize", -halfSize - relativeCamPos);
@@ -815,30 +598,30 @@ namespace Engine
             CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         }
 
-        private static void PrePostProcessingPass()
+        private static void PrePostProcessingPass(Camera camera)
         {
-            bloomEffect.Process(colorBuffer);
+            bloomEffect.Process(camera.ColorBuffer);
         }
 
-        private static void GammaCorrectionPass()
+        private static void GammaCorrectionPass(Camera camera)
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.Backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
 
             AssetsManager.ShaderPipelines["deferred_gamma_correction"].Use();
 
-            colorBuffer.use("colorTex");
+            camera.ColorBuffer.use("colorTex");
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
         }
 
-        private static void RenderTexture(Texture tex)
+        private static void RenderTexture(Camera camera, Texture tex)
         {
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, backbuffer.Width, backbuffer.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.Backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
 
             AssetsManager.ShaderPipelines["tex_to_screen"].Use();
 
@@ -846,35 +629,22 @@ namespace Engine
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
 
-            FlushAndSwapFrameBuffers();
+            FlushAndSwapFrameBuffers(camera);
         }
-
-        private static void FlushAndSwapFrameBuffers()
+        private static void Flush()
         {
             CurrentDevice.ImmediateContext.Flush();
-
             CurrentDevice.ImmediateContext.End(synchQuery);
-            int result = 0;
+
+            int result;
             while (!(CurrentDevice.ImmediateContext.GetData(synchQuery, out result) && result != 0))
                 Thread.Yield();
-
-            lock (middlebuffer)
-            {
-                FrameBuffer tmp = backbuffer;
-                backbuffer = middlebuffer;
-                middlebuffer = tmp;
-            }
         }
-
-        public static FrameBuffer GetNextFrontBuffer()
+        private static void FlushAndSwapFrameBuffers(Camera camera)
         {
-            lock (middlebuffer)
-            {
-                FrameBuffer tmp = middlebuffer;
-                middlebuffer = frontbuffer;
-                frontbuffer = tmp;
-            }
-            return frontbuffer;
+            Flush();
+
+            camera.SwapFrameBuffers();
         }
 
         public static void Dispose()
@@ -882,9 +652,6 @@ namespace Engine
             if (!disposed)
             {
                 CurrentDevice.Dispose();
-                frontbuffer.Dispose();
-                middlebuffer.Dispose();
-                backbuffer.Dispose();
 
                 disposed = true;
             }

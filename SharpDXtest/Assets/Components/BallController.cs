@@ -21,17 +21,17 @@ namespace SharpDXtest.Assets.Components
         {
             if (!initialized) 
             {
-                GameObject.getComponent<Rigidbody>().OnCollisionBegin += OnCollisionBegin;
+                GameObject.GetComponent<Rigidbody>().OnCollisionBegin += OnCollisionBegin;
                 initialized = true;
 
                 Random rng = new Random();
                 for (int i = 0; i < 25; i++)
                 {
                     GameObject obj = new GameObject();
-                    obj.addComponent<Rigidbody>();
-                    obj.addComponent<CubeCollider>();
-                    obj.addComponent<GravityForce>();
-                    Mesh mesh = obj.addComponent<Mesh>();
+                    obj.AddComponent<Rigidbody>();
+                    obj.AddComponent<CubeCollider>();
+                    obj.AddComponent<GravityForce>();
+                    Mesh mesh = obj.AddComponent<Mesh>();
                     mesh.model = AssetsManager.Models["Cube"];
                     mesh.Material.Albedo = AssetsManager.Textures["Prototype_Light"];
                     double angle = rng.NextDouble() * 2 * Math.PI;
@@ -52,7 +52,7 @@ namespace SharpDXtest.Assets.Components
         {
             base.FixedUpdate();
 
-            Rigidbody rb = GameObject.getComponent<Rigidbody>();
+            Rigidbody rb = GameObject.GetComponent<Rigidbody>();
             rb.addForce(new Vector3(0, 0, -9.8 * rb.Mass));
 
             if (GameObject.Transform.Position.z < -10)
@@ -76,7 +76,7 @@ namespace SharpDXtest.Assets.Components
 
         private void OnCollisionBegin(Rigidbody sender, Collider col, Collider other)
         {
-            Rigidbody otherRb = other.GameObject.getComponent<Rigidbody>();
+            Rigidbody otherRb = other.GameObject.GetComponent<Rigidbody>();
             if (otherRb == null || otherRb.IsStatic)
                 return;
 
@@ -88,14 +88,14 @@ namespace SharpDXtest.Assets.Components
             other.GameObject.Transform.SetParent(GameObject.Transform);
             //other.gameObject.transform.Position = pos;
             //other.gameObject.transform.Rotation = quat;
-            other.GameObject.getComponent<Rigidbody>().Enabled = false;
-            other.GameObject.getComponent<Collider>().Enabled = false;
+            other.GameObject.GetComponent<Rigidbody>().Enabled = false;
+            other.GameObject.GetComponent<Collider>().Enabled = false;
 
             //other.gameObject.Destroy();
             //gameObject.transform.LocalScale = gameObject.transform.LocalScale + new Vector3(0.2, 0.2, 0.2);
 
             (col as SphereCollider).Radius += 0.1;
-            CameraObject.getComponent<CameraArm>().ArmLength += 0.3;
+            CameraObject.GetComponent<CameraArm>().ArmLength += 0.3;
         }
     }
 }
