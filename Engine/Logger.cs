@@ -65,16 +65,16 @@ namespace Engine
         public string Message { get; }
         public Exception? Exception { get; }
 
-        public LogMessage(LogType type, DateTime dateTime, string errorMessage)
+        public LogMessage(LogType type, DateTime dateTime, string message)
+            : this(type, dateTime, message, null)
         {
-            Type = type;
-            DateTime = dateTime;
-            Message = errorMessage;
+
         }
-        public LogMessage(LogType type, DateTime dateTime, Exception? exception)
+        public LogMessage(LogType type, DateTime dateTime, string message, Exception? exception)
         {
             Type = type;
             DateTime = dateTime;
+            Message = message;
             Exception = exception;
         }
     }

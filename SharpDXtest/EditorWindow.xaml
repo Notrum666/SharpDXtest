@@ -13,6 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="32"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
         <Grid Margin="0, 0, 120, 0">
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
@@ -37,14 +38,19 @@
                     </MenuItem>
                     <MenuItem Header="View">
                         <MenuItem Header="Camera" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:CameraRenderControl}"/>
+                        <MenuItem Header="Output" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
                     </MenuItem>
                 </Menu>
             </StackPanel>
         </Grid>
         <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
-            <this:DockableHost>
+            <this:DockableHost Orientation="Vertical" SplitLocation="0.8">
                 <this:CameraRenderControl/>
+                <this:OutputControl/>
             </this:DockableHost>
         </this:DockingManager>
+        <Grid Grid.Row="2">
+            <Rectangle Fill="{StaticResource BorderBrush}"/>
+        </Grid>
     </Grid>
 </Window>

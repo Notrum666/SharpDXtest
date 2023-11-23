@@ -107,7 +107,7 @@ namespace Engine.BaseAssets.Components
         }
         private bool matrixesRequireRecalculation;
 
-        public event Action<int, int> OnResized;
+        public event Action<Camera> OnResized;
 
         public Color BackgroundColor { get; set; }
 
@@ -170,6 +170,7 @@ namespace Engine.BaseAssets.Components
             {
                 needsToBeResized = false;
                 GenerateBuffers(targetWidth, targetHeight);
+                OnResized?.Invoke(this);
             }
         }
         private void GenerateBuffers(int width, int height)
@@ -207,18 +208,11 @@ namespace Engine.BaseAssets.Components
         }
         public FrameBuffer GetNextFrontBuffer()
         {
-            try
+            lock (middlebuffer)
             {
-                lock (middlebuffer)
-                {
-                    FrameBuffer tmp = middlebuffer;
-                    middlebuffer = frontbuffer;
-                    frontbuffer = tmp;
-                }
-            }
-            catch (Exception e)
-            {
-
+                FrameBuffer tmp = middlebuffer;
+                middlebuffer = frontbuffer;
+                frontbuffer = tmp;
             }
             return frontbuffer;
         }

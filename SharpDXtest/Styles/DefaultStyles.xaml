@@ -133,11 +133,11 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="False">
-                            <Setter TargetName="MainGrid" Property="Background" Value="{StaticResource ButtonBackgroundBrush}"/>
+                            <Setter TargetName="MainGrid" Property="Background" Value="{StaticResource CloseToolButtonBackgroundBrush}"/>
                             <Setter TargetName="Cross" Property="Fill" Value="{StaticResource CrossBrush}"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="MainGrid" Property="Background" Value="{StaticResource HoverButtonBackgroundBrush}"/>
+                            <Setter TargetName="MainGrid" Property="Background" Value="{StaticResource HoverCloseToolButtonBackgroundBrush}"/>
                             <Setter TargetName="Cross" Property="Fill" Value="{StaticResource HoverCrossBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -387,5 +387,61 @@
                 <Setter Property="Template" Value="{StaticResource MenuItem_SubmenuHeader}" />
             </Trigger>
         </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ClearOutputButton" TargetType="Button">
+        <Setter Property="Focusable" Value="false" />
+        <Setter Property="TextElement.Foreground" Value="{StaticResource InactiveForegroundBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Host" BorderThickness="1" BorderBrush="{StaticResource ClearOutputButtonBorderBrush}" 
+                            Background="{StaticResource ClearOutputButtonBackgroundBrush}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Host" Property="Background" Value="{StaticResource HoverClearOutputButtonBackgroundBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Host" Property="Background" Value="{StaticResource PressClearOutputButtonBackgroundBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="TextElement.Foreground" Value="{StaticResource HoverForegroundBrush}"/>
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="TextElement.Foreground" Value="{StaticResource HoverForegroundBrush}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="LogTypeVisibiliyToggleButton" TargetType="ToggleButton">
+        <Setter Property="Focusable" Value="false"/>
+        <Setter Property="TextElement.Foreground" Value="{StaticResource ForegroundBrush}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="Host" BorderThickness="0" BorderBrush="{StaticResource ClearOutputButtonBorderBrush}">
+                        <ContentPresenter/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Host" Property="Background" Value="{StaticResource ToggledLogTypeVisibilityButtonBackgroundBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter TargetName="Host" Property="Background" Value="{StaticResource UntoggledLogTypeVisibilityButtonBackgroundBrush}"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Host" Property="Background" Value="{StaticResource PressLogTypeVisibilityButtonBackgroundBrush}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </ResourceDictionary>

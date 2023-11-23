@@ -12,10 +12,10 @@
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Host" Property="Background" Value="{StaticResource HoverButtonBackgroundBrush}"/>
+                            <Setter TargetName="Host" Property="Background" Value="{StaticResource HoverWindowButtonBackgroundBrush}"/>
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="Host" Property="Background" Value="{StaticResource PressButtonBackgroundBrush}"/>
+                            <Setter TargetName="Host" Property="Background" Value="{StaticResource PressWindowButtonBackgroundBrush}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

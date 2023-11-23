@@ -71,7 +71,6 @@ namespace Editor
 
             if (!loaded)
             {
-
                 Width = double.NaN;
                 Height = double.NaN;
 
@@ -82,6 +81,7 @@ namespace Editor
                 camera = controlledGameObject.AddComponent<Camera>();
                 camera.Near = 0.001;
                 camera.Far = 500;
+                camera.OnResized += c => Logger.Log(LogType.Info, string.Format("Editor camera was resized, new size: ({0}, {1}).", c.Width, c.Height));
 
                 Resize((int)ActualWidth, (int)ActualHeight);
             }
@@ -95,9 +95,6 @@ namespace Editor
 
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            if (!EngineCore.IsAlive)
-                return;
-
             EngineCore.OnFrameEnded -= GameCore_OnFrameEnded;
 
             CompositionTarget.Rendering -= OnRender;

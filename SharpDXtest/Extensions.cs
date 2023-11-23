@@ -35,5 +35,22 @@ namespace Editor
 
             return curPath;
         }
+        public static object FindChildByName(this DependencyObject parent, string name)
+        {
+            int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+                if (child is FrameworkElement frameworkElement)
+                {
+                    if (frameworkElement.Name == name)
+                        return child;
+                }
+                object subChild = child.FindChildByName(name);
+                if (subChild != null)
+                    return subChild;
+            }
+            return null;
+        }
     }
 }

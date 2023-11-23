@@ -5,16 +5,15 @@ using System.Windows;
 
 namespace Editor
 {
-    [ValueConversion(typeof(bool), typeof(Visibility))]
-    public sealed class BoolToVisibilityConverter : IValueConverter
+    [ValueConversion(typeof(bool), typeof(object))]
+    public sealed class BoolObjectSelector : IValueConverter
     {
-        public Visibility TrueValue { get; set; }
-        public Visibility FalseValue { get; set; }
+        public object TrueValue { get; set; }
+        public object FalseValue { get; set; }
 
-        public BoolToVisibilityConverter()
+        public BoolObjectSelector()
         {
-            TrueValue = Visibility.Visible;
-            FalseValue = Visibility.Collapsed;
+
         }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
