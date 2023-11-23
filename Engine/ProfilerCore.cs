@@ -11,6 +11,8 @@ namespace Engine
 {
     public static class ProfilerCore
     {
+        public static long MillisecondsToStore = 60 * 1000;
+
         private static readonly Harmony harmony = new("Profiler");
         private static readonly List<MethodInfo> methodsToPatch = new();
 
@@ -30,6 +32,15 @@ namespace Engine
             }
 
             PatchAll();
+        }
+
+        public static void Update()
+        {
+            long currentTimeMilliseconds = Stopwatch.GetTimestamp() / Stopwatch.Frequency * 1000;
+            while (results.Count > 0 && currentTimeMilliseconds - results[0].StartMilliseconds > MillisecondsToStore)
+            {
+                results.RemoveAt(0);
+            }
         }
 
         public static void AddProfilingResult(ProfilingResult result)
@@ -96,7 +107,7 @@ namespace Engine
                 IReadOnlyList<ProfilingResult> results = GetResults();
                 DumpResults(results, outputFile, false);
 
-                outputFile.WriteLine("]\n}");
+                outputFile.WriteLine("\n]\n}");
             }
         }
 
@@ -111,7 +122,7 @@ namespace Engine
                 DumpResult(result, file);
                 if (skipEndCheck || i != results.Count - 1)
                 {
-                    file.Write(",");
+                    file.WriteLine(",");
                 }
             }
         }
@@ -130,7 +141,7 @@ namespace Engine
             file.WriteLine($"\"dur\": {result.DeltaMilliseconds * 1000},");
             file.WriteLine($"\"args\": {{ \"ticks\": {result.DeltaTicks} }}");
 
-            file.WriteLine("}");
+            file.Write("}");
         }
     }
 
