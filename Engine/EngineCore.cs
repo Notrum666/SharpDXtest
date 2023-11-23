@@ -62,17 +62,6 @@ namespace Engine
             {
                 while (isAlive)
                 {
-                    InputManager.Update();
-                    Time.Update();
-                    if (!isPaused)
-                    {
-                        Update();
-                        SoundCore.Update();
-                    }
-                    GraphicsCore.Update();
-
-                    OnFrameEnded?.Invoke();
-
                     if (needsToBePaused)
                     {
                         needsToBePaused = false;
@@ -86,6 +75,17 @@ namespace Engine
                         isPaused = false;
                         OnResumed?.Invoke();
                     }
+
+                    InputManager.Update();
+                    Time.Update();
+                    if (!isPaused)
+                    {
+                        Update();
+                        SoundCore.Update();
+                    }
+                    GraphicsCore.Update();
+
+                    OnFrameEnded?.Invoke();
 
                     if (Time.DeltaTime < 1.0/144.0)
                     {

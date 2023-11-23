@@ -39,9 +39,8 @@ namespace Editor
 
             EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene5.xml");
 
-            EngineCore.Run();
-
             EngineCore.IsPaused = true;
+            EngineCore.Run();
         }
         private void MainWindowInst_Closed(object sender, EventArgs e)
         {
