@@ -9,7 +9,7 @@ using Engine;
 
 namespace Editor
 {
-    public partial class EditorWindow : Window
+    public partial class EditorWindow : EditorWindowBase
     {
         private RelayCommand spawnFlyingControl;
         public RelayCommand SpawnFlyingControl

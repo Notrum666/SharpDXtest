@@ -1,4 +1,4 @@
-﻿<Window x:Name="EditorWindowInst" x:Class="Editor.EditorWindow"
+﻿<this:EditorWindowBase x:Name="EditorWindowInst" x:Class="Editor.EditorWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,48 +9,45 @@
         WindowState="Maximized" Width="1920" Height="1080" 
         Closed="MainWindowInst_Closed" MouseDown="EditorWindowInst_MouseDown"
         Style="{StaticResource CustomWindow}">
+    <this:EditorWindowBase.Header>
+        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+            <Image Source="Images\big-gear.png" Height="30" Width="30" Margin="1"/>
+            <Menu VerticalAlignment="Top" Margin="10,4,0,0">
+                <MenuItem Header="File">
+                    <MenuItem Header="Test1"/>
+                    <MenuItem Header="Test2"/>
+                    <MenuItem Header="Test3"/>
+                    <MenuItem Header="Test4">
+                        <MenuItem Header="SubTest1"/>
+                        <MenuItem Header="SubTest2"/>
+                        <MenuItem Header="SubTest3"/>
+                        <MenuItem Header="SubTest4"/>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="Edit">
+                    <MenuItem Header="Test1"/>
+                    <MenuItem Header="Test2"/>
+                    <MenuItem Header="Test3"/>
+                    <MenuItem Header="Test4"/>
+                </MenuItem>
+                <MenuItem Header="View">
+                    <MenuItem Header="Camera" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:CameraRenderControl}"/>
+                    <MenuItem Header="Output" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
+                </MenuItem>
+            </Menu>
+        </StackPanel>
+    </this:EditorWindowBase.Header>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="32"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="20"/>
-        </Grid.RowDefinitions>
-        <Grid Margin="0, 0, 120, 0">
-            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
-                <Image Source="Images\big-gear.png" Height="30" Width="30" Margin="1"/>
-                <Menu VerticalAlignment="Top" Margin="10,4,0,0">
-                    <MenuItem Header="File">
-                        <MenuItem Header="Test1"/>
-                        <MenuItem Header="Test2"/>
-                        <MenuItem Header="Test3"/>
-                        <MenuItem Header="Test4">
-                            <MenuItem Header="SubTest1"/>
-                            <MenuItem Header="SubTest2"/>
-                            <MenuItem Header="SubTest3"/>
-                            <MenuItem Header="SubTest4"/>
-                        </MenuItem>
-                    </MenuItem>
-                    <MenuItem Header="Edit">
-                        <MenuItem Header="Test1"/>
-                        <MenuItem Header="Test2"/>
-                        <MenuItem Header="Test3"/>
-                        <MenuItem Header="Test4"/>
-                    </MenuItem>
-                    <MenuItem Header="View">
-                        <MenuItem Header="Camera" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:CameraRenderControl}"/>
-                        <MenuItem Header="Output" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
-                    </MenuItem>
-                </Menu>
-            </StackPanel>
-        </Grid>
         <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
             <this:DockableHost Orientation="Vertical" SplitLocation="0.8">
                 <this:CameraRenderControl/>
                 <this:OutputControl/>
             </this:DockableHost>
         </this:DockingManager>
+    </Grid>
+    <this:EditorWindowBase.Footer>
         <Grid Grid.Row="2">
             <Rectangle Fill="{StaticResource BorderBrush}"/>
         </Grid>
-    </Grid>
-</Window>
+    </this:EditorWindowBase.Footer>
+</this:EditorWindowBase>
