@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +18,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Editor
 {
@@ -33,6 +35,7 @@ namespace Editor
             get => clearOutputCommand ?? (clearOutputCommand = new RelayCommand(obj => LogMessages.Clear()));
         }
         public ObservableCollection<LogMessage> LogMessages { get; private set; } = new ObservableCollection<LogMessage>();
+        private List<LogMessage> newMessages = new List<LogMessage>();
         public int InfoCount { get => LogMessages.Count(msg => msg.Type == LogType.Info); }
         public int WarningCount { get => LogMessages.Count(msg => msg.Type == LogType.Warning); }
         public int ErrorCount { get => LogMessages.Count(msg => msg.Type == LogType.Error); }
@@ -72,6 +75,7 @@ namespace Editor
         public Dictionary<LogType, Func<bool>> ShowLogTypeSelector { get; private set; }
         private bool loaded = false;
         private readonly Dictionary<LogType, Action> CountPropertyChangedLambdas;
+        private DispatcherTimer updateTimer;
         public OutputControl()
         {
             InitializeComponent();
@@ -90,7 +94,20 @@ namespace Editor
                 [LogType.Error] = () => ShowErrorMessages
             };
 
-            LogMessages.CollectionChanged += LogMessages_CollectionChanged;            
+            LogMessages.CollectionChanged += LogMessages_CollectionChanged;
+
+            updateTimer = new DispatcherTimer();
+            updateTimer.Interval = TimeSpan.FromMilliseconds(50);
+            updateTimer.Tick += UpdateTimer_Tick;
+            updateTimer.Start();
+        }
+
+        private void UpdateTimer_Tick(object sender, EventArgs e)
+        {
+            List<LogMessage> copy = new List<LogMessage>();
+            copy = Interlocked.Exchange(ref newMessages, copy);
+            foreach (LogMessage message in copy)
+                LogMessages.Insert(0, message);
         }
 
         private void LogMessages_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -134,7 +151,7 @@ namespace Editor
         }
         private void Logger_OnLog(LogMessage message)
         {
-            Dispatcher.Invoke(() => LogMessages.Insert(0, message));
+            newMessages.Add(message);
         }
         private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
         {
