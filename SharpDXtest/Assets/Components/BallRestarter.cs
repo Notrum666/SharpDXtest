@@ -22,7 +22,7 @@ namespace SharpDXtest.Assets.Components
         public event Action<int, int> OnScoreChanged;
         public override void Update()
         {
-            Rigidbody rb = GameObject.getComponent<Rigidbody>();
+            Rigidbody rb = GameObject.GetComponent<Rigidbody>();
             if (!initialized)
             {
                 initialized = true;

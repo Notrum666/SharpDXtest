@@ -16,7 +16,7 @@ namespace SharpDXtest.Assets.Components
         public double periodInDays;
         public override void FixedUpdate()
         {
-            Rigidbody rb = GameObject.getComponent<Rigidbody>();
+            Rigidbody rb = GameObject.GetComponent<Rigidbody>();
             if (rb != null)
                 rb.addForce(new Vector3(0, 0, -9.8 * rb.Mass));
         }

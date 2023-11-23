@@ -195,7 +195,7 @@ namespace Engine.BaseAssets.Components
         }
         private void recalculateInertiaTensor()
         {
-            IEnumerable<Collider> colliders = GameObject.getComponents<Collider>().Where(coll => coll.Enabled);
+            IEnumerable<Collider> colliders = GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
             if (colliders.Count() == 0)
             {
                 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
@@ -280,8 +280,8 @@ namespace Engine.BaseAssets.Components
             if (!Enabled || !otherRigidbody.Enabled || IsStatic && otherRigidbody.IsStatic)
                 return;
 
-            IEnumerable<Collider> colliders = GameObject.getComponents<Collider>().Where(coll => coll.Enabled);
-            IEnumerable<Collider> otherColliders = otherRigidbody.GameObject.getComponents<Collider>().Where(coll => coll.Enabled);
+            IEnumerable<Collider> colliders = GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
+            IEnumerable<Collider> otherColliders = otherRigidbody.GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
 
             foreach (Collider collider in colliders)
                 foreach (Collider otherCollider in otherColliders)

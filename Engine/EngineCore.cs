@@ -18,6 +18,7 @@ namespace Engine
         private static bool isAlive = false;
         public static bool IsAlive { get => isAlive; }
         private static bool needsToBePaused = false;
+        private static bool needsToBeUnpaused = false;
         private static bool isPaused = false;
         public static bool IsPaused 
         {
@@ -33,20 +34,23 @@ namespace Engine
                 if (value)
                     needsToBePaused = true;
                 else
-                    isPaused = false;
+                    needsToBeUnpaused = true;
             }
         }
         private static Task loopTask;
         public static event Action OnPaused;
         public static event Action OnResumed;
         public static event Action OnFrameEnded;
-        public static void Init(IntPtr HWND, int width, int height)
+        public static void Init(nint HWND, int width, int height)
         {
+            Logger.Log(LogType.Info, "Engine initialization");
             // Order of initialization is important, same number means no difference
+            ProfilerCore.Init();
             GraphicsCore.Init(HWND, width, height); // 1
             SoundCore.Init(); // 1
             Time.Init(); // 1
             InputManager.Init(); // 2
+            Logger.Log(LogType.Info, "Engine initialization finished");
         }
         public static async void Run()
         {
@@ -61,9 +65,13 @@ namespace Engine
                 {
                     InputManager.Update();
                     Time.Update();
-                    Update();
-                    SoundCore.Update();
+                    if (!isPaused)
+                    {
+                        Update();
+                        SoundCore.Update();
+                    }
                     GraphicsCore.Update();
+                    ProfilerCore.Update();
 
                     OnFrameEnded?.Invoke();
 
@@ -72,14 +80,13 @@ namespace Engine
                         needsToBePaused = false;
                         isPaused = true;
                         OnPaused?.Invoke();
-                        while (isPaused && IsAlive) ;
+                    }
 
-                        if (IsAlive)
-                        {
-                            InputManager.Update();
-                            Time.Update();
-                            OnResumed?.Invoke();
-                        }
+                    if (needsToBeUnpaused)
+                    {
+                        needsToBeUnpaused = false;
+                        isPaused = false;
+                        OnResumed?.Invoke();
                     }
 
                     if (Time.DeltaTime < 1.0/144.0)
@@ -88,14 +95,7 @@ namespace Engine
                     }
                 }
             });
-            try
-            {
-                await loopTask;
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
+            await loopTask;
         }
         public static void Stop()
         {
@@ -167,10 +167,10 @@ namespace Engine
             {
                 if (!CurrentScene.objects[i].Enabled)
                     continue;
-                Rigidbody rigidbody = CurrentScene.objects[i].getComponent<Rigidbody>();
+                Rigidbody rigidbody = CurrentScene.objects[i].GetComponent<Rigidbody>();
                 if (rigidbody != null)
                 {
-                    foreach (Collider collider in CurrentScene.objects[i].getComponents<Collider>())
+                    foreach (Collider collider in CurrentScene.objects[i].GetComponents<Collider>())
                         collider.updateData();
                     foreach (Rigidbody otherRigidbody in rigidbodies)
                         rigidbody.solveCollisionWith(otherRigidbody);

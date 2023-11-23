@@ -1,0 +1,87 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="BackgroundColor">#FF202020</Color>
+    <SolidColorBrush x:Key="BackgroundBrush" Color="{StaticResource BackgroundColor}"/>
+
+    <Color x:Key="SelectedMenuItemColor">#FF505050</Color>
+    <SolidColorBrush x:Key="SelectedMenuItemBrush" Color="{StaticResource SelectedMenuItemColor}"/>
+    
+    <Color x:Key="BorderColor">#FF606060</Color>
+    <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
+
+    <Color x:Key="InactiveBorderColor">#FF303030</Color>
+    <SolidColorBrush x:Key="InactiveBorderBrush" Color="{StaticResource InactiveBorderColor}"/>
+
+    <Color x:Key="ForegroundColor">#FFFFFFFF</Color>
+    <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}"/>
+
+    <Color x:Key="HoverForegroundColor">#FFC0C0C0</Color>
+    <SolidColorBrush x:Key="HoverForegroundBrush" Color="{StaticResource HoverForegroundColor}"/>
+
+    <Color x:Key="InactiveForegroundColor">#FFB0B0B0</Color>
+    <SolidColorBrush x:Key="InactiveForegroundBrush" Color="{StaticResource InactiveForegroundColor}"/>
+
+    <!--#region ItemTab-->
+    <Color x:Key="ItemTabColor">#FF303030</Color>
+    <SolidColorBrush x:Key="ItemTabBrush" Color="{StaticResource ItemTabColor}"/>
+    
+    <Color x:Key="HoverItemTabColor">#FF404040</Color>
+    <SolidColorBrush x:Key="HoverItemTabBrush" Color="{StaticResource HoverItemTabColor}"/>
+    
+    <Color x:Key="SelectedItemTabColor">#FF505050</Color>
+    <SolidColorBrush x:Key="SelectedItemTabBrush" Color="{StaticResource SelectedItemTabColor}"/>
+    <!--#endregion-->
+
+    <!--#region Menu-->
+    <Color x:Key="MenuForegroundColor">#FFE0E0E0</Color>
+    <SolidColorBrush x:Key="MenuForegroundBrush" Color="{StaticResource MenuForegroundColor}"/>
+
+    <Color x:Key="InactiveMenuForegroundColor">#FF909090</Color>
+    <SolidColorBrush x:Key="InactiveMenuForegroundBrush" Color="{StaticResource InactiveMenuForegroundColor}"/>
+    <!--#endregion-->
+    
+    <!--#region ClearOutputButton-->
+    <Color x:Key="ClearOutputButtonBorderColor">#FFA0A0A0</Color>
+    <SolidColorBrush x:Key="ClearOutputButtonBorderBrush" Color="{StaticResource ClearOutputButtonBorderColor}"/>
+
+    <Color x:Key="ClearOutputButtonBackgroundColor">#FF202020</Color>
+    <SolidColorBrush x:Key="ClearOutputButtonBackgroundBrush" Color="{StaticResource ClearOutputButtonBackgroundColor}"/>
+
+    <Color x:Key="HoverClearOutputButtonBackgroundColor">#FF303030</Color>
+    <SolidColorBrush x:Key="HoverClearOutputButtonBackgroundBrush" Color="{StaticResource HoverClearOutputButtonBackgroundColor}"/>
+
+    <Color x:Key="PressClearOutputButtonBackgroundColor">#FF282828</Color>
+    <SolidColorBrush x:Key="PressClearOutputButtonBackgroundBrush" Color="{StaticResource PressClearOutputButtonBackgroundColor}"/>
+    <!--#endregion-->
+
+    <!--#region LogTypeVisibilityToggleButton-->
+    <Color x:Key="UntoggledLogTypeVisibilityButtonBackgroundColor">#FF202020</Color>
+    <SolidColorBrush x:Key="UntoggledLogTypeVisibilityButtonBackgroundBrush" Color="{StaticResource UntoggledLogTypeVisibilityButtonBackgroundColor}"/>
+
+    <Color x:Key="ToggledLogTypeVisibilityButtonBackgroundColor">#FF404040</Color>
+    <SolidColorBrush x:Key="ToggledLogTypeVisibilityButtonBackgroundBrush" Color="{StaticResource ToggledLogTypeVisibilityButtonBackgroundColor}"/>
+    
+    <Color x:Key="PressLogTypeVisibilityButtonBackgroundColor">#FF101010</Color>
+    <SolidColorBrush x:Key="PressLogTypeVisibilityButtonBackgroundBrush" Color="{StaticResource PressLogTypeVisibilityButtonBackgroundColor}"/>
+    <!--#endregion-->
+
+    <!--#region CloseToolButton-->
+    <SolidColorBrush x:Key="CloseToolButtonBackgroundBrush" Color="Transparent"/>
+
+    <Color x:Key="HoverCloseToolButtonBackgroundColor">#FF606060</Color>
+    <SolidColorBrush x:Key="HoverCloseToolButtonBackgroundBrush" Color="{StaticResource HoverCloseToolButtonBackgroundColor}"/>
+
+    <Color x:Key="PressCloseToolButtonBackgroundColor">#FF404040</Color>
+    <SolidColorBrush x:Key="PressCloseToolButtonBackgroundBrush" Color="{StaticResource PressCloseToolButtonBackgroundColor}"/>
+    <!--#endregion-->
+    
+    <!--#region WindowButton-->
+    <SolidColorBrush x:Key="WindowButtonBackgroundBrush" Color="Transparent"/>
+
+    <Color x:Key="HoverWindowButtonBackgroundColor">#FF606060</Color>
+    <SolidColorBrush x:Key="HoverWindowButtonBackgroundBrush" Color="{StaticResource HoverWindowButtonBackgroundColor}"/>
+
+    <Color x:Key="PressWindowButtonBackgroundColor">#FF404040</Color>
+    <SolidColorBrush x:Key="PressWindowButtonBackgroundBrush" Color="{StaticResource PressWindowButtonBackgroundColor}"/>
+    <!--#endregion-->
+</ResourceDictionary>
