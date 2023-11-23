@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Drawing;
@@ -30,7 +29,6 @@ using Vector3 = LinearAlgebra.Vector3;
 using Vector2 = LinearAlgebra.Vector2;
 using Matrix3x3 = LinearAlgebra.Matrix3x3;
 using Quaternion = LinearAlgebra.Quaternion;
-using System.Diagnostics;
 
 namespace Engine
 {
@@ -1650,49 +1648,6 @@ namespace Engine
         
             Scenes[Path.GetFileNameWithoutExtension(path)] = scene as Scene;
             return scene as Scene;
-        }
-    }
-
-    public static class ChromeProfilerReader
-    {
-        public static void DumpProfiler()
-        {
-            // Set a variable to the Documents path.
-            string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            using (StreamWriter outputFile = new StreamWriter(Path.Combine(docPath, "ProfileResults.json")))
-            {
-                outputFile.WriteLine("{\n\"traceEvents\": [");
-
-                IReadOnlyList<ProfilingResult> results = ProfilerCore.GetResults();
-                for (int i = 0; i < results.Count; i++)
-                {
-                    DumpResult(results[i], outputFile);
-                    if (i != results.Count - 1)
-                    {
-                        outputFile.Write(",");
-                    }
-                }                    
-
-                outputFile.WriteLine("]\n}");
-            }
-        }
-
-        private static void DumpResult(ProfilingResult result, StreamWriter file)
-        {
-            file.WriteLine("{");
-
-            file.WriteLine($"\"cat\": \"default\",");
-            file.WriteLine($"\"name\": \"{result.DisplayName}\",");
-            file.WriteLine($"\"tid\": {result.ThreadId},");
-            file.WriteLine($"\"pid\": 0,");
-
-            file.WriteLine($"\"ph\": \"X\",");
-            file.WriteLine($"\"ts\": {result.StartMilliseconds * 1000},");
-            file.WriteLine($"\"dur\": {result.DeltaMilliseconds * 1000},");
-            file.WriteLine($"\"args\": {{ \"ticks\": {result.DeltaTicks} }}");
-
-            file.WriteLine("}");
         }
     }
 }
