@@ -10,6 +10,8 @@ using System.Runtime.CompilerServices;
 using Engine;
 using Engine.BaseAssets.Components;
 using SharpDXtest.Assets.Components;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace Editor
 {
@@ -18,6 +20,35 @@ namespace Editor
         Normal,
         Hidden,
         HiddenAndLocked
+    }
+    public struct AspectRatio
+    {
+        public double width;
+        public double height;
+        public double Ratio
+        {
+            get => width / height;
+        }
+        public string displayText;
+        public AspectRatio() :
+            this(double.NaN, double.NaN, "") { }
+        public AspectRatio(double width, double height) :
+            this(width, height, "")
+        { }
+        public AspectRatio(double width, double height, string displayText)
+        {
+            this.width = width;
+            this.height = height;
+            this.displayText = displayText;
+        }
+        public override string ToString()
+        {
+            if (displayText != "")
+                return displayText;
+            if (double.IsNaN(width) || double.IsNaN(height))
+                return "Free aspect";
+            return width.ToString() + ":" + height.ToString();
+        }
     }
     public partial class CameraRenderControl : UserControl, INotifyPropertyChanged
     {
@@ -28,6 +59,21 @@ namespace Editor
 
         private System.Drawing.Point cursorLockPoint;
         private CursorMode cursorMode;
+
+        public ObservableCollection<AspectRatio> AspectRatios { get; set; } = new ObservableCollection<AspectRatio>
+        {
+            new AspectRatio(),
+            new AspectRatio(1, 1),
+            new AspectRatio(4, 3),
+            new AspectRatio(5, 4),
+            new AspectRatio(3, 2),
+            new AspectRatio(16, 10),
+            new AspectRatio(16, 9),
+            new AspectRatio(17, 9),
+            new AspectRatio(21, 9),
+            new AspectRatio(32, 9),
+        };
+        public AspectRatio SelectedAspectRatio { get; set; } = new AspectRatio();
         public CursorMode CursorMode
         {
             get => cursorMode;
@@ -83,7 +129,7 @@ namespace Editor
                 camera.Far = 500;
                 camera.OnResized += c => Logger.Log(LogType.Info, string.Format("Editor camera was resized, new size: ({0}, {1}).", c.Width, c.Height));
 
-                Resize((int)ActualWidth, (int)ActualHeight);
+                ResizeCameraAndFramebuffer((int)ActualWidth, (int)ActualHeight);
             }
 
             EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
@@ -138,14 +184,6 @@ namespace Editor
                 framesCount = 0;
             }
         }
-        private void Resize(int width, int height)
-        {
-            camera.Aspect = width / (double)height;
-
-            camera.Resize(width, height);
-
-            copyFramebuffer = new FrameBuffer(width, height);
-        }
 
         private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -182,12 +220,49 @@ namespace Editor
             keyboardFocused = false;
         }
 
+        private void ResizeCameraAndFramebuffer(int width, int height)
+        {
+            camera.Aspect = width / (double)height;
+
+            camera.Resize(width, height);
+
+            copyFramebuffer = new FrameBuffer(width, height);
+        }
         private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (!loaded)
                 return;
 
-            Resize((int)ActualWidth, (int)ActualHeight);
+            ResizeCameraAndFramebuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+        }
+        private void UpdateRenderControlSize()
+        {
+            if (double.IsNaN(SelectedAspectRatio.width) || double.IsNaN(SelectedAspectRatio.height))
+            {
+                RenderControl.Width = double.NaN;
+                RenderControl.Height = double.NaN;
+                return;
+            }
+
+            if (RenderControlHost.ActualWidth > RenderControlHost.ActualHeight * SelectedAspectRatio.Ratio)
+            {
+                RenderControl.Height = RenderControlHost.ActualHeight;
+                RenderControl.Width = RenderControl.Height * SelectedAspectRatio.Ratio;
+            }
+            else
+            {
+                RenderControl.Width = RenderControlHost.ActualWidth;
+                RenderControl.Height = RenderControl.Width / SelectedAspectRatio.Ratio;
+            }
+        }
+        private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            UpdateRenderControlSize();
+        }
+
+        private void AspectRatioComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateRenderControlSize();
         }
     }
 }

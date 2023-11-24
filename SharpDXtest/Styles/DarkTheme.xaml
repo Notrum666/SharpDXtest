@@ -84,4 +84,20 @@
     <Color x:Key="PressWindowButtonBackgroundColor">#FF404040</Color>
     <SolidColorBrush x:Key="PressWindowButtonBackgroundBrush" Color="{StaticResource PressWindowButtonBackgroundColor}"/>
     <!--#endregion-->
+
+    <!--#region ComboBox-->
+    <Color x:Key="ComboBoxBackgroundColor">#FF303030</Color>
+    <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="{StaticResource ComboBoxBackgroundColor}"/>
+    
+    <Color x:Key="HoverComboBoxBackgroundColor">#FF505050</Color>
+    <SolidColorBrush x:Key="HoverComboBoxBackgroundBrush" Color="{StaticResource HoverComboBoxBackgroundColor}"/>
+    
+    <Color x:Key="ComboBoxBorderColor">#FF505050</Color>
+    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{StaticResource ComboBoxBorderColor}"/>
+    <!--#endregion-->
+    
+    <!--#region CameraRenderControl-->
+    <Color x:Key="CameraRenderControlBackgroundColor">#FF101010</Color>
+    <SolidColorBrush x:Key="CameraRenderControlBackgroundBrush" Color="{StaticResource CameraRenderControlBackgroundColor}"/>
+    <!--#endregion-->
 </ResourceDictionary>
