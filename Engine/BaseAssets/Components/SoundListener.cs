@@ -52,7 +52,7 @@ namespace Engine.BaseAssets.Components
             Listener.OrientTop.X = -(float)up.x;
             Listener.OrientTop.Y = (float)up.y;
             Listener.OrientTop.Z = (float)up.z;
-            Rigidbody rb = GameObject.getComponent<Rigidbody>();
+            Rigidbody rb = GameObject.GetComponent<Rigidbody>();
             if (rb != null)
             {
                 Vector3 velocity = rb.Velocity;

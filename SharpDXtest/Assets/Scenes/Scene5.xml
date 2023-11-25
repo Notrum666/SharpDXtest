@@ -10,13 +10,13 @@
 			<Texture path="Prototype_Light.png"/>
 		</Textures>
 	</Assets>
-	
+
 	<GameObject>
 		<Transform>
 			<Transform.Position y="-40" z="90"/>
 			<Transform.Rotation x="-45"/>
 		</Transform>
-		<Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="500" FOV="1.7777"/>
+		<Camera Aspect="1.7777" Near="0.001" Far="500" FOV="1.7777"/>
 		<SoundListener IsCurrent="true"/>
 		<CameraController speed="5"/>
 	</GameObject>

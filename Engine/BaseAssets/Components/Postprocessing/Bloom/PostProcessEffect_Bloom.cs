@@ -131,15 +131,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
                 if (width == 0 || height == 0)
                     break;
 
-                textures.Add(
-                    new Texture(
-                        width,
-                        height,
-                        Vector4f.Zero.GetBytes(),
-                        Format.R32G32B32A32_Float,
-                        BindFlags.ShaderResource | BindFlags.RenderTarget
-                    )
-                );
+                textures.Add(new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget));
             }
 
             if (textures.Count == 0)

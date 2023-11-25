@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Drawing;
@@ -359,7 +358,7 @@ namespace Engine
 
             generateViews();
         }
-        public Texture(int width, int height, IEnumerable<byte> defaultDataPerPixel, Format textureFormat, BindFlags usage, int arraySize = 1)
+        public Texture(int width, int height, IEnumerable<byte>? defaultDataPerPixel, Format textureFormat, BindFlags usage, int arraySize = 1)
         {
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
@@ -373,26 +372,31 @@ namespace Engine
             if (!supportedFormats.Contains(textureFormat))
                 throw new NotSupportedException("Texture format is not supported: %s" + textureFormat.ToString());
 
-            int bytesPerPixel = textureFormat.SizeOfInBytes();
+            nint dataPtr = 0;
+            DataRectangle[]? rectangles = null;
+            if (defaultDataPerPixel != null)
+            {
+                int bytesPerPixel = textureFormat.SizeOfInBytes();
 
-            byte[] data = new byte[width * height * bytesPerPixel];
+                byte[] data = new byte[width * height * bytesPerPixel];
 
-            IEnumerator<byte> enumerator = defaultDataPerPixel.GetEnumerator();
-            for (int i = 0; i < height; i++)
-                for (int j = 0; j < width; j++)
-                {
-                    int pos = (i * width + j) * bytesPerPixel;
-                    for (int k = 0; k < bytesPerPixel && enumerator.MoveNext(); k++)
-                        data[pos + k] = enumerator.Current;
-                    enumerator.Reset();
-                }
+                IEnumerator<byte> enumerator = defaultDataPerPixel.GetEnumerator();
+                for (int i = 0; i < height; i++)
+                    for (int j = 0; j < width; j++)
+                    {
+                        int pos = (i * width + j) * bytesPerPixel;
+                        for (int k = 0; k < bytesPerPixel && enumerator.MoveNext(); k++)
+                            data[pos + k] = enumerator.Current;
+                        enumerator.Reset();
+                    }
 
-            IntPtr dataPtr = Marshal.AllocHGlobal(width * height * bytesPerPixel);
-            Marshal.Copy(data, 0, dataPtr, width * height * bytesPerPixel);
+                dataPtr = Marshal.AllocHGlobal(width * height * bytesPerPixel);
+                Marshal.Copy(data, 0, dataPtr, width * height * bytesPerPixel);
 
-            DataRectangle[] rectangles = new DataRectangle[arraySize];
-            for (int i = 0; i < arraySize; i++)
-                rectangles[i] = new DataRectangle(dataPtr, width * bytesPerPixel);
+                rectangles = new DataRectangle[arraySize];
+                for (int i = 0; i < arraySize; i++)
+                    rectangles[i] = new DataRectangle(dataPtr, width * bytesPerPixel);
+            }
             texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
             {
                 Width = width,
@@ -407,7 +411,8 @@ namespace Engine
                 SampleDescription = new SampleDescription(1, 0)
             }, rectangles);
 
-            Marshal.FreeHGlobal(dataPtr);
+            if (defaultDataPerPixel != null)
+                Marshal.FreeHGlobal(dataPtr);
 
             generateViews();
         }
@@ -1762,7 +1767,7 @@ namespace Engine
                         if (curType == typeof(Transform))
                             curObj = (parent as GameObject).Transform;
                         else
-                            curObj = (parent as GameObject).addComponent(curType);
+                            curObj = (parent as GameObject).AddComponent(curType);
                         parseAttributes(ref curObj, element.Attributes());
                         foreach (XElement elem in element.Elements())
                             parseElement(curObj, element, elem);
