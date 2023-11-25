@@ -11,11 +11,11 @@ namespace Engine.BaseAssets.Components.Colliders
 {
     public class MeshCollider : Collider
     {
-        public Model Model
+        public MeshComponent Mesh
         { 
             set
             {
-                FromModel(value);
+                FromMesh(value.mesh);
             }
         }
 
@@ -114,7 +114,7 @@ namespace Engine.BaseAssets.Components.Colliders
             if (globalVertexes.Count == 0)
                 throw new Exception("No vertexes present in this collider.");
 
-            hindmost = Vector3.Zero; 
+            hindmost = Vector3.Zero;
             furthest = Vector3.Zero;
             double furthestValue = double.MinValue, hindmostValue = double.MaxValue;
 
@@ -148,12 +148,12 @@ namespace Engine.BaseAssets.Components.Colliders
         {
 
         }
-        public void FromModel(Model model)
+        public void FromMesh(Mesh mesh)
         {
             vertices = new List<Vector3>();
-            foreach (Model.Mesh mesh in model.Meshes)
+            foreach (Primitive primitive in mesh.Primitives)
             {
-                vertices.AddRange(mesh.v);
+                vertices.AddRange(primitive.v);
             }
 
             //polygons = new List<int[]>(model.v_i);

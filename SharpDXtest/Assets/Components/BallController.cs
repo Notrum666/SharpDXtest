@@ -31,8 +31,8 @@ namespace SharpDXtest.Assets.Components
                     obj.AddComponent<Rigidbody>();
                     obj.AddComponent<CubeCollider>();
                     obj.AddComponent<GravityForce>();
-                    Mesh mesh = obj.AddComponent<Mesh>();
-                    mesh.model = AssetsManager.Models["Cube"];
+                    MeshComponent mesh = obj.AddComponent<MeshComponent>();
+                    mesh.mesh = AssetsManager.Meshes["Cube"];
                     mesh.Material.Albedo = AssetsManager.Textures["Prototype_Light"];
                     double angle = rng.NextDouble() * 2 * Math.PI;
                     double distance = 5 + (1.0 - rng.NextDouble() * rng.NextDouble()) * 35;

@@ -1,8 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
 	<Assets>
-		<Models>
-		</Models>
+		<Meshes>
+			<Mesh path="Ball.obj"/>
+			<Mesh path="Cube.obj"/>
+		</Meshes>
 
 		<Textures>
 			<Texture path="Sun.jpg"/>
@@ -42,18 +44,18 @@
 			<Transform.LocalScale x="1" y="1" z="2"/>
 			<Transform.LocalRotation x="0" y="45" z="0"/>
 		</Transform>
-		<!--<Mesh model="{Model Cube}">
-			<Mesh.Material Albedo="{Texture Prototype}"/>
-		</Mesh>-->
+		<MeshComponent mesh="{Mesh Cube}">
+			<MeshComponent.Material Albedo="{Texture Prototype}"/>
+		</MeshComponent>
 	</GameObject>
 	
 	<GameObject>
 		<Transform>
 			<Transform.LocalScale x="50" y="50" z="0.5"/>
 		</Transform>
-		<!--<Mesh model="{Model Cube}">
-			<Mesh.Material Albedo="{Texture Prototype}"/>
-		</Mesh>-->
+		<MeshComponent mesh="{Mesh Cube}">
+			<MeshComponent.Material Albedo="{Texture Prototype}"/>
+		</MeshComponent>
 	</GameObject>
 
 	<GameObject>

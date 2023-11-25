@@ -13,7 +13,6 @@ using Device = SharpDX.Direct3D11.Device;
 using Filter = SharpDX.Direct3D11.Filter;
 using Query = SharpDX.Direct3D11.Query;
 using Light = Engine.BaseAssets.Components.Light;
-using Mesh = Engine.BaseAssets.Components.Mesh;
 using Format = SharpDX.DXGI.Format;
 
 using Engine.BaseAssets.Components;
@@ -247,15 +246,15 @@ namespace Engine
                 {
                     if (!obj.Enabled)
                         continue;
-                    foreach (Mesh mesh in obj.GetComponents<Mesh>())
+                    foreach (MeshComponent meshComponent in obj.GetComponents<MeshComponent>())
                     {
-                        if (!mesh.Enabled)
+                        if (!meshComponent.Enabled)
                             continue;
                         pipeline.UpdateUniform("model", (Matrix4x4f)obj.Transform.Model);
 
                         pipeline.UploadUpdatedUniforms();
 
-                        mesh.model.Render();
+                        meshComponent.mesh.Render();
                     }
                 }
             }
@@ -375,20 +374,16 @@ namespace Engine
             {
                 if (!obj.Enabled)
                     continue;
-                foreach (Mesh mesh in obj.GetComponents<Mesh>())
+                foreach (MeshComponent meshComponent in obj.GetComponents<MeshComponent>())
                 {
-                    if (!mesh.Enabled)
+                    if (!meshComponent.Enabled)
                         continue;
                     pipeline.UpdateUniform("model", (Matrix4x4f)obj.Transform.Model);
                     pipeline.UpdateUniform("modelNorm", (Matrix4x4f)obj.Transform.Model.inverse().transposed());
             
                     pipeline.UploadUpdatedUniforms();
-                    mesh.Material.Albedo.use("albedoMap");
-                    mesh.Material.Normal.use("normalMap");
-                    mesh.Material.Metallic.use("metallicMap");
-                    mesh.Material.Roughness.use("roughnessMap");
-                    mesh.Material.AmbientOcclusion.use("ambientOcclusionMap");
-                    mesh.model.Render();
+                    meshComponent.Material.Use();
+                    meshComponent.mesh.Render();
                 }
             }
 
