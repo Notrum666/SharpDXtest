@@ -87,7 +87,7 @@ namespace Engine
 
                     OnFrameEnded?.Invoke();
 
-                    if (Time.DeltaTime < 1.0/144.0)
+                    if (Time.DeltaTime < 1.0 / 144.0)
                     {
                         Thread.Sleep((int)((1.0 / 144.0 - Time.DeltaTime) * 1000));
                     }

@@ -42,15 +42,15 @@ namespace Editor
             EngineCore.IsPaused = true;
             EngineCore.Run();
         }
-        private void MainWindowInst_Closed(object sender, EventArgs e)
+        private void EditorWindowInst_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (EngineCore.IsAlive)
                 EngineCore.Stop();
         }
-
         private void EditorWindowInst_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Keyboard.ClearFocus();
         }
+
     }
 }

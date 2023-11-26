@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="SharpDXtest" Loaded="Window_Loaded" Focusable="True"
         WindowState="Maximized" Width="1920" Height="1080" 
-        Closed="MainWindowInst_Closed" MouseDown="EditorWindowInst_MouseDown"
+        Closing="EditorWindowInst_Closing" MouseDown="EditorWindowInst_MouseDown"
         Style="{StaticResource CustomWindow}">
     <this:EditorWindowBase.Header>
         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
@@ -33,15 +33,19 @@
                 <MenuItem Header="View">
                     <MenuItem Header="Camera" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:CameraRenderControl}"/>
                     <MenuItem Header="Output" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
+                    <MenuItem Header="Inspector" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:InspectorControl}"/>
                 </MenuItem>
             </Menu>
         </StackPanel>
     </this:EditorWindowBase.Header>
     <Grid>
         <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
-            <this:DockableHost Orientation="Vertical" SplitLocation="0.8">
-                <this:CameraRenderControl/>
-                <this:OutputControl/>
+            <this:DockableHost Orientation="Horizontal" SplitLocation="0.8">
+                <this:DockableHost Orientation="Vertical" SplitLocation="0.8">
+                    <this:CameraRenderControl/>
+                    <this:OutputControl/>
+                </this:DockableHost>
+                <this:InspectorControl/>
             </this:DockableHost>
         </this:DockingManager>
     </Grid>
