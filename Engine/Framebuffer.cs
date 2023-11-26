@@ -26,9 +26,9 @@ namespace Engine
             if (depthTexture == null)
                 throw new ArgumentNullException(nameof(depthTexture));
 
-            if (!renderTargetTexture.Views.Any(view => view is RenderTargetView))
+            if (!renderTargetTexture.HasViews<RenderTargetView>())
                 throw new ArgumentException("Passed render target texture does not have render target view.");
-            if (!depthTexture.Views.Any(view => view is DepthStencilView))
+            if (!depthTexture.HasViews<DepthStencilView>())
                 throw new ArgumentException("Passed depth texture does not have depth stencil view.");
 
             if (renderTargetTexture.texture.Description.Width != depthTexture.texture.Description.Width ||

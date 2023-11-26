@@ -300,7 +300,7 @@ namespace Engine
                         Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(CurrentCamera);
                         for (int i = 0; i < lightSpaces.Length; i++)
                         {
-                            DepthStencilView curDSV = curLight.ShadowTexture.GetViews<DepthStencilView>().First(view => view.Description.Texture2DArray.FirstArraySlice == i);
+                            DepthStencilView curDSV = curLight.ShadowTexture.GetView<DepthStencilView>(i);
                             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(curDSV, renderTargetView: null);
                             CurrentDevice.ImmediateContext.ClearDepthStencilView(curDSV, DepthStencilClearFlags.Depth, 1.0f, 0);
 
@@ -634,6 +634,7 @@ namespace Engine
             ssaoSampler.use("texSampler");
 
             CurrentDevice.ImmediateContext.Draw(6, 0);
+            CurrentDevice.ImmediateContext.GenerateMips(camera.SsaoDepthBuffer.GetView<ShaderResourceView>());
         }
 
         private static void SSAOOccludePass(Camera camera)
