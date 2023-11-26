@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,10 +9,11 @@ using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {
-    public class Transform : Component
+    public class Transform : Component, INotifyFieldChanged
     {
         public event Action Invalidated;
         public Transform Parent { get; private set; }
+        [SerializeField("Position")]
         private Vector3 localPosition;
         public Vector3 LocalPosition
         {
@@ -78,6 +80,7 @@ namespace Engine.BaseAssets.Components
                 LocalRotation = rot;
             }
         }
+        [SerializeField("Scale")]
         private Vector3 localScale;
         public Vector3 LocalScale
         {
@@ -264,6 +267,11 @@ namespace Engine.BaseAssets.Components
 
             if (Parent != null)
                 Parent.Invalidated += invalidateCachedData;
+        }
+
+        public void OnFieldChanged(FieldInfo fieldInfo)
+        {
+            invalidateCachedData();
         }
     }
 }
