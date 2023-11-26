@@ -1,11 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
 	<Assets>
-		<Meshes>
-			<Mesh path="Ball.obj"/>
-			<Mesh path="rgb_sphere.gltf"/>
-		</Meshes>
-
 		<Textures>
 			<Texture path="Sun.jpg"/>
 			<Texture path="Mercury.jpg"/>
@@ -18,6 +13,10 @@
 			<Texture path="Uranus.jpg"/>
 			<Texture path="Neptune.jpg"/>
 		</Textures>
+		<Meshes>
+			<Mesh path="Ball.obj"/>
+			<Mesh path="cube_materials.fbx"/>
+		</Meshes>
 	</Assets>
 
 	<GameObject>
@@ -36,7 +35,7 @@
 				<Transform.LocalScale x="3" y="3" z="3"/>
 			</Transform>
 			<MeshComponent mesh="{Mesh Ball}">
-				<MeshComponent.Material Albedo="{Texture Sun}"/>
+				<MeshComponent.Material Albedo="{Texture 0}"/>
 			</MeshComponent>
 			<SelfRotation periodInDays="26.6"/>
 		</GameObject>
@@ -45,7 +44,7 @@
 		<GameObject x.Name="Mercury">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
-					<MeshComponent.Material Albedo="{Texture Mercury}"/>
+					<MeshComponent.Material Albedo="{Texture 1}"/>
 				</MeshComponent>
 				<SelfRotation periodInDays="58"/>
 			</GameObject>
@@ -55,7 +54,7 @@
 		<GameObject x.Name="Venus">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
-					<MeshComponent.Material Albedo="{Texture Venus}"/>
+					<MeshComponent.Material Albedo="{Texture 2}"/>
 				</MeshComponent>
 				<SelfRotation periodInDays="243"/>
 			</GameObject>
@@ -65,7 +64,7 @@
 		<GameObject x.Name="Earth">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
-					<MeshComponent.Material Albedo="{Texture Earth}"/>
+					<MeshComponent.Material Albedo="{Texture 3}"/>
 				</MeshComponent>
 				<SelfRotation periodInDays="1"/>
 			</GameObject>
@@ -74,7 +73,7 @@
 			<GameObject x.Name="Moon">
 				<GameObject>
 					<MeshComponent mesh="{Mesh Ball}">
-						<MeshComponent.Material Albedo="{Texture Moon}"/>
+						<MeshComponent.Material Albedo="{Texture 4}"/>
 					</MeshComponent>
 					<SelfRotation periodInDays="29.5"/>
 				</GameObject>
@@ -85,7 +84,7 @@
 		<GameObject x.Name="Mars">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
-					<MeshComponent.Material Albedo="{Texture Mars}"/>
+					<MeshComponent.Material Albedo="{Texture 5}"/>
 				</MeshComponent>
 				<SelfRotation periodInDays="1"/>
 			</GameObject>
@@ -103,7 +102,7 @@
 		<GameObject x.Name="Jupiter">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
-					<MeshComponent.Material Albedo="{Texture Jupiter}"/>
+					<MeshComponent.Material Albedo="{Texture 6}"/>
 				</MeshComponent>
 				<SelfRotation periodInDays="0.42"/>
 			</GameObject>
@@ -129,7 +128,7 @@
 		<GameObject x.Name="Saturn">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
-					<MeshComponent.Material Albedo="{Texture Saturn}"/>
+					<MeshComponent.Material Albedo="{Texture 7}"/>
 				</MeshComponent>
 				<SelfRotation periodInDays="0.42"/>
 			</GameObject>
@@ -143,7 +142,7 @@
 		<GameObject x.Name="UrAnus">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
-					<MeshComponent.Material Albedo="{Texture Uranus}"/>
+					<MeshComponent.Material Albedo="{Texture 8}"/>
 				</MeshComponent>
 				<SelfRotation periodInDays="0.7"/>
 			</GameObject>
@@ -153,7 +152,7 @@
 		<GameObject x.Name="Neptune">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
-					<MeshComponent.Material Albedo="{Texture Neptune}"/>
+					<MeshComponent.Material Albedo="{Texture 9}"/>
 				</MeshComponent>
 				<SelfRotation periodInDays="0.7"/>
 			</GameObject>

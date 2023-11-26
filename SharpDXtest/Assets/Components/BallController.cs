@@ -19,7 +19,7 @@ namespace SharpDXtest.Assets.Components
         private bool initialized = false;
         public override void Update()
         {
-            if (!initialized) 
+            if (!initialized)
             {
                 GameObject.GetComponent<Rigidbody>().OnCollisionBegin += OnCollisionBegin;
                 initialized = true;
@@ -33,7 +33,7 @@ namespace SharpDXtest.Assets.Components
                     obj.AddComponent<GravityForce>();
                     MeshComponent mesh = obj.AddComponent<MeshComponent>();
                     mesh.mesh = AssetsManager.Meshes["Cube"];
-                    mesh.Material.Albedo = AssetsManager.Textures["Prototype_Light"];
+                    // mesh.Material.Albedo = AssetsManager.Textures["Prototype_Light"];
                     double angle = rng.NextDouble() * 2 * Math.PI;
                     double distance = 5 + (1.0 - rng.NextDouble() * rng.NextDouble()) * 35;
                     obj.Transform.Position = new Vector3(Math.Cos(angle) * distance, Math.Sin(angle) * distance, 5);

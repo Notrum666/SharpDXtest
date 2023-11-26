@@ -24,7 +24,7 @@ namespace Engine.BaseAssets.Components.Colliders
         protected List<Vector3> nonCollinearNormals = new List<Vector3>();
         protected List<int[]> polygons = new List<int[]>();
         protected List<(int a, int b)> edges = new List<(int a, int b)>();
-        public IReadOnlyList<Vector3> Vertexes
+        public IReadOnlyList<Vector3> Vertices
         {
             get
             {
@@ -151,12 +151,24 @@ namespace Engine.BaseAssets.Components.Colliders
         public void FromMesh(Mesh mesh)
         {
             vertices = new List<Vector3>();
+            polygons = new List<int[]>();
             foreach (Primitive primitive in mesh.Primitives)
             {
-                vertices.AddRange(primitive.v);
+                for (int i = 0; i < primitive.indices.Count;)
+                {
+                    if (primitive.indices[i] == -1) // restart index
+                    {
+                        ++i; continue;
+                    }
+                    int[] polygonIndices = { primitive.indices[i] + vertices.Count,
+                                             primitive.indices[i + 1] + vertices.Count,
+                                             primitive.indices[i + 2] + vertices.Count };
+                    polygons.Add(polygonIndices);
+                    i += 3;
+                }
+                foreach (Primitive.PrimitiveVertex vertex in primitive.vertices)
+                    vertices.Add(vertex.v);
             }
-
-            //polygons = new List<int[]>(model.v_i);
 
             normals = new List<Vector3>(polygons.Count);
             edges = new List<(int a, int b)>();

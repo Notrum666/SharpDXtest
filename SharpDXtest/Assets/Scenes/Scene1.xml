@@ -1,16 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
 	<Assets>
+		<Textures>
+		</Textures>
 		<Meshes>
 			<Mesh path="Racket.obj"/>
 			<Mesh path="Ball.obj"/>
 			<Mesh path="Wall.obj"/>
 		</Meshes>
-
-		<Textures>
-			<Texture path="brick_wall_normal.png"/>
-		</Textures>
-	</Assets>
+</Assets>
 
 	<GameObject>
 		<Transform>

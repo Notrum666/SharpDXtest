@@ -1,16 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
 	<Assets>
+		<Textures>
+			<Texture path="Prototype.png"/>
+		</Textures>
+
 		<Meshes>
 			<Mesh path="Ball.obj"/>
 			<Mesh path="Cube.obj"/>
 		</Meshes>
-
-		<Textures>
-			<Texture path="Sun.jpg"/>
-			<Texture path="Prototype.png"/>
-			<Texture path="Prototype_Light.png"/>
-		</Textures>
 	</Assets>
 	
 	<GameObject>
@@ -45,7 +43,7 @@
 			<Transform.LocalRotation x="0" y="45" z="0"/>
 		</Transform>
 		<MeshComponent mesh="{Mesh Cube}">
-			<MeshComponent.Material Albedo="{Texture Prototype}"/>
+			<MeshComponent.Material Albedo="{Texture 0}"/>
 		</MeshComponent>
 	</GameObject>
 	
@@ -54,7 +52,7 @@
 			<Transform.LocalScale x="50" y="50" z="0.5"/>
 		</Transform>
 		<MeshComponent mesh="{Mesh Cube}">
-			<MeshComponent.Material Albedo="{Texture Prototype}"/>
+			<MeshComponent.Material Albedo="{Texture 0}"/>
 		</MeshComponent>
 	</GameObject>
 

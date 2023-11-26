@@ -1,11 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
   <Assets>
-    <Meshes>
-      <Mesh path="Cube.obj"/>
-      <Mesh path="Ball.obj"/>
-    </Meshes>
-
     <Textures>
       <Texture path="Sun.jpg"/>
       <Texture path="white.jpg"/>
@@ -15,6 +10,11 @@
       <Texture path="Jupiter.jpg"/>
       <Texture path="Prototype.png"/>
     </Textures>
+
+    <Meshes>
+      <Mesh path="Cube.obj"/>
+      <Mesh path="Ball.obj"/>
+    </Meshes>
   </Assets>
 
   <GameObject x.Name="Camera">
@@ -31,7 +31,7 @@
       <Transform.Position x="10" y="0" z="0"/>
     </Transform>
     <MeshComponent mesh="{Mesh Cube}">
-      <MeshComponent.Material Albedo="{Texture Prototype}"/>
+      <MeshComponent.Material Albedo="{Texture 7}"/>
     </MeshComponent>
     <PointLight Radius="1000" Brightness="10"/>
   </GameObject>
@@ -42,7 +42,7 @@
       <Transform.LocalScale x="10" y="10" z="10"/>
     </Transform>
     <MeshComponent mesh="{Mesh Ball}">
-      <MeshComponent.Material Albedo="{Texture Sun}"/>
+      <MeshComponent.Material Albedo="{Texture 0}"/>
     </MeshComponent>
   </GameObject>
 
@@ -52,7 +52,7 @@
       <Transform.LocalScale x="5" y="5" z="5"/>
     </Transform>
     <MeshComponent mesh="{Mesh Ball}">
-      <MeshComponent.Material Albedo="{Texture Uranus}"/>
+      <MeshComponent.Material Albedo="{Texture 4}"/>
     </MeshComponent>
   </GameObject>
 
@@ -62,7 +62,7 @@
       <Transform.LocalScale x="5" y="5" z="5"/>
     </Transform>
     <MeshComponent mesh="{Mesh Ball}">
-      <MeshComponent.Material Albedo="{Texture Jupiter}"/>
+      <MeshComponent.Material Albedo="{Texture 5}"/>
     </MeshComponent>
   </GameObject>
 
@@ -72,7 +72,7 @@
       <Transform.LocalScale x="10" y="10" z="10"/>
     </Transform>
     <MeshComponent mesh="{Mesh Cube}">
-      <MeshComponent.Material Albedo="{Texture blue}"/>
+      <MeshComponent.Material Albedo="{Texture 3}"/>
     </MeshComponent>
   </GameObject>
 
@@ -82,7 +82,7 @@
       <Transform.LocalScale x="10" y="10" z="10"/>
     </Transform>
     <MeshComponent mesh="{Mesh Cube}">
-      <MeshComponent.Material Albedo="{Texture red}"/>
+      <MeshComponent.Material Albedo="{Texture 2}"/>
     </MeshComponent>
   </GameObject>
 </Scene>
