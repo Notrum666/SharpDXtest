@@ -42,6 +42,27 @@ namespace Engine
         }
     }
 
+    internal struct SsaoBuffer : IDisposable
+    {
+        public Texture ssao;
+        public Texture depth;
+        public Texture depthTemp;
+
+        public SsaoBuffer(int width, int height)
+        {
+            ssao = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
+            depth = new Texture(width, height, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.RenderTarget, arraySize: 1, mipLevels: 3);
+            depthTemp = new Texture(width, height, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.RenderTarget, arraySize: 1, mipLevels: 3);
+        }
+
+        public void Dispose()
+        {
+            ssao?.Dispose();
+            depth?.Dispose();
+            depthTemp?.Dispose();
+        }
+    }
+
     public static class GraphicsCore
     {
 
@@ -63,6 +84,7 @@ namespace Engine
         private static Query synchQuery;
 
         private static PostProcessEffect_Bloom bloomEffect;
+        private static PostProcessEffect_LinearBlur blurEffect;
 
 #if GraphicsDebugging
         private static SharpDX.DXGI.SwapChain swapChain;
@@ -114,9 +136,10 @@ namespace Engine
 
             AssetsManager.LoadShaderPipeline("ssao_depth", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao_depth.fsh"));
             AssetsManager.LoadShaderPipeline("ssao", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao.fsh"));
-            AssetsManager.LoadShaderPipeline("ssao_blur", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao_blur.fsh"));
+            AssetsManager.LoadShaderPipeline("ssao_depth_downsample", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\ssao_depth_downsample.fsh"));
 
             bloomEffect = new PostProcessEffect_Bloom();
+            blurEffect = new PostProcessEffect_LinearBlur();
         }
 
         private static void InitDirectX(nint HWND, int width, int height)
@@ -300,7 +323,7 @@ namespace Engine
                         Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(CurrentCamera);
                         for (int i = 0; i < lightSpaces.Length; i++)
                         {
-                            DepthStencilView curDSV = curLight.ShadowTexture.GetView<DepthStencilView>(i);
+                            DepthStencilView curDSV = curLight.ShadowTexture.GetSliceView<DepthStencilView>(i);
                             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(curDSV, renderTargetView: null);
                             CurrentDevice.ImmediateContext.ClearDepthStencilView(curDSV, DepthStencilClearFlags.Depth, 1.0f, 0);
 
@@ -338,10 +361,10 @@ namespace Engine
             }
 
             GeometryPass(camera);
+            SSAOPass(camera);
             LightingPass(camera);
             VolumetricPass(camera);
-            SSAOPass(camera);
-            //PrePostProcessingPass(camera);
+            PrePostProcessingPass(camera);
             GammaCorrectionPass(camera);
 
             FlushAndSwapFrameBuffers(camera);
@@ -364,7 +387,7 @@ namespace Engine
                                                                                                                    camera.GBuffer.roughness.GetView<RenderTargetView>(),
                                                                                                                    camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>());
             
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(float.NaN, float.NaN, float.NaN, float.NaN));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(float.NaN, float.NaN, float.NaN, 0.0f));
             CurrentDevice.ImmediateContext.ClearDepthStencilView(camera.DepthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
             
             List<GameObject> objects = EngineCore.CurrentScene.objects;
@@ -541,6 +564,7 @@ namespace Engine
             camera.GBuffer.albedo.use("albedoTex");
             camera.GBuffer.ambientOcclusion.use("ambientOcclusionTex");
             camera.RadianceBuffer.use("radianceTex");
+            camera.SsaoBuffer.ssao.use("ssaoTex");
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
         }
@@ -605,20 +629,28 @@ namespace Engine
             CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         }
 
+        private static void PrepareRenderTarget(RenderTargetView renderTargetView, int width, int height, RasterizerState rastState, BlendState blendState = null)
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = rastState;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = blendState;
+
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, width, height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: renderTargetView);
+        }
+
         private static void SSAOPass(Camera camera)
         {
             SSAODepthPass(camera);
+            SSAODepthMipsPass(camera);
             SSAOOccludePass(camera);
-            SSAOBlurPass(camera);
+            blurEffect.Process(camera.SsaoBuffer.ssao);
         }
 
         private static void SSAODepthPass(Camera camera)
         {
-            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
-            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
+            Texture depthTempTex = camera.SsaoBuffer.depthTemp;
 
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.SsaoDepthBuffer.texture.Description.Width, camera.SsaoDepthBuffer.texture.Description.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.SsaoDepthBuffer.GetView<RenderTargetView>());
+            PrepareRenderTarget(depthTempTex.GetView<RenderTargetView>(), depthTempTex.Width, depthTempTex.Height,  backCullingRasterizer, null);
 
             ShaderPipeline pipeline = AssetsManager.ShaderPipelines["ssao_depth"];
 
@@ -634,7 +666,33 @@ namespace Engine
             ssaoSampler.use("texSampler");
 
             CurrentDevice.ImmediateContext.Draw(6, 0);
-            CurrentDevice.ImmediateContext.GenerateMips(camera.SsaoDepthBuffer.GetView<ShaderResourceView>());
+            CurrentDevice.ImmediateContext.CopySubresourceRegion(camera.SsaoBuffer.depthTemp.texture, 0, null, camera.SsaoBuffer.depth.texture, 0, 0, 0, 0);
+        }
+
+        private static void SSAODepthMipsPass(Camera camera)
+        {
+            Texture depthTex = camera.SsaoBuffer.depth;
+            Texture depthTempTex = camera.SsaoBuffer.depthTemp;
+
+            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["ssao_depth_downsample"];
+
+            pipeline.Use();
+
+            for (int i = 1; i < depthTex.texture.Description.MipLevels; i++)
+            {
+                PrepareRenderTarget(
+                    depthTempTex.GetSliceView<RenderTargetView>(0, i), 
+                    Math.Max(depthTempTex.Width / (int)Math.Pow(2, i), 1), 
+                    Math.Max(depthTempTex.Height / (int)Math.Pow(2, i), 1),  
+                    backCullingRasterizer, 
+                    null
+                );
+
+                pipeline.UploadTexture("inputTex", depthTex.GetSliceView<ShaderResourceView>(0, i - 1));
+
+                CurrentDevice.ImmediateContext.Draw(6, 0);
+                CurrentDevice.ImmediateContext.CopySubresourceRegion(depthTempTex.texture, i, null, depthTex.texture, i, 0, 0, 0);
+            }
         }
 
         private static void SSAOOccludePass(Camera camera)
@@ -642,8 +700,8 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.SsaoBuffer.texture.Description.Width, camera.SsaoBuffer.texture.Description.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.SsaoBuffer.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.SsaoBuffer.ssao.texture.Description.Width, camera.SsaoBuffer.ssao.texture.Description.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.SsaoBuffer.ssao.GetView<RenderTargetView>());
 
             ShaderPipeline pipeline = AssetsManager.ShaderPipelines["ssao"];
 
@@ -652,8 +710,8 @@ namespace Engine
             pipeline.UpdateUniform(
                 "texSize",
                 new Vector2f(
-                    camera.GBuffer.worldPos.texture.Description.Width,
-                    camera.GBuffer.worldPos.texture.Description.Height
+                    camera.SsaoBuffer.ssao.texture.Description.Width,
+                    camera.SsaoBuffer.ssao.texture.Description.Height
                 )
             );
 
@@ -718,35 +776,7 @@ namespace Engine
 
             camera.GBuffer.worldPos.use("worldPosTex");
             camera.GBuffer.normal.use("normalTex");
-            camera.SsaoDepthBuffer.use("depthTex");
-            ssaoSampler.use("texSampler");
-
-            CurrentDevice.ImmediateContext.Draw(6, 0);
-        }
-
-        private static void SSAOBlurPass(Camera camera)
-        {
-            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
-            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
-
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.ColorBuffer.texture.Description.Width, camera.ColorBuffer.texture.Description.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
-
-            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["ssao_blur"];
-
-            pipeline.Use();
-
-            pipeline.UpdateUniform(
-                "texelSize",
-                new Vector2f(
-                    1.0f / camera.SsaoBuffer.texture.Description.Width,
-                    1.0f / camera.SsaoBuffer.texture.Description.Height
-                )
-            );
-
-            pipeline.UploadUpdatedUniforms();
-
-            camera.SsaoBuffer.use("inputTex");
+            camera.SsaoBuffer.depth.use("depthTex");
             ssaoSampler.use("texSampler");
 
             CurrentDevice.ImmediateContext.Draw(6, 0);

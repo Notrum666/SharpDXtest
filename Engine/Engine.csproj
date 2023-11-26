@@ -45,10 +45,13 @@
     <None Update="BaseAssets\Shaders\ssao.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="BaseAssets\Shaders\ssao_blur.fsh">
+    <None Update="BaseAssets\Shaders\Blur\linear_blur.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="BaseAssets\Shaders\ssao_depth.fsh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="BaseAssets\Shaders\ssao_depth_downsample.fsh">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="BaseAssets\Shaders\VolumetricRender\volume.fsh">

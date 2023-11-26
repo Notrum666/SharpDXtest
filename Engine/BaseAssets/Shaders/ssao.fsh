@@ -2,7 +2,7 @@ static const int SAMPLES_COUNT = 64;
 
 struct vert_in
 {
-    float4 _ : SV_POSITION;//pixel coord
+    float4 p : SV_POSITION;
     float2 t : TEX;
 };
 
@@ -30,12 +30,14 @@ float4 main(vert_in v) : SV_Target
 {
     int2 texPos = v.t * texSize;
     
-    float3 n = mul(normalTex.Sample(texSampler, v.t), camView).xyz;
+    float3 n = mul(normalTex.SampleLevel(texSampler, v.t, 0), camView).xyz;
     
     if (dot(n, n) < 0.00001)
         return (float4)1.0f;
     
-    float3 wp = worldPosTex.Sample(texSampler, v.t).xyz;
+    n = normalize(n);
+    
+    float3 wp = worldPosTex.SampleLevel(texSampler, v.t, 0).xyz;
     float3 pos = mul(float4(wp, 1.0f), camView).xyz;
     
     float3 rv = noise[texPos.x % 4 + (texPos.y % 4) * 4];
@@ -47,7 +49,7 @@ float4 main(vert_in v) : SV_Target
     float occlusion = 0.0f;
     float bias = 0.001;
     
-    float depth = pos.y; //linear_depth(v.t, texSize).y;
+    float depth = pos.y;
     
     [unroll]
     for (int i = 0; i < SAMPLES_COUNT; i++)
@@ -60,11 +62,15 @@ float4 main(vert_in v) : SV_Target
         
         offset.x = (offset.x / offset.w) * 0.5f + 0.5f;
         offset.y = -(offset.y / offset.w) * 0.5f + 0.5f;
+             
+        int mipLevel = (1.0f - min(depth / (sampleRad * 5.0f), 1.0f)) * 2.0f;
+        float sampleDepth = depthTex.Load(int3(offset.xy * texSize / pow(2, mipLevel), mipLevel)).x;
         
-        float sampleDepth = depthTex.Sample(texSampler, offset.xy).x; //linear_depth(offset.xy, texSize).y;
+        if (sampleDepth > samplePos.y - bias)
+            continue;
         
         float distScale = smoothstep(0.0f, 1.0f, sampleRad / abs(depth - sampleDepth));
-        occlusion += (sampleDepth <= samplePos.y - bias ? distScale : 0.0f);
+        occlusion += distScale;
     }
     
     occlusion = 1.0f - (occlusion / (float) SAMPLES_COUNT);

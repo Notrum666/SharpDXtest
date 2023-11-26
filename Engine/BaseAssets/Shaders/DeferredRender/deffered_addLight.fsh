@@ -11,6 +11,7 @@ cbuffer textureBuf
 	Texture2D worldPosTex;
 	Texture2D albedoTex;
 	Texture2D ambientOcclusionTex;
+	Texture2D ssaoTex;
 };
 
 SamplerState texSampler;
@@ -23,7 +24,8 @@ float4 main(vert_in v) : SV_Target
 
 	float3 albedo = albedoTex.Sample(texSampler, v.t).rgb;
 	float ambientOcclusion = ambientOcclusionTex.Sample(texSampler, v.t).x;
+	float ssao = ssaoTex.Sample(texSampler, v.t).x;
 
-	float3 ambient = float3(0.03f, 0.03f, 0.03f) * albedo * ambientOcclusion;
-    return float4(ambient + radianceTex.Sample(texSampler, v.t).rgb, 1.0f);
+    float3 ambient = float3(0.03f, 0.03f, 0.03f) * albedo * ambientOcclusion;
+    return float4(ambient + radianceTex.Sample(texSampler, v.t).rgb * ssao, 1.0f);
 }
