@@ -11,15 +11,15 @@ namespace LinearAlgebra
     /// </summary>
     public struct Matrix3x3
     {
-        public double v00 { get; set; } // [rowIndex, columnIndex]
-        public double v01 { get; set; }
-        public double v02 { get; set; }
-        public double v10 { get; set; }
-        public double v11 { get; set; }
-        public double v12 { get; set; }
-        public double v20 { get; set; }
-        public double v21 { get; set; }
-        public double v22 { get; set; }
+        public double v00; // [rowIndex, columnIndex]
+        public double v01;
+        public double v02;
+        public double v10;
+        public double v11;
+        public double v12;
+        public double v20;
+        public double v21;
+        public double v22;
 
         /// <summary>
         /// Returns new identity matrix

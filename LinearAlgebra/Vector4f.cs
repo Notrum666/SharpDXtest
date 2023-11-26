@@ -32,10 +32,10 @@ namespace LinearAlgebra
         /// </summary>
         public static readonly Vector4f UnitW = new Vector4f(0f, 0f, 0f, 1f);
 
-        public float x { get; set; }
-        public float y { get; set; }
-        public float z { get; set; }
-        public float w { get; set; }
+        public float x;
+        public float y;
+        public float z;
+        public float w;
         public Vector3f xyz { get { return new Vector3f(x, y, z); } }
         public Vector4f(float x = 0f, float y = 0f, float z = 0f, float w = 0f)
         {

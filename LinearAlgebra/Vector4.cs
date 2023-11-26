@@ -32,10 +32,10 @@ namespace LinearAlgebra
         /// </summary>
         public static readonly Vector4 UnitW = new Vector4(0.0, 0.0, 0.0, 1.0);
 
-        public double x { get; set; }
-        public double y { get; set; }
-        public double z { get; set; }
-        public double w { get; set; }
+        public double x;
+        public double y;
+        public double z;
+        public double w;
         public Vector3 xyz { get { return new Vector3(x, y, z); } }
         public Vector4(double x = 0.0, double y = 0.0, double z = 0.0, double w = 0.0)
         {
