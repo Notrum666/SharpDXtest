@@ -11,10 +11,10 @@ namespace LinearAlgebra
     /// </summary>
     public struct Matrix2x2
     {
-        public double v00 { get; set; } // [rowIndex, columnIndex]
-        public double v01 { get; set; }
-        public double v10 { get; set; }
-        public double v11 { get; set; }
+        public double v00; // [rowIndex, columnIndex]
+        public double v01;
+        public double v10;
+        public double v11;
 
         /// <summary>
         /// Returns new identity matrix

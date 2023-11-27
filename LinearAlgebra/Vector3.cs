@@ -42,9 +42,9 @@ namespace LinearAlgebra
         /// </summary>
         public static readonly Vector3 UnitZ = new Vector3(0.0, 0.0, 1.0);
 
-        public double x { get; set; }
-        public double y { get; set; }
-        public double z { get; set; }
+        public double x;
+        public double y;
+        public double z;
         public Vector2 xy { get { return new Vector2(x, y); } }
         public Vector3(double x = 0.0, double y = 0.0, double z = 0.0)
         {

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Windows.Media;
 using System.Windows;
+using System.Linq;
+using System.Windows.Input;
 
 namespace Editor
 {
@@ -51,6 +53,25 @@ namespace Editor
                     return subChild;
             }
             return null;
+        }
+        public static IEnumerable<Type> GetInheritancHierarchy(this Type type)
+        {
+            for (var current = type; current != null; current = current.BaseType)
+                yield return current;
+        }
+        public static int GetInheritanceDistance<TOther>(this Type type)
+        {
+            IEnumerable<Type> hierarchy = type.GetInheritancHierarchy().TakeWhile(t => t != typeof(TOther));
+            if (hierarchy.Last() != type)
+                return -1;
+            return hierarchy.Count();
+        }
+        public static int GetInheritanceDistance(this Type type, Type other)
+        {
+            IEnumerable<Type> hierarchy = type.GetInheritancHierarchy().TakeWhile(t => t != other).ToList();
+            if (hierarchy.Any() && hierarchy.Last().BaseType != other)
+                return -1;
+            return hierarchy.Count();
         }
     }
 }

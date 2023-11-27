@@ -11,22 +11,22 @@ namespace LinearAlgebra
     /// </summary>
     public struct Matrix4x4
     {
-        public double v00 { get; set; } // [rowIndex, columnIndex]
-        public double v01 { get; set; }
-        public double v02 { get; set; }
-        public double v03 { get; set; }
-        public double v10 { get; set; }
-        public double v11 { get; set; }
-        public double v12 { get; set; }
-        public double v13 { get; set; }
-        public double v20 { get; set; }
-        public double v21 { get; set; }
-        public double v22 { get; set; }
-        public double v23 { get; set; }
-        public double v30 { get; set; }
-        public double v31 { get; set; }
-        public double v32 { get; set; }
-        public double v33 { get; set; }
+        public double v00; // [rowIndex, columnIndex]
+        public double v01;
+        public double v02;
+        public double v03;
+        public double v10;
+        public double v11;
+        public double v12;
+        public double v13;
+        public double v20;
+        public double v21;
+        public double v22;
+        public double v23;
+        public double v30;
+        public double v31;
+        public double v32;
+        public double v33;
 
         /// <summary>
         /// Returns new identity matrix

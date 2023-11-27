@@ -9,7 +9,7 @@ using Engine;
 
 namespace Editor
 {
-    public partial class EditorWindow : Window
+    public partial class EditorWindow : EditorWindowBase
     {
         private RelayCommand spawnFlyingControl;
         public RelayCommand SpawnFlyingControl
@@ -39,19 +39,18 @@ namespace Editor
 
             EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene5.xml");
 
-            EngineCore.Run();
-
             EngineCore.IsPaused = true;
+            EngineCore.Run();
         }
-        private void MainWindowInst_Closed(object sender, EventArgs e)
+        private void EditorWindowInst_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (EngineCore.IsAlive)
                 EngineCore.Stop();
         }
-
         private void EditorWindowInst_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Keyboard.ClearFocus();
         }
+
     }
 }

@@ -7,8 +7,8 @@
              xmlns:e="clr-namespace:Engine;assembly=Engine"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Tag="Output" Width="800" Height="300"
-             Loaded="UserControl_Loaded"  Unloaded="UserControl_Unloaded"  Focusable="True"
-             MouseDown="UserControl_MouseDown">
+             Loaded="UserControl_Loaded"  Unloaded="UserControl_Unloaded"
+             Style="{StaticResource ToolControl}">
     <UserControl.Resources>
         <local:DateTimeConverter x:Key="DateTimeConv" Format="HH:mm:ss.fff"/>
         <local:LogMessageVisibiliySelector x:Key="LogMessageVisibilityConv"/>

@@ -63,18 +63,6 @@ namespace Engine
             {
                 while (isAlive)
                 {
-                    InputManager.Update();
-                    Time.Update();
-                    if (!isPaused)
-                    {
-                        Update();
-                        SoundCore.Update();
-                    }
-                    GraphicsCore.Update();
-                    ProfilerCore.Update();
-
-                    OnFrameEnded?.Invoke();
-
                     if (needsToBePaused)
                     {
                         needsToBePaused = false;
@@ -89,7 +77,19 @@ namespace Engine
                         OnResumed?.Invoke();
                     }
 
-                    if (Time.DeltaTime < 1.0/144.0)
+                    InputManager.Update();
+                    Time.Update();
+                    if (!isPaused)
+                    {
+                        Update();
+                        SoundCore.Update();
+                    }
+                    GraphicsCore.Update();
+                    ProfilerCore.Update();
+
+                    OnFrameEnded?.Invoke();
+
+                    if (Time.DeltaTime < 1.0 / 144.0)
                     {
                         Thread.Sleep((int)((1.0 / 144.0 - Time.DeltaTime) * 1000));
                     }
