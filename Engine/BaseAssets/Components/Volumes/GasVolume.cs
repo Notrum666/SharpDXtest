@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX.Direct3D11;
+﻿using System.Linq;
 using LinearAlgebra;
-using Buffer = SharpDX.Direct3D11.Buffer;
 using SharpDX;
+using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 
 namespace Engine.BaseAssets.Components

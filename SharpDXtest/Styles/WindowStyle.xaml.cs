@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Interop;
 using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows.Interop;
 
 namespace Editor
 {
@@ -22,7 +23,7 @@ namespace Editor
             if (window.WindowState == WindowState.Maximized)
             {
                 // Make sure window doesn't overlap with the taskbar.
-                System.Windows.Forms.Screen screen = System.Windows.Forms.Screen.FromHandle(handle);
+                Screen screen = Screen.FromHandle(handle);
                 if (screen.Primary)
                     containerBorder.Padding = new Thickness(
                         SystemParameters.WorkArea.Left + 7,

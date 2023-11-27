@@ -1,31 +1,32 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Linq;
+using Engine.BaseAssets.Components;
+using LinearAlgebra;
 using SharpDX;
+using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
-using SharpDX.D3DCompiler;
-using SharpDX.XAudio2;
-using SharpDX.Multimedia;
 using SharpDX.Mathematics.Interop;
+using SharpDX.Multimedia;
+using SharpDX.XAudio2;
 using Buffer = SharpDX.Direct3D11.Buffer;
-using Engine.BaseAssets.Components;
-using LinearAlgebra;
-using Vector3 = LinearAlgebra.Vector3;
-using Vector2 = LinearAlgebra.Vector2;
-using Matrix3x3 = LinearAlgebra.Matrix3x3;
+using MapFlags = SharpDX.Direct3D11.MapFlags;
 using Quaternion = LinearAlgebra.Quaternion;
+using Rectangle = System.Drawing.Rectangle;
+using Vector2 = LinearAlgebra.Vector2;
+using Vector3 = LinearAlgebra.Vector3;
 
 namespace Engine
 {
@@ -261,8 +262,8 @@ namespace Engine
         {
 
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
-                image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
-            BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                image = image.Clone(new Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
+            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
             texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
             {
@@ -660,7 +661,7 @@ namespace Engine
                 if (buf.invalidated)
                 {
                     DataStream stream;
-                    GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.buffer, 0, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out stream);
+                    GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.buffer, 0, MapMode.WriteDiscard, MapFlags.None, out stream);
                     foreach (ShaderVariable variable in buf.variables.Values)
                     {
                         if (variable.value == null)

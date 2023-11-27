@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX.DirectInput;
-using LinearAlgebra;
-using Engine;
-using Engine.BaseAssets.Components;
+﻿using Engine.BaseAssets.Components;
 
 namespace SharpDXtest.Assets.Components
 {

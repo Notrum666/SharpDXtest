@@ -1,10 +1,4 @@
-﻿using System;
-using System.Windows;
-using System.Windows.Input;
-using System.Threading;
-using System.Globalization;
-using System.Windows.Interop;
-using Engine;
+﻿using System.Windows;
 
 namespace Editor
 {

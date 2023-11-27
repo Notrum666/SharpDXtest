@@ -1,10 +1,8 @@
-﻿using Engine;
-using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Component = Engine.BaseAssets.Components.Component;
+using Engine;
 
 namespace Editor
 {

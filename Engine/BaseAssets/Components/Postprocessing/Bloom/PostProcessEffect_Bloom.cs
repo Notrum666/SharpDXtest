@@ -1,9 +1,10 @@
-﻿using LinearAlgebra;
-using SharpDX;
-using SharpDX.DXGI;
-using SharpDX.Direct3D11;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using LinearAlgebra;
+using SharpDX;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+using Device = SharpDX.Direct3D11.Device;
 
 namespace Engine.BaseAssets.Components.Postprocessing
 {
@@ -36,7 +37,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
         }
         private float treshold = 1.0f;
 
-        private static SharpDX.Direct3D11.Device device => GraphicsCore.CurrentDevice;
+        private static Device device => GraphicsCore.CurrentDevice;
 
         private static Sampler sampler;
         private static RasterizerState backCullingRasterizerState;

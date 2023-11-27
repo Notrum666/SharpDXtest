@@ -1,17 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX;
-using SharpDX.XAudio2;
-using SharpDX.X3DAudio;
-using SharpDX.Multimedia;
-using SharpDX.XAPO;
-using SharpDX.XAPO.Fx;
 using Engine.BaseAssets.Components;
-using SharpDX.Mathematics.Interop;
-using System.Threading;
+using SharpDX.Multimedia;
+using SharpDX.X3DAudio;
+using SharpDX.XAudio2;
 
 namespace Engine
 {

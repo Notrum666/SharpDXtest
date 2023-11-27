@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX.Direct3D11;
-using LinearAlgebra;
-using Buffer = SharpDX.Direct3D11.Buffer;
 using System.Runtime.InteropServices;
-using SharpDX;
 using Engine.BaseAssets.Components.Particles;
+using LinearAlgebra;
+using SharpDX;
+using SharpDX.Direct3D;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+using Buffer = SharpDX.Direct3D11.Buffer;
+using MapFlags = SharpDX.Direct3D11.MapFlags;
 
 namespace Engine.BaseAssets.Components
 {
@@ -100,7 +100,7 @@ namespace Engine.BaseAssets.Components
             particlesPoolView = new UnorderedAccessView(GraphicsCore.CurrentDevice, particlesPool, new UnorderedAccessViewDescription()
             {
                 Dimension = UnorderedAccessViewDimension.Buffer,
-                Format = SharpDX.DXGI.Format.Unknown,
+                Format = Format.Unknown,
                 Buffer = new UnorderedAccessViewDescription.BufferResource()
                 {
                     ElementCount = maxParticles,
@@ -111,8 +111,8 @@ namespace Engine.BaseAssets.Components
 
             particlesPoolResourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, particlesPool, new ShaderResourceViewDescription()
             {
-                Dimension = SharpDX.Direct3D.ShaderResourceViewDimension.Buffer,
-                Format = SharpDX.DXGI.Format.Unknown,
+                Dimension = ShaderResourceViewDimension.Buffer,
+                Format = Format.Unknown,
                 Buffer = new ShaderResourceViewDescription.BufferResource()
                 {
                     FirstElement = 0,
@@ -131,7 +131,7 @@ namespace Engine.BaseAssets.Components
             rngPoolView = new UnorderedAccessView(GraphicsCore.CurrentDevice, rngPool, new UnorderedAccessViewDescription()
             {
                 Dimension = UnorderedAccessViewDimension.Buffer,
-                Format = SharpDX.DXGI.Format.Unknown,
+                Format = Format.Unknown,
                 Buffer = new UnorderedAccessViewDescription.BufferResource()
                 {
                     ElementCount = kernelsCount,

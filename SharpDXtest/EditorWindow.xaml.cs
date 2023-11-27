@@ -1,8 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Globalization;
+using System.Threading;
 using System.Windows;
 using System.Windows.Input;
-using System.Threading;
-using System.Globalization;
 using System.Windows.Interop;
 using Engine;
 
@@ -42,7 +43,7 @@ namespace Editor
             EngineCore.Run();
         }
 
-        private void EditorWindowInst_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void EditorWindowInst_Closing(object sender, CancelEventArgs e)
         {
             if (EngineCore.IsAlive)
                 EngineCore.Stop();

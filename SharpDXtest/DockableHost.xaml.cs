@@ -2,10 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Markup;
 
 namespace Editor
@@ -387,13 +387,13 @@ namespace Editor
             ShowDockingOverlay = false;
         }
 
-        private void ColumnsSplitter_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        private void ColumnsSplitter_DragDelta(object sender, DragDeltaEventArgs e)
         {
             SplitLocation = ContentGrid.ColumnDefinitions[0].ActualWidth /
                             (ContentGrid.ColumnDefinitions[0].ActualWidth + ContentGrid.ColumnDefinitions[2].ActualWidth);
         }
 
-        private void RowsSplitter_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        private void RowsSplitter_DragDelta(object sender, DragDeltaEventArgs e)
         {
             SplitLocation = ContentGrid.RowDefinitions[0].ActualHeight /
                             (ContentGrid.RowDefinitions[0].ActualHeight + ContentGrid.RowDefinitions[2].ActualHeight);

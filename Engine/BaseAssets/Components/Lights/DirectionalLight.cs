@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX.Direct3D11;
 using LinearAlgebra;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
 
 namespace Engine.BaseAssets.Components
 {
@@ -95,7 +92,7 @@ namespace Engine.BaseAssets.Components
 
         public DirectionalLight()
         {
-            ShadowTexture = new Texture(shadowSize, shadowSize, null, SharpDX.DXGI.Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil, cascadeFrustumDistances.Length - 1);
+            ShadowTexture = new Texture(shadowSize, shadowSize, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil, cascadeFrustumDistances.Length - 1);
         }
     }
 }

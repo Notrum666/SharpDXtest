@@ -1,22 +1,24 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using Engine.BaseAssets.Components;
+using Engine.BaseAssets.Components.Postprocessing;
+using LinearAlgebra;
 using SharpDX;
-using SharpDX.DXGI;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
 using SharpDX.Mathematics.Interop;
+using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using Device = SharpDX.Direct3D11.Device;
+using FillMode = SharpDX.Direct3D11.FillMode;
 using Filter = SharpDX.Direct3D11.Filter;
-using Query = SharpDX.Direct3D11.Query;
+using Format = SharpDX.DXGI.Format;
 using Light = Engine.BaseAssets.Components.Light;
 using Mesh = Engine.BaseAssets.Components.Mesh;
-using Format = SharpDX.DXGI.Format;
-using Engine.BaseAssets.Components;
-using LinearAlgebra;
-using Engine.BaseAssets.Components.Postprocessing;
+using Query = SharpDX.Direct3D11.Query;
+using QueryType = SharpDX.Direct3D11.QueryType;
 
 namespace Engine
 {
@@ -146,7 +148,7 @@ namespace Engine
 
             backCullingRasterizer = new RasterizerState(CurrentDevice, new RasterizerStateDescription()
             {
-                FillMode = SharpDX.Direct3D11.FillMode.Solid,
+                FillMode = FillMode.Solid,
                 CullMode = CullMode.Back,
                 IsFrontCounterClockwise = true,
                 IsScissorEnabled = false,
@@ -156,7 +158,7 @@ namespace Engine
             });
             frontCullingRasterizer = new RasterizerState(CurrentDevice, new RasterizerStateDescription()
             {
-                FillMode = SharpDX.Direct3D11.FillMode.Solid,
+                FillMode = FillMode.Solid,
                 CullMode = CullMode.Front,
                 IsFrontCounterClockwise = true,
                 IsScissorEnabled = false,
@@ -171,8 +173,8 @@ namespace Engine
                 AlphaToCoverageEnable = false,
                 IndependentBlendEnable = false
             };
-            blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.One, BlendOption.One, SharpDX.Direct3D11.BlendOperation.Add,
-                                                                              BlendOption.Zero, BlendOption.One, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
+            blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.One, BlendOption.One, BlendOperation.Add,
+                                                                              BlendOption.Zero, BlendOption.One, BlendOperation.Add, ColorWriteMaskFlags.All);
             additiveBlendState = new BlendState(CurrentDevice, blendStateDesc);
 
             blendStateDesc = new BlendStateDescription()
@@ -180,8 +182,8 @@ namespace Engine
                 AlphaToCoverageEnable = false,
                 IndependentBlendEnable = false
             };
-            blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, SharpDX.Direct3D11.BlendOperation.Add,
-                                                                              BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
+            blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, BlendOperation.Add,
+                                                                              BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, BlendOperation.Add, ColorWriteMaskFlags.All);
             blendingBlendState = new BlendState(CurrentDevice, blendStateDesc);
 
             //depthState_checkDepth = new DepthStencilState(CurrentDevice, new DepthStencilStateDescription()
@@ -207,15 +209,15 @@ namespace Engine
                                                     DeviceType.Hardware,
                                                     0,
                                                     CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.FpuPreserve,
-                                                    new SharpDX.Direct3D9.PresentParameters()
+                                                    new PresentParameters()
                                                     {
                                                         Windowed = true,
-                                                        SwapEffect = SharpDX.Direct3D9.SwapEffect.Discard,
+                                                        SwapEffect = SwapEffect.Discard,
                                                         DeviceWindowHandle = HWND,
                                                         PresentationInterval = PresentInterval.Default
                                                     });
 
-            synchQuery = new Query(CurrentDevice, new QueryDescription() { Type = SharpDX.Direct3D11.QueryType.Event, Flags = QueryFlags.None });
+            synchQuery = new Query(CurrentDevice, new QueryDescription() { Type = QueryType.Event, Flags = QueryFlags.None });
         }
 
         public static void Update()

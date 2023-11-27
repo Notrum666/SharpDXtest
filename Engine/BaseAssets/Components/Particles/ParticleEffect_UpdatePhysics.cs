@@ -1,11 +1,4 @@
-﻿using LinearAlgebra;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Engine.BaseAssets.Components.Particles
+﻿namespace Engine.BaseAssets.Components.Particles
 {
     public class ParticleEffect_UpdatePhysics : ParticleEffect
     {

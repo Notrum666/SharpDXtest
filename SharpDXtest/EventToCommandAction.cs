@@ -1,7 +1,7 @@
-﻿using Microsoft.Xaml.Behaviors;
-using System;
-using System.Windows.Input;
+﻿using System;
 using System.Windows;
+using System.Windows.Input;
+using Microsoft.Xaml.Behaviors;
 
 namespace Editor
 {

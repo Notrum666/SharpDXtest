@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX.XAudio2;
+﻿using LinearAlgebra;
 using SharpDX.X3DAudio;
-using SharpDX.Multimedia;
-using SharpDX.XAPO;
-using SharpDX.XAPO.Fx;
-using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {

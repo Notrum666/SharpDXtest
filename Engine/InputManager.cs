@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX;
+﻿using LinearAlgebra;
 using SharpDX.DirectInput;
-using System.Diagnostics;
-using LinearAlgebra;
-using Vector2 = LinearAlgebra.Vector2;
 
 namespace Engine
 {

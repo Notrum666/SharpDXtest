@@ -1,11 +1,8 @@
-﻿using SharpDX.Direct3D11;
-using SharpDX.Direct3D9;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SharpDX.Direct3D11;
+using SharpDX.Direct3D9;
+using Resource = SharpDX.DXGI.Resource;
 
 namespace Engine
 {
@@ -39,7 +36,7 @@ namespace Engine
             RenderTargetTexture = renderTargetTexture;
             DepthTexture = depthTexture;
 
-            nint renderTextureHandle = renderTargetTexture.texture.QueryInterface<SharpDX.DXGI.Resource>().SharedHandle;
+            nint renderTextureHandle = renderTargetTexture.texture.QueryInterface<Resource>().SharedHandle;
             d9texture = new SharpDX.Direct3D9.Texture(GraphicsCore.D9Device,
                                                       Width,
                                                       Height,
@@ -60,7 +57,7 @@ namespace Engine
             RenderTargetTexture = new Texture(width, height, null, SharpDX.DXGI.Format.B8G8R8A8_UNorm, BindFlags.ShaderResource | BindFlags.RenderTarget);
             DepthTexture = new Texture(width, height, null, SharpDX.DXGI.Format.R32_Typeless, BindFlags.DepthStencil);
 
-            nint renderTextureHandle = RenderTargetTexture.texture.QueryInterface<SharpDX.DXGI.Resource>().SharedHandle;
+            nint renderTextureHandle = RenderTargetTexture.texture.QueryInterface<Resource>().SharedHandle;
             d9texture = new SharpDX.Direct3D9.Texture(GraphicsCore.D9Device,
                                                       Width,
                                                       Height,

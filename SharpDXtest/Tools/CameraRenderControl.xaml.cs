@@ -1,15 +1,18 @@
 ﻿using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Interop;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Collections.ObjectModel;
+using System.Windows.Media;
 using Engine;
 using Engine.BaseAssets.Components;
+using LinearAlgebra;
+using SharpDX.DXGI;
 using SharpDXtest.Assets.Components;
+using Point = System.Drawing.Point;
 
 namespace Editor
 {
@@ -59,7 +62,7 @@ namespace Editor
         private GameObject controlledGameObject;
         private Camera camera;
 
-        private System.Drawing.Point cursorLockPoint;
+        private Point cursorLockPoint;
         private CursorMode cursorMode;
 
         public ObservableCollection<AspectRatio> AspectRatios { get; set; } = new ObservableCollection<AspectRatio>
@@ -126,7 +129,7 @@ namespace Editor
                 Height = double.NaN;
 
                 controlledGameObject = new GameObject();
-                controlledGameObject.Transform.Position = new LinearAlgebra.Vector3(0, -10, 5);
+                controlledGameObject.Transform.Position = new Vector3(0, -10, 5);
                 EditorCameraController controller = controlledGameObject.AddComponent<EditorCameraController>();
                 controller.speed = 5;
                 camera = controlledGameObject.AddComponent<Camera>();
@@ -179,7 +182,7 @@ namespace Editor
 
             FrameBuffer buffer = camera.GetNextFrontBuffer();
 
-            GraphicsCore.CurrentDevice.ImmediateContext.ResolveSubresource(buffer.RenderTargetTexture.texture, 0, copyFramebuffer.RenderTargetTexture.texture, 0, SharpDX.DXGI.Format.B8G8R8A8_UNorm);
+            GraphicsCore.CurrentDevice.ImmediateContext.ResolveSubresource(buffer.RenderTargetTexture.texture, 0, copyFramebuffer.RenderTargetTexture.texture, 0, Format.B8G8R8A8_UNorm);
 
             timeCounter += Time.DeltaTime;
             framesCount++;
