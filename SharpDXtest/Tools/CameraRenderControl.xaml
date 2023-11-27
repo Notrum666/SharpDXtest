@@ -7,22 +7,42 @@
              xmlns:local="clr-namespace:Editor"
              mc:Ignorable="d" 
              d:DesignWidth="1280" d:DesignHeight="720" Tag="Camera" Width="1280" Height="720"
-             Loaded="UserControl_Loaded" Unloaded="UserControl_Unloaded" Focusable="True"
+             Loaded="UserControl_Loaded" Unloaded="UserControl_Unloaded"
              MouseDown="UserControl_MouseDown" MouseUp="UserControl_MouseUp" 
              KeyDown="UserControl_KeyDown"
              GotKeyboardFocus="UserControl_GotKeyboardFocus" 
-             LostKeyboardFocus="UserControl_LostKeyboardFocus">
+             LostKeyboardFocus="UserControl_LostKeyboardFocus"
+             SizeChanged="UserControl_SizeChanged"
+             Style="{StaticResource ToolControl}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="boolToVisibility"/>
     </UserControl.Resources>
-    <Grid>
-        <TextBlock x:Name="FPSTextBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20" 
+    <Grid Background="{StaticResource BackgroundBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Background="{StaticResource BorderBrush}">
+            <ComboBox HorizontalAlignment="Left" Width="100" Margin="1" ItemsSource="{Binding AspectRatios}"
+                      SelectedItem="{Binding SelectedAspectRatio}" Style="{StaticResource EditlessComboBox}"
+                      SelectionChanged="AspectRatioComboBox_SelectionChanged" MaxDropDownHeight="600">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Text="{Binding}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </Grid>
+        <Grid Grid.Row="1" x:Name="RenderControlHost" Background="{StaticResource CameraRenderControlBackgroundBrush}">
+            <TextBlock x:Name="FPSTextBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20" 
                    Text="0" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
-        <Image x:Name="RenderControl" HorizontalAlignment="Stretch" 
+            <Image x:Name="RenderControl" HorizontalAlignment="Stretch" 
                VerticalAlignment="Stretch" Stretch="Fill" SizeChanged="RenderControl_SizeChanged">
-            <Image.Source>
-                <i:D3DImage x:Name="d3dimage"/>
-            </Image.Source>
-        </Image>
+                <Image.Source>
+                    <i:D3DImage x:Name="d3dimage"/>
+                </Image.Source>
+            </Image>
+        </Grid>
     </Grid>
 </UserControl>

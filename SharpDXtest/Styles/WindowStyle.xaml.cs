@@ -10,6 +10,7 @@ namespace Editor
         void WindowLoaded(object sender, RoutedEventArgs e)
         {
             ((Window)sender).StateChanged += WindowStateChanged;
+            WindowStateChanged((Window)sender, e);
         }
         void WindowStateChanged(object sender, EventArgs e)
         {

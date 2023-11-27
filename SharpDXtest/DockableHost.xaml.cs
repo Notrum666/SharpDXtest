@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -127,6 +128,8 @@ namespace Editor
 
         public DockableHost()
         {
+            IsLocked = true;
+
             InitializeComponent();
 
             DataContext = this;
@@ -388,6 +391,12 @@ namespace Editor
         {
             SplitLocation = ContentGrid.RowDefinitions[0].ActualHeight /
                 (ContentGrid.RowDefinitions[0].ActualHeight + ContentGrid.RowDefinitions[2].ActualHeight);
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            IsLocked = false;
+            UpdateConfiguration();
         }
     }
 }

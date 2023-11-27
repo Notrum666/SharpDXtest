@@ -24,8 +24,8 @@ namespace LinearAlgebra
         /// </summary>
         public static readonly Vector2 UnitY = new Vector2(0.0, 1.0);
 
-        public double x { get; set; }
-        public double y { get; set; }
+        public double x;
+        public double y;
         public Vector2(double x = 0.0, double y = 0.0)
         {
             this.x = x;

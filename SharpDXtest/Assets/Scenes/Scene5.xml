@@ -21,6 +21,7 @@
 		<Camera Aspect="1.7777" Near="0.001" Far="500" FOV="1.7777"/>
 		<SoundListener IsCurrent="true"/>
 		<CameraController speed="5"/>
+		<InspectorTestComponent/>
 	</GameObject>
 
 	<!--
