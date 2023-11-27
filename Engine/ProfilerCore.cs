@@ -13,11 +13,11 @@ namespace Engine
     {
         public static long MillisecondsToStore = 60 * 1000;
 
-        private static readonly Harmony harmony = new("Profiler");
-        private static readonly List<MethodInfo> methodsToPatch = new();
+        private static readonly Harmony harmony = new Harmony("Profiler");
+        private static readonly List<MethodInfo> methodsToPatch = new List<MethodInfo>();
 
-        private static readonly List<ProfilingResult> results = new();
-        private static readonly Stack<ProfilingResult> currentStack = new();
+        private static readonly List<ProfilingResult> results = new List<ProfilingResult>();
+        private static readonly Stack<ProfilingResult> currentStack = new Stack<ProfilingResult>();
 
         public static void Init()
         {
@@ -38,21 +38,15 @@ namespace Engine
         {
             long currentTimeMilliseconds = Stopwatch.GetTimestamp() / Stopwatch.Frequency * 1000;
             while (results.Count > 0 && currentTimeMilliseconds - results[0].StartMilliseconds > MillisecondsToStore)
-            {
                 results.RemoveAt(0);
-            }
         }
 
         public static void AddProfilingResult(ProfilingResult result)
         {
             if (currentStack.TryPeek(out ProfilingResult parent))
-            {
                 parent.AddChildResult(result);
-            }
             else
-            {
                 results.Add(result);
-            }
 
             currentStack.Push(result);
         }
@@ -61,9 +55,7 @@ namespace Engine
         {
             ProfilingResult stackResult = currentStack.Pop();
             if (result != stackResult)
-            {
                 throw new ArgumentException($"Trying to finalize result for {result.DisplayName}, while current is {stackResult.DisplayName}");
-            }
         }
 
         public static IReadOnlyList<ProfilingResult> GetResults()
@@ -77,9 +69,7 @@ namespace Engine
             MethodInfo profilerPostfix = AccessTools.Method(typeof(ProfilerCore), nameof(StopProfiling));
 
             foreach (MethodInfo method in methodsToPatch)
-            {
                 harmony.Patch(method, new HarmonyMethod(profilerPrefix), new HarmonyMethod(profilerPostfix));
-            }
         }
 
         private static void StartProfiling(out ProfilingResult __state, MethodInfo __originalMethod)
@@ -121,9 +111,7 @@ namespace Engine
 
                 DumpResult(result, file);
                 if (skipEndCheck || i != results.Count - 1)
-                {
                     file.WriteLine(",");
-                }
             }
         }
 
