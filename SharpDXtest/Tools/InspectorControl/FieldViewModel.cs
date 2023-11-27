@@ -20,6 +20,7 @@ namespace Editor
         public string DisplayName { get; private set; }
         public object Value
         {
+            // TODO: optimize repetitive boxing-unboxing by caching structure value
             get
             {
                 if (parentField is null)
