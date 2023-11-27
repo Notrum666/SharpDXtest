@@ -6,12 +6,11 @@ using System.Windows.Media;
 using System.Windows.Interop;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Collections.ObjectModel;
 
 using Engine;
 using Engine.BaseAssets.Components;
 using SharpDXtest.Assets.Components;
-using System.Collections.ObjectModel;
-using System.Collections.Generic;
 
 namespace Editor
 {
@@ -188,11 +187,10 @@ namespace Editor
         private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
+            Focus();
 
             if (e.RightButton == MouseButtonState.Pressed)
                 CursorMode = CursorMode.HiddenAndLocked;
-
-            Keyboard.Focus(this);
         }
         private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
         {

@@ -139,4 +139,9 @@
   <ItemGroup>
     <Resource Include="Images\big-gear.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Tools\InspectorControl\InspectorControl.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>

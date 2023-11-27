@@ -8,7 +8,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles\DarkTheme.xaml"/>
                 <ResourceDictionary Source="Styles\WindowStyle.xaml"/>
+                <ResourceDictionary Source="Styles\ToolStyle.xaml"/>
                 <ResourceDictionary Source="Styles\DefaultStyles.xaml"/>
+                <ResourceDictionary Source="Tools\InspectorControl\DefaultInspectorStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

@@ -445,14 +445,6 @@
         </Setter>
     </Style>
 
-
-
-
-
-
-
-
-
     <Style x:Key="EditlessComboBox" TargetType="ComboBox">
         <Setter Property="ItemContainerStyle">
             <Setter.Value>
@@ -529,5 +521,50 @@
         </Setter>
         <Style.Triggers>
         </Style.Triggers>
+    </Style>
+
+    <Style x:Key="InspectorExpandContentToggleButton" TargetType="ToggleButton">
+        <Setter Property="IsChecked" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{TemplateBinding Background}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid VerticalAlignment="Stretch" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}">
+                            <Path x:Name="Arrow" Fill="{StaticResource ForegroundBrush}" Data="M0,0 L6,6 L0,12 z"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+                        <ContentPresenter Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Arrow" Property="Data" Value="M0,0 L12,0 L6,6 z"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="InspectorBoolFieldToggleButton" TargetType="ToggleButton">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="Host" BorderThickness="1" CornerRadius="1" BorderBrush="{StaticResource InspectorInputBorderBrush}"
+                            Background="{StaticResource BackgroundBrush}">
+                        <Path x:Name="CheckMark" Stroke="{StaticResource InspectorCheckMarkBrush}" StrokeThickness="3" Data="M0,3 L4,7 L11,0"
+                              HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Visible" Margin="1,1,0,-1"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="False">
+                            <Setter Property="Visibility" TargetName="CheckMark" Value="Hidden"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </ResourceDictionary>

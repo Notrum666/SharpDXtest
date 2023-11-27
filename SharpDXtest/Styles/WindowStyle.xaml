@@ -23,7 +23,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
     <Style x:Key="CustomWindow" TargetType="this:EditorWindowBase">
         <Setter Property="WindowStyle" Value="None" />
         <Setter Property="ResizeMode" Value="CanResizeWithGrip"/>

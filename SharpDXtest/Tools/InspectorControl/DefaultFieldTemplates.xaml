@@ -1,0 +1,322 @@
+﻿<ResourceDictionary x:Class="Editor.DefaultFieldTemplates" 
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:local="clr-namespace:Editor"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:linal="clr-namespace:LinearAlgebra;assembly=LinearAlgebra"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <local:ByteToStringConverter x:Key="ByteToStringConv"/>
+    <local:SByteToStringConverter x:Key="SByteToStringConv"/>
+    <local:CharToStringConverter x:Key="CharToStringConv"/>
+    <local:DecimalToStringConverter x:Key="DecimalToStringConv"/>
+    <local:DoubleToStringConverter x:Key="DoubleToStringConv"/>
+    <local:FloatToStringConverter x:Key="FloatToStringConv"/>
+    <local:IntToStringConverter x:Key="IntToStringConv"/>
+    <local:UIntToStringConverter x:Key="UIntToStringConv"/>
+    <local:LongToStringConverter x:Key="LongToStringConv"/>
+    <local:ULongToStringConverter x:Key="ULongToStringConv"/>
+    <local:ShortToStringConverter x:Key="ShortToStringConv"/>
+    <local:UShortToStringConverter x:Key="UShortToStringConv"/>
+
+    <!--#region primitive value types-->
+    <local:FieldDataTemplate x:Key="BoolField" TargetType="{x:Type system:Boolean}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <ToggleButton IsChecked="{Binding Value}" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" 
+                              HorizontalAlignment="Left" VerticalAlignment="Stretch" Style="{DynamicResource InspectorBoolFieldToggleButton}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="ByteField" TargetType="{x:Type system:Byte}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource ByteToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="SByteField" TargetType="{x:Type system:SByte}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource SByteToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="CharField" TargetType="{x:Type system:Char}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource CharToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="DecimalField" TargetType="{x:Type system:Decimal}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource DecimalToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="DoubleField" TargetType="{x:Type system:Double}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource DoubleToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="FloatField" TargetType="{x:Type system:Single}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource FloatToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="IntField" TargetType="{x:Type system:Int32}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource IntToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="UIntField" TargetType="{x:Type system:UInt32}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource UIntToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="LongField" TargetType="{x:Type system:Int64}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource LongToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="ULongField" TargetType="{x:Type system:UInt64}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource ULongToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="ShortField" TargetType="{x:Type system:Int16}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource ShortToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+
+    <local:FieldDataTemplate x:Key="UShortField" TargetType="{x:Type system:UInt16}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay, Converter={StaticResource UShortToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+    <!--#endregion-->
+
+    <!--#region primitive reference types-->
+    <local:FieldDataTemplate x:Key="StringField" TargetType="{x:Type system:String}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="6,4,10,4">
+                <TextBox Text="{Binding Value, Mode=TwoWay}" Style="{DynamicResource InspectorTextBox}"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+    
+    <local:FieldDataTemplate x:Key="ReferenceField" TargetType="{x:Type system:Object}" Predicate="ReferenceFieldPredicate">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Border Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="6,4,10,4" BorderThickness="1"
+                    BorderBrush="{DynamicResource InspectorInputBorderBrush}" Background="{DynamicResource BackgroundBrush}">
+                <TextBlock Text="{Binding Value}" Foreground="{DynamicResource InactiveForegroundBrush}"/>
+            </Border>
+        </Grid>
+    </local:FieldDataTemplate>
+    <!--#endregion-->
+
+    <local:FieldDataTemplate x:Key="StructField" TargetType="{x:Type system:ValueType}" Predicate="StructFieldPredicate">
+        <local:FieldDataTemplate.Resources>
+            <local:InspectorFieldDataTemplateSelector x:Key="FieldDataTemplateSelector"/>
+            <local:BoolToVisibilityConverter x:Key="VisibilityConv"/>
+        </local:FieldDataTemplate.Resources>
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="24"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <ToggleButton x:Name="StructToggleButton" Style="{StaticResource InspectorExpandContentToggleButton}"
+                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                          Background="Transparent" Grid.ColumnSpan="2">
+                <TextBlock Text="{Binding DisplayName}" HorizontalAlignment="Left" 
+                           VerticalAlignment="Center" Margin="4,1,4,3"
+                           Foreground="{StaticResource ForegroundBrush}"/>
+            </ToggleButton>
+            <Rectangle Grid.Row="1" Fill="{DynamicResource BackgroundBrush}"/>
+            <ItemsControl Visibility="{Binding IsChecked, ElementName=StructToggleButton, Converter={StaticResource VisibilityConv}}"
+                          ItemsSource="{Binding StructFieldViewModels}" Grid.Row="1" Grid.Column="1"
+                          ItemTemplateSelector="{StaticResource FieldDataTemplateSelector}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </Grid>
+    </local:FieldDataTemplate>
+    
+    <local:FieldDataTemplate x:Key="Vector3Field" TargetType="{x:Type linal:Vector3}">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="ExpandButtonSizeGroup"/>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="1" Text="{Binding DisplayName}" HorizontalAlignment="Left" VerticalAlignment="Center" 
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="6,4,10,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Text="{Binding StructFieldViewModels[0].Value, Mode=TwoWay, Converter={StaticResource DoubleToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}" Grid.Column="0" Margin="0,0,5,0"/>
+                <TextBox Text="{Binding StructFieldViewModels[1].Value, Mode=TwoWay, Converter={StaticResource DoubleToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}" Grid.Column="1" Margin="0,0,5,0"/>
+                <TextBox Text="{Binding StructFieldViewModels[2].Value, Mode=TwoWay, Converter={StaticResource DoubleToStringConv}}" 
+                         Style="{DynamicResource InspectorTextBox}" Grid.Column="2" Margin="0,0,5,0"/>
+            </Grid>
+        </Grid>
+    </local:FieldDataTemplate>
+</ResourceDictionary>
