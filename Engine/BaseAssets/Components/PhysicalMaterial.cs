@@ -20,10 +20,7 @@ namespace Engine.BaseAssets.Components
         private double friction;
         public double Friction
         {
-            get
-            {
-                return friction;
-            }
+            get => friction;
             set
             {
                 if (value < 0 || value > 1)
@@ -35,10 +32,7 @@ namespace Engine.BaseAssets.Components
         private double bounciness;
         public double Bounciness
         {
-            get
-            {
-                return bounciness;
-            }
+            get => bounciness;
             set
             {
                 if (value < 0 || value > 1)
@@ -57,8 +51,9 @@ namespace Engine.BaseAssets.Components
             FrictionCombineMode = CombineMode.Average;
             BouncinessCombineMode = CombineMode.Average;
         }
+
         public PhysicalMaterial(double friction, double bounciness, CombineMode frictionCombineMode = CombineMode.Average,
-                                                                    CombineMode bouncinessCombineMode = CombineMode.Average)
+            CombineMode bouncinessCombineMode = CombineMode.Average)
         {
             Friction = friction;
             Bounciness = bounciness;
@@ -68,7 +63,7 @@ namespace Engine.BaseAssets.Components
 
         public double GetCombinedFrictionWith(PhysicalMaterial material)
         {
-            switch(FrictionCombineMode)
+            switch (FrictionCombineMode)
             {
                 case CombineMode.Minimum:
                     return Math.Min(Friction, material.Friction);

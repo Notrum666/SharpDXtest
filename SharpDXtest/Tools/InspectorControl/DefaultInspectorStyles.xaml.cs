@@ -15,7 +15,7 @@ namespace Editor
         {
             if (e.Key == Key.Enter || e.Key == Key.Escape)
             {
-                FrameworkElement root = ((FrameworkElement)FocusManager.GetFocusScope((DependencyObject)sender));
+                FrameworkElement root = (FrameworkElement)FocusManager.GetFocusScope((DependencyObject)sender);
                 root.Focus();
                 Keyboard.Focus(root);
             }

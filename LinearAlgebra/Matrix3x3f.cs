@@ -24,15 +24,10 @@ namespace LinearAlgebra
         /// <summary>
         /// Returns new identity matrix
         /// </summary>
-        public static Matrix3x3f Identity
-        {
-            get
-            {
-                return new Matrix3x3f(1f, 0f, 0f,
-                                      0f, 1f, 0f,
-                                      0f, 0f, 1f);
-            }
-        }
+        public static Matrix3x3f Identity => new Matrix3x3f(1f, 0f, 0f,
+                                                            0f, 1f, 0f,
+                                                            0f, 0f, 1f);
+
         public Matrix3x3f(params float[] values)
         {
             if (values.Length != 9)
@@ -47,6 +42,7 @@ namespace LinearAlgebra
             v21 = values[7];
             v22 = values[8];
         }
+
         public Matrix3x3f(in Vector3f vec1, in Vector3f vec2, in Vector3f vec3, bool rows = true)
         {
             if (rows)
@@ -74,63 +70,74 @@ namespace LinearAlgebra
                 v22 = vec3.z;
             }
         }
-        public static explicit operator Matrix3x3f(in Matrix3x3 mat) => new Matrix3x3f((float)mat.v00, (float)mat.v01, (float)mat.v02,
-                                                                                       (float)mat.v10, (float)mat.v11, (float)mat.v12,
-                                                                                       (float)mat.v20, (float)mat.v21, (float)mat.v22);
+
+        public static explicit operator Matrix3x3f(in Matrix3x3 mat)
+        {
+            return new Matrix3x3f((float)mat.v00, (float)mat.v01, (float)mat.v02,
+                                  (float)mat.v10, (float)mat.v11, (float)mat.v12,
+                                  (float)mat.v20, (float)mat.v21, (float)mat.v22);
+        }
+
         public static Matrix3x3f operator *(in Matrix3x3f m1, in Matrix3x3f m2)
         {
             return new Matrix3x3f(m1.v00 * m2.v00 + m1.v01 * m2.v10 + m1.v02 * m2.v20,
                                   m1.v00 * m2.v01 + m1.v01 * m2.v11 + m1.v02 * m2.v21,
                                   m1.v00 * m2.v02 + m1.v01 * m2.v12 + m1.v02 * m2.v22,
-
                                   m1.v10 * m2.v00 + m1.v11 * m2.v10 + m1.v12 * m2.v20,
                                   m1.v10 * m2.v01 + m1.v11 * m2.v11 + m1.v12 * m2.v21,
                                   m1.v10 * m2.v02 + m1.v11 * m2.v12 + m1.v12 * m2.v22,
-
                                   m1.v20 * m2.v00 + m1.v21 * m2.v10 + m1.v22 * m2.v20,
                                   m1.v20 * m2.v01 + m1.v21 * m2.v11 + m1.v22 * m2.v21,
                                   m1.v20 * m2.v02 + m1.v21 * m2.v12 + m1.v22 * m2.v22);
         }
+
         public static Matrix3x3f operator +(in Matrix3x3f lhs, in Matrix3x3f rhs)
         {
             return new Matrix3x3f(lhs.v00 + rhs.v00, lhs.v01 + rhs.v01, lhs.v02 + rhs.v02,
-                                 lhs.v10 + rhs.v10, lhs.v11 + rhs.v11, lhs.v12 + rhs.v12,
-                                 lhs.v20 + rhs.v20, lhs.v21 + rhs.v21, lhs.v22 + rhs.v22);
+                                  lhs.v10 + rhs.v10, lhs.v11 + rhs.v11, lhs.v12 + rhs.v12,
+                                  lhs.v20 + rhs.v20, lhs.v21 + rhs.v21, lhs.v22 + rhs.v22);
         }
+
         public static Matrix3x3f operator -(in Matrix3x3f lhs, in Matrix3x3f rhs)
         {
             return new Matrix3x3f(lhs.v00 - rhs.v00, lhs.v01 - rhs.v01, lhs.v02 - rhs.v02,
-                                 lhs.v10 - rhs.v10, lhs.v11 - rhs.v11, lhs.v12 - rhs.v12,
-                                 lhs.v20 - rhs.v20, lhs.v21 - rhs.v21, lhs.v22 - rhs.v22);
+                                  lhs.v10 - rhs.v10, lhs.v11 - rhs.v11, lhs.v12 - rhs.v12,
+                                  lhs.v20 - rhs.v20, lhs.v21 - rhs.v21, lhs.v22 - rhs.v22);
         }
+
         public static Matrix3x3f operator *(in Matrix3x3f mat, float value)
         {
             return new Matrix3x3f(mat.v00 * value, mat.v01 * value, mat.v02 * value,
                                   mat.v10 * value, mat.v11 * value, mat.v12 * value,
                                   mat.v20 * value, mat.v21 * value, mat.v22 * value);
         }
+
         public static Matrix3x3f operator *(float value, in Matrix3x3f mat)
         {
             return mat * value;
         }
+
         public static Matrix3x3f operator /(in Matrix3x3f mat, float value)
         {
             if (value == 0)
                 throw new DivideByZeroException();
             return mat * (1.0f / value);
         }
+
         public static Vector3f operator *(in Matrix3x3f mat, in Vector3f vec)
         {
             return new Vector3f(mat.v00 * vec.x + mat.v01 * vec.y + mat.v02 * vec.z,
                                 mat.v10 * vec.x + mat.v11 * vec.y + mat.v12 * vec.z,
                                 mat.v20 * vec.x + mat.v21 * vec.y + mat.v22 * vec.z);
         }
+
         public static Vector3f operator *(in Vector3f vec, in Matrix3x3f mat)
         {
             return new Vector3f(mat.v00 * vec.x + mat.v10 * vec.y + mat.v20 * vec.z,
                                 mat.v01 * vec.x + mat.v11 * vec.y + mat.v21 * vec.z,
                                 mat.v02 * vec.x + mat.v12 * vec.y + mat.v22 * vec.z);
         }
+
         /// <summary>
         /// Returns transposed copy of this matrix
         /// </summary>
@@ -140,6 +147,7 @@ namespace LinearAlgebra
                                   v01, v11, v21,
                                   v02, v12, v22);
         }
+
         /// <summary>
         /// Transposes this matrix
         /// </summary>
@@ -157,6 +165,7 @@ namespace LinearAlgebra
             v21 = v12;
             v12 = tmp;
         }
+
         /// <summary>
         /// Returns inverse copy of this matrix
         /// </summary>
@@ -178,9 +187,10 @@ namespace LinearAlgebra
             float det22 = v00 * v11 - v01 * v10;
 
             return new Matrix3x3f(det00, -det10, det20,
-                                 -det01, det11, -det21,
+                                  -det01, det11, -det21,
                                   det02, -det12, det22) / determinant;
         }
+
         /// <summary>
         /// Inverts this matrix
         /// </summary>
@@ -213,6 +223,7 @@ namespace LinearAlgebra
             v21 = -det12 * determinant;
             v22 = det22 * determinant;
         }
+
         public static Matrix3x3f FromQuaternion(Quaternion q)
         {
             float s2 = 2.0f / (float)q.norm();
@@ -224,6 +235,7 @@ namespace LinearAlgebra
                                   s2 * (x * y + w * z), 1 - s2 * (x * x + z * z), s2 * (y * z - w * x),
                                   s2 * (x * z - w * y), s2 * (y * z + w * x), 1 - s2 * (x * x + y * y));
         }
+
         public bool IsIdentity()
         {
             if (Math.Abs(v00 - 1.0f) > Constants.FloatEpsilon || Math.Abs(v01) > Constants.FloatEpsilon || Math.Abs(v02) > Constants.FloatEpsilon ||
@@ -232,6 +244,7 @@ namespace LinearAlgebra
                 return false;
             return true;
         }
+
         public bool IsZero()
         {
             if (Math.Abs(v00) > Constants.FloatEpsilon || Math.Abs(v01) > Constants.FloatEpsilon || Math.Abs(v02) > Constants.FloatEpsilon ||
@@ -240,12 +253,14 @@ namespace LinearAlgebra
                 return false;
             return true;
         }
+
         public override string ToString()
         {
             return "| " + v00.ToString() + " " + v01.ToString() + " " + v02.ToString() + " |\n" +
                    "| " + v10.ToString() + " " + v11.ToString() + " " + v12.ToString() + " |\n" +
                    "| " + v20.ToString() + " " + v21.ToString() + " " + v22.ToString() + " |";
         }
+
         public string ToString(string format)
         {
             return "| " + v00.ToString(format) + " " + v01.ToString(format) + " " + v02.ToString(format) + " " + " |\n" +

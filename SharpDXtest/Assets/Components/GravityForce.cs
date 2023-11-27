@@ -14,6 +14,7 @@ namespace SharpDXtest.Assets.Components
     class GravityForce : Component
     {
         public double periodInDays;
+
         public override void FixedUpdate()
         {
             Rigidbody rb = GameObject.GetComponent<Rigidbody>();

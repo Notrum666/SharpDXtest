@@ -50,7 +50,7 @@ namespace LinearAlgebra.Test
         public void mult_21_12and23__78_45returned()
         {
             //arrange
-            
+
             Matrix2x2f MatX = new Matrix2x2f(2f, 3f,
                                              1f, 2f);
             Vector2f VectY = new Vector2f(2f, 3f);
@@ -75,7 +75,7 @@ namespace LinearAlgebra.Test
                                              5f, 7f);
 
             Matrix2x2f expected = new Matrix2x2f(7f, -4f,
-                                                -5f, 3f);
+                                                 -5f, 3f);
             //act
             Matrix2x2f actual = MatX.inverse();
 
@@ -124,7 +124,7 @@ namespace LinearAlgebra.Test
         }
 
         /////////////////////////////////_transpose_/////////////////////////////////
-        
+
         //Матрица не нулевая, все её компоненты не нулевые, она не симметрична
         [TestMethod]
         public void transpose_34_57__35_47returned()
@@ -135,7 +135,7 @@ namespace LinearAlgebra.Test
 
 
             Matrix2x2f expected = new Matrix2x2f(3f, 5f,
-                                               4f, 7f);
+                                                 4f, 7f);
             //act
             MatX.transpose();
             Matrix2x2f actual = MatX;

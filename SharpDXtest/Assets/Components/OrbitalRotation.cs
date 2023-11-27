@@ -16,6 +16,7 @@ namespace SharpDXtest.Assets.Components
         public double periodInDays;
         public double radius;
         private double curAngle = 0;
+
         public override void Update()
         {
             double angularSpeed = 90 * 365.0 / periodInDays * Time.DeltaTime;

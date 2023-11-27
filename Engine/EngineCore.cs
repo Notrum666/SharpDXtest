@@ -16,16 +16,13 @@ namespace Engine
         private static List<GameObject> newObjects = new List<GameObject>();
         private static double accumulator = 0.0;
         private static bool isAlive = false;
-        public static bool IsAlive { get => isAlive; }
+        public static bool IsAlive => isAlive;
         private static bool needsToBePaused = false;
         private static bool needsToBeUnpaused = false;
         private static bool isPaused = false;
-        public static bool IsPaused 
+        public static bool IsPaused
         {
-            get
-            {
-                return isPaused;
-            }
+            get => isPaused;
             set
             {
                 if (isPaused == value || !isAlive)
@@ -41,6 +38,7 @@ namespace Engine
         public static event Action OnPaused;
         public static event Action OnResumed;
         public static event Action OnFrameEnded;
+
         public static void Init(nint HWND, int width, int height)
         {
             Logger.Log(LogType.Info, "Engine initialization");
@@ -52,6 +50,7 @@ namespace Engine
             InputManager.Init(); // 2
             Logger.Log(LogType.Info, "Engine initialization finished");
         }
+
         public static async void Run()
         {
             if (isAlive)
@@ -90,13 +89,12 @@ namespace Engine
                     OnFrameEnded?.Invoke();
 
                     if (Time.DeltaTime < 1.0 / 144.0)
-                    {
                         Thread.Sleep((int)((1.0 / 144.0 - Time.DeltaTime) * 1000));
-                    }
                 }
             });
             await loopTask;
         }
+
         public static void Stop()
         {
             if (!isAlive)
@@ -109,6 +107,7 @@ namespace Engine
             GraphicsCore.Dispose();
             SoundCore.Dispose();
         }
+
         public static void AddObject(GameObject obj)
         {
             if (CurrentScene == null || CurrentScene.objects.Contains(obj) || newObjects.Contains(obj))
@@ -116,6 +115,7 @@ namespace Engine
 
             newObjects.Add(obj);
         }
+
         public static void Update()
         {
             if (CurrentScene == null)
@@ -136,24 +136,26 @@ namespace Engine
                 {
                     fixedUpdate();
                     accumulator -= Time.FixedDeltaTime;
-                }
-                while (accumulator >= Time.FixedDeltaTime);
+                } while (accumulator >= Time.FixedDeltaTime);
                 Time.SwitchToVariating();
             }
 
             update();
         }
+
         private static void initialize()
         {
             foreach (GameObject obj in CurrentScene.objects)
                 obj.Initialize();
         }
+
         private static void update()
         {
             foreach (GameObject obj in CurrentScene.objects)
                 if (obj.Enabled)
                     obj.Update();
         }
+
         private static void fixedUpdate()
         {
             InputManager.FixedUpdate();

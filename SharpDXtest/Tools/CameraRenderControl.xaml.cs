@@ -7,7 +7,6 @@ using System.Windows.Interop;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
-
 using Engine;
 using Engine.BaseAssets.Components;
 using SharpDXtest.Assets.Components;
@@ -24,22 +23,26 @@ namespace Editor
     {
         public double width;
         public double height;
-        public double Ratio
-        {
-            get => width / height;
-        }
+        public double Ratio => width / height;
         public string displayText;
+
         public AspectRatio() :
-            this(double.NaN, double.NaN, "") { }
+            this(double.NaN, double.NaN, "")
+        {
+        }
+
         public AspectRatio(double width, double height) :
             this(width, height, "")
-        { }
+        {
+        }
+
         public AspectRatio(double width, double height, string displayText)
         {
             this.width = width;
             this.height = height;
             this.displayText = displayText;
         }
+
         public override string ToString()
         {
             if (displayText != "")
@@ -70,8 +73,9 @@ namespace Editor
             new AspectRatio(16, 9),
             new AspectRatio(17, 9),
             new AspectRatio(21, 9),
-            new AspectRatio(32, 9),
+            new AspectRatio(32, 9)
         };
+
         public AspectRatio SelectedAspectRatio { get; set; } = new AspectRatio();
         public CursorMode CursorMode
         {
@@ -87,14 +91,15 @@ namespace Editor
                 OnPropertyChanged();
             }
         }
-        
+
         private bool loaded = false;
-        
+
         private FrameBuffer copyFramebuffer;
-        
+
         private int framesCount = 0;
         private double timeCounter = 0.0;
         private bool keyboardFocused = false;
+
         public CameraRenderControl()
         {
             InitializeComponent();
@@ -103,6 +108,7 @@ namespace Editor
 
             DataContext = this;
         }
+
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
@@ -144,6 +150,7 @@ namespace Editor
 
             CompositionTarget.Rendering -= OnRender;
         }
+
         private void OnRender(object sender, EventArgs e)
         {
             if (!IsVisible)
@@ -153,15 +160,16 @@ namespace Editor
                 System.Windows.Forms.Cursor.Position = cursorLockPoint;
 
             d3dimage.Lock();
-        
+
             d3dimage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, copyFramebuffer.D9SurfaceNativePointer);
             d3dimage.AddDirtyRect(new Int32Rect(0, 0, copyFramebuffer.Width, copyFramebuffer.Height));
-        
+
             d3dimage.Unlock();
         }
+
         private void GameCore_OnFrameEnded()
         {
-            if (!EngineCore.IsAlive || !IsVisible) 
+            if (!EngineCore.IsAlive || !IsVisible)
                 return;
 
             if (keyboardFocused)
@@ -170,15 +178,15 @@ namespace Editor
             GraphicsCore.RenderScene(camera);
 
             FrameBuffer buffer = camera.GetNextFrontBuffer();
-        
+
             GraphicsCore.CurrentDevice.ImmediateContext.ResolveSubresource(buffer.RenderTargetTexture.texture, 0, copyFramebuffer.RenderTargetTexture.texture, 0, SharpDX.DXGI.Format.B8G8R8A8_UNorm);
-        
+
             timeCounter += Time.DeltaTime;
             framesCount++;
             if (timeCounter >= 1.0)
             {
                 FPSTextBlock.Dispatcher.Invoke(() => { FPSTextBlock.Text = framesCount.ToString(); });
-        
+
                 timeCounter -= 1.0;
                 framesCount = 0;
             }
@@ -192,6 +200,7 @@ namespace Editor
             if (e.RightButton == MouseButtonState.Pressed)
                 CursorMode = CursorMode.HiddenAndLocked;
         }
+
         private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
@@ -226,6 +235,7 @@ namespace Editor
 
             copyFramebuffer = new FrameBuffer(width, height);
         }
+
         private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (!loaded)
@@ -233,6 +243,7 @@ namespace Editor
 
             ResizeCameraAndFramebuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
+
         private void UpdateRenderControlSize()
         {
             if (double.IsNaN(SelectedAspectRatio.width) || double.IsNaN(SelectedAspectRatio.height))
@@ -253,6 +264,7 @@ namespace Editor
                 RenderControl.Height = RenderControl.Width / SelectedAspectRatio.Ratio;
             }
         }
+
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             UpdateRenderControlSize();

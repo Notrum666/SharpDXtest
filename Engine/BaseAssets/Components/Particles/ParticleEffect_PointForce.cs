@@ -7,15 +7,17 @@ using System.Threading.Tasks;
 
 namespace Engine.BaseAssets.Components.Particles
 {
-    internal class ParticleEffect_PointForce : ParticleEffect
+    public class ParticleEffect_PointForce : ParticleEffect
     {
         public Vector3f Point { get; set; } = Vector3f.Zero;
         public float Force { get; set; } = 0.0f;
         public bool Global { get; set; } = false;
+
         public ParticleEffect_PointForce()
         {
             EffectShader = AssetsManager.Shaders["particles_force_point"];
         }
+
         public override void Use(ParticleSystem system)
         {
             EffectShader.use();

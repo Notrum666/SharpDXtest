@@ -13,12 +13,13 @@ namespace Engine
     {
         public Texture RenderTargetTexture { get; private set; }
         public Texture DepthTexture { get; private set; }
-        public int Width { get => RenderTargetTexture.texture.Description.Width; }
-        public int Height { get => RenderTargetTexture.texture.Description.Height; }
+        public int Width => RenderTargetTexture.texture.Description.Width;
+        public int Height => RenderTargetTexture.texture.Description.Height;
         private SharpDX.Direct3D9.Texture d9texture;
         private bool disposed;
 
-        public nint D9SurfaceNativePointer { get => d9texture.GetSurfaceLevel(0).NativePointer; }
+        public nint D9SurfaceNativePointer => d9texture.GetSurfaceLevel(0).NativePointer;
+
         public FrameBuffer(Texture renderTargetTexture, Texture depthTexture)
         {
             if (renderTargetTexture == null)
@@ -48,6 +49,7 @@ namespace Engine
                                                       Pool.Default,
                                                       ref renderTextureHandle);
         }
+
         public FrameBuffer(int width, int height)
         {
             if (width <= 0)
@@ -78,6 +80,7 @@ namespace Engine
                 disposed = true;
             }
         }
+
         ~FrameBuffer()
         {
             Dispose(disposing: false);

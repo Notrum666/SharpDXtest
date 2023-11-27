@@ -12,13 +12,7 @@ namespace Engine
         private Stack<FrameBuffer> freeFrameBuffers = new Stack<FrameBuffer>();
         private bool disposed;
 
-        public int PoolCapacity
-        {
-            get
-            {
-                return frameBuffers.Count();
-            }
-        }
+        public int PoolCapacity => frameBuffers.Count();
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -39,6 +33,7 @@ namespace Engine
                 freeFrameBuffers.Push(frameBuffers[i]);
             }
         }
+
         public FrameBuffer Get()
         {
             if (disposed)
@@ -57,6 +52,7 @@ namespace Engine
 
             return freeFrameBuffers.Pop();
         }
+
         public void Release(FrameBuffer curFrameBuffer)
         {
             if (disposed)

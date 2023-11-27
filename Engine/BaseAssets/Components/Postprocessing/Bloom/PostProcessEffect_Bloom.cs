@@ -11,15 +11,15 @@ namespace Engine.BaseAssets.Components.Postprocessing
     {
         public const int MaxIterationsCount = 16;
 
-        public int Iterations 
+        public int Iterations
         {
             get => iterations;
             set
             {
-                if(value < 1 || value > MaxIterationsCount)
+                if (value < 1 || value > MaxIterationsCount)
                     throw new ArgumentOutOfRangeException("Iterations", "Iterations must be greater than 1 and less or equal than MaxIterationsCount");
                 iterations = value;
-            } 
+            }
         }
         private int iterations = 5;
 
@@ -28,7 +28,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
             get => treshold;
             set
             {
-                if(value < 0)
+                if (value < 0)
                     throw new ArgumentOutOfRangeException("Treshold", "Treshold can't be negative");
 
                 treshold = value;
@@ -93,7 +93,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
 
         public override void Process(Texture inputTexture)
         {
-            if(inputTextureWidth != inputTexture.texture.Description.Width 
+            if (inputTextureWidth != inputTexture.texture.Description.Width
                 || inputTextureHeight != inputTexture.texture.Description.Height
                 || samplingsTextures == null)
             {

@@ -26,11 +26,13 @@ namespace LinearAlgebra
 
         public double x;
         public double y;
+
         public Vector2(double x = 0.0, double y = 0.0)
         {
             this.x = x;
             this.y = y;
         }
+
         public Vector2(double[] values)
         {
             if (values.Length != 2)
@@ -40,7 +42,10 @@ namespace LinearAlgebra
             y = values[1];
         }
 
-        public static implicit operator Vector2(in Vector2f vec) => new Vector2(vec.x, vec.y);
+        public static implicit operator Vector2(in Vector2f vec)
+        {
+            return new Vector2(vec.x, vec.y);
+        }
 
         /// <summary>
         /// Magnitude of vector. Same as length
@@ -49,6 +54,7 @@ namespace LinearAlgebra
         {
             return Math.Sqrt(squaredMagnitude());
         }
+
         /// <summary>
         /// Magnitude of vector without root. Same as squaredLength
         /// </summary>
@@ -56,6 +62,7 @@ namespace LinearAlgebra
         {
             return dot(this);
         }
+
         /// <summary>
         /// Length of vector. Same as length
         /// </summary>
@@ -63,6 +70,7 @@ namespace LinearAlgebra
         {
             return magnitude();
         }
+
         /// <summary>
         /// Length of vector without root. Same as squaredMagnitude
         /// </summary>
@@ -70,6 +78,7 @@ namespace LinearAlgebra
         {
             return squaredMagnitude();
         }
+
         /// <summary>
         /// Checks if vector small enough to be considered a zero vector
         /// </summary>
@@ -77,34 +86,42 @@ namespace LinearAlgebra
         {
             return squaredMagnitude() < Constants.SqrEpsilon;
         }
+
         public static Vector2 operator +(in Vector2 v1, in Vector2 v2)
         {
             return new Vector2(v1.x + v2.x, v1.y + v2.y);
         }
+
         public static Vector2 operator -(in Vector2 v1, in Vector2 v2)
         {
             return new Vector2(v1.x - v2.x, v1.y - v2.y);
         }
+
         public static Vector2 operator *(in Vector2 vec, double value)
         {
             return new Vector2(vec.x * value, vec.y * value);
         }
+
         public static Vector2 operator *(double value, in Vector2 vec)
         {
             return new Vector2(vec.x * value, vec.y * value);
         }
+
         public static Vector2 operator /(in Vector2 vec, double value)
         {
             return new Vector2(vec.x / value, vec.y / value);
         }
+
         public static Vector2 operator /(float value, in Vector2 vec)
         {
             return new Vector2(value / vec.x, value / vec.y);
         }
+
         public static Vector2 operator -(in Vector2 vec)
         {
             return new Vector2(-vec.x, -vec.y);
         }
+
         /// <summary>
         /// Cross product
         /// </summary>
@@ -112,6 +129,7 @@ namespace LinearAlgebra
         {
             return v1.vecMul(v2);
         }
+
         /// <summary>
         /// Dot product
         /// </summary>
@@ -119,6 +137,7 @@ namespace LinearAlgebra
         {
             return v1.dot(v2);
         }
+
         /// <summary>
         /// Dot product
         /// </summary>
@@ -126,6 +145,7 @@ namespace LinearAlgebra
         {
             return x * vec.x + y * vec.y;
         }
+
         /// <summary>
         /// Component multiplication
         /// </summary>
@@ -134,6 +154,7 @@ namespace LinearAlgebra
         {
             return new Vector2(x * vec.x, y * vec.y);
         }
+
         /// <summary>
         /// Component division
         /// </summary>
@@ -142,6 +163,7 @@ namespace LinearAlgebra
         {
             return new Vector2(x / vec.x, y / vec.y);
         }
+
         /// <summary>
         /// Returns normalized copy of this vector
         /// </summary>
@@ -149,6 +171,7 @@ namespace LinearAlgebra
         {
             return this / magnitude();
         }
+
         /// <summary>
         /// Normalizes this vector
         /// </summary>
@@ -158,6 +181,7 @@ namespace LinearAlgebra
             x /= magn;
             y /= magn;
         }
+
         /// <summary>
         /// Checks if vectors are equal enough to be considered equal
         /// </summary>
@@ -165,15 +189,17 @@ namespace LinearAlgebra
         {
             return (vec - this).isZero();
         }
+
         /// <summary>
         /// Projects vector on another vector
         /// </summary>
         public Vector2 projectOnVector(in Vector2 vec)
         {
             if (vec.isZero())
-                return Vector2.Zero;
+                return Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
+
         /// <summary>
         /// Cross product. Same as cross
         /// </summary>
@@ -181,6 +207,7 @@ namespace LinearAlgebra
         {
             return x * vec.y - y * vec.x;
         }
+
         /// <summary>
         /// Cross product. Same as vecMul
         /// </summary>
@@ -188,6 +215,7 @@ namespace LinearAlgebra
         {
             return vecMul(vec);
         }
+
         /// <summary>
         /// Checks if vectors are parallel enough to be considered collinear
         /// </summary>
@@ -196,10 +224,12 @@ namespace LinearAlgebra
         {
             return Math.Abs(this % vec) < Constants.Epsilon;
         }
+
         public override string ToString()
         {
             return "(" + x.ToString() + ", " + y.ToString() + ")";
         }
+
         public string ToString(string format)
         {
             return "(" + x.ToString(format) + ", " + y.ToString(format) + ")";

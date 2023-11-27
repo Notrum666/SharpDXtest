@@ -12,6 +12,7 @@ namespace Editor
         {
             return type.IsClass;
         }
+
         public bool StructFieldPredicate(Type type)
         {
             return !type.IsEnum && !type.IsPrimitive;

@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
-
 using SharpDX;
 using SharpDX.DXGI;
 using SharpDX.Direct3D;
@@ -15,14 +14,13 @@ using Query = SharpDX.Direct3D11.Query;
 using Light = Engine.BaseAssets.Components.Light;
 using Mesh = Engine.BaseAssets.Components.Mesh;
 using Format = SharpDX.DXGI.Format;
-
 using Engine.BaseAssets.Components;
 using LinearAlgebra;
 using Engine.BaseAssets.Components.Postprocessing;
 
 namespace Engine
 {
-    internal struct GBuffer
+    struct GBuffer
     {
         public Texture worldPos;
         public Texture albedo;
@@ -82,27 +80,27 @@ namespace Engine
             sampler = AssetsManager.Samplers["default"] = new Sampler(TextureAddressMode.Wrap, TextureAddressMode.Wrap);
 
             AssetsManager.LoadShaderPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
-                                                           Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
+                                             Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
             shadowsSampler = AssetsManager.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.ComparisonMinMagMipLinear, 0, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f), Comparison.LessEqual);
 
-            AssetsManager.LoadShaderPipeline("deferred_geometry", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.vsh"), 
-                                                                  Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.fsh"));
+            AssetsManager.LoadShaderPipeline("deferred_geometry", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.vsh"),
+                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.fsh"));
 
             AssetsManager.LoadShaderPipeline("deferred_geometry_particles", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.vsh"),
-                                                                            Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
-                                                                            Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
+                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
+                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
             AssetsManager.LoadShader("particles_bitonic_sort_step", "BaseAssets\\Shaders\\Particles\\particles_bitonic_sort_step.csh");
-            AssetsManager.LoadShader("particles_emit_point",        "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
-            AssetsManager.LoadShader("particles_emit_sphere",       "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
-            AssetsManager.LoadShader("particles_force_constant",    "BaseAssets\\Shaders\\Particles\\particles_force_constant.csh");
-            AssetsManager.LoadShader("particles_force_point",       "BaseAssets\\Shaders\\Particles\\particles_force_point.csh");
-            AssetsManager.LoadShader("particles_init",              "BaseAssets\\Shaders\\Particles\\particles_init.csh");
-            AssetsManager.LoadShader("particles_update_energy",     "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
-            AssetsManager.LoadShader("particles_update_physics",    "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
-            AssetsManager.LoadShader("screen_quad",                 "BaseAssets\\Shaders\\screen_quad.vsh");
+            AssetsManager.LoadShader("particles_emit_point", "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
+            AssetsManager.LoadShader("particles_emit_sphere", "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
+            AssetsManager.LoadShader("particles_force_constant", "BaseAssets\\Shaders\\Particles\\particles_force_constant.csh");
+            AssetsManager.LoadShader("particles_force_point", "BaseAssets\\Shaders\\Particles\\particles_force_point.csh");
+            AssetsManager.LoadShader("particles_init", "BaseAssets\\Shaders\\Particles\\particles_init.csh");
+            AssetsManager.LoadShader("particles_update_energy", "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
+            AssetsManager.LoadShader("particles_update_physics", "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
+            AssetsManager.LoadShader("screen_quad", "BaseAssets\\Shaders\\screen_quad.vsh");
 
             AssetsManager.LoadShaderPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
-                                                       Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
+                                             Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
 
             Shader screenQuadShader = AssetsManager.Shaders["screen_quad"];
             AssetsManager.LoadShaderPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
@@ -174,7 +172,7 @@ namespace Engine
                 IndependentBlendEnable = false
             };
             blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.One, BlendOption.One, SharpDX.Direct3D11.BlendOperation.Add,
-                                                                                    BlendOption.Zero, BlendOption.One, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
+                                                                              BlendOption.Zero, BlendOption.One, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
             additiveBlendState = new BlendState(CurrentDevice, blendStateDesc);
 
             blendStateDesc = new BlendStateDescription()
@@ -183,7 +181,7 @@ namespace Engine
                 IndependentBlendEnable = false
             };
             blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, SharpDX.Direct3D11.BlendOperation.Add,
-                                                                                    BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
+                                                                              BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, SharpDX.Direct3D11.BlendOperation.Add, ColorWriteMaskFlags.All);
             blendingBlendState = new BlendState(CurrentDevice, blendStateDesc);
 
             //depthState_checkDepth = new DepthStencilState(CurrentDevice, new DepthStencilStateDescription()
@@ -205,27 +203,26 @@ namespace Engine
             Direct3DEx context = new Direct3DEx();
 
             D9Device = new SharpDX.Direct3D9.Device(context,
-                                         0,
-                                         DeviceType.Hardware,
-                                         0,
-                                         CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.FpuPreserve,
-                                         new SharpDX.Direct3D9.PresentParameters()
-                                         {
-                                             Windowed = true,
-                                             SwapEffect = SharpDX.Direct3D9.SwapEffect.Discard,
-                                             DeviceWindowHandle = HWND,
-                                             PresentationInterval = PresentInterval.Default,
-                                         });
+                                                    0,
+                                                    DeviceType.Hardware,
+                                                    0,
+                                                    CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.FpuPreserve,
+                                                    new SharpDX.Direct3D9.PresentParameters()
+                                                    {
+                                                        Windowed = true,
+                                                        SwapEffect = SharpDX.Direct3D9.SwapEffect.Discard,
+                                                        DeviceWindowHandle = HWND,
+                                                        PresentationInterval = PresentInterval.Default
+                                                    });
 
             synchQuery = new Query(CurrentDevice, new QueryDescription() { Type = SharpDX.Direct3D11.QueryType.Event, Flags = QueryFlags.None });
         }
+
         public static void Update()
         {
             if (CurrentCamera != null)
-            {
                 //RenderShadows();
                 RenderScene(CurrentCamera);
-            }
         }
 
         private static void RenderShadows()
@@ -312,7 +309,9 @@ namespace Engine
                         continue;
                     }
                     else
+                    {
                         continue;
+                    }
                 }
             }
         }
@@ -351,25 +350,25 @@ namespace Engine
 
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Width, camera.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(camera.DepthBuffer.GetView<DepthStencilView>(), camera.GBuffer.worldPos.GetView<RenderTargetView>(),
-                                                                                                                   camera.GBuffer.albedo.GetView<RenderTargetView>(),
-                                                                                                                   camera.GBuffer.normal.GetView<RenderTargetView>(),
-                                                                                                                   camera.GBuffer.metallic.GetView<RenderTargetView>(),
-                                                                                                                   camera.GBuffer.roughness.GetView<RenderTargetView>(),
-                                                                                                                   camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>());
-            
+                                                                   camera.GBuffer.albedo.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.normal.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.metallic.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.roughness.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>());
+
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
             CurrentDevice.ImmediateContext.ClearDepthStencilView(camera.DepthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
-            
+
             List<GameObject> objects = EngineCore.CurrentScene.objects;
-            
+
             ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_geometry"];
             pipeline.Use();
 
             sampler.use("texSampler");
-            
+
             pipeline.UpdateUniform("view", (Matrix4x4f)camera.GameObject.Transform.View);
             pipeline.UpdateUniform("proj", (Matrix4x4f)camera.Proj);
-            
+
             foreach (GameObject obj in objects)
             {
                 if (!obj.Enabled)
@@ -380,7 +379,7 @@ namespace Engine
                         continue;
                     pipeline.UpdateUniform("model", (Matrix4x4f)obj.Transform.Model);
                     pipeline.UpdateUniform("modelNorm", (Matrix4x4f)obj.Transform.Model.inverse().transposed());
-            
+
                     pipeline.UploadUpdatedUniforms();
                     mesh.Material.Albedo.use("albedoMap");
                     mesh.Material.Normal.use("normalMap");
@@ -395,15 +394,15 @@ namespace Engine
 
             pipeline = AssetsManager.ShaderPipelines["deferred_geometry_particles"];
             pipeline.Use();
-            
+
             sampler.use("texSampler");
-            
+
             pipeline.UpdateUniform("view", (Matrix4x4f)camera.GameObject.Transform.View);
             pipeline.UpdateUniform("proj", (Matrix4x4f)camera.Proj);
-            
+
             pipeline.UpdateUniform("camDir", (Vector3f)camera.GameObject.Transform.Forward);
             pipeline.UpdateUniform("camUp", (Vector3f)camera.GameObject.Transform.Up);
-            
+
             pipeline.UpdateUniform("size", new Vector2f(0.1f, 0.1f));
 
             foreach (GameObject obj in objects)
@@ -415,14 +414,14 @@ namespace Engine
                     if (!particleSystem.Enabled)
                         continue;
                     pipeline.UpdateUniform("model", particleSystem.WorldSpaceParticles ? Matrix4x4f.Identity : (Matrix4x4f)obj.Transform.Model);
-            
+
                     pipeline.UploadUpdatedUniforms();
                     particleSystem.Material.Albedo.use("albedoMap");
                     particleSystem.Material.Normal.use("normalMap");
                     particleSystem.Material.Metallic.use("metallicMap");
                     particleSystem.Material.Roughness.use("roughnessMap");
                     particleSystem.Material.AmbientOcclusion.use("ambientOcclusionMap");
-            
+
                     particleSystem.Render();
                 }
             }
@@ -450,7 +449,7 @@ namespace Engine
                 {
                     if (!light.Enabled)
                         continue;
-            
+
                     if (light is SpotLight)
                     {
                         SpotLight curLight = light as SpotLight;
@@ -471,7 +470,7 @@ namespace Engine
                         pipeline.UpdateUniform("directionalLight.direction", (Vector3f)curLight.GameObject.Transform.Forward);
                         pipeline.UpdateUniform("directionalLight.brightness", curLight.Brightness);
                         pipeline.UpdateUniform("directionalLight.color", curLight.color);
-                        
+
                         Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(camera);
                         for (int i = 0; i < lightSpaces.Length; i++)
                             pipeline.UpdateUniform("directionalLight.lightSpaces[" + i.ToString() + "]", lightSpaces[i]);
@@ -479,7 +478,7 @@ namespace Engine
                         for (int i = 0; i < cascadeDepths.Length; i++)
                             pipeline.UpdateUniform("directionalLight.cascadesDepths[" + i.ToString() + "]", cascadeDepths[i]);
                         pipeline.UpdateUniform("directionalLight.cascadesCount", lightSpaces.Length);
-                        
+
                         pipeline.UpdateUniform("directionalLight.shadowMapSize", new Vector2f(curLight.ShadowSize, curLight.ShadowSize));
 
                         pipeline.UploadUpdatedUniforms();
@@ -511,7 +510,9 @@ namespace Engine
                         continue;
                     }
                     else
+                    {
                         throw new NotImplementedException("Light type " + light.GetType().Name + " is not supported.");
+                    }
 
                     camera.GBuffer.worldPos.use("worldPosTex");
                     camera.GBuffer.albedo.use("albedoTex");
@@ -631,6 +632,7 @@ namespace Engine
 
             FlushAndSwapFrameBuffers(camera);
         }
+
         private static void Flush()
         {
             CurrentDevice.ImmediateContext.Flush();
@@ -640,6 +642,7 @@ namespace Engine
             while (!(CurrentDevice.ImmediateContext.GetData(synchQuery, out result) && result != 0))
                 Thread.Yield();
         }
+
         private static void FlushAndSwapFrameBuffers(Camera camera)
         {
             Flush();

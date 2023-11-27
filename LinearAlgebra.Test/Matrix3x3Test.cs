@@ -80,7 +80,7 @@ namespace LinearAlgebra.Test
                                            5, -2, -3);
 
             Matrix3x3 expected = new Matrix3x3(1, -1, 1,
-                                              -38, 41, -34,
+                                               -38, 41, -34,
                                                27, -29, 24);
             //act
             Matrix3x3 actual = MatX.inverse();
@@ -101,7 +101,7 @@ namespace LinearAlgebra.Test
                                            5, -2, -3);
 
             Matrix3x3 expected = new Matrix3x3(1, -1, 1,
-                                              -38, 41, -34,
+                                               -38, 41, -34,
                                                27, -29, 24);
             //act
 
@@ -155,6 +155,6 @@ namespace LinearAlgebra.Test
             //assert
             Assert.AreEqual(expected, actual);
 
-        } 
+        }
     }
 }

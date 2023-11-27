@@ -17,9 +17,10 @@ namespace SharpDXtest.Assets.Components
         public GameObject CameraObject;
         public double Force;
         private bool initialized = false;
+
         public override void Update()
         {
-            if (!initialized) 
+            if (!initialized)
             {
                 GameObject.GetComponent<Rigidbody>().OnCollisionBegin += OnCollisionBegin;
                 initialized = true;

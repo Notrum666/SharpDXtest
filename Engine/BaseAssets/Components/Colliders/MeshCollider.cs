@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using LinearAlgebra;
 //using SharpDX;
 
@@ -11,12 +10,9 @@ namespace Engine.BaseAssets.Components.Colliders
 {
     public class MeshCollider : Collider
     {
-        public Model Model 
-        { 
-            set
-            {
-                FromModel(value);
-            } 
+        public Model Model
+        {
+            set => FromModel(value);
         }
 
         protected List<Vector3> vertexes = new List<Vector3>();
@@ -24,97 +20,31 @@ namespace Engine.BaseAssets.Components.Colliders
         protected List<Vector3> nonCollinearNormals = new List<Vector3>();
         protected List<int[]> polygons = new List<int[]>();
         protected List<(int a, int b)> edges = new List<(int a, int b)>();
-        public IReadOnlyList<Vector3> Vertexes
-        {
-            get
-            {
-                return vertexes.AsReadOnly();
-            }
-        }
-        public IReadOnlyList<Vector3> Normals
-        {
-            get
-            {
-                return normals.AsReadOnly();
-            }
-        }
-        public IReadOnlyList<Vector3> NonCollinearNormals
-        {
-            get
-            {
-                return nonCollinearNormals.AsReadOnly();
-            }
-        }
-        public IReadOnlyList<int[]> Polygons
-        {
-            get
-            {
-                return polygons.Select(arr => (int[])arr.Clone()).ToList().AsReadOnly();
-            }
-        }
-        public IReadOnlyList<(int a, int b)> Edges
-        {
-            get
-            {
-                return edges.AsReadOnly();
-            }
-        }
+        public IReadOnlyList<Vector3> Vertexes => vertexes.AsReadOnly();
+        public IReadOnlyList<Vector3> Normals => normals.AsReadOnly();
+        public IReadOnlyList<Vector3> NonCollinearNormals => nonCollinearNormals.AsReadOnly();
+        public IReadOnlyList<int[]> Polygons => polygons.Select(arr => (int[])arr.Clone()).ToList().AsReadOnly();
+        public IReadOnlyList<(int a, int b)> Edges => edges.AsReadOnly();
         private Vector3 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
-        public override Vector3 InertiaTensor
-        {
-            get
-            {
-                return inertiaTensor;
-            }
-        }
+        public override Vector3 InertiaTensor => inertiaTensor;
 
         private List<Vector3> globalVertexes = new List<Vector3>();
         private List<Vector3> globalNormals = new List<Vector3>();
         private List<Vector3> globalNonCollinearNormals = new List<Vector3>();
-        public IReadOnlyList<Vector3> GlobalVertexes
-        {
-            get
-            {
-                return globalVertexes.AsReadOnly();
-            }
-        }
-        public IReadOnlyList<Vector3> GlobalNormals
-        {
-            get
-            {
-                return globalNormals.AsReadOnly();
-            }
-        }
-        public IReadOnlyList<Vector3> GlobalNonCollinearNormals
-        {
-            get
-            {
-                return globalNonCollinearNormals.AsReadOnly();
-            }
-        }
+        public IReadOnlyList<Vector3> GlobalVertexes => globalVertexes.AsReadOnly();
+        public IReadOnlyList<Vector3> GlobalNormals => globalNormals.AsReadOnly();
+        public IReadOnlyList<Vector3> GlobalNonCollinearNormals => globalNonCollinearNormals.AsReadOnly();
         private double squaredOuterSphereRadius;
-        public override double SquaredOuterSphereRadius
-        {
-            get
-            {
-                return squaredOuterSphereRadius;
-            }
-        }
+        public override double SquaredOuterSphereRadius => squaredOuterSphereRadius;
         private double outerSphereRadius;
-        public override double OuterSphereRadius
-        {
-            get
-            {
-                return outerSphereRadius;
-            }
-        }
+        public override double OuterSphereRadius => outerSphereRadius;
 
         protected override void getBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest)
         {
             if (globalVertexes.Count == 0)
                 throw new Exception("No vertexes present in this collider.");
 
-            hindmost = Vector3.Zero; 
+            hindmost = Vector3.Zero;
             furthest = Vector3.Zero;
             double furthestValue = double.MinValue, hindmostValue = double.MaxValue;
 
@@ -148,6 +78,7 @@ namespace Engine.BaseAssets.Components.Colliders
         {
 
         }
+
         public void FromModel(Model model)
         {
             vertexes = new List<Vector3>(model.v);
@@ -194,6 +125,7 @@ namespace Engine.BaseAssets.Components.Colliders
             foreach (Vector3 normal in normals)
                 addUnique(normal);
         }
+
         public override void updateData()
         {
             base.updateData();

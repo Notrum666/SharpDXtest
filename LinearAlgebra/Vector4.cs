@@ -36,7 +36,8 @@ namespace LinearAlgebra
         public double y;
         public double z;
         public double w;
-        public Vector3 xyz { get { return new Vector3(x, y, z); } }
+        public Vector3 xyz => new Vector3(x, y, z);
+
         public Vector4(double x = 0.0, double y = 0.0, double z = 0.0, double w = 0.0)
         {
             this.x = x;
@@ -44,6 +45,7 @@ namespace LinearAlgebra
             this.z = z;
             this.w = w;
         }
+
         public Vector4(in Vector2 vec, double z = 0.0, double w = 0.0)
         {
             x = vec.x;
@@ -51,6 +53,7 @@ namespace LinearAlgebra
             this.z = z;
             this.w = w;
         }
+
         public Vector4(in Vector3 vec, double w = 0.0)
         {
             x = vec.x;
@@ -58,6 +61,7 @@ namespace LinearAlgebra
             z = vec.z;
             this.w = w;
         }
+
         public Vector4(params double[] values)
         {
             if (values.Length != 4)
@@ -69,7 +73,10 @@ namespace LinearAlgebra
             w = values[3];
         }
 
-        public static implicit operator Vector4(in Vector4f vec) => new Vector4(vec.x, vec.y, vec.z);
+        public static implicit operator Vector4(in Vector4f vec)
+        {
+            return new Vector4(vec.x, vec.y, vec.z);
+        }
 
         /// <summary>
         /// Magnitude of vector. Same as length
@@ -78,6 +85,7 @@ namespace LinearAlgebra
         {
             return Math.Sqrt(squaredMagnitude());
         }
+
         /// <summary>
         /// Magnitude of vector without root. Same as squaredLength
         /// </summary>
@@ -85,6 +93,7 @@ namespace LinearAlgebra
         {
             return dot(this);
         }
+
         /// <summary>
         /// Length of vector. Same as length
         /// </summary>
@@ -92,6 +101,7 @@ namespace LinearAlgebra
         {
             return magnitude();
         }
+
         /// <summary>
         /// Length of vector without root. Same as squaredMagnitude
         /// </summary>
@@ -99,6 +109,7 @@ namespace LinearAlgebra
         {
             return squaredMagnitude();
         }
+
         /// <summary>
         /// Checks if vector small enough to be considered a zero vector
         /// </summary>
@@ -106,34 +117,42 @@ namespace LinearAlgebra
         {
             return squaredMagnitude() < Constants.SqrEpsilon;
         }
+
         public static Vector4 operator +(in Vector4 v1, in Vector4 v2)
         {
             return new Vector4(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w);
         }
+
         public static Vector4 operator -(in Vector4 v1, in Vector4 v2)
         {
             return new Vector4(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
         }
+
         public static Vector4 operator *(in Vector4 vec, double value)
         {
             return new Vector4(vec.x * value, vec.y * value, vec.z * value, vec.w * value);
         }
+
         public static Vector4 operator *(double value, in Vector4 vec)
         {
             return new Vector4(vec.x * value, vec.y * value, vec.z * value, vec.w * value);
         }
+
         public static Vector4 operator /(in Vector4 vec, double value)
         {
             return new Vector4(vec.x / value, vec.y / value, vec.z / value, vec.w / value);
         }
+
         public static Vector4 operator /(float value, in Vector4 vec)
         {
             return new Vector4(value / vec.x, value / vec.y, value / vec.z, value / vec.w);
         }
+
         public static Vector4 operator -(in Vector4 vec)
         {
             return new Vector4(-vec.x, -vec.y, -vec.z, -vec.w);
         }
+
         /// <summary>
         /// Dot product
         /// </summary>
@@ -141,6 +160,7 @@ namespace LinearAlgebra
         {
             return v1.dot(v2);
         }
+
         /// <summary>
         /// Dot product
         /// </summary>
@@ -148,6 +168,7 @@ namespace LinearAlgebra
         {
             return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
         }
+
         /// <summary>
         /// Component multiplication
         /// </summary>
@@ -156,6 +177,7 @@ namespace LinearAlgebra
         {
             return new Vector4(x * vec.x, y * vec.y, z * vec.z, w * vec.w);
         }
+
         /// <summary>
         /// Component division
         /// </summary>
@@ -164,6 +186,7 @@ namespace LinearAlgebra
         {
             return new Vector4(x / vec.x, y / vec.y, z / vec.z, w / vec.w);
         }
+
         /// <summary>
         /// Returns normalized copy of this vector
         /// </summary>
@@ -171,6 +194,7 @@ namespace LinearAlgebra
         {
             return this / magnitude();
         }
+
         /// <summary>
         /// Normalizes this vector
         /// </summary>
@@ -182,6 +206,7 @@ namespace LinearAlgebra
             z /= magn;
             w /= magn;
         }
+
         /// <summary>
         /// Checks if vectors are equal enough to be considered equal
         /// </summary>
@@ -189,15 +214,17 @@ namespace LinearAlgebra
         {
             return (vec - this).isZero();
         }
+
         /// <summary>
         /// Projects vector on another vector
         /// </summary>
         public Vector4 projectOnVector(in Vector4 vec)
         {
             if (vec.isZero())
-                return Vector4.Zero;
+                return Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
+
         /// <summary>
         /// Projects vector on flat
         /// </summary>
@@ -207,10 +234,12 @@ namespace LinearAlgebra
         {
             return this - flatNorm * (this * flatNorm / flatNorm.squaredMagnitude());
         }
+
         public override string ToString()
         {
             return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ", " + w.ToString() + ")";
         }
+
         public string ToString(string format)
         {
             return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ", " + w.ToString() + ")";

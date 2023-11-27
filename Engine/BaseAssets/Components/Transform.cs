@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
@@ -13,14 +12,10 @@ namespace Engine.BaseAssets.Components
     {
         public event Action Invalidated;
         public Transform Parent { get; private set; }
-        [SerializeField("Position")]
-        private Vector3 localPosition;
+        [SerializeField("Position")] private Vector3 localPosition;
         public Vector3 LocalPosition
         {
-            get
-            {
-                return localPosition;
-            }
+            get => localPosition;
             set
             {
                 localPosition = value;
@@ -28,14 +23,14 @@ namespace Engine.BaseAssets.Components
             }
         }
         private Vector3 position;
-        public Vector3 Position 
-        { 
-            get 
+        public Vector3 Position
+        {
+            get
             {
                 if (requiresCachedDataRecalculation)
                     recalculateCachedData();
                 return position;
-            } 
+            }
             set
             {
                 if (Parent == null)
@@ -47,10 +42,7 @@ namespace Engine.BaseAssets.Components
         private Quaternion localRotation;
         public Quaternion LocalRotation
         {
-            get
-            {
-                return localRotation;
-            }
+            get => localRotation;
             set
             {
                 localRotation = value;
@@ -80,14 +72,10 @@ namespace Engine.BaseAssets.Components
                 LocalRotation = rot;
             }
         }
-        [SerializeField("Scale")]
-        private Vector3 localScale;
+        [SerializeField("Scale")] private Vector3 localScale;
         public Vector3 LocalScale
         {
-            get
-            {
-                return localScale;
-            }
+            get => localScale;
             set
             {
                 if (Math.Abs(value.x) <= Constants.Epsilon ||
@@ -148,31 +136,33 @@ namespace Engine.BaseAssets.Components
                 return view;
             }
         }
-        public Vector3 LocalForward { get { return LocalRotation * Vector3.Forward; } }
-        public Vector3 LocalRight { get { return LocalRotation * Vector3.Right; } }
-        public Vector3 LocalUp { get { return LocalRotation * Vector3.Up; } }
-        public Vector3 Forward { get { return Rotation * Vector3.Forward; } }
-        public Vector3 Right { get { return Rotation * Vector3.Right; } }
-        public Vector3 Up { get { return Rotation * Vector3.Up; } }
+        public Vector3 LocalForward => LocalRotation * Vector3.Forward;
+        public Vector3 LocalRight => LocalRotation * Vector3.Right;
+        public Vector3 LocalUp => LocalRotation * Vector3.Up;
+        public Vector3 Forward => Rotation * Vector3.Forward;
+        public Vector3 Right => Rotation * Vector3.Right;
+        public Vector3 Up => Rotation * Vector3.Up;
         private bool requiresCachedDataRecalculation;
+
         private void invalidateCachedData()
         {
             Invalidated?.Invoke();
             requiresCachedDataRecalculation = true;
         }
+
         private void decomposeModel(in Matrix4x4 model, out Vector3 position, out Quaternion rotation, out Vector3 scale)
         {
             position = new Vector3(model.v03, model.v13, model.v23);
-        
+
             Matrix3x3 prevRot;
             Matrix3x3 rot = new Matrix3x3(model.v00, model.v01, model.v02,
                                           model.v10, model.v11, model.v12,
                                           model.v20, model.v21, model.v22);
-            
+
             do
             {
                 prevRot = rot;
-        
+
                 rot.invert();
                 rot.transpose();
                 rot = 0.5 * (prevRot + rot);
@@ -187,14 +177,21 @@ namespace Engine.BaseAssets.Components
 
             scale = new Vector3(rot.v00, rot.v11, rot.v22);
         }
+
         private Matrix4x4 createModel(in Vector3 position, in Quaternion rotation, in Vector3 scale)
         {
             // Model * vec => Move * Rotate * Scale * vec
             Matrix4x4 res = Matrix4x4.FromQuaternion(rotation);
 
-            res.v00 *= scale.x; res.v01 *= scale.y; res.v02 *= scale.z;
-            res.v10 *= scale.x; res.v11 *= scale.y; res.v12 *= scale.z;
-            res.v20 *= scale.x; res.v21 *= scale.y; res.v22 *= scale.z;
+            res.v00 *= scale.x;
+            res.v01 *= scale.y;
+            res.v02 *= scale.z;
+            res.v10 *= scale.x;
+            res.v11 *= scale.y;
+            res.v12 *= scale.z;
+            res.v20 *= scale.x;
+            res.v21 *= scale.y;
+            res.v22 *= scale.z;
 
             res.v03 = position.x;
             res.v13 = position.y;
@@ -202,6 +199,7 @@ namespace Engine.BaseAssets.Components
 
             return res;
         }
+
         private Matrix4x4 createView(in Vector3 position, in Quaternion rotation, in Vector3 scale)
         {
             // View * vec => Scale^(-1) * Rotate^(-1) * Move^(-1) * vec
@@ -211,9 +209,15 @@ namespace Engine.BaseAssets.Components
             double invScaleX = 1.0 / scale.x;
             double invScaleY = 1.0 / scale.y;
             double invScaleZ = 1.0 / scale.z;
-            res.v00 *= invScaleX; res.v01 *= invScaleX; res.v02 *= invScaleX;
-            res.v10 *= invScaleY; res.v11 *= invScaleY; res.v12 *= invScaleY;
-            res.v20 *= invScaleZ; res.v21 *= invScaleZ; res.v22 *= invScaleZ;
+            res.v00 *= invScaleX;
+            res.v01 *= invScaleX;
+            res.v02 *= invScaleX;
+            res.v10 *= invScaleY;
+            res.v11 *= invScaleY;
+            res.v12 *= invScaleY;
+            res.v20 *= invScaleZ;
+            res.v21 *= invScaleZ;
+            res.v22 *= invScaleZ;
 
             res.v03 = -position.x * res.v00 - position.y * res.v01 - position.z * res.v02;
             res.v13 = -position.x * res.v10 - position.y * res.v11 - position.z * res.v12;
@@ -221,6 +225,7 @@ namespace Engine.BaseAssets.Components
 
             return res;
         }
+
         private void recalculateCachedData()
         {
             localModel = createModel(localPosition, localRotation, localScale);
@@ -233,6 +238,7 @@ namespace Engine.BaseAssets.Components
 
             requiresCachedDataRecalculation = false;
         }
+
         public Transform()
         {
             localPosition = Vector3.Zero;
@@ -241,6 +247,7 @@ namespace Engine.BaseAssets.Components
 
             recalculateCachedData();
         }
+
         public void SetParent(Transform transform, bool keepRelative = true)
         {
             if (Parent != null)
@@ -261,7 +268,9 @@ namespace Engine.BaseAssets.Components
                 decomposeModel(model, out localPosition, out localRotation, out localScale);
             }
             else
+            {
                 Parent = transform;
+            }
 
             invalidateCachedData();
 

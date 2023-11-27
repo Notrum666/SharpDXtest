@@ -15,6 +15,7 @@ namespace SharpDXtest.Assets.Components
     class ObjectController : Component
     {
         public double Speed { get; set; } = 5.0;
+
         public override void Update()
         {
             if (InputManager.IsKeyDown(Key.Up))

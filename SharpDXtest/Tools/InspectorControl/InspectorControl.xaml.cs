@@ -6,7 +6,6 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-
 using Engine;
 
 namespace Editor
@@ -21,6 +20,7 @@ namespace Editor
         public GameObjectViewModel GameObjectViewModel { get; private set; }
         private bool loaded = false;
         private int objectIndex = -1;
+
         static InspectorControl()
         {
             ResourceDictionary resourceDictionary = new ResourceDictionary();
@@ -29,13 +29,15 @@ namespace Editor
                 if (resource is FieldDataTemplate template)
                     RegisterFieldDataTemplate(template);
         }
+
         public static void RegisterFieldDataTemplate(FieldDataTemplate template)
         {
             if (FieldDataTemplates.Any(t => t.TargetType == template.TargetType))
-                throw new ArgumentException("FieldDataTemplate for type " + (template.TargetType).Name + " already registered.");
+                throw new ArgumentException("FieldDataTemplate for type " + template.TargetType.Name + " already registered.");
 
             FieldDataTemplates.Add(template);
         }
+
         public InspectorControl()
         {
             InitializeComponent();
@@ -44,10 +46,12 @@ namespace Editor
 
             DataContext = this;
         }
+
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
+
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             // to prevent errors during xaml designer loading in visual studio
@@ -62,6 +66,7 @@ namespace Editor
 
             loaded = true;
         }
+
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
         {
             // to prevent errors during xaml designer loading in visual studio
@@ -69,6 +74,7 @@ namespace Editor
                 return;
 
         }
+
         private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;

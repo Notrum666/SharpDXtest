@@ -9,6 +9,7 @@ namespace Editor
     public sealed class DateTimeConverter : IValueConverter
     {
         public string Format { get; set; }
+
         public DateTimeConverter()
         {
             Format = "HH:mm:ss";

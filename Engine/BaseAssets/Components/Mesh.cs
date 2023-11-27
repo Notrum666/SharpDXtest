@@ -12,10 +12,7 @@ namespace Engine.BaseAssets.Components
         private Material material = new Material();
         public Material Material
         {
-            get
-            {
-                return material;
-            }
+            get => material;
             set
             {
                 if (value == null)

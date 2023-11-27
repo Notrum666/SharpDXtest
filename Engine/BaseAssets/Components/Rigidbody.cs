@@ -14,30 +14,24 @@ namespace Engine.BaseAssets.Components
         Z = 4
     }
 
-    sealed public class Rigidbody : Component
+    public sealed class Rigidbody : Component
     {
         private double mass = 1.0;
-        public double Mass 
-        { 
-            get 
-            { 
-                return mass; 
-            } 
-            set 
+        public double Mass
+        {
+            get => mass;
+            set
             {
                 if (value <= 0)
                     throw new ArgumentException("Mass must be positive.");
                 mass = value;
                 recalculateInverseMass();
-            } 
+            }
         }
         private Vector3 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
         public Vector3 InertiaTensor
         {
-            get
-            {
-                return inertiaTensor;
-            }
+            get => inertiaTensor;
             private set
             {
                 inertiaTensor = value;
@@ -51,10 +45,7 @@ namespace Engine.BaseAssets.Components
         private double linearDrag = 0.05;
         public double LinearDrag
         {
-            get
-            {
-                return linearDrag;
-            }
+            get => linearDrag;
             set
             {
                 if (value < 0)
@@ -65,10 +56,7 @@ namespace Engine.BaseAssets.Components
         private double angularDrag = 0.05;
         public double AngularDrag
         {
-            get
-            {
-                return angularDrag;
-            }
+            get => angularDrag;
             set
             {
                 if (value < 0)
@@ -80,10 +68,7 @@ namespace Engine.BaseAssets.Components
         private bool isStatic = false;
         public bool IsStatic
         {
-            get
-            {
-                return isStatic;
-            }
+            get => isStatic;
             set
             {
                 isStatic = value;
@@ -94,10 +79,7 @@ namespace Engine.BaseAssets.Components
         private bool freezeMovement = false;
         public bool FreezeMovement
         {
-            get
-            {
-                return freezeMovement;
-            }
+            get => freezeMovement;
             set
             {
                 freezeMovement = value;
@@ -107,10 +89,7 @@ namespace Engine.BaseAssets.Components
         private FreezeRotationFlags freezeRotation = FreezeRotationFlags.None;
         public FreezeRotationFlags FreezeRotation
         {
-            get
-            {
-                return freezeRotation;
-            }
+            get => freezeRotation;
             set
             {
                 freezeRotation = value;
@@ -159,7 +138,9 @@ namespace Engine.BaseAssets.Components
                     Velocity = Vector3.Zero;
             }
             else
+            {
                 linearVelocitySleepCounter = LinearVelocitySleepCounterBase;
+            }
 
             if (AngularVelocity.squaredLength() <= angularSleepThresholdSquared)
             {
@@ -169,14 +150,16 @@ namespace Engine.BaseAssets.Components
                     AngularVelocity = Vector3.Zero;
             }
             else
+            {
                 angularVelocitySleepCounter = AngularVelocitySleepCounterBase;
+            }
 
             if (t.Parent == null)
             {
                 t.LocalPosition += Velocity * Time.DeltaTime;
 
                 t.LocalRotation = (t.LocalRotation +
-                    0.5 * new Quaternion(0.0, AngularVelocity.x, AngularVelocity.y, AngularVelocity.z) * t.LocalRotation * Time.DeltaTime).normalized();
+                                   0.5 * new Quaternion(0.0, AngularVelocity.x, AngularVelocity.y, AngularVelocity.z) * t.LocalRotation * Time.DeltaTime).normalized();
             }
             else
             {
@@ -185,14 +168,15 @@ namespace Engine.BaseAssets.Components
                 // faster
                 Vector3 localAngularVelocity = t.Parent.Rotation.inverse() * AngularVelocity;
                 t.LocalRotation = (t.LocalRotation +
-                    0.5 * new Quaternion(0.0, localAngularVelocity.x, localAngularVelocity.y, localAngularVelocity.z) * 
-                    t.LocalRotation * Time.DeltaTime).normalized();
+                                   0.5 * new Quaternion(0.0, localAngularVelocity.x, localAngularVelocity.y, localAngularVelocity.z) *
+                                   t.LocalRotation * Time.DeltaTime).normalized();
                 // simpler
                 //t.Rotation = (t.Rotation +
                 //    0.5 * new Quaternion(0.0, angularVelocity.x, angularVelocity.y, angularVelocity.z) *
                 //    t.Rotation * Time.DeltaTime).normalized();
             }
         }
+
         private void recalculateInertiaTensor()
         {
             IEnumerable<Collider> colliders = GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
@@ -213,10 +197,12 @@ namespace Engine.BaseAssets.Components
 
             InertiaTensor = result;
         }
+
         private void recalculateInverseMass()
         {
-            inverseMass = (IsStatic || FreezeMovement ? 0.0 : 1.0 / mass);
+            inverseMass = IsStatic || FreezeMovement ? 0.0 : 1.0 / mass;
         }
+
         private void recalculateInverseGlobalInertiaTensor()
         {
             if (isStatic)
@@ -226,37 +212,44 @@ namespace Engine.BaseAssets.Components
             }
             Matrix3x3 model = Matrix3x3.FromQuaternion(GameObject.Transform.Rotation);
             inverseGlobalInertiaTensor = model * new Matrix3x3(FreezeRotation.HasFlag(FreezeRotationFlags.X) ? 0.0 : 1.0 / InertiaTensor.x, 0.0, 0.0,
-                                                         0.0, FreezeRotation.HasFlag(FreezeRotationFlags.Y) ? 0.0 : 1.0 / InertiaTensor.y, 0.0,
-                                                         0.0, 0.0, FreezeRotation.HasFlag(FreezeRotationFlags.Z) ? 0.0 : 1.0 / InertiaTensor.z) * model.transposed();
+                                                               0.0, FreezeRotation.HasFlag(FreezeRotationFlags.Y) ? 0.0 : 1.0 / InertiaTensor.y, 0.0,
+                                                               0.0, 0.0, FreezeRotation.HasFlag(FreezeRotationFlags.Z) ? 0.0 : 1.0 / InertiaTensor.z) * model.transposed();
         }
+
         public void addForce(Vector3 force)
         {
             velocityChange += force * Time.DeltaTime * inverseMass;
         }
+
         public void addImpulse(Vector3 impulse)
         {
             velocityChange += impulse * inverseMass;
         }
+
         public void addTorque(Vector3 torque)
         {
             angularVelocityChange += torque * inverseGlobalInertiaTensor * Time.DeltaTime;
         }
+
         public void addAngularImpulse(Vector3 angularImpulse)
         {
             angularVelocityChange += angularImpulse * inverseGlobalInertiaTensor;
         }
+
         public void addForceAtPoint(Vector3 force, Vector3 point)
         {
             velocityChange += force * Time.DeltaTime * inverseMass;
 
             angularVelocityChange += (point - GameObject.Transform.Position) % force * inverseGlobalInertiaTensor * Time.DeltaTime;
         }
+
         public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
             velocityChange += impulse * inverseMass;
 
             angularVelocityChange += (point - GameObject.Transform.Position) % impulse * inverseGlobalInertiaTensor;
         }
+
         public void applyChanges()
         {
             Velocity += velocityChange;
@@ -275,6 +268,7 @@ namespace Engine.BaseAssets.Components
             GameObject.Transform.Position += result;
             collisionExitVectors.Clear();
         }
+
         public void solveCollisionWith(Rigidbody otherRigidbody)
         {
             if (!Enabled || !otherRigidbody.Enabled || IsStatic && otherRigidbody.IsStatic)
@@ -369,7 +363,7 @@ namespace Engine.BaseAssets.Components
                         jacobi.v12 = delta.y / Constants.Epsilon;
                         jacobi.v22 = delta.z / Constants.Epsilon;
 
-                        return start + jacobi.inverse() * (-baseValue);
+                        return start + jacobi.inverse() * -baseValue;
                     }
 
                     Vector3 r1 = collisionPoint - GameObject.Transform.Position;
@@ -381,10 +375,10 @@ namespace Engine.BaseAssets.Components
                     double bounciness = Material.GetComdinedBouncinessWith(otherRigidbody.Material);
                     double friction = Material.GetCombinedFrictionWith(otherRigidbody.Material);
 
-                    Func<Vector3, Vector3> func = (F) => (F * (inverseMass + otherRigidbody.inverseMass) +
-                                                          (inverseGlobalInertiaTensor * (r1 % F)) % r1 +
-                                                          (otherRigidbody.inverseGlobalInertiaTensor * (r2 % F)) % r2 +
-                                                          dvn * (1 + bounciness) + dvf * friction);
+                    Func<Vector3, Vector3> func = (F) => F * (inverseMass + otherRigidbody.inverseMass) +
+                                                         inverseGlobalInertiaTensor * (r1 % F) % r1 +
+                                                         otherRigidbody.inverseGlobalInertiaTensor * (r2 % F) % r2 +
+                                                         dvn * (1 + bounciness) + dvf * friction;
 
                     Vector3 impulse = newtonIteration(func, Vector3.Zero);
 
@@ -393,10 +387,10 @@ namespace Engine.BaseAssets.Components
                     bounciness = otherRigidbody.Material.GetComdinedBouncinessWith(Material);
                     friction = otherRigidbody.Material.GetCombinedFrictionWith(Material);
 
-                    func = (F) => (F * (inverseMass + otherRigidbody.inverseMass) +
-                                                          (inverseGlobalInertiaTensor * (r1 % F)) % r1 +
-                                                          (otherRigidbody.inverseGlobalInertiaTensor * (r2 % F)) % r2 +
-                                                          dvn * (1 + bounciness) + dvf * friction);
+                    func = (F) => F * (inverseMass + otherRigidbody.inverseMass) +
+                                  inverseGlobalInertiaTensor * (r1 % F) % r1 +
+                                  otherRigidbody.inverseGlobalInertiaTensor * (r2 % F) % r2 +
+                                  dvn * (1 + bounciness) + dvf * friction;
 
                     impulse = newtonIteration(func, Vector3.Zero);
 
@@ -416,6 +410,7 @@ namespace Engine.BaseAssets.Components
                     }
                 }
         }
+
         internal void updateCollidingPairs()
         {
             foreach (KeyValuePair<Collider, Collider> pair in prevCollidingPairs)

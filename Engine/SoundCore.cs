@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using SharpDX;
 using SharpDX.XAudio2;
 using SharpDX.X3DAudio;
 using SharpDX.Multimedia;
 using SharpDX.XAPO;
 using SharpDX.XAPO.Fx;
-
 using Engine.BaseAssets.Components;
-
 using SharpDX.Mathematics.Interop;
 using System.Threading;
 
@@ -24,14 +21,11 @@ namespace Engine
         public Emitter source;
 
         private bool isFinished = false;
-        public bool IsFinished { get => isFinished; }
+        public bool IsFinished => isFinished;
         private bool isPaused = false;
         public bool IsPaused
         {
-            get
-            {
-                return isPaused;
-            }
+            get => isPaused;
             set
             {
                 if (value)
@@ -95,11 +89,11 @@ namespace Engine
         private static X3DAudio device3d;
         private static MasteringVoice masteringVoice;
         private static bool disposed = false;
-        public static XAudio2 CurrentDevice { get => device; }
+        public static XAudio2 CurrentDevice => device;
         public static SoundListener CurrentListener { get; set; }
 
         private static List<PlayingSound> playingSounds = new List<PlayingSound>();
-        public static IReadOnlyCollection<PlayingSound> PlayingSounds { get => playingSounds.AsReadOnly(); }
+        public static IReadOnlyCollection<PlayingSound> PlayingSounds => playingSounds.AsReadOnly();
 
         public static void Init()
         {
@@ -111,6 +105,7 @@ namespace Engine
             EngineCore.OnPaused += OnPaused;
             EngineCore.OnResumed += OnResumed;
         }
+
         private static void OnPaused()
         {
             foreach (PlayingSound sound in playingSounds)
@@ -118,6 +113,7 @@ namespace Engine
                     sound.voice.Stop(1);
             device.CommitChanges(1);
         }
+
         private static void OnResumed()
         {
             foreach (PlayingSound sound in playingSounds)
@@ -125,6 +121,7 @@ namespace Engine
                     sound.voice.Start(1);
             device.CommitChanges(1);
         }
+
         public static PlayingSound PlayFrom(Sound sound, SoundSource source)
         {
             SourceVoice voice = new SourceVoice(device, sound.Format, VoiceFlags.None, 1024f, true);
@@ -145,10 +142,12 @@ namespace Engine
 
             return playingSound;
         }
+
         public static PlayingSound Play(Sound sound)
         {
             return PlayFrom(sound, null);
         }
+
         public static void Update()
         {
             for (int i = 0; i < playingSounds.Count; i++)
@@ -169,6 +168,7 @@ namespace Engine
                 }
             }
         }
+
         public static void Dispose()
         {
             if (!disposed)

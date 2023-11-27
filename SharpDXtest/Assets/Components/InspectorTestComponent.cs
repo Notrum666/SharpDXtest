@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SharpDX.DirectInput;
-
 using LinearAlgebra;
 using Engine;
 using Engine.BaseAssets.Components;
@@ -15,6 +14,7 @@ namespace SharpDXtest.Assets.Components
     {
         public int ImOutOfIdeas = 142;
         public int ImOutOfIdeas2 = 142;
+
         public TestStruct2()
         {
 
@@ -26,6 +26,7 @@ namespace SharpDXtest.Assets.Components
         public double StructDoubleValue = 0.142;
         public TestStruct2 StructSubStruct = new TestStruct2();
         public string StructStringValue = "Number 142";
+
         public TestStruct()
         {
 

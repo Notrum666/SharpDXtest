@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
@@ -26,6 +25,7 @@ namespace Engine.BaseAssets.Components
             public int indexA, indexB, indexC;
             public Polygon adjacentAB, adjacentBC, adjacentCA;
             public Vector3 normal;
+
             public Polygon(int indexA, int indexB, int indexC)
             {
                 this.indexA = indexA;
@@ -37,14 +37,11 @@ namespace Engine.BaseAssets.Components
 
         public virtual Vector3 Offset { get; set; }
         private Vector3 globalCenter;
-        public Vector3 GlobalCenter { get => globalCenter; }
+        public Vector3 GlobalCenter => globalCenter;
         private double massPart = 1.0;
         public double MassPart
         {
-            get
-            {
-                return massPart;
-            }
+            get => massPart;
             set
             {
                 if (value < 0.0)
@@ -57,10 +54,11 @@ namespace Engine.BaseAssets.Components
         public abstract double OuterSphereRadius { get; }
 
         protected abstract void getBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest);
+
         private static List<Vector3> getPossibleCollisionDirections(Collider col1, Collider col2, bool first = true)
         {
             List<Vector3> result = new List<Vector3>();
-            
+
             void addUnique(Vector3 vec)
             {
                 bool exists = false;
@@ -140,20 +138,21 @@ namespace Engine.BaseAssets.Components
             Vector3 centersVector = collider.globalCenter - globalCenter;
             return centersVector.squaredLength() <= SquaredOuterSphereRadius + 2 * OuterSphereRadius * collider.OuterSphereRadius + collider.SquaredOuterSphereRadius;
         }
+
         public bool getCollisionExitVector_SAT(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             collisionExitVector = null;
             exitDirectionVector = null;
             colliderEndPoint = null;
 
-            if(!IsOuterSphereIntersectWith(other))
+            if (!IsOuterSphereIntersectWith(other))
                 return false;
 
             List<Vector3> axises = getPossibleCollisionDirections(this, other);
 
             Vector3[] projection = new Vector3[2];
             Vector3[] projectionOther = new Vector3[2];
-            foreach(Vector3 axis in axises)
+            foreach (Vector3 axis in axises)
             {
                 getBoundaryPointsInDirection(axis, out projection[0], out projection[1]);
                 other.getBoundaryPointsInDirection(axis, out projectionOther[0], out projectionOther[1]);
@@ -195,6 +194,7 @@ namespace Engine.BaseAssets.Components
 
             return true;
         }
+
         private bool GilbertJohnsonKeerthi(Collider other, out List<Vector3> simplex)
         {
             simplex = new List<Vector3>();
@@ -317,6 +317,7 @@ namespace Engine.BaseAssets.Components
                 return true;
             }
         }
+
         private void ExpandingPolytopeAlgorithm(Collider other, List<Vector3> initialSimplex, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             Vector3 point1, point2;
@@ -486,14 +487,12 @@ namespace Engine.BaseAssets.Components
                 createHolePart(currentPolygon.adjacentCA, currentPolygon.indexC, currentPolygon.indexA);
 
                 for (int j = 1; j < hole.Count - 2; j++)
-                {
                     if (hole[j] == hole[j + 2])
                     {
                         hole.RemoveRange(j, 2);
                         adjacentPolygons.RemoveRange(j, 2);
                         polygonsToReplace.RemoveRange(j, 2);
                     }
-                }
 
                 for (int j = 0; j < hole.Count; j++)
                 {
@@ -529,6 +528,7 @@ namespace Engine.BaseAssets.Components
             getBoundaryPointsInDirection(direction, out _, out _colliderEndPoint);
             colliderEndPoint = _colliderEndPoint;
         }
+
         public bool getCollisionExitVector_GJK_EPA(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             collisionExitVector = null;
@@ -544,11 +544,13 @@ namespace Engine.BaseAssets.Components
 
             return true;
         }
+
         public bool getCollisionExitVector(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             return getCollisionExitVector_SAT(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
             //return getCollisionExitVector_GJK_EPA(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
         }
+
         protected abstract List<Vector3> getVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon);
 
         private static Vector3 GetAverageCollisionPointWithEpsilon(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon = 1E-7)
@@ -564,25 +566,23 @@ namespace Engine.BaseAssets.Components
 
                 Vector3 start = figure[0];
                 Vector3 current;
-                for(int k = 1; k < count - 1; k++)
+                for (int k = 1; k < count - 1; k++)
                 {
                     current = vertexes[0] - start;
                     int currentIndex = 0;
                     for (int i = 1; i < vertexes.Count; i++)
-                    {
                         if ((vertexes[i] - start).cross(current) * collisionPlaneNormal > 0)
                         {
                             currentIndex = i;
                             current = vertexes[i] - start;
                         }
-                    }
 
                     figure[k] = vertexes[currentIndex];
                     vertexes.RemoveAt(currentIndex);
                 }
 
                 if (vertexes.Count > 0)
-                    figure[figure.Length - 1] = vertexes[0];                
+                    figure[figure.Length - 1] = vertexes[0];
 
                 return figure;
             }
@@ -611,8 +611,7 @@ namespace Engine.BaseAssets.Components
                             isPointOnEdge = true;
                             return true;
                         }
-                        else
-                            continue;
+                        continue;
                     }
 
                     if (vecMult.dot(prevVecMult) < 0)
@@ -649,7 +648,6 @@ namespace Engine.BaseAssets.Components
             void addIntersectionPoints(ref Vector3[] points1, ref Vector3[] points2)
             {
                 foreach (Vector3 point in points1)
-                {
                     if (IsPointInsideFigure(points2, point, out pointOnEdge))
                     {
                         if (!pointOnEdge)
@@ -668,7 +666,6 @@ namespace Engine.BaseAssets.Components
                         if (!pointExists)
                             intersectionPoints.Add(point);
                     }
-                }
             }
             addIntersectionPoints(ref figure1, ref figure2);
             addIntersectionPoints(ref figure2, ref figure1);
@@ -686,22 +683,22 @@ namespace Engine.BaseAssets.Components
                     start2 = figure2[j];
                     end2 = figure2[(j + 1) % figure2.Length];
                     edge2 = end2 - start2;
-            
+
                     start1start2 = start2 - start1;
                     start1end2 = end2 - start1;
                     if (start1start2.cross(edge1).dot(start1end2.cross(edge1)) >= -sqrEpsilon ||
                         (-start1start2).cross(edge2).dot((end1 - start2).cross(edge2)) >= -sqrEpsilon)
                         continue;
-            
+
                     start2proj = start1 + start1start2.projectOnVector(edge1);
                     end2proj = start1 + start1end2.projectOnVector(edge1);
-            
+
                     double k = (start2 - start2proj).length();
                     k = k / (k + (end2 - end2proj).length());
-            
+
                     // start2 is reused as variable for final point
                     start2 = start2proj * k + end2proj * (1.0 - k);
-            
+
                     pointExists = false;
                     foreach (Vector3 intersectionPoint in intersectionPoints)
                         if (intersectionPoint.equals(start2))
@@ -721,7 +718,7 @@ namespace Engine.BaseAssets.Components
                 y += point.y;
                 z += point.z;
             }
-            
+
             return new Vector3(x / intersectionPoints.Count, y / intersectionPoints.Count, z / intersectionPoints.Count);
         }
 

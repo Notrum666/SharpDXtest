@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components.Colliders
@@ -11,12 +10,9 @@ namespace Engine.BaseAssets.Components.Colliders
     public sealed class SphereCollider : Collider
     {
         private double radius;
-        public double Radius 
+        public double Radius
         {
-            get
-            {
-                return radius;
-            }
+            get => radius;
             set
             {
                 if (value <= 0)
@@ -29,43 +25,28 @@ namespace Engine.BaseAssets.Components.Colliders
             }
         }
         private Vector3 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
-        public override Vector3 InertiaTensor
-        {
-            get
-            {
-                return inertiaTensor;
-            }
-        }
+        public override Vector3 InertiaTensor => inertiaTensor;
         private double squaredOuterSphereRadius;
-        public override double SquaredOuterSphereRadius
-        {
-            get
-            {
-                return squaredOuterSphereRadius;
-            }
-        }
+        public override double SquaredOuterSphereRadius => squaredOuterSphereRadius;
         private double outerSphereRadius;
-        public override double OuterSphereRadius
-        {
-            get
-            {
-                return outerSphereRadius;
-            }
-        }
+        public override double OuterSphereRadius => outerSphereRadius;
 
         public SphereCollider()
         {
             Radius = 1.0;
         }
+
         public SphereCollider(double radius)
         {
             Radius = radius;
         }
+
         public SphereCollider(double radius, Vector3 offset)
         {
             Radius = radius;
             Offset = offset;
         }
+
         private void calculateIntertiaTensor()
         {
             double inertia = 2.0 / 5.0 * radius * radius;

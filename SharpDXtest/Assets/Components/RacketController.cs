@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SharpDX.DirectInput;
-
 using LinearAlgebra;
 using Engine;
 using Engine.BaseAssets.Components;
@@ -15,6 +14,7 @@ namespace SharpDXtest.Assets.Components
     {
         public float speed;
         public GameObject leftRacket, rightRacket;
+
         public override void Update()
         {
             //if (InputManager.IsKeyPressed(Key.F))
@@ -29,8 +29,8 @@ namespace SharpDXtest.Assets.Components
                 delta -= curSpeed;
             if (InputManager.IsKeyDown(Key.W))
                 delta += curSpeed;
-            leftRacket.Transform.Position = new Vector3(leftRacket.Transform.Position.x, 
-                                                        leftRacket.Transform.Position.y, 
+            leftRacket.Transform.Position = new Vector3(leftRacket.Transform.Position.x,
+                                                        leftRacket.Transform.Position.y,
                                                         Math.Min(7.5, Math.Max(-7.5, leftRacket.Transform.Position.z + delta)));
 
             delta = 0;

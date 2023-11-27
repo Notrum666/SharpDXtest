@@ -13,10 +13,7 @@ namespace Engine.BaseAssets.Components.Particles
         private int rate = 20;
         public int Rate
         {
-            get
-            {
-                return rate;
-            }
+            get => rate;
             set
             {
                 if (value < 0)
@@ -26,14 +23,17 @@ namespace Engine.BaseAssets.Components.Particles
         }
         public bool Global { get; set; } = false;
         private double toEmitAccumulator = 0.0;
+
         public ParticleEffect_PointEmitter()
         {
             EffectShader = AssetsManager.Shaders["particles_emit_point"];
         }
+
         public override void Update(ParticleSystem system)
         {
             toEmitAccumulator += rate * Time.DeltaTime;
         }
+
         public override void Use(ParticleSystem system)
         {
             int toEmit = (int)Math.Floor(toEmitAccumulator);

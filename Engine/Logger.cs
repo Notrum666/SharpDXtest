@@ -4,11 +4,12 @@ using System.IO;
 
 namespace Engine
 {
-    public static class Logger 
+    public static class Logger
     {
         private static string DirectoryPath { get; } = Environment.CurrentDirectory + @"\Logs\";
         private static StreamWriter FileStream { get; set; }
         public static event Action<LogMessage> OnLog;
+
         static Logger()
         {
             FileStream = CreateFilePath();
@@ -16,29 +17,27 @@ namespace Engine
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
         }
 
-        private static void LogToFile(LogMessage obj)  
+        private static void LogToFile(LogMessage obj)
         {
             string typeLog = obj.Type + ": ";
             string errorMessage = GetDateTimeString(obj.DateTime) + typeLog + obj.Message;
             if (obj.Exception != null)
-            {
                 errorMessage += " " + obj.Exception;
-            }
             FileStream.WriteLine(errorMessage);
         }
 
         public static void Log(LogType type, string message)
         {
-             OnLog?.Invoke(new LogMessage(type, DateTime.Now, message));
+            OnLog?.Invoke(new LogMessage(type, DateTime.Now, message));
         }
 
         private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception ex = (Exception)e.ExceptionObject;
-            FileStream.WriteLine(GetDateTimeString(DateTime.Now) +  "Error: " + ex.Message);
+            FileStream.WriteLine(GetDateTimeString(DateTime.Now) + "Error: " + ex.Message);
             FileStream.WriteLine("Full Error: " + e.ExceptionObject);
         }
-        
+
         private static StreamWriter CreateFilePath()
         {
             string path = DirectoryPath + (DateTime.Now.ToString(CultureInfo.InvariantCulture) + ".txt")
@@ -51,10 +50,11 @@ namespace Engine
             writer.AutoFlush = true;
             return writer;
         }
+
         private static string GetDateTimeString(DateTime dateTime)
         {
             string dateTimeString = dateTime.ToString(CultureInfo.InvariantCulture)
-                .Replace("/", ".") + ": "; 
+                .Replace("/", ".") + ": ";
             return dateTimeString;
         }
     }
@@ -70,6 +70,7 @@ namespace Engine
         {
 
         }
+
         public LogMessage(LogType type, DateTime dateTime, string message, Exception? exception)
         {
             Type = type;
@@ -83,5 +84,5 @@ namespace Engine
         Info = 0,
         Warning = 1,
         Error = 2
-    }   
+    }
 }

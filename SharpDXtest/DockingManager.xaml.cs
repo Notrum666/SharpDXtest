@@ -18,26 +18,27 @@ namespace Editor
         public static readonly DependencyProperty ItemsSourceProperty = ItemsControl.ItemsSourceProperty.AddOwner(typeof(DockingManager));
         public IEnumerable ItemsSource
         {
-            get { return (IEnumerable)GetValue(ItemsSourceProperty); }
-            set { SetValue(ItemsSourceProperty, value); }
+            get => (IEnumerable)GetValue(ItemsSourceProperty);
+            set => SetValue(ItemsSourceProperty, value);
         }
-        public ItemCollection Items
-        {
-            get { return itemsControl.Items; }
-        }
+        public ItemCollection Items => itemsControl.Items;
 
         private List<FlyingControl> flyingControls = new List<FlyingControl>();
         public ReadOnlyCollection<FlyingControl> FlyingControls => flyingControls.AsReadOnly();
+
         public DockingManager()
         {
             InitializeComponent();
 
             DataContext = this;
         }
+
         public void AddFlyingControl(FlyingControl control)
         {
             if (flyingControls.Contains(control))
+            {
                 flyingControls.Remove(control);
+            }
             else
             {
                 control.Loaded += FlyingControl_Loaded;

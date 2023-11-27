@@ -25,7 +25,7 @@ namespace Editor
             [ComparisonMode.GreaterThan] = (int a, int b) => a > b,
             [ComparisonMode.GreaterThanOrEqual] = (int a, int b) => a >= b,
             [ComparisonMode.LessThan] = (int a, int b) => a < b,
-            [ComparisonMode.LessThanOrEqual] = (int a, int b) => a <= b,
+            [ComparisonMode.LessThanOrEqual] = (int a, int b) => a <= b
         };
         public int TargetValue { get; set; }
         public ComparisonMode Mode { get; set; }

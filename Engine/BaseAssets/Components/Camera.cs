@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using SharpDX;
 using Format = SharpDX.DXGI.Format;
-
 using LinearAlgebra;
 using SharpDX.Direct3D11;
 using System.Threading;
@@ -18,10 +16,7 @@ namespace Engine.BaseAssets.Components
         private double fov = Math.PI / 2;
         public double FOV
         {
-            get
-            {
-                return fov;
-            }
+            get => fov;
             set
             {
                 fov = value;
@@ -31,10 +26,7 @@ namespace Engine.BaseAssets.Components
         private double aspect;
         public double Aspect
         {
-            get
-            {
-                return aspect;
-            }
+            get => aspect;
             set
             {
                 aspect = value;
@@ -44,10 +36,7 @@ namespace Engine.BaseAssets.Components
         private double near;
         public double Near
         {
-            get
-            {
-                return near;
-            }
+            get => near;
             set
             {
                 near = value;
@@ -57,10 +46,7 @@ namespace Engine.BaseAssets.Components
         private double far;
         public double Far
         {
-            get
-            {
-                return far;
-            }
+            get => far;
             set
             {
                 far = value;
@@ -69,22 +55,10 @@ namespace Engine.BaseAssets.Components
         }
         public static Camera Current
         {
-            get
-            {
-                return GraphicsCore.CurrentCamera;
-            }
-            set
-            {
-                GraphicsCore.CurrentCamera = value;
-            }
+            get => GraphicsCore.CurrentCamera;
+            set => GraphicsCore.CurrentCamera = value;
         }
-        public bool IsCurrent
-        {
-            get
-            {
-                return Current == this;
-            }
-        }
+        public bool IsCurrent => Current == this;
         private Matrix4x4 proj;
         public Matrix4x4 Proj
         {
@@ -122,7 +96,7 @@ namespace Engine.BaseAssets.Components
         private bool needsToBeResized;
         private int targetWidth;
         private int targetHeight;
-        
+
         public int Width { get; private set; }
         public int Height { get; private set; }
 
@@ -131,10 +105,12 @@ namespace Engine.BaseAssets.Components
             BackgroundColor = Color.FromRgba(0xFF010101);
             //BackgroundColor = Color.FromRgba(0xFFFFFFFF);
         }
+
         public void InvalidateMatrixes()
         {
             matrixesRequireRecalculation = true;
         }
+
         public void RecalculateMatrixes()
         {
             double ctg = 1 / Math.Tan(FOV / 2);
@@ -148,11 +124,13 @@ namespace Engine.BaseAssets.Components
 
             matrixesRequireRecalculation = false;
         }
+
         public void MakeCurrent()
         {
             Current = this;
             Resize(1280, 720);
         }
+
         public void Resize(int width, int height)
         {
             if (width <= 0)
@@ -164,6 +142,7 @@ namespace Engine.BaseAssets.Components
             targetWidth = width;
             needsToBeResized = true;
         }
+
         internal void PreRenderUpdate()
         {
             if (needsToBeResized)
@@ -173,6 +152,7 @@ namespace Engine.BaseAssets.Components
                 OnResized?.Invoke(this);
             }
         }
+
         private void GenerateBuffers(int width, int height)
         {
             Width = width;
@@ -197,6 +177,7 @@ namespace Engine.BaseAssets.Components
             RadianceBuffer = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
             ColorBuffer = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.ShaderResource | BindFlags.RenderTarget);
         }
+
         public void SwapFrameBuffers()
         {
             lock (middlebuffer)
@@ -206,6 +187,7 @@ namespace Engine.BaseAssets.Components
                 middlebuffer = tmp;
             }
         }
+
         public FrameBuffer GetNextFrontBuffer()
         {
             lock (middlebuffer)

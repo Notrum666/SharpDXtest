@@ -10,8 +10,12 @@ namespace Engine
     public class SerializeFieldAttribute : Attribute
     {
         public string? DisplayName { get; private set; }
+
         public SerializeFieldAttribute()
-            : this(null) { }
+            : this(null)
+        {
+        }
+
         public SerializeFieldAttribute(string? displayName)
         {
             DisplayName = displayName;

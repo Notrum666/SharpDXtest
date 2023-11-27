@@ -20,6 +20,7 @@ namespace SharpDXtest.Assets.Components
         public GameObject leftRacket, rightRacket;
         public int scoreLeft = 0, scoreRight = 0;
         public event Action<int, int> OnScoreChanged;
+
         public override void Update()
         {
             Rigidbody rb = GameObject.GetComponent<Rigidbody>();

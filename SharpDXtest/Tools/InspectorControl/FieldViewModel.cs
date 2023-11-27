@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
 using Component = Engine.BaseAssets.Components.Component;
 
 namespace Editor
@@ -13,10 +12,7 @@ namespace Editor
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private FieldInfo targetField;
-        public FieldInfo TargetField
-        {
-            get => targetField;
-        }
+        public FieldInfo TargetField => targetField;
         public string DisplayName { get; private set; }
         public object Value
         {
@@ -47,8 +43,12 @@ namespace Editor
         public ObservableCollection<FieldViewModel> StructFieldViewModels { get; private set; } = null;
         private object parentObject;
         private FieldViewModel parentField;
+
         public FieldViewModel(object parentObject, FieldInfo field)
-            : this(parentObject, field, null) { }
+            : this(parentObject, field, null)
+        {
+        }
+
         public FieldViewModel(object parentObject, FieldInfo field, FieldViewModel parentField)
         {
             this.parentObject = parentObject;
@@ -64,7 +64,9 @@ namespace Editor
                     DisplayName = field.Name;
             }
             else
+            {
                 DisplayName = field.Name;
+            }
 
             if (targetField.FieldType.IsValueType && !targetField.FieldType.IsEnum && !targetField.FieldType.IsPrimitive)
             {
@@ -78,10 +80,12 @@ namespace Editor
                 }
             }
         }
+
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
+
         public void Update()
         {
             if (StructFieldViewModels is null)

@@ -11,10 +11,7 @@ namespace Engine.BaseAssets.Components
         private Texture albedo;
         public Texture Albedo
         {
-            get
-            {
-                return albedo;
-            }
+            get => albedo;
             set
             {
                 if (value == null)
@@ -25,10 +22,7 @@ namespace Engine.BaseAssets.Components
         private Texture normal;
         public Texture Normal
         {
-            get
-            {
-                return normal;
-            }
+            get => normal;
             set
             {
                 if (value == null)
@@ -39,10 +33,7 @@ namespace Engine.BaseAssets.Components
         private Texture metallic;
         public Texture Metallic
         {
-            get
-            {
-                return metallic;
-            }
+            get => metallic;
             set
             {
                 if (value == null)
@@ -53,10 +44,7 @@ namespace Engine.BaseAssets.Components
         private Texture roughness;
         public Texture Roughness
         {
-            get
-            {
-                return roughness;
-            }
+            get => roughness;
             set
             {
                 if (value == null)
@@ -67,10 +55,7 @@ namespace Engine.BaseAssets.Components
         private Texture ambientOcclusion;
         public Texture AmbientOcclusion
         {
-            get
-            {
-                return ambientOcclusion;
-            }
+            get => ambientOcclusion;
             set
             {
                 if (value == null)
@@ -78,6 +63,7 @@ namespace Engine.BaseAssets.Components
                 ambientOcclusion = value;
             }
         }
+
         public Material()
         {
             albedo = AssetsManager.Textures["default_albedo"];
@@ -86,6 +72,7 @@ namespace Engine.BaseAssets.Components
             roughness = AssetsManager.Textures["default_roughness"];
             ambientOcclusion = AssetsManager.Textures["default_ambientOcclusion"];
         }
+
         public Material(Texture albedo, Texture normal, Texture metallic, Texture roughness, Texture ambientOcclusion)
         {
             Albedo = albedo;
