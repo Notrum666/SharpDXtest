@@ -69,11 +69,11 @@ float4 main(vert_in v) : SV_Target
             continue;
         
         float2 offsetCoord = offset.xy * texSize;
-        float treshhold = 10;
+        float pixelsTreshold = 32;
         
         float d = distance(offsetCoord, v.p.xy);
         
-        int mipLevel = min(d / treshhold, depthMipLevels);
+        int mipLevel = min(d / pixelsTreshold, depthMipLevels);
              
         float sampleDepth = depthTex.Load(int3(offset.xy * texSize / pow(2, mipLevel), mipLevel)).x;
         

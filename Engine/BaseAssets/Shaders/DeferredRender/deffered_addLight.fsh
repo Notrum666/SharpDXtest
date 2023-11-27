@@ -26,6 +26,6 @@ float4 main(vert_in v) : SV_Target
 	float ambientOcclusion = ambientOcclusionTex.Sample(texSampler, v.t).x;
 	float ssao = ssaoTex.Sample(texSampler, v.t).x;
 
-    float3 ambient = (float3) 0.3f * albedo * ambientOcclusion * ssao + ambientOcclusion * 0;
+    float3 ambient = (float3) 0.3f * albedo * ambientOcclusion * ssao;
     return float4(ambient + radianceTex.Sample(texSampler, v.t).rgb, 1.0f);
 }

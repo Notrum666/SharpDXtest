@@ -727,7 +727,7 @@ namespace Engine
             const int samplesCount = 64;
 
             Random rnd = new Random();
-            float sampleRadius = 0.1f;
+            float sampleRadius = 0.5f;
             for (int i = 0; i < samplesCount; i++)
             {
                 Vector3f v = new Vector3f(
