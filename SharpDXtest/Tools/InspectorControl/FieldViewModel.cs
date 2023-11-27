@@ -18,19 +18,28 @@ namespace Editor
             get => targetField;
         }
         public string DisplayName { get; private set; }
+        private object cachedBoxedValue;
+        private bool invalidated = true;
         public object Value
         {
-            // TODO: optimize repetitive boxing-unboxing by caching structure value
             get
             {
                 if (parentField is null)
-                    return targetField.GetValue(parentObject);
+                {
+                    if (invalidated)
+                    {
+                        cachedBoxedValue = targetField.GetValue(parentObject);
+                        invalidated = false;
+                    }
+                    return cachedBoxedValue;
+                }
                 return targetField.GetValue(parentField.Value);
             }
             set
             {
                 if (parentField is null)
                 {
+                    invalidated = true;
                     targetField.SetValue(parentObject, value);
                     if (parentObject is INotifyFieldChanged notifyFieldChanged)
                         notifyFieldChanged.OnFieldChanged(targetField);
@@ -66,7 +75,7 @@ namespace Editor
             else
                 DisplayName = field.Name;
 
-            if (targetField.FieldType.IsValueType && !targetField.FieldType.IsEnum && !targetField.FieldType.IsPrimitive)
+            if (targetField.FieldType.IsStruct())
             {
                 StructFieldViewModels = new ObservableCollection<FieldViewModel>();
                 FieldInfo[] subFields = targetField.FieldType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -86,6 +95,7 @@ namespace Editor
         {
             if (StructFieldViewModels is null)
             {
+                invalidated = true;
                 OnPropertyChanged(nameof(Value));
                 return;
             }

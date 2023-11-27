@@ -9,6 +9,10 @@ namespace Editor
 {
     public static class Extensions
     {
+        public static bool IsStruct(this Type type)
+        {
+            return !(type.IsPrimitive || !type.IsValueType || type.IsEnum);
+        }
         public static T FindParent<T>(this DependencyObject child) where T : DependencyObject
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
