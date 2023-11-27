@@ -22,23 +22,25 @@ cbuffer ssaoParamsBuf
     float3 randomVectors[SAMPLES_COUNT];
     float3 noise[16];
     float sampleRad;
+    int depthMipLevels;
 };
 
 SamplerState texSampler;
 
 float4 main(vert_in v) : SV_Target
 {
-    int2 texPos = v.t * texSize;
+    int2 texPos = v.p.xy;
+    
+    float4 wp = worldPosTex.SampleLevel(texSampler, v.t, 0).xyzw;
+    
+    if (wp.w == 0.0f)
+        return (float4)1.0f;
     
     float3 n = mul(normalTex.SampleLevel(texSampler, v.t, 0), camView).xyz;
     
-    if (dot(n, n) < 0.00001)
-        return (float4)1.0f;
-    
     n = normalize(n);
     
-    float3 wp = worldPosTex.SampleLevel(texSampler, v.t, 0).xyz;
-    float3 pos = mul(float4(wp, 1.0f), camView).xyz;
+    float3 pos = mul(float4(wp.xyz, 1.0f), camView).xyz;
     
     float3 rv = noise[texPos.x % 4 + (texPos.y % 4) * 4];
     
@@ -62,8 +64,17 @@ float4 main(vert_in v) : SV_Target
         
         offset.x = (offset.x / offset.w) * 0.5f + 0.5f;
         offset.y = -(offset.y / offset.w) * 0.5f + 0.5f;
+        
+        if(offset.x > 1 || offset.x < 0 || offset.y > 1 || offset.y < 0)
+            continue;
+        
+        float2 offsetCoord = offset.xy * texSize;
+        float treshhold = 10;
+        
+        float d = distance(offsetCoord, v.p.xy);
+        
+        int mipLevel = min(d / treshhold, depthMipLevels);
              
-        int mipLevel = (1.0f - min(depth / (sampleRad * 5.0f), 1.0f)) * 2.0f;
         float sampleDepth = depthTex.Load(int3(offset.xy * texSize / pow(2, mipLevel), mipLevel)).x;
         
         if (sampleDepth > samplePos.y - bias)
@@ -74,6 +85,8 @@ float4 main(vert_in v) : SV_Target
     }
     
     occlusion = 1.0f - (occlusion / (float) SAMPLES_COUNT);
+    
+    occlusion = pow(occlusion, 2.0f);
     
     return float4(occlusion, occlusion, occlusion, 1.0f);
 }

@@ -21,7 +21,7 @@
   <GameObject x.Name="Warrior">
     <Transform>
       <Transform.Position x="0" y="0" z="0"/>
-      <Transform.LocalScale x="0.1" y="0.1" z="0.1"/>
+      <Transform.LocalScale x="0.01" y="0.01" z="0.01"/>
       <Transform.Rotation x="90"/>
     </Transform>
     <Mesh model="{Model alliance_statue}">

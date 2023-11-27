@@ -722,18 +722,19 @@ namespace Engine
             pipeline.UpdateUniform("camView", view);
             pipeline.UpdateUniform("camProj", proj);
             pipeline.UpdateUniform("camInvProj", invProj);
+            pipeline.UpdateUniform("depthMipLevels", camera.SsaoBuffer.depth.texture.Description.MipLevels);
 
             const int samplesCount = 64;
 
             Random rnd = new Random();
-            float sampleRadius = 1.0f;
+            float sampleRadius = 0.1f;
             for (int i = 0; i < samplesCount; i++)
             {
                 Vector3f v = new Vector3f(
                     rnd.NextFloat(-1, 1),
                     rnd.NextFloat(0, 1),
                     rnd.NextFloat(-1, 1)
-                );// half sphere distribution
+                );
 
                 v.normalize();
 
@@ -755,13 +756,10 @@ namespace Engine
 
             for (int i = 0; i < 16; i++)
             {
-                float rAngle = rnd.NextFloat(0.0f, MathF.PI * 2.0f);
-                float rRadius = MathF.Sqrt(rnd.NextFloat(0.0f, 1.0f));
-
                 Vector3f v = new Vector3f(
-                    MathF.Sin(rAngle) * rRadius,
+                    rnd.NextFloat(-1, 1),
                     0.0f,
-                    MathF.Cos(rAngle) * rRadius
+                    rnd.NextFloat(-1, 1)
                 );
 
                 pipeline.UpdateUniform(
