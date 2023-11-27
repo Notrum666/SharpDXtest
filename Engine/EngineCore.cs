@@ -45,6 +45,7 @@ namespace Engine
         {
             Logger.Log(LogType.Info, "Engine initialization");
             // Order of initialization is important, same number means no difference
+            ProfilerCore.Init();
             GraphicsCore.Init(HWND, width, height); // 1
             SoundCore.Init(); // 1
             Time.Init(); // 1
@@ -84,6 +85,7 @@ namespace Engine
                         SoundCore.Update();
                     }
                     GraphicsCore.Update();
+                    ProfilerCore.Update();
 
                     OnFrameEnded?.Invoke();
 
