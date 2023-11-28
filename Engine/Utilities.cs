@@ -253,10 +253,22 @@ namespace Engine
     }
     public class Texture : IDisposable
     {
+        private interface IResourceViewCollection { }
+        private struct ResourceViewCollection<T> : IResourceViewCollection where T : ResourceView
+        {
+            public struct ArrayItemView
+            {
+                public List<T> MipsViews;
+            }
+
+            public T GeneralView;
+            public List<ArrayItemView> ArrayItemsViews;
+        }
+
         private bool disposed = false;
         public Texture2D texture { get; private set; }
-        private List<ResourceView> views = new List<ResourceView>();
-        public IReadOnlyCollection<ResourceView> Views { get => views.AsReadOnly(); }
+        private List<IResourceViewCollection> views = new List<IResourceViewCollection>();
+
         public Texture(Bitmap image, bool applyGammaCorrection = true)
         {
 
@@ -280,9 +292,9 @@ namespace Engine
 
             image.UnlockBits(data);
 
-            generateViews();
+            GenerateViews();
         }
-        public Texture(int width, int height, IEnumerable<byte>? defaultDataPerPixel, Format textureFormat, BindFlags usage, int arraySize = 1)
+        public Texture(int width, int height, IEnumerable<byte>? defaultDataPerPixel, Format textureFormat, BindFlags usage, int arraySize = 1, int mipLevels = 1)
         {
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
@@ -330,7 +342,7 @@ namespace Engine
                 Usage = ResourceUsage.Default,
                 CpuAccessFlags = CpuAccessFlags.None,
                 Format = textureFormat,
-                MipLevels = 1,
+                MipLevels = mipLevels,
                 OptionFlags = ResourceOptionFlags.Shared,
                 SampleDescription = new SampleDescription(1, 0)
             }, rectangles);
@@ -338,129 +350,161 @@ namespace Engine
             if (defaultDataPerPixel != null)
                 Marshal.FreeHGlobal(dataPtr);
 
-            generateViews();
+            GenerateViews();
         }
-        private void generateViews()
+        private void GenerateViews()
         {
             Format format = texture.Description.Format;
             if (format == Format.R32_Typeless)
                 format = Format.R32_Float;
             BindFlags usage = texture.Description.BindFlags;
+
             int arraySize = texture.Description.ArraySize;
+            int mipLevels = texture.Description.MipLevels;
 
-            if (usage.HasFlag(BindFlags.RenderTarget))
-            {
-                if (arraySize > 1)
-                {
-                    views.Add(new RenderTargetView(GraphicsCore.CurrentDevice, texture,
-                        new RenderTargetViewDescription()
-                        {
-                            Format = format,
-                            Dimension = RenderTargetViewDimension.Texture2DArray,
-                            Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = 0,
-                                ArraySize = texture.Description.ArraySize,
-                                FirstArraySlice = 0
-                            }
-                        }));
-                }
-                for (int i = 0; i < arraySize; i++)
-                {
-                    views.Add(new RenderTargetView(GraphicsCore.CurrentDevice, texture,
-                        new RenderTargetViewDescription()
-                        {
-                            Format = format,
-                            Dimension = RenderTargetViewDimension.Texture2DArray,
-                            Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = 0,
-                                ArraySize = 1,
-                                FirstArraySlice = i
-                            }
-                        }));
-                }
-            }
+            bool hasRenderTargets = usage.HasFlag(BindFlags.RenderTarget);
+            bool hasDepthStencils = usage.HasFlag(BindFlags.DepthStencil);
+            bool hasShaderResources = usage.HasFlag(BindFlags.ShaderResource);
 
-            if (usage.HasFlag(BindFlags.DepthStencil))
-            {
-                if (arraySize > 1)
-                {
-                    views.Add(new DepthStencilView(GraphicsCore.CurrentDevice, texture,
-                        new DepthStencilViewDescription()
-                        {
-                            Format = Format.D32_Float,
-                            Dimension = DepthStencilViewDimension.Texture2DArray,
-                            Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = 0,
-                                ArraySize = texture.Description.ArraySize,
-                                FirstArraySlice = 0
-                            }
-                        }));
-                }
-                for (int i = 0; i < arraySize; i++)
-                {
-                    views.Add(new DepthStencilView(GraphicsCore.CurrentDevice, texture,
-                        new DepthStencilViewDescription()
-                        {
-                            Format = Format.D32_Float,
-                            Dimension = DepthStencilViewDimension.Texture2DArray,
-                            Flags = DepthStencilViewFlags.None,
-                            Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = 0,
-                                ArraySize = 1,
-                                FirstArraySlice = i
-                            }
-                        }));
-                }
-            }
-
-            if (usage.HasFlag(BindFlags.ShaderResource))
-            {
-                if (arraySize > 1)
-                {
-                    views.Add(new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
-                        new ShaderResourceViewDescription()
-                        {
-                            Format = format,
-                            Dimension = ShaderResourceViewDimension.Texture2DArray,
-                            Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
-                            {
-                                MipLevels = texture.Description.MipLevels,
-                                MostDetailedMip = texture.Description.MipLevels - 1,
-                                ArraySize = texture.Description.ArraySize,
-                                FirstArraySlice = 0
-                            }
-                        }));
-                }
-                for (int i = 0; i < arraySize; i++)
-                {
-                    views.Add(new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
-                        new ShaderResourceViewDescription()
-                        {
-                            Format = format,
-                            Dimension = ShaderResourceViewDimension.Texture2DArray,
-                            Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
-                            {
-                                MipLevels = texture.Description.MipLevels,
-                                MostDetailedMip = texture.Description.MipLevels - 1,
-                                ArraySize = 1,
-                                FirstArraySlice = i
-                            }
-                        }));
-                }
-            }
+            if (hasRenderTargets) 
+                views.Add(CreateResourceViewCollection<RenderTargetView>(format, arraySize, mipLevels));
+            if (hasDepthStencils) 
+                views.Add(CreateResourceViewCollection<DepthStencilView>(format, arraySize, mipLevels));
+            if (hasShaderResources) 
+                views.Add(CreateResourceViewCollection<ShaderResourceView>(format, arraySize, mipLevels));
         }
+
+        private ResourceViewCollection<T> CreateResourceViewCollection<T>(Format format, int arraySize, int mipLevels) 
+            where T : ResourceView
+        {
+            if(arraySize < 1)
+            {
+                throw new ArgumentNullException(nameof(arraySize));
+            }
+
+            if(mipLevels < 1)
+            {
+                throw new ArgumentNullException(nameof(mipLevels));
+            }
+
+            ResourceViewCollection<T> collection = new ResourceViewCollection<T>();
+
+            collection.ArrayItemsViews = new List<ResourceViewCollection<T>.ArrayItemView>(arraySize);
+
+            for(int i = 0; i < arraySize; i++)
+            {
+                collection.ArrayItemsViews.Add(new ResourceViewCollection<T>.ArrayItemView
+                {
+                    MipsViews = new List<T>(mipLevels)
+                });
+            }
+
+            collection.GeneralView = collection switch
+            {
+                ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, arraySize, 0, 0) as T,
+                ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, arraySize, 0, 0) as T,
+                ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, arraySize, 0, mipLevels, 0) as T,
+                var _ => throw new NotImplementedException(typeof(T).Name)
+            };
+
+            if (arraySize > 1 || mipLevels > 1)
+            {
+                for (int i = 0; i < arraySize; i++)
+                {
+                    for (int j = 0; j < mipLevels; j++)
+                    {
+                        T view = collection switch
+                        {
+                            ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, 1, i, j) as T,
+                            ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, 1, i, j) as T,
+                            ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, 1, i, 1, j) as T,
+                            var _ => throw new NotImplementedException(typeof(T).Name)
+                        };
+
+                        collection.ArrayItemsViews[i].MipsViews.Add(view);
+                    }
+                }
+            }
+            else
+            {
+                collection.ArrayItemsViews[0].MipsViews.Add(collection.GeneralView);
+            }
+
+            return collection;
+        }
+
+        private RenderTargetView CreateRenderTargetView(Texture2D rawTexture, Format format, int arraySize, int arraySlice, int mipSlice)
+        {
+            return new RenderTargetView(GraphicsCore.CurrentDevice, rawTexture,
+                        new RenderTargetViewDescription()
+                        {
+                            Format = format,
+                            Dimension = RenderTargetViewDimension.Texture2DArray,
+                            Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource()
+                            {
+                                MipSlice = mipSlice,
+                                ArraySize = arraySize,
+                                FirstArraySlice = arraySlice
+                            }
+                        }
+                    );
+        }
+
+        private DepthStencilView CreateDepthStencilView(Texture2D rawTexture, int arraySize, int arraySlice, int mipSlice)
+        {
+            return new DepthStencilView(GraphicsCore.CurrentDevice, rawTexture,
+                        new DepthStencilViewDescription()
+                        {
+                            Format = Format.D32_Float,
+                            Dimension = DepthStencilViewDimension.Texture2DArray,
+                            Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                            {
+                                MipSlice = mipSlice,
+                                ArraySize = arraySize,
+                                FirstArraySlice = arraySlice
+                            }
+                        }
+                    );
+        }
+
+        private ShaderResourceView CreateShaderResourceView(Texture2D rawTexture, Format format, int arraySize, int arraySlice, int mipLevels, int mipSlice)
+        {
+            return new ShaderResourceView(GraphicsCore.CurrentDevice, rawTexture,
+                        new ShaderResourceViewDescription()
+                        {
+                            Format = format,
+                            Dimension = ShaderResourceViewDimension.Texture2DArray,
+                            Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
+                            {
+                                MipLevels = mipLevels,
+                                MostDetailedMip = mipSlice,
+                                ArraySize = arraySize,
+                                FirstArraySlice = arraySlice
+                            }
+                        }
+                    );
+        }
+
+        private ResourceViewCollection<T> GetResourceViewCollection<T>() where T : ResourceView
+        {
+            return (ResourceViewCollection<T>)views.First(view => view is ResourceViewCollection<T>);
+        }
+
+        public bool HasViews<T>() where T : ResourceView
+        {
+            return views.Any(v => v is ResourceViewCollection<T>);
+        }
+
         public T GetView<T>() where T : ResourceView
         {
-            return (T)views.First(view => view is T);
+            return GetResourceViewCollection<T>().GeneralView;
         }
-        public IList<T> GetViews<T>() where T : ResourceView
+
+        public T GetSliceView<T>(int arraySliceIndex, int mipSliceIndex = 0) where T : ResourceView
         {
-            return views.Where(view => view is T).Cast<T>().ToList();
+            return GetResourceViewCollection<T>().ArrayItemsViews[arraySliceIndex].MipsViews[mipSliceIndex];
         }
+
         public void use(string variable, bool targetIsTextureArray = false)
         {
             if ((texture.Description.BindFlags & BindFlags.ShaderResource) == BindFlags.None)
