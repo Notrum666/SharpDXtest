@@ -335,10 +335,6 @@ namespace Engine.BaseAssets.Components
             void addPolygon(Polygon polygon)
             {
                 polygon.normal = (initialSimplex[polygon.indexB] - initialSimplex[polygon.indexA]).cross(initialSimplex[polygon.indexC] - initialSimplex[polygon.indexA]);
-                if (polygon.normal.x == 0 && polygon.normal.y == 0 && polygon.normal.z == 0)
-                {
-
-                }
                 polygons.Add(initialSimplex[polygon.indexA].projectOnVector(polygon.normal).squaredLength(), polygon);
             }
 

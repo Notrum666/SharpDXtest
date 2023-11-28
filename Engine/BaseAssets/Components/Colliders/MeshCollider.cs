@@ -74,10 +74,7 @@ namespace Engine.BaseAssets.Components.Colliders
             return result;
         }
 
-        public MeshCollider()
-        {
-
-        }
+        public MeshCollider() { }
 
         public void FromModel(Model model)
         {

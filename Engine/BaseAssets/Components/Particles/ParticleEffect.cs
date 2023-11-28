@@ -4,10 +4,7 @@
     {
         public Shader EffectShader { get; protected set; }
 
-        public virtual void Update(ParticleSystem system)
-        {
-
-        }
+        public virtual void Update(ParticleSystem system) { }
 
         public abstract void Use(ParticleSystem system);
     }

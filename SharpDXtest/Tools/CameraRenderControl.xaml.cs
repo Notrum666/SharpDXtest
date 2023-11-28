@@ -30,14 +30,10 @@ namespace Editor
         public string displayText;
 
         public AspectRatio() :
-            this(double.NaN, double.NaN, "")
-        {
-        }
+            this(double.NaN, double.NaN, "") { }
 
         public AspectRatio(double width, double height) :
-            this(width, height, "")
-        {
-        }
+            this(width, height, "") { }
 
         public AspectRatio(double width, double height, string displayText)
         {

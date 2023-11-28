@@ -27,19 +27,10 @@ namespace Engine.BaseAssets.Components
             Initialized();
         }
 
-        protected virtual void Initialized()
-        {
+        protected virtual void Initialized() { }
 
-        }
+        public virtual void Update() { }
 
-        public virtual void Update()
-        {
-
-        }
-
-        public virtual void FixedUpdate()
-        {
-
-        }
+        public virtual void FixedUpdate() { }
     }
 }

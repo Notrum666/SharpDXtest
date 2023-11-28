@@ -8,9 +8,7 @@ namespace Engine
         public string? DisplayName { get; private set; }
 
         public SerializeFieldAttribute()
-            : this(null)
-        {
-        }
+            : this(null) { }
 
         public SerializeFieldAttribute(string? displayName)
         {

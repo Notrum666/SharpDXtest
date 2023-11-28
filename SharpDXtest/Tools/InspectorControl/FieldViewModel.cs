@@ -43,9 +43,7 @@ namespace Editor
         private FieldViewModel parentField;
 
         public FieldViewModel(object parentObject, FieldInfo field)
-            : this(parentObject, field, null)
-        {
-        }
+            : this(parentObject, field, null) { }
 
         public FieldViewModel(object parentObject, FieldInfo field, FieldViewModel parentField)
         {

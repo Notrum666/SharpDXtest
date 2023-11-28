@@ -1,7 +1,4 @@
 ﻿namespace Engine.BaseAssets.Components
 {
-    public class AmbientLight : Light
-    {
-
-    }
+    public class AmbientLight : Light { }
 }

@@ -15,10 +15,7 @@ namespace SharpDXtest.Assets.Components
         public double CurPitch;
         public Vector2 MouseSensitivity;
 
-        public override void Update()
-        {
-
-        }
+        public override void Update() { }
 
         public override void FixedUpdate()
         {

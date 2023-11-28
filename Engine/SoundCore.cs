@@ -54,10 +54,7 @@ namespace Engine
         {
             if (!disposed)
             {
-                if (disposing)
-                {
-
-                }
+                if (disposing) { }
                 voice.DestroyVoice();
                 //voice.Dispose();
                 disposed = true;

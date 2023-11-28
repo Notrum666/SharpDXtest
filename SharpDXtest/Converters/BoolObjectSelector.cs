@@ -11,10 +11,7 @@ namespace Editor
         public object TrueValue { get; set; }
         public object FalseValue { get; set; }
 
-        public BoolObjectSelector()
-        {
-
-        }
+        public BoolObjectSelector() { }
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

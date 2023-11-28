@@ -22,10 +22,7 @@ namespace Editor
         }
         public ObservableCollection<ComponentViewModel> ComponentViewModels { get; private set; } = new ObservableCollection<ComponentViewModel>();
 
-        public GameObjectViewModel()
-        {
-
-        }
+        public GameObjectViewModel() { }
 
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {

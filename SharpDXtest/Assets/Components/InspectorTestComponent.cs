@@ -7,10 +7,7 @@ namespace SharpDXtest.Assets.Components
         public int ImOutOfIdeas = 142;
         public int ImOutOfIdeas2 = 142;
 
-        public TestStruct2()
-        {
-
-        }
+        public TestStruct2() { }
     }
     public struct TestStruct
     {
@@ -19,10 +16,7 @@ namespace SharpDXtest.Assets.Components
         public TestStruct2 StructSubStruct = new TestStruct2();
         public string StructStringValue = "Number 142";
 
-        public TestStruct()
-        {
-
-        }
+        public TestStruct() { }
     }
     public class InspectorTestComponent : Component
     {

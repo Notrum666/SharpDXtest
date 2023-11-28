@@ -10,10 +10,7 @@ namespace Editor
     [ValueConversion(typeof(object[]), typeof(Visibility))]
     public sealed class LogMessageVisibiliySelector : IMultiValueConverter
     {
-        public LogMessageVisibiliySelector()
-        {
-
-        }
+        public LogMessageVisibiliySelector() { }
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
