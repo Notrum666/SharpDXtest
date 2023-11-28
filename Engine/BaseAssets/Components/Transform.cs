@@ -8,7 +8,8 @@ namespace Engine.BaseAssets.Components
     {
         public event Action Invalidated;
         public Transform Parent { get; private set; }
-        [SerializeField("Position")] private Vector3 localPosition;
+        [SerializeField("Position")]
+        private Vector3 localPosition;
         public Vector3 LocalPosition
         {
             get => localPosition;
@@ -68,7 +69,8 @@ namespace Engine.BaseAssets.Components
                 LocalRotation = rot;
             }
         }
-        [SerializeField("Scale")] private Vector3 localScale;
+        [SerializeField("Scale")]
+        private Vector3 localScale;
         public Vector3 LocalScale
         {
             get => localScale;
