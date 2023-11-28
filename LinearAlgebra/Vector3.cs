@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LinearAlgebra
 {
@@ -45,19 +41,22 @@ namespace LinearAlgebra
         public double x;
         public double y;
         public double z;
-        public Vector2 xy { get { return new Vector2(x, y); } }
+        public Vector2 xy => new Vector2(x, y);
+
         public Vector3(double x = 0.0, double y = 0.0, double z = 0.0)
         {
             this.x = x;
             this.y = y;
             this.z = z;
         }
+
         public Vector3(in Vector2 vec, double z = 0.0)
         {
             x = vec.x;
             y = vec.y;
             this.z = z;
         }
+
         public Vector3(params double[] values)
         {
             if (values.Length != 3)
@@ -68,7 +67,10 @@ namespace LinearAlgebra
             z = values[2];
         }
 
-        public static implicit operator Vector3(in Vector3f vec) => new Vector3(vec.x, vec.y, vec.z);
+        public static implicit operator Vector3(in Vector3f vec)
+        {
+            return new Vector3(vec.x, vec.y, vec.z);
+        }
 
         /// <summary>
         /// Magnitude of vector. Same as length
@@ -77,6 +79,7 @@ namespace LinearAlgebra
         {
             return Math.Sqrt(squaredMagnitude());
         }
+
         /// <summary>
         /// Magnitude of vector without root. Same as squaredLength
         /// </summary>
@@ -84,6 +87,7 @@ namespace LinearAlgebra
         {
             return dot(this);
         }
+
         /// <summary>
         /// Length of vector. Same as length
         /// </summary>
@@ -91,6 +95,7 @@ namespace LinearAlgebra
         {
             return magnitude();
         }
+
         /// <summary>
         /// Length of vector without root. Same as squaredMagnitude
         /// </summary>
@@ -98,6 +103,7 @@ namespace LinearAlgebra
         {
             return squaredMagnitude();
         }
+
         /// <summary>
         /// Checks if vector small enough to be considered a zero vector
         /// </summary>
@@ -105,34 +111,42 @@ namespace LinearAlgebra
         {
             return squaredMagnitude() < Constants.SqrEpsilon;
         }
+
         public static Vector3 operator +(in Vector3 v1, in Vector3 v2)
         {
             return new Vector3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
         }
+
         public static Vector3 operator -(in Vector3 v1, in Vector3 v2)
         {
             return new Vector3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
         }
+
         public static Vector3 operator *(in Vector3 vec, double value)
         {
             return new Vector3(vec.x * value, vec.y * value, vec.z * value);
         }
+
         public static Vector3 operator *(double value, in Vector3 vec)
         {
             return new Vector3(vec.x * value, vec.y * value, vec.z * value);
         }
+
         public static Vector3 operator /(in Vector3 vec, double value)
         {
             return new Vector3(vec.x / value, vec.y / value, vec.z / value);
         }
+
         public static Vector3 operator /(float value, in Vector3 vec)
         {
             return new Vector3(value / vec.x, value / vec.y, value / vec.z);
         }
+
         public static Vector3 operator -(in Vector3 vec)
         {
             return new Vector3(-vec.x, -vec.y, -vec.z);
         }
+
         /// <summary>
         /// Cross product
         /// </summary>
@@ -140,6 +154,7 @@ namespace LinearAlgebra
         {
             return v1.vecMul(v2);
         }
+
         /// <summary>
         /// Dot product
         /// </summary>
@@ -147,6 +162,7 @@ namespace LinearAlgebra
         {
             return v1.dot(v2);
         }
+
         /// <summary>
         /// Dot product
         /// </summary>
@@ -154,6 +170,7 @@ namespace LinearAlgebra
         {
             return x * vec.x + y * vec.y + z * vec.z;
         }
+
         /// <summary>
         /// Component multiplication
         /// </summary>
@@ -162,6 +179,7 @@ namespace LinearAlgebra
         {
             return new Vector3(x * vec.x, y * vec.y, z * vec.z);
         }
+
         /// <summary>
         /// Component division
         /// </summary>
@@ -170,6 +188,7 @@ namespace LinearAlgebra
         {
             return new Vector3(x / vec.x, y / vec.y, z / vec.z);
         }
+
         /// <summary>
         /// Returns normalized copy of this vector
         /// </summary>
@@ -177,6 +196,7 @@ namespace LinearAlgebra
         {
             return this / magnitude();
         }
+
         /// <summary>
         /// Normalizes this vector
         /// </summary>
@@ -187,6 +207,7 @@ namespace LinearAlgebra
             y /= magn;
             z /= magn;
         }
+
         /// <summary>
         /// Checks if vectors are equal enough to be considered equal
         /// </summary>
@@ -194,15 +215,17 @@ namespace LinearAlgebra
         {
             return (vec - this).isZero();
         }
+
         /// <summary>
         /// Projects vector on another vector
         /// </summary>
         public Vector3 projectOnVector(in Vector3 vec)
         {
             if (vec.isZero())
-                return Vector3.Zero;
+                return Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
+
         /// <summary>
         /// Projects vector on flat
         /// </summary>
@@ -212,6 +235,7 @@ namespace LinearAlgebra
         {
             return this - flatNorm * (this * flatNorm / flatNorm.squaredMagnitude());
         }
+
         /// <summary>
         /// Cross product. Same as cross
         /// </summary>
@@ -219,6 +243,7 @@ namespace LinearAlgebra
         {
             return new Vector3(y * vec.z - z * vec.y, z * vec.x - x * vec.z, x * vec.y - y * vec.x);
         }
+
         /// <summary>
         /// Cross product. Same as vecMul
         /// </summary>
@@ -226,6 +251,7 @@ namespace LinearAlgebra
         {
             return vecMul(vec);
         }
+
         /// <summary>
         /// Checks if vectors are parallel enough to be considered collinear
         /// </summary>
@@ -234,10 +260,12 @@ namespace LinearAlgebra
         {
             return (this % vec).isZero();
         }
+
         public override string ToString()
         {
             return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
         }
+
         public string ToString(string format)
         {
             return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";

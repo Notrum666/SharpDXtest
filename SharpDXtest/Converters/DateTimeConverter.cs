@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
-using System.Windows.Data;
 using System.Windows;
+using System.Windows.Data;
 
 namespace Editor
 {
@@ -9,6 +9,7 @@ namespace Editor
     public sealed class DateTimeConverter : IValueConverter
     {
         public string Format { get; set; }
+
         public DateTimeConverter()
         {
             Format = "HH:mm:ss";

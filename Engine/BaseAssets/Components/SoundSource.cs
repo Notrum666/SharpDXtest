@@ -1,32 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LinearAlgebra;
 
-using SharpDX.XAudio2;
 using SharpDX.X3DAudio;
-using SharpDX.Multimedia;
-using SharpDX.XAPO;
-using SharpDX.XAPO.Fx;
-
-using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {
     public sealed class SoundSource : Component
     {
         public Emitter Source { get; private set; }
+
         public SoundSource()
         {
             Source = new Emitter();
             Source.ChannelCount = 1;
             Source.CurveDistanceScaler = float.MinValue;
         }
+
         public void play(Sound sound)
         {
             SoundCore.PlayFrom(sound, this);
         }
+
         public override void Update()
         {
             Vector3 pos = GameObject.Transform.Position;

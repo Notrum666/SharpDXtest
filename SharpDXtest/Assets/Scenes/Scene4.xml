@@ -12,7 +12,7 @@
 			<Texture path="Prototype_Light.png"/>
 		</Textures>
 	</Assets>
-	
+
 	<GameObject>
 		<Transform>
 			<Transform.Position y="-5" z="5"/>
@@ -37,7 +37,7 @@
 		</ParticleSystem>
 		<ObjectController/>
 	</GameObject>
-	
+
 	<GameObject>
 		<Transform>
 			<Transform.Position z="2"/>
@@ -48,7 +48,7 @@
 			<Mesh.Material Albedo="{Texture Prototype}"/>
 		</Mesh>
 	</GameObject>
-	
+
 	<GameObject>
 		<Transform>
 			<Transform.LocalScale x="50" y="50" z="0.5"/>
@@ -64,7 +64,7 @@
 		</Transform>
 		<PointLight Radius="10"/>
 	</GameObject>
-	
+
 	<GameObject>
 		<Transform>
 			<Transform.LocalPosition x="-5" z="3"/>

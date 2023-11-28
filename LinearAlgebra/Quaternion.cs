@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LinearAlgebra
 {
@@ -20,8 +16,9 @@ namespace LinearAlgebra
     {
         public double w, x, y, z;
 
-        public static Quaternion Identity { get { return new Quaternion(1); } }
-        public static Quaternion Zero { get { return new Quaternion(); } }
+        public static Quaternion Identity => new Quaternion(1);
+        public static Quaternion Zero => new Quaternion();
+
         public Quaternion(double w = 0, double x = 0, double y = 0, double z = 0)
         {
             this.w = w;
@@ -29,6 +26,7 @@ namespace LinearAlgebra
             this.y = y;
             this.z = z;
         }
+
         /// <summary>
         /// Dot product
         /// </summary>
@@ -36,6 +34,7 @@ namespace LinearAlgebra
         {
             return w * q.w + x * q.x + y * q.y + z * q.z;
         }
+
         /// <summary>
         /// Norm of quaternion
         /// </summary>
@@ -43,6 +42,7 @@ namespace LinearAlgebra
         {
             return dot(this);
         }
+
         /// <summary>
         /// Length of quaternion. Same as magnitude
         /// </summary>
@@ -50,6 +50,7 @@ namespace LinearAlgebra
         {
             return Math.Sqrt(norm());
         }
+
         /// <summary>
         /// Magnitude of quaternion. Same as length
         /// </summary>
@@ -57,6 +58,7 @@ namespace LinearAlgebra
         {
             return length();
         }
+
         /// <summary>
         /// Checks if quaternion small enough to be considered a zero quaternion
         /// </summary>
@@ -64,6 +66,7 @@ namespace LinearAlgebra
         {
             return norm() < Constants.SqrEpsilon;
         }
+
         /// <summary>
         /// Normalizes this quaternion
         /// </summary>
@@ -75,6 +78,7 @@ namespace LinearAlgebra
             y /= l;
             z /= l;
         }
+
         /// <summary>
         /// Returns normalized copy of this quaternion
         /// </summary>
@@ -82,6 +86,7 @@ namespace LinearAlgebra
         {
             return this / length();
         }
+
         /// <summary>
         /// Conjugates this quaternion
         /// </summary>
@@ -91,6 +96,7 @@ namespace LinearAlgebra
             y = -y;
             z = -z;
         }
+
         /// <summary>
         /// Returns conjugated copy of this quaternion
         /// </summary>
@@ -98,6 +104,7 @@ namespace LinearAlgebra
         {
             return new Quaternion(w, -x, -y, -z);
         }
+
         /// <summary>
         /// Cross product
         /// </summary>
@@ -105,6 +112,7 @@ namespace LinearAlgebra
         {
             return new Quaternion(0.0, y * q.z - z * q.y, z * q.x - x * q.z, x * q.y - y * q.x);
         }
+
         /// <summary>
         /// Checks if quaternions are parallel enough to be considered collinear
         /// </summary>
@@ -113,6 +121,7 @@ namespace LinearAlgebra
         {
             return cross(q).isZero();
         }
+
         /// <summary>
         /// Returns inverse copy of this quaternion
         /// </summary>
@@ -120,6 +129,7 @@ namespace LinearAlgebra
         {
             return conjugated() / norm();
         }
+
         /// <summary>
         /// Inverts this quaternion
         /// </summary>
@@ -132,6 +142,7 @@ namespace LinearAlgebra
             y /= n;
             z /= n;
         }
+
         /// <summary>
         /// Creates quaternion that represents rotation around axis for angle
         /// </summary>
@@ -142,6 +153,7 @@ namespace LinearAlgebra
             double sinhalf = Math.Sin(angle / 2.0);
             return new Quaternion(Math.Cos(angle / 2.0), axis.x * sinhalf, axis.y * sinhalf, axis.z * sinhalf);
         }
+
         public static Quaternion FromMatrix(in Matrix3x3 rot)
         {
             double trace = rot.v00 + rot.v11 + rot.v22;
@@ -151,7 +163,7 @@ namespace LinearAlgebra
                 double S = 0.5 / Math.Sqrt(trace + 1.0); // S=1/4qw
                 return new Quaternion(0.25 / S, (rot.v21 - rot.v12) * S, (rot.v02 - rot.v20) * S, (rot.v10 - rot.v01) * S);
             }
-            else if ((rot.v00 > rot.v11) && (rot.v00 > rot.v22))
+            else if (rot.v00 > rot.v11 && rot.v00 > rot.v22)
             {
                 double S = 0.5 / Math.Sqrt(1.0 + rot.v00 - rot.v11 - rot.v22); // S=1/4qx
                 return new Quaternion((rot.v21 - rot.v12) * S, 0.25 / S, (rot.v01 + rot.v10) * S, (rot.v02 + rot.v20) * S);
@@ -167,6 +179,7 @@ namespace LinearAlgebra
                 return new Quaternion((rot.v10 - rot.v01) * S, (rot.v02 + rot.v20) * S, (rot.v12 + rot.v21) * S, 0.25 / S);
             }
         }
+
         public static Quaternion FromMatrix(in Matrix4x4 rot)
         {
             double trace = rot.v00 + rot.v11 + rot.v22;
@@ -176,7 +189,7 @@ namespace LinearAlgebra
                 double S = 0.5 / Math.Sqrt(trace + 1.0); // S=1/4qw
                 return new Quaternion(0.25 / S, (rot.v21 - rot.v12) * S, (rot.v02 - rot.v20) * S, (rot.v10 - rot.v01) * S);
             }
-            else if ((rot.v00 > rot.v11) && (rot.v00 > rot.v22))
+            else if (rot.v00 > rot.v11 && rot.v00 > rot.v22)
             {
                 double S = 0.5 / Math.Sqrt(1.0 + rot.v00 - rot.v11 - rot.v22); // S=1/4qx
                 return new Quaternion((rot.v21 - rot.v12) * S, 0.25 / S, (rot.v01 + rot.v10) * S, (rot.v02 + rot.v20) * S);
@@ -192,6 +205,7 @@ namespace LinearAlgebra
                 return new Quaternion((rot.v10 - rot.v01) * S, (rot.v02 + rot.v20) * S, (rot.v12 + rot.v21) * S, 0.25 / S);
             }
         }
+
         /// <summary>
         /// Creates quaternion from euler angles in specified order
         /// </summary>
@@ -237,14 +251,17 @@ namespace LinearAlgebra
         {
             return new Quaternion(lhs.w / rhs, lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);
         }
+
         public static Quaternion operator *(in Quaternion lhs, double rhs)
         {
             return new Quaternion(lhs.w * rhs, lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
         }
+
         public static Quaternion operator *(double lhs, in Quaternion rhs)
         {
             return new Quaternion(lhs * rhs.w, lhs * rhs.x, lhs * rhs.y, lhs * rhs.z);
         }
+
         public static Quaternion operator *(in Quaternion lhs, in Quaternion rhs)
         {
             return new Quaternion(lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z,
@@ -252,19 +269,23 @@ namespace LinearAlgebra
                                   lhs.w * rhs.y - lhs.x * rhs.z + lhs.y * rhs.w + lhs.z * rhs.x,
                                   lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w);
         }
+
         public static Vector3 operator *(in Quaternion lhs, in Vector3 rhs)
         {
             Quaternion q = lhs * new Quaternion(0.0, rhs.x, rhs.y, rhs.z) * lhs.inverse();
             return new Vector3(q.x, q.y, q.z);
         }
+
         public static Quaternion operator +(in Quaternion lhs, in Quaternion rhs)
         {
             return new Quaternion(lhs.w + rhs.w, lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
         }
+
         public static Quaternion operator -(in Quaternion lhs, in Quaternion rhs)
         {
             return new Quaternion(lhs.w - rhs.w, lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
         }
+
         public bool Equals(in Quaternion q)
         {
             if (Math.Abs(w - q.w) > Constants.Epsilon ||
@@ -274,10 +295,12 @@ namespace LinearAlgebra
                 return false;
             return true;
         }
+
         public override string ToString()
         {
             return "(" + w.ToString() + ", " + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ")";
         }
+
         public string ToString(string format)
         {
             return "(" + w.ToString(format) + ", " + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ")";

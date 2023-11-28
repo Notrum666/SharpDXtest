@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Media;
-using System.Windows;
 using System.Linq;
-using System.Windows.Input;
+using System.Windows;
+using System.Windows.Media;
 
 namespace Editor
 {
@@ -13,7 +12,7 @@ namespace Editor
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
 
-            if (parentObject == null) 
+            if (parentObject == null)
                 return null;
 
             if (parentObject is T parent)
@@ -21,6 +20,7 @@ namespace Editor
 
             return FindParent<T>(parentObject);
         }
+
         public static IList<DependencyObject> FindParentWithPath<T>(this DependencyObject child) where T : DependencyObject
         {
             DependencyObject parentObject = VisualTreeHelper.GetParent(child);
@@ -37,6 +37,7 @@ namespace Editor
 
             return curPath;
         }
+
         public static object FindChildByName(this DependencyObject parent, string name)
         {
             int childrenCount = VisualTreeHelper.GetChildrenCount(parent);
@@ -54,11 +55,13 @@ namespace Editor
             }
             return null;
         }
+
         public static IEnumerable<Type> GetInheritancHierarchy(this Type type)
         {
-            for (var current = type; current != null; current = current.BaseType)
+            for (Type current = type; current != null; current = current.BaseType)
                 yield return current;
         }
+
         public static int GetInheritanceDistance<TOther>(this Type type)
         {
             IEnumerable<Type> hierarchy = type.GetInheritancHierarchy().TakeWhile(t => t != typeof(TOther));
@@ -66,6 +69,7 @@ namespace Editor
                 return -1;
             return hierarchy.Count();
         }
+
         public static int GetInheritanceDistance(this Type type, Type other)
         {
             IEnumerable<Type> hierarchy = type.GetInheritancHierarchy().TakeWhile(t => t != other).ToList();

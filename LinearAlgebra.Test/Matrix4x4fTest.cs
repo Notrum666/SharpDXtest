@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
 namespace LinearAlgebra.Test
 {
     [TestClass]
@@ -86,7 +85,7 @@ namespace LinearAlgebra.Test
                                              1f, -1f, -2f, -8f);
 
             Matrix4x4f expected = new Matrix4x4f(-11.5f, -2.5f, 24f, -6.5f,
-                                                  9.5f, 2.5f, -20f, 5.5f,
+                                                 9.5f, 2.5f, -20f, 5.5f,
                                                  -0.5f, -0.5f, 2f, -0.5f,
                                                  -2.5f, -0.5f, 5f, -1.5f);
             //act
@@ -109,7 +108,7 @@ namespace LinearAlgebra.Test
                                              1f, -1f, -2f, -8f);
 
             Matrix4x4f expected = new Matrix4x4f(-11.5f, -2.5f, 24f, -6.5f,
-                                                  9.5f, 2.5f, -20f, 5.5f,
+                                                 9.5f, 2.5f, -20f, 5.5f,
                                                  -0.5f, -0.5f, 2f, -0.5f,
                                                  -2.5f, -0.5f, 5f, -1.5f);
             //act
@@ -169,4 +168,3 @@ namespace LinearAlgebra.Test
         }
     }
 }
-
