@@ -25,16 +25,16 @@ namespace Editor
                 // Make sure window doesn't overlap with the taskbar.
                 Screen screen = Screen.FromHandle(handle);
                 if (screen.Primary)
+                {
                     containerBorder.Padding = new Thickness(
                         SystemParameters.WorkArea.Left + 7,
                         SystemParameters.WorkArea.Top + 7,
                         SystemParameters.PrimaryScreenWidth - SystemParameters.WorkArea.Right + 7,
                         SystemParameters.PrimaryScreenHeight - SystemParameters.WorkArea.Bottom + 7);
+                }
             }
             else
-            {
                 containerBorder.Padding = new Thickness(7);
-            }
         }
 
         private Window GetWindowFromTemplate(object templateFrameworkElement)

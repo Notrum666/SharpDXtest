@@ -47,8 +47,10 @@ namespace Engine
         public T GetComponent<T>() where T : Component
         {
             foreach (Component component in components)
+            {
                 if (component is T)
                     return component as T;
+            }
             return null;
         }
 
@@ -56,8 +58,10 @@ namespace Engine
         {
             List<T> curComponents = new List<T>();
             foreach (Component component in components)
+            {
                 if (component is T)
                     curComponents.Add(component as T);
+            }
             return curComponents.ToArray();
         }
 
@@ -66,8 +70,10 @@ namespace Engine
             if (!t.IsSubclassOf(typeof(Component)))
                 throw new ArgumentException("Given type must be a component");
             foreach (Component component in components)
+            {
                 if (component.GetType() == t || component.GetType().IsSubclassOf(t))
                     return component;
+            }
             return null;
         }
 
@@ -77,8 +83,10 @@ namespace Engine
                 throw new ArgumentException("Given type must be a component");
             List<Component> curComponents = new List<Component>();
             foreach (Component component in components)
+            {
                 if (component.GetType() == t || component.GetType().IsSubclassOf(t))
                     curComponents.Add(component);
+            }
             return curComponents.ToArray();
         }
 
@@ -94,15 +102,19 @@ namespace Engine
         public void Update()
         {
             foreach (Component component in components)
+            {
                 if (component.Enabled)
                     component.Update();
+            }
         }
 
         public void FixedUpdate()
         {
             foreach (Component component in components)
+            {
                 if (component.Enabled)
                     component.FixedUpdate();
+            }
         }
 
         public void Destroy()

@@ -221,11 +221,13 @@ namespace Engine
             bool correctLocation = false;
             int location;
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
+            {
                 if (shader.Locations.TryGetValue(variable, out location))
                 {
                     correctLocation = true;
                     GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetSampler(location, sampler);
                 }
+            }
             if (!correctLocation)
                 throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
         }
@@ -311,6 +313,7 @@ namespace Engine
 
                 IEnumerator<byte> enumerator = defaultDataPerPixel.GetEnumerator();
                 for (int i = 0; i < height; i++)
+                {
                     for (int j = 0; j < width; j++)
                     {
                         int pos = (i * width + j) * bytesPerPixel;
@@ -318,6 +321,7 @@ namespace Engine
                             data[pos + k] = enumerator.Current;
                         enumerator.Reset();
                     }
+                }
 
                 dataPtr = Marshal.AllocHGlobal(width * height * bytesPerPixel);
                 Marshal.Copy(data, 0, dataPtr, width * height * bytesPerPixel);
@@ -357,6 +361,7 @@ namespace Engine
             if (usage.HasFlag(BindFlags.RenderTarget))
             {
                 if (arraySize > 1)
+                {
                     views.Add(new RenderTargetView(GraphicsCore.CurrentDevice, texture,
                                                    new RenderTargetViewDescription()
                                                    {
@@ -369,7 +374,9 @@ namespace Engine
                                                            FirstArraySlice = 0
                                                        }
                                                    }));
+                }
                 for (int i = 0; i < arraySize; i++)
+                {
                     views.Add(new RenderTargetView(GraphicsCore.CurrentDevice, texture,
                                                    new RenderTargetViewDescription()
                                                    {
@@ -382,11 +389,13 @@ namespace Engine
                                                            FirstArraySlice = i
                                                        }
                                                    }));
+                }
             }
 
             if (usage.HasFlag(BindFlags.DepthStencil))
             {
                 if (arraySize > 1)
+                {
                     views.Add(new DepthStencilView(GraphicsCore.CurrentDevice, texture,
                                                    new DepthStencilViewDescription()
                                                    {
@@ -399,7 +408,9 @@ namespace Engine
                                                            FirstArraySlice = 0
                                                        }
                                                    }));
+                }
                 for (int i = 0; i < arraySize; i++)
+                {
                     views.Add(new DepthStencilView(GraphicsCore.CurrentDevice, texture,
                                                    new DepthStencilViewDescription()
                                                    {
@@ -413,11 +424,13 @@ namespace Engine
                                                            FirstArraySlice = i
                                                        }
                                                    }));
+                }
             }
 
             if (usage.HasFlag(BindFlags.ShaderResource))
             {
                 if (arraySize > 1)
+                {
                     views.Add(new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
                                                      new ShaderResourceViewDescription()
                                                      {
@@ -431,7 +444,9 @@ namespace Engine
                                                              FirstArraySlice = 0
                                                          }
                                                      }));
+                }
                 for (int i = 0; i < arraySize; i++)
+                {
                     views.Add(new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
                                                      new ShaderResourceViewDescription()
                                                      {
@@ -445,6 +460,7 @@ namespace Engine
                                                              FirstArraySlice = i
                                                          }
                                                      }));
+                }
             }
         }
 
@@ -465,6 +481,7 @@ namespace Engine
             bool correctLocation = false;
             int location;
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
+            {
                 if (shader.Locations.TryGetValue(variable, out location))
                 {
                     correctLocation = true;
@@ -473,6 +490,7 @@ namespace Engine
                     else
                         GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, GetView<ShaderResourceView>());
                 }
+            }
             if (!correctLocation)
                 throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
         }
@@ -553,8 +571,10 @@ namespace Engine
         public bool hasVariable(string name)
         {
             foreach (ShaderBuffer buffer in buffers)
+            {
                 if (buffer.variables.ContainsKey(name))
                     return true;
+            }
             return false;
         }
 
@@ -562,6 +582,7 @@ namespace Engine
         {
             ShaderVariable variable;
             foreach (ShaderBuffer buffer in buffers)
+            {
                 if (buffer.variables.TryGetValue(name, out variable))
                 {
                     if (variable.size < Marshal.SizeOf(value))
@@ -570,6 +591,7 @@ namespace Engine
                     buffer.invalidated = true;
                     return;
                 }
+            }
             throw new ArgumentException("Variable does not exists.");
         }
 
@@ -577,6 +599,7 @@ namespace Engine
         {
             ShaderVariable variable;
             foreach (ShaderBuffer buffer in buffers)
+            {
                 if (buffer.variables.TryGetValue(name, out variable))
                 {
                     if (variable.size < Marshal.SizeOf(value))
@@ -585,6 +608,7 @@ namespace Engine
                     buffer.invalidated = true;
                     return true;
                 }
+            }
             return false;
         }
 
@@ -642,6 +666,7 @@ namespace Engine
             if (type.Description.MemberCount == 0)
                 variables.Add(varName, new ShaderVariable() { offset = parentOffset + type.Description.Offset, size = varSize, value = null });
             else
+            {
                 for (int i = 0; i < type.Description.MemberCount; i++)
                 {
                     ShaderReflectionType subtype = type.GetMemberType(i);
@@ -652,12 +677,14 @@ namespace Engine
                         memberSize = type.GetMemberType(i + 1).Description.Offset - subtype.Description.Offset;
                     variables.AddRange(parseShaderVariableType(subtype, varName + "." + type.GetMemberTypeName(i), parentOffset + type.Description.Offset, memberSize));
                 }
+            }
             return variables;
         }
 
         public void uploadUpdatedUniforms()
         {
             foreach (ShaderBuffer buf in buffers)
+            {
                 if (buf.invalidated)
                 {
                     DataStream stream;
@@ -672,6 +699,7 @@ namespace Engine
                     GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.buffer, 0);
                     buf.invalidated = false;
                 }
+            }
         }
 
         public static Shader Create(string path)
@@ -960,8 +988,10 @@ namespace Engine
         {
             bool exists = false;
             foreach (Shader shader in shaders)
+            {
                 if (shader.tryUpdateUniform(name, value))
                     exists = true;
+            }
 
             if (!exists)
                 throw new ArgumentException("Variable \n" + name + "\n does not exists in this shader pipeline.");
@@ -971,8 +1001,10 @@ namespace Engine
         {
             bool exists = false;
             foreach (Shader shader in shaders)
+            {
                 if (shader.tryUpdateUniform(name, value))
                     exists = true;
+            }
 
             return exists;
         }
@@ -1087,6 +1119,7 @@ namespace Engine
                         if (model.n_i != null)
                             n_i = new int[vertexesCount];
                         if (reverse)
+                        {
                             for (int i = 0; i < vertexesCount; i++)
                             {
                                 string[] values = words[1 + i].Split('/');
@@ -1096,7 +1129,9 @@ namespace Engine
                                 if (n_i != null)
                                     n_i[vertexesCount - i - 1] = int.Parse(values[2]) - offset_n - 1;
                             }
+                        }
                         else
+                        {
                             for (int i = 0; i < vertexesCount; i++)
                             {
                                 string[] values = words[1 + i].Split('/');
@@ -1106,6 +1141,7 @@ namespace Engine
                                 if (n_i != null)
                                     n_i[i] = int.Parse(values[2]) - offset_n - 1;
                             }
+                        }
                         for (int i = 1; i < vertexesCount - 1; i++)
                         {
                             model.v_i.Add(new int[3] { v_i[0], v_i[i], v_i[i + 1] });
@@ -1240,9 +1276,7 @@ namespace Engine
                                 throw new Exception("Model " + words[1] + " is not loaded.");
                             PropertyInfo property = objType.GetProperty(name);
                             if (property != null)
-                            {
                                 property.SetValue(obj, Models[words[1]]);
-                            }
                             else
                             {
                                 FieldInfo field = objType.GetField(name);
@@ -1259,9 +1293,7 @@ namespace Engine
                                 throw new Exception("Texture " + words[1] + " not loaded.");
                             PropertyInfo property = objType.GetProperty(name);
                             if (property != null)
-                            {
                                 property.SetValue(obj, Textures[words[1]]);
-                            }
                             else
                             {
                                 FieldInfo field = objType.GetField(name);
@@ -1278,9 +1310,7 @@ namespace Engine
                                 throw new Exception("Sound " + words[1] + " not loaded.");
                             PropertyInfo property = objType.GetProperty(name);
                             if (property != null)
-                            {
                                 property.SetValue(obj, Sounds[words[1]]);
-                            }
                             else
                             {
                                 FieldInfo field = objType.GetField(name);
@@ -1306,12 +1336,11 @@ namespace Engine
                         continue;
                     }
                     if (attrib.Value.StartsWith("{") && attrib.Value.EndsWith("}"))
-                    {
                         parseSpecialAttribute(obj, attrib.Name.LocalName, attrib.Value.Substring(1, attrib.Value.Length - 2));
-                    }
                     else
                     {
                         if (obj is Quaternion)
+                        {
                             switch (attrib.Name.LocalName.ToLower())
                             {
                                 case "x":
@@ -1326,6 +1355,7 @@ namespace Engine
                                 default:
                                     throw new Exception("Quaternion does not have \"" + attrib.Name.LocalName + "\"");
                             }
+                        }
                         PropertyInfo property = objType.GetProperty(attrib.Name.LocalName);
                         if (property != null)
                         {
@@ -1337,9 +1367,7 @@ namespace Engine
                                 property.SetValue(obj, value);
                             }
                             else
-                            {
                                 property.SetValue(obj, Convert.ChangeType(attrib.Value, property.PropertyType));
-                            }
                         }
                         else
                         {
@@ -1354,14 +1382,10 @@ namespace Engine
                                     field.SetValue(obj, value);
                                 }
                                 else
-                                {
                                     field.SetValue(obj, Convert.ChangeType(attrib.Value, field.FieldType));
-                                }
                             }
                             else
-                            {
                                 throw new Exception(objType.Name + " don't have " + attrib.Name.LocalName + ".");
-                            }
                         }
                     }
                 }
@@ -1375,6 +1399,7 @@ namespace Engine
                 if (element.Name.LocalName == "Assets")
                 {
                     foreach (XElement assetsSet in element.Elements())
+                    {
                         switch (assetsSet.Name.LocalName)
                         {
                             case "Models":
@@ -1388,6 +1413,7 @@ namespace Engine
                                         {
                                             bool found = false;
                                             foreach (ParameterInfo param in parameters)
+                                            {
                                                 if (param.Name == attrib.Name.LocalName)
                                                 {
                                                     if (parameterValues.ContainsKey(param.Name))
@@ -1398,6 +1424,7 @@ namespace Engine
                                                     found = true;
                                                     break;
                                                 }
+                                            }
                                             if (!found)
                                                 throw new Exception("Attribute \"" + attrib.Name.LocalName + "\" not found.");
                                         }
@@ -1417,6 +1444,7 @@ namespace Engine
                                         {
                                             bool found = false;
                                             foreach (ParameterInfo param in parameters)
+                                            {
                                                 if (param.Name == attrib.Name.LocalName)
                                                 {
                                                     if (parameterValues.ContainsKey(param.Name))
@@ -1427,6 +1455,7 @@ namespace Engine
                                                     found = true;
                                                     break;
                                                 }
+                                            }
                                             if (!found)
                                                 throw new Exception("Attribute \"" + attrib.Name.LocalName + "\" not found.");
                                         }
@@ -1446,6 +1475,7 @@ namespace Engine
                                         {
                                             bool found = false;
                                             foreach (ParameterInfo param in parameters)
+                                            {
                                                 if (param.Name == attrib.Name.LocalName)
                                                 {
                                                     if (parameterValues.ContainsKey(param.Name))
@@ -1456,6 +1486,7 @@ namespace Engine
                                                     found = true;
                                                     break;
                                                 }
+                                            }
                                             if (!found)
                                                 throw new Exception("Attribute \"" + attrib.Name.LocalName + "\" not found.");
                                         }
@@ -1467,6 +1498,7 @@ namespace Engine
                             default:
                                 throw new Exception("Unknown assets type: " + assetsSet.Name.LocalName);
                         }
+                    }
                     return null;
                 }
                 object curObj = null;
@@ -1512,9 +1544,7 @@ namespace Engine
                     else
                     {
                         if (curType == typeof(Quaternion))
-                        {
                             curObj = Quaternion.Identity;
-                        }
                         else
                         {
                             if (curType.GetConstructor(Type.EmptyTypes) != null)
@@ -1547,9 +1577,7 @@ namespace Engine
                             if (elements.Count() != 0)
                                 throw new Exception("Setter can't have values in both places");
                             if (property.PropertyType == typeof(Quaternion))
-                            {
                                 curObj = Quaternion.Identity;
-                            }
                             else
                             {
                                 if (property.PropertyType.GetConstructor(Type.EmptyTypes) != null)
@@ -1681,9 +1709,7 @@ namespace Engine
                     throw new Exception(reference.referenceObjName + " not found.");
                 FieldInfo field = reference.obj.GetType().GetField(reference.fieldName);
                 if (field != null)
-                {
                     field.SetValue(reference.obj, namedObjects[reference.referenceObjName]);
-                }
                 else
                 {
                     PropertyInfo property = reference.obj.GetType().GetProperty(reference.fieldName);

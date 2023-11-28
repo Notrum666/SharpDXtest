@@ -67,8 +67,10 @@ namespace Engine.BaseAssets.Components.Colliders
         {
             List<Vector3> result = new List<Vector3>();
             foreach (Vector3 vertex in globalVertexes)
+            {
                 if (Math.Abs((vertex - collisionPlanePoint).dot(collisionPlaneNormal)) <= epsilon * epsilon)
                     result.Add(vertex);
+            }
             return result;
         }
 
@@ -96,11 +98,13 @@ namespace Engine.BaseAssets.Components.Colliders
 
                     exists = false;
                     foreach ((int a, int b) edge in edges)
+                    {
                         if (a == edge.a && b == edge.b || a == edge.b && b == edge.a)
                         {
                             exists = true;
                             break;
                         }
+                    }
 
                     if (!exists)
                         edges.Add((a, b));
@@ -111,11 +115,13 @@ namespace Engine.BaseAssets.Components.Colliders
             {
                 exists = false;
                 foreach (Vector3 vector in nonCollinearNormals)
+                {
                     if (vector.isCollinearTo(vec))
                     {
                         exists = true;
                         break;
                     }
+                }
                 if (!exists)
                     nonCollinearNormals.Add(vec);
             }

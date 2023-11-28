@@ -264,9 +264,7 @@ namespace Engine.BaseAssets.Components
                 decomposeModel(model, out localPosition, out localRotation, out localScale);
             }
             else
-            {
                 Parent = transform;
-            }
 
             invalidateCachedData();
 

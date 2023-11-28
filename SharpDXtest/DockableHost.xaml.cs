@@ -181,6 +181,7 @@ namespace Editor
                 return;
 
             for (int i = 0; i < ContentGrid.Children.Count; i++)
+            {
                 if (ContentGrid.Children[i] != ColumnsSplitter && ContentGrid.Children[i] != RowsSplitter)
                 {
                     if (ContentGrid.Children[i] is DockableHost dockableHost)
@@ -190,6 +191,7 @@ namespace Editor
                     ContentGrid.Children.RemoveAt(i);
                     i--;
                 }
+            }
 
             if (Items.Count > 2)
                 throw new Exception("Dockable host can't have more than 2 children.");
@@ -223,6 +225,7 @@ namespace Editor
                     break;
                 case 2:
                     for (int i = 0; i < 2; i++)
+                    {
                         if (Items[i] is not DockableHost)
                         {
                             DockableHost wrapper = new DockableHost();
@@ -230,6 +233,7 @@ namespace Editor
                             Items[i] = wrapper;
                             return;
                         }
+                    }
 
                     Orientation orientation = Orientation;
 

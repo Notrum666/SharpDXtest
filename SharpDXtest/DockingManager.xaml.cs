@@ -35,9 +35,7 @@ namespace Editor
         public void AddFlyingControl(FlyingControl control)
         {
             if (flyingControls.Contains(control))
-            {
                 flyingControls.Remove(control);
-            }
             else
             {
                 control.Loaded += FlyingControl_Loaded;
@@ -82,6 +80,7 @@ namespace Editor
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             foreach (UIElement child in Items)
+            {
                 if (child is FlyingControl flyingControl)
                 {
                     flyingControl.Loaded += FlyingControl_Loaded;
@@ -89,6 +88,7 @@ namespace Editor
                     flyingControl.PreviewMouseDown += FlyingControl_PreviewMouseDown;
                     flyingControls.Add(flyingControl);
                 }
+            }
 
             updateFlyingControlsOrder();
         }

@@ -62,9 +62,7 @@ namespace Editor
                     DisplayName = field.Name;
             }
             else
-            {
                 DisplayName = field.Name;
-            }
 
             if (targetField.FieldType.IsValueType && !targetField.FieldType.IsEnum && !targetField.FieldType.IsPrimitive)
             {

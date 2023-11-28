@@ -101,16 +101,20 @@ namespace Engine
         private static void OnPaused()
         {
             foreach (PlayingSound sound in playingSounds)
+            {
                 if (!sound.IsPaused)
                     sound.voice.Stop(1);
+            }
             device.CommitChanges(1);
         }
 
         private static void OnResumed()
         {
             foreach (PlayingSound sound in playingSounds)
+            {
                 if (!sound.IsPaused)
                     sound.voice.Start(1);
+            }
             device.CommitChanges(1);
         }
 

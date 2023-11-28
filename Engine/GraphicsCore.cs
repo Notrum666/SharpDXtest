@@ -311,9 +311,7 @@ namespace Engine
                         continue;
                     }
                     else
-                    {
                         continue;
-                    }
                 }
             }
         }
@@ -512,9 +510,7 @@ namespace Engine
                         continue;
                     }
                     else
-                    {
                         throw new NotImplementedException("Light type " + light.GetType().Name + " is not supported.");
-                    }
 
                     camera.GBuffer.worldPos.use("worldPosTex");
                     camera.GBuffer.albedo.use("albedoTex");

@@ -45,8 +45,10 @@ namespace Editor
             {
                 DependencyObject child = VisualTreeHelper.GetChild(parent, i);
                 if (child is FrameworkElement frameworkElement)
+                {
                     if (frameworkElement.Name == name)
                         return child;
+                }
                 object subChild = child.FindChildByName(name);
                 if (subChild != null)
                     return subChild;

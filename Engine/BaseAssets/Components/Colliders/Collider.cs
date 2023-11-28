@@ -60,11 +60,13 @@ namespace Engine.BaseAssets.Components
             {
                 bool exists = false;
                 foreach (Vector3 vector in result)
+                {
                     if (vector.isCollinearTo(vec))
                     {
                         exists = true;
                         break;
                     }
+                }
                 if (!exists)
                     result.Add(vec);
             }
@@ -84,8 +86,10 @@ namespace Engine.BaseAssets.Components
 
                                 IReadOnlyList<(int a, int b)> edges2 = mesh2.Edges;
                                 foreach ((int a, int b) edge1 in mesh1.Edges)
+                                {
                                     foreach ((int a, int b) edge2 in edges2)
                                         addUnique((globalVertexes1[edge1.b] - globalVertexes1[edge1.a]).cross(globalVertexes2[edge2.b] - globalVertexes2[edge2.a]));
+                                }
 
                                 return result;
                             }
@@ -484,12 +488,14 @@ namespace Engine.BaseAssets.Components
                 createHolePart(currentPolygon.adjacentCA, currentPolygon.indexC, currentPolygon.indexA);
 
                 for (int j = 1; j < hole.Count - 2; j++)
+                {
                     if (hole[j] == hole[j + 2])
                     {
                         hole.RemoveRange(j, 2);
                         adjacentPolygons.RemoveRange(j, 2);
                         polygonsToReplace.RemoveRange(j, 2);
                     }
+                }
 
                 for (int j = 0; j < hole.Count; j++)
                 {
@@ -568,11 +574,13 @@ namespace Engine.BaseAssets.Components
                     current = vertexes[0] - start;
                     int currentIndex = 0;
                     for (int i = 1; i < vertexes.Count; i++)
+                    {
                         if ((vertexes[i] - start).cross(current) * collisionPlaneNormal > 0)
                         {
                             currentIndex = i;
                             current = vertexes[i] - start;
                         }
+                    }
 
                     figure[k] = vertexes[currentIndex];
                     vertexes.RemoveAt(currentIndex);
@@ -645,6 +653,7 @@ namespace Engine.BaseAssets.Components
             void addIntersectionPoints(ref Vector3[] points1, ref Vector3[] points2)
             {
                 foreach (Vector3 point in points1)
+                {
                     if (IsPointInsideFigure(points2, point, out pointOnEdge))
                     {
                         if (!pointOnEdge)
@@ -655,14 +664,17 @@ namespace Engine.BaseAssets.Components
 
                         pointExists = false;
                         foreach (Vector3 intersectionPoint in intersectionPoints)
+                        {
                             if (intersectionPoint.equals(point))
                             {
                                 pointExists = true;
                                 break;
                             }
+                        }
                         if (!pointExists)
                             intersectionPoints.Add(point);
                     }
+                }
             }
             addIntersectionPoints(ref figure1, ref figure2);
             addIntersectionPoints(ref figure2, ref figure1);
@@ -698,11 +710,13 @@ namespace Engine.BaseAssets.Components
 
                     pointExists = false;
                     foreach (Vector3 intersectionPoint in intersectionPoints)
+                    {
                         if (intersectionPoint.equals(start2))
                         {
                             pointExists = true;
                             break;
                         }
+                    }
                     if (!pointExists)
                         intersectionPoints.Add(start2);
                 }

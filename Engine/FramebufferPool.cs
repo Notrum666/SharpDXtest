@@ -57,11 +57,13 @@ namespace Engine
                 throw new ObjectDisposedException(nameof(FrameBufferPool));
 
             foreach (FrameBuffer fb in frameBuffers)
+            {
                 if (fb == curFrameBuffer)
                 {
                     freeFrameBuffers.Push(curFrameBuffer);
                     return;
                 }
+            }
             throw new ArgumentException("This FrameBuffer does not exist in this FrameBufferPool");
         }
 

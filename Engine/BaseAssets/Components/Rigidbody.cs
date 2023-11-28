@@ -138,9 +138,7 @@ namespace Engine.BaseAssets.Components
                     Velocity = Vector3.Zero;
             }
             else
-            {
                 linearVelocitySleepCounter = LinearVelocitySleepCounterBase;
-            }
 
             if (AngularVelocity.squaredLength() <= angularSleepThresholdSquared)
             {
@@ -150,9 +148,7 @@ namespace Engine.BaseAssets.Components
                     AngularVelocity = Vector3.Zero;
             }
             else
-            {
                 angularVelocitySleepCounter = AngularVelocitySleepCounterBase;
-            }
 
             if (t.Parent == null)
             {
@@ -278,6 +274,7 @@ namespace Engine.BaseAssets.Components
             IEnumerable<Collider> otherColliders = otherRigidbody.GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
 
             foreach (Collider collider in colliders)
+            {
                 foreach (Collider otherCollider in otherColliders)
                 {
                     Vector3? _collisionExitVector;
@@ -409,13 +406,16 @@ namespace Engine.BaseAssets.Components
                         otherCollider.updateData();
                     }
                 }
+            }
         }
 
         internal void updateCollidingPairs()
         {
             foreach (KeyValuePair<Collider, Collider> pair in prevCollidingPairs)
+            {
                 if (!collidingPairs.Contains(pair))
                     OnCollisionEnd?.Invoke(this, pair.Key, pair.Value);
+            }
             foreach (KeyValuePair<Collider, Collider> pair in collidingPairs)
             {
                 if (!prevCollidingPairs.Contains(pair))

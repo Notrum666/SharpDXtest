@@ -12,9 +12,7 @@ namespace Engine.BaseAssets.Components
             set
             {
                 if (value)
-                {
                     makeCurrent();
-                }
                 else
                 {
                     if (IsCurrent)

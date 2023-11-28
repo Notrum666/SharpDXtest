@@ -26,8 +26,10 @@ namespace Editor
             ResourceDictionary resourceDictionary = new ResourceDictionary();
             resourceDictionary.Source = new Uri("pack://application:,,,/Tools/InspectorControl/DefaultFieldTemplates.xaml", UriKind.RelativeOrAbsolute);
             foreach (object resource in resourceDictionary.Values)
+            {
                 if (resource is FieldDataTemplate template)
                     RegisterFieldDataTemplate(template);
+            }
         }
 
         public static void RegisterFieldDataTemplate(FieldDataTemplate template)

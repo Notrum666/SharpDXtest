@@ -148,8 +148,10 @@ namespace Engine
         private static void update()
         {
             foreach (GameObject obj in CurrentScene.objects)
+            {
                 if (obj.Enabled)
                     obj.Update();
+            }
         }
 
         private static void fixedUpdate()
@@ -157,8 +159,10 @@ namespace Engine
             InputManager.FixedUpdate();
 
             foreach (GameObject obj in CurrentScene.objects)
+            {
                 if (obj.Enabled)
                     obj.FixedUpdate();
+            }
 
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
             for (int i = 0; i < CurrentScene.objects.Count; i++)
