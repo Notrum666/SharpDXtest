@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+
 using Engine.BaseAssets.Components;
 using Engine.BaseAssets.Components.Postprocessing;
+
 using LinearAlgebra;
+
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
 using SharpDX.Mathematics.Interop;
+
 using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using Device = SharpDX.Direct3D11.Device;
 using FillMode = SharpDX.Direct3D11.FillMode;

@@ -1,7 +1,10 @@
 ﻿using System;
+
 using Engine;
 using Engine.BaseAssets.Components;
+
 using LinearAlgebra;
+
 using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components

@@ -1,6 +1,8 @@
 ﻿using System;
+
 using Engine;
 using Engine.BaseAssets.Components;
+
 using LinearAlgebra;
 
 namespace SharpDXtest.Assets.Components

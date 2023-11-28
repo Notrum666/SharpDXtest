@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using LinearAlgebra;
+
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+
 using Device = SharpDX.Direct3D11.Device;
 
 namespace Engine.BaseAssets.Components.Postprocessing

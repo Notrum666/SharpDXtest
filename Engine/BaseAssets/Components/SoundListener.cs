@@ -1,4 +1,5 @@
 ﻿using LinearAlgebra;
+
 using SharpDX.X3DAudio;
 
 namespace Engine.BaseAssets.Components

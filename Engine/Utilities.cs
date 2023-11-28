@@ -11,8 +11,11 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Linq;
+
 using Engine.BaseAssets.Components;
+
 using LinearAlgebra;
+
 using SharpDX;
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
@@ -21,6 +24,7 @@ using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using SharpDX.Multimedia;
 using SharpDX.XAudio2;
+
 using Buffer = SharpDX.Direct3D11.Buffer;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 using Quaternion = LinearAlgebra.Quaternion;

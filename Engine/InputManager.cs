@@ -1,4 +1,5 @@
 ﻿using LinearAlgebra;
+
 using SharpDX.DirectInput;
 
 namespace Engine

@@ -7,11 +7,16 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+
 using Engine;
 using Engine.BaseAssets.Components;
+
 using LinearAlgebra;
+
 using SharpDX.DXGI;
+
 using SharpDXtest.Assets.Components;
+
 using Point = System.Drawing.Point;
 
 namespace Editor

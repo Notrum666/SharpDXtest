@@ -1,5 +1,7 @@
 ﻿using System;
+
 using LinearAlgebra;
+
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;

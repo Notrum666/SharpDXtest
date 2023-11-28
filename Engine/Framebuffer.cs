@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
+
 using Resource = SharpDX.DXGI.Resource;
 
 namespace Engine

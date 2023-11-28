@@ -1,8 +1,11 @@
 ﻿using System;
+
 using Engine;
 using Engine.BaseAssets.Components;
 using Engine.BaseAssets.Components.Colliders;
+
 using LinearAlgebra;
+
 using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
