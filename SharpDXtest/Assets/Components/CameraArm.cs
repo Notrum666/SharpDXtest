@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+
 using Engine;
 using Engine.BaseAssets.Components;
+
 using LinearAlgebra;
-using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
 {
@@ -20,10 +16,9 @@ namespace SharpDXtest.Assets.Components
         public double CurYaw;
         public double CurPitch;
         public Vector2 MouseSensitivity;
-        public override void Update()
-        {
 
-        }
+        public override void Update() { }
+
         public override void FixedUpdate()
         {
             base.FixedUpdate();

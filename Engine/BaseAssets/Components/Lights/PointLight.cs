@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine.BaseAssets.Components
 {
@@ -30,6 +26,7 @@ namespace Engine.BaseAssets.Components
                 intensity = value;
             }
         }
+
         //public static readonly float NEAR = 0.001f;
         //public static readonly int SHADOW_SIZE = 1024;
         //public int FBO { get; private set; } = 0;

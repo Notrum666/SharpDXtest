@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
 namespace LinearAlgebra.Test
 {
     [TestClass]
@@ -19,9 +18,9 @@ namespace LinearAlgebra.Test
                                            3, 1, 1, 2,
                                            4, 2, 5, 1);
             Matrix4x4 MatY = new Matrix4x4(1, 2, 3, 4,
-                                            4, 3, 2, 1,
-                                            3, 2, 2, 3,
-                                            1, 1, 2, 2);
+                                           4, 3, 2, 1,
+                                           3, 2, 2, 3,
+                                           1, 1, 2, 2);
 
             Matrix4x4 expected = new Matrix4x4(17, 14, 15, 16,
                                                12, 13, 17, 20,
@@ -58,7 +57,7 @@ namespace LinearAlgebra.Test
         public void multmult_1234_4321_3223_1122and1222__17141516returned()
         {
             //arrange
-            
+
             Matrix4x4 MatX = new Matrix4x4(1, 2, 3, 4,
                                            4, 3, 2, 1,
                                            3, 2, 2, 3,
@@ -85,7 +84,7 @@ namespace LinearAlgebra.Test
                                            1, -1, -2, -8);
 
             Matrix4x4 expected = new Matrix4x4(-11.5, -2.5, 24, -6.5,
-                                                9.5, 2.5, -20, 5.5,
+                                               9.5, 2.5, -20, 5.5,
                                                -0.5, -0.5, 2, -0.5,
                                                -2.5, -0.5, 5, -1.5);
             //act
@@ -108,7 +107,7 @@ namespace LinearAlgebra.Test
                                            1, -1, -2, -8);
 
             Matrix4x4 expected = new Matrix4x4(-11.5, -2.5, 24, -6.5,
-                                                9.5, 2.5, -20, 5.5,
+                                               9.5, 2.5, -20, 5.5,
                                                -0.5, -0.5, 2, -0.5,
                                                -2.5, -0.5, 5, -1.5);
             //act
@@ -164,6 +163,6 @@ namespace LinearAlgebra.Test
 
             //assert
             Assert.AreEqual(expected, actual);
-        }  
+        }
     }
 }

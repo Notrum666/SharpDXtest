@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LinearAlgebra;
 
-using SharpDX.XAudio2;
 using SharpDX.X3DAudio;
-using SharpDX.Multimedia;
-using SharpDX.XAPO;
-using SharpDX.XAPO.Fx;
-
-using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {
@@ -19,10 +9,7 @@ namespace Engine.BaseAssets.Components
         public Listener Listener { get; private set; }
         public bool IsCurrent
         {
-            get
-            {
-                return SoundCore.CurrentListener == this;
-            }
+            get => SoundCore.CurrentListener == this;
             set
             {
                 if (value)
@@ -34,10 +21,12 @@ namespace Engine.BaseAssets.Components
                 }
             }
         }
+
         public SoundListener()
         {
             Listener = new Listener();
         }
+
         public override void Update()
         {
             Vector3 pos = GameObject.Transform.Position;
@@ -61,6 +50,7 @@ namespace Engine.BaseAssets.Components
                 Listener.Velocity.Z = (float)velocity.z;
             }
         }
+
         public void makeCurrent()
         {
             SoundCore.CurrentListener = this;

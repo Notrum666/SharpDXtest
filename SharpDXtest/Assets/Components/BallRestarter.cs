@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+
 using Engine;
 using Engine.BaseAssets.Components;
+
 using LinearAlgebra;
+
 using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
@@ -20,6 +17,7 @@ namespace SharpDXtest.Assets.Components
         public GameObject leftRacket, rightRacket;
         public int scoreLeft = 0, scoreRight = 0;
         public event Action<int, int> OnScoreChanged;
+
         public override void Update()
         {
             Rigidbody rb = GameObject.GetComponent<Rigidbody>();

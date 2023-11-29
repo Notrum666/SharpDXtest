@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace Engine
 {
@@ -11,7 +6,7 @@ namespace Engine
     {
         private static double deltaTime;
         public static bool IsFixed { get; private set; }
-        public static double DeltaTime { get { return IsFixed ? FixedDeltaTime : deltaTime; } }
+        public static double DeltaTime => IsFixed ? FixedDeltaTime : deltaTime;
         public static double FixedDeltaTime { get; private set; } = 1.0 / 60.0;
         public static double TotalTime { get; private set; }
         public static double TimeScale { get; set; } = 1;
@@ -38,6 +33,7 @@ namespace Engine
         {
             IsFixed = true;
         }
+
         public static void SwitchToVariating()
         {
             IsFixed = false;

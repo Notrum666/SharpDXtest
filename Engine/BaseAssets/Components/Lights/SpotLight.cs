@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using SharpDX.Direct3D11;
 
 using LinearAlgebra;
+
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
 
 namespace Engine.BaseAssets.Components
 {
@@ -37,10 +34,7 @@ namespace Engine.BaseAssets.Components
         private float angularIntensity = 0.4f;
         public float AngularIntensity
         {
-            get
-            {
-                return angularIntensity;
-            }
+            get => angularIntensity;
             set
             {
                 if (value < 0.0f || value > 1.0f)
@@ -63,10 +57,7 @@ namespace Engine.BaseAssets.Components
         private int shadowSize = 1024;
         public int ShadowSize
         {
-            get
-            {
-                return shadowSize;
-            }
+            get => shadowSize;
             set
             {
                 if (value <= 0)
@@ -89,9 +80,10 @@ namespace Engine.BaseAssets.Components
             }
         }
         public Texture ShadowTexture { get; private set; }
+
         public SpotLight()
         {
-            ShadowTexture = new Texture(shadowSize, shadowSize, null, SharpDX.DXGI.Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil);
+            ShadowTexture = new Texture(shadowSize, shadowSize, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil);
         }
     }
 }

@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Threading;
 
 using Engine;
@@ -23,15 +22,12 @@ namespace Editor
         public event PropertyChangedEventHandler PropertyChanged;
 
         private RelayCommand clearOutputCommand;
-        public RelayCommand ClearOutputCommand
-        {
-            get => clearOutputCommand ?? (clearOutputCommand = new RelayCommand(obj => LogMessages.Clear()));
-        }
+        public RelayCommand ClearOutputCommand => clearOutputCommand ?? (clearOutputCommand = new RelayCommand(obj => LogMessages.Clear()));
         public ObservableCollection<LogMessage> LogMessages { get; private set; } = new ObservableCollection<LogMessage>();
         private List<LogMessage> newMessages = new List<LogMessage>();
-        public int InfoCount { get => LogMessages.Count(msg => msg.Type == LogType.Info); }
-        public int WarningCount { get => LogMessages.Count(msg => msg.Type == LogType.Warning); }
-        public int ErrorCount { get => LogMessages.Count(msg => msg.Type == LogType.Error); }
+        public int InfoCount => LogMessages.Count(msg => msg.Type == LogType.Info);
+        public int WarningCount => LogMessages.Count(msg => msg.Type == LogType.Warning);
+        public int ErrorCount => LogMessages.Count(msg => msg.Type == LogType.Error);
         private bool showInfoMessages = true;
         public bool ShowInfoMessages
         {
@@ -69,6 +65,7 @@ namespace Editor
         private bool loaded = false;
         private readonly Dictionary<LogType, Action> CountPropertyChangedLambdas;
         private DispatcherTimer updateTimer;
+
         public OutputControl()
         {
             InitializeComponent();
@@ -114,10 +111,12 @@ namespace Editor
             foreach (LogType type in CountPropertyChangedLambdas.Keys)
                 CountPropertyChangedLambdas[type]();
         }
+
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
+
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             // to prevent errors during xaml designer loading in visual studio
@@ -134,6 +133,7 @@ namespace Editor
 
             loaded = true;
         }
+
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
         {
             // to prevent errors during xaml designer loading in visual studio
@@ -142,6 +142,7 @@ namespace Editor
 
             Logger.OnLog -= Logger_OnLog;
         }
+
         private void Logger_OnLog(LogMessage message)
         {
             newMessages.Add(message);

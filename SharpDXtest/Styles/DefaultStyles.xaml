@@ -2,7 +2,7 @@
                     xmlns:this="clr-namespace:Editor"
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    
+
     <Style x:Key="DockingSpot" TargetType="Control">
         <Setter Property="Margin" Value="5"/>
         <Setter Property="Template">
@@ -26,8 +26,8 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <Rectangle Fill="Blue" Grid.RowSpan="1" Grid.Row="0"/>
-                            <Rectangle Fill="Gray" Grid.RowSpan="1" Grid.Row="1"/>
+                            <Rectangle Fill="Blue" Grid.Row="0"/>
+                            <Rectangle Fill="Gray" Grid.Row="1"/>
                         </Grid>
                     </Grid>
                 </ControlTemplate>
@@ -45,8 +45,8 @@
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                            <Rectangle Fill="Gray" Grid.RowSpan="1" Grid.Row="0"/>
-                            <Rectangle Fill="Blue" Grid.RowSpan="1" Grid.Row="1"/>
+                            <Rectangle Fill="Gray" Grid.Row="0"/>
+                            <Rectangle Fill="Blue" Grid.Row="1"/>
                         </Grid>
                     </Grid>
                 </ControlTemplate>
@@ -64,8 +64,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Rectangle Fill="Blue" Grid.ColumnSpan="1" Grid.Column="0"/>
-                            <Rectangle Fill="Gray" Grid.ColumnSpan="1" Grid.Column="1"/>
+                            <Rectangle Fill="Blue" Grid.Column="0"/>
+                            <Rectangle Fill="Gray" Grid.Column="1"/>
                         </Grid>
                     </Grid>
                 </ControlTemplate>
@@ -83,8 +83,8 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <Rectangle Fill="Gray" Grid.ColumnSpan="1" Grid.Column="0"/>
-                            <Rectangle Fill="Blue" Grid.ColumnSpan="1" Grid.Column="1"/>
+                            <Rectangle Fill="Gray" Grid.Column="0"/>
+                            <Rectangle Fill="Blue" Grid.Column="1"/>
                         </Grid>
                     </Grid>
                 </ControlTemplate>
@@ -107,7 +107,7 @@
             </GeometryDrawing>
         </DrawingBrush.Drawing>
     </DrawingBrush>
-    
+
     <DrawingBrush x:Key="HoverCrossBrush" ViewboxUnits="Absolute">
         <DrawingBrush.Drawing>
             <GeometryDrawing>
@@ -145,7 +145,7 @@
             </Setter.Value>
         </Setter>
     </Style>
-        
+
     <Style x:Key="ToolsTabControl" TargetType="TabControl">
         <Style.Resources>
             <Style TargetType="TabItem">
@@ -155,23 +155,27 @@
                             <Grid x:Name="HeaderGrid" Height="20" Background="{StaticResource ItemTabBrush}">
                                 <i:Interaction.Triggers>
                                     <i:EventTrigger EventName="MouseDown">
-                                        <this:EventToCommandAction Command="{Binding HeaderBackground_MouseDownCommand, 
-                                            RelativeSource={RelativeSource AncestorType=this:ToolsHost}}" Sender="{Binding}"/>
+                                        <this:EventToCommandAction
+                                            Command="{Binding HeaderBackground_MouseDownCommand, 
+                                            RelativeSource={RelativeSource AncestorType=this:ToolsHost}}"
+                                            Sender="{Binding}"/>
                                     </i:EventTrigger>
                                     <i:EventTrigger EventName="MouseMove">
-                                        <this:EventToCommandAction Command="{Binding HeaderBackground_MouseMoveCommand, 
-                                            RelativeSource={RelativeSource AncestorType=this:ToolsHost}}" Sender="{Binding}"/>
+                                        <this:EventToCommandAction
+                                            Command="{Binding HeaderBackground_MouseMoveCommand, 
+                                            RelativeSource={RelativeSource AncestorType=this:ToolsHost}}"
+                                            Sender="{Binding}"/>
                                     </i:EventTrigger>
                                 </i:Interaction.Triggers>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" MinWidth="40"/>
                                     <ColumnDefinition Width="auto"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock x:Name="HeaderTextBlock" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6,4,6,4" 
+                                <TextBlock x:Name="HeaderTextBlock" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="6,4,6,4"
                                            Text="{Binding Tag}" FontSize="12" FontWeight="Regular" Foreground="{StaticResource InactiveForegroundBrush}"/>
-                                <Button x:Name="CloseButton" Grid.Column="1" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" 
-                                        Visibility="Hidden" Margin="4" VerticalAlignment="Stretch" Style="{StaticResource CrossButton}" 
-                                        Command="{Binding CloseButton_ClickCommand, RelativeSource={RelativeSource AncestorType=this:ToolsHost}}" 
+                                <Button x:Name="CloseButton" Grid.Column="1" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                        Visibility="Hidden" Margin="4" VerticalAlignment="Stretch" Style="{StaticResource CrossButton}"
+                                        Command="{Binding CloseButton_ClickCommand, RelativeSource={RelativeSource AncestorType=this:ToolsHost}}"
                                         CommandParameter="{Binding}"/>
                             </Grid>
 
@@ -218,38 +222,44 @@
                             <RowDefinition Height="auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
-                        <Grid Height="20" Visibility="{Binding Items.Count, RelativeSource={RelativeSource AncestorType=this:ToolsHost}, Converter={StaticResource SingleTabHeaderVisibilityConverter}}"
+                        <Grid Height="20"
+                              Visibility="{Binding Items.Count, RelativeSource={RelativeSource AncestorType=this:ToolsHost}, Converter={StaticResource SingleTabHeaderVisibilityConverter}}"
                               Background="Transparent">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="MouseDown">
-                                    <this:EventToCommandAction Command="{Binding HeaderBackground_MouseDownCommand, 
-                                        RelativeSource={RelativeSource AncestorType=this:ToolsHost}}" 
+                                    <this:EventToCommandAction
+                                        Command="{Binding HeaderBackground_MouseDownCommand, 
+                                        RelativeSource={RelativeSource AncestorType=this:ToolsHost}}"
                                         Sender="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=TabControl}}"/>
                                 </i:EventTrigger>
                                 <i:EventTrigger EventName="MouseMove">
-                                    <this:EventToCommandAction Command="{Binding HeaderBackground_MouseMoveCommand, 
-                                        RelativeSource={RelativeSource AncestorType=this:ToolsHost}}" 
+                                    <this:EventToCommandAction
+                                        Command="{Binding HeaderBackground_MouseMoveCommand, 
+                                        RelativeSource={RelativeSource AncestorType=this:ToolsHost}}"
                                         Sender="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=TabControl}}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
-                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,4,6,4" 
-                                       Text="{Binding SelectedItem.Tag, RelativeSource={RelativeSource AncestorType=TabControl}}" FontSize="12" FontWeight="Regular" Foreground="{StaticResource ForegroundBrush}"/>
-                            <Button HorizontalAlignment="Right" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}" 
-                                    Margin="4" VerticalAlignment="Stretch" Style="{StaticResource CrossButton}" 
-                                    Command="{Binding CloseButton_ClickCommand, RelativeSource={RelativeSource AncestorType=this:ToolsHost}}" 
+                            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,4,6,4"
+                                       Text="{Binding SelectedItem.Tag, RelativeSource={RelativeSource AncestorType=TabControl}}" FontSize="12" FontWeight="Regular"
+                                       Foreground="{StaticResource ForegroundBrush}"/>
+                            <Button HorizontalAlignment="Right" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                                    Margin="4" VerticalAlignment="Stretch" Style="{StaticResource CrossButton}"
+                                    Command="{Binding CloseButton_ClickCommand, RelativeSource={RelativeSource AncestorType=this:ToolsHost}}"
                                     CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=TabControl}}"/>
                         </Grid>
                         <ScrollViewer Focusable="False" x:Name="TabPanelScrollViewer" Grid.Row="0" Panel.ZIndex="1" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Hidden"
                                       Visibility="{Binding Items.Count, RelativeSource={RelativeSource AncestorType=this:ToolsHost}, Converter={StaticResource TabPanelVisibilityConverter}}">
                             <i:Interaction.Triggers>
                                 <i:EventTrigger EventName="PreviewMouseWheel">
-                                    <this:EventToCommandAction Command="{Binding TabPanel_PreviewMouseWheelCommand, 
-                                        RelativeSource={RelativeSource AncestorType=this:ToolsHost}}" Sender="{Binding ElementName=TabPanelScrollViewer}"/>
+                                    <this:EventToCommandAction
+                                        Command="{Binding TabPanel_PreviewMouseWheelCommand, 
+                                        RelativeSource={RelativeSource AncestorType=this:ToolsHost}}"
+                                        Sender="{Binding ElementName=TabPanelScrollViewer}"/>
                                 </i:EventTrigger>
                             </i:Interaction.Triggers>
                             <TabPanel IsItemsHost="True"/>
                         </ScrollViewer>
-                        <Border x:Name="Border" Grid.Row="1" BorderThickness="1" 
+                        <Border x:Name="Border" Grid.Row="1" BorderThickness="1"
                                 Background="{StaticResource ResourceKey=BackgroundBrush}"
                                 BorderBrush="{StaticResource ResourceKey=BorderBrush}">
                             <i:Interaction.Triggers>
@@ -305,7 +315,7 @@
                 <ColumnDefinition Width="13"/>
             </Grid.ColumnDefinitions>
             <ContentPresenter x:Name="Icon" Margin="6,0,6,0" Grid.Column="0" VerticalAlignment="Center" ContentSource="Icon"/>
-            <ContentPresenter x:Name="HeaderHost" Grid.Column="1" Margin="10,0,0,0" TextElement.Foreground="{StaticResource MenuForegroundBrush}" 
+            <ContentPresenter x:Name="HeaderHost" Grid.Column="1" Margin="10,0,0,0" TextElement.Foreground="{StaticResource MenuForegroundBrush}"
                               VerticalAlignment="Stretch" ContentSource="Header"/>
             <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="10,2,0,2" VerticalAlignment="Stretch"/>
         </Grid>
@@ -327,15 +337,15 @@
         <Grid x:Name="MenuElementGrid" Background="Transparent" WindowChrome.IsHitTestVisibleInChrome="True">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut" />
-                <ColumnDefinition Width="13" />
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
+                <ColumnDefinition Width="13"/>
             </Grid.ColumnDefinitions>
             <ContentPresenter x:Name="Icon" Margin="6,0,6,0" Grid.Column="0" VerticalAlignment="Center" ContentSource="Icon"/>
             <ContentPresenter x:Name="HeaderHost" Grid.Column="1" Margin="10,0,0,0" TextElement.Foreground="{StaticResource MenuForegroundBrush}"
                               VerticalAlignment="Stretch" ContentSource="Header"/>
             <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="10,0,0,2" VerticalAlignment="Stretch"/>
-            <Path x:Name="SubmenuArrow" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center" 
+            <Path x:Name="SubmenuArrow" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center"
                   Data="M 0 0 L 0 8 L 6 4 Z" Fill="{StaticResource MenuForegroundBrush}"/>
             <Popup x:Name="Popup" Placement="Right" IsOpen="{TemplateBinding IsSubmenuOpen}" Focusable="False" PopupAnimation="Fade" WindowChrome.IsHitTestVisibleInChrome="True">
                 <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1"
@@ -349,7 +359,7 @@
                 <Setter Property="Background" TargetName="MenuElementGrid" Value="{StaticResource SelectedMenuItemBrush}"/>
             </Trigger>
             <Trigger Property="Icon" Value="{x:Null}">
-                <Setter TargetName="Icon" Property="Visibility" Value="Hidden" />
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
             </Trigger>
             <Trigger Property="IsEnabled" Value="false">
                 <Setter Property="TextElement.Foreground" TargetName="HeaderHost" Value="{StaticResource InactiveMenuForegroundBrush}"/>
@@ -371,31 +381,31 @@
         <Style.Triggers>
             <!-- Top-level without children -->
             <Trigger Property="Role" Value="TopLevelItem">
-                <Setter Property="Template" Value="{StaticResource MenuItem_TopLevelItem}" />
+                <Setter Property="Template" Value="{StaticResource MenuItem_TopLevelItem}"/>
             </Trigger>
             <!-- Top-level with children -->
             <Trigger Property="Role" Value="TopLevelHeader">
-                <Setter Property="Template" Value="{StaticResource MenuItem_TopLevelHeader}" />
-                <Setter Property="Grid.IsSharedSizeScope" Value="true" />
+                <Setter Property="Template" Value="{StaticResource MenuItem_TopLevelHeader}"/>
+                <Setter Property="Grid.IsSharedSizeScope" Value="true"/>
             </Trigger>
             <!-- Sub-level without children -->
             <Trigger Property="Role" Value="SubmenuItem">
-                <Setter Property="Template" Value="{StaticResource MenuItem_SubmenuItem}" />
+                <Setter Property="Template" Value="{StaticResource MenuItem_SubmenuItem}"/>
             </Trigger>
             <!-- Sub-level with children -->
             <Trigger Property="Role" Value="SubmenuHeader">
-                <Setter Property="Template" Value="{StaticResource MenuItem_SubmenuHeader}" />
+                <Setter Property="Template" Value="{StaticResource MenuItem_SubmenuHeader}"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
     <Style x:Key="ClearOutputButton" TargetType="Button">
-        <Setter Property="Focusable" Value="false" />
+        <Setter Property="Focusable" Value="false"/>
         <Setter Property="TextElement.Foreground" Value="{StaticResource InactiveForegroundBrush}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="Host" BorderThickness="1" BorderBrush="{StaticResource ClearOutputButtonBorderBrush}" 
+                    <Border x:Name="Host" BorderThickness="1" BorderBrush="{StaticResource ClearOutputButtonBorderBrush}"
                             Background="{StaticResource ClearOutputButtonBackgroundBrush}">
                         <ContentPresenter/>
                     </Border>
@@ -485,8 +495,8 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="{Binding ActualHeight, RelativeSource={RelativeSource TemplatedParent}}"/>
                                             </Grid.ColumnDefinitions>
-                                            <Path x:Name="Arrow" Grid.Column="1" Fill="{StaticResource ForegroundBrush}" 
-                                                  HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                            <Path x:Name="Arrow" Grid.Column="1" Fill="{StaticResource ForegroundBrush}"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center"
                                                   Data="M0,0 L6,0 L3,3 z"/>
                                         </Grid>
                                         <ControlTemplate.Triggers>
@@ -498,10 +508,10 @@
                                 </ToggleButton.Template>
                             </ToggleButton>
                             <ContentPresenter IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}"
-                            ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                            VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              VerticalAlignment="Stretch" HorizontalAlignment="Center"/>
                             <Popup Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" Focusable="False" PopupAnimation="Fade">
-                                <Border BorderThickness="1,0,1,1" BorderBrush="{StaticResource ComboBoxBorderBrush}" 
+                                <Border BorderThickness="1,0,1,1" BorderBrush="{StaticResource ComboBoxBorderBrush}"
                                         Background="{StaticResource ComboBoxBackgroundBrush}"
                                         MinWidth="{TemplateBinding ActualWidth}" MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden">
@@ -519,8 +529,6 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Style.Triggers>
-        </Style.Triggers>
     </Style>
 
     <Style x:Key="InspectorExpandContentToggleButton" TargetType="ToggleButton">

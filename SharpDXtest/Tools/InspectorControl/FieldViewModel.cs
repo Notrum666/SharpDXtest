@@ -1,11 +1,10 @@
-﻿using Engine;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-using Component = Engine.BaseAssets.Components.Component;
+using Engine;
 
 namespace Editor
 {
@@ -66,8 +65,10 @@ namespace Editor
         public ObservableCollection<FieldViewModel> StructFieldViewModels { get; } = null;
         private object parentObject;
         private FieldViewModel parentField;
+
         public FieldViewModel(object parentObject, FieldInfo field)
             : this(parentObject, field, null) { }
+
         public FieldViewModel(object parentObject, FieldInfo field, FieldViewModel parentField)
         {
             this.parentObject = parentObject;
@@ -106,10 +107,12 @@ namespace Editor
                 }
             }
         }
+
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
+
         public void Update()
         {
             if (StructFieldViewModels is null)
