@@ -61,6 +61,7 @@ namespace Editor
         public event PropertyChangedEventHandler PropertyChanged;
 
         private GameObject controlledGameObject;
+        private EditorCameraController controller;
         private Camera camera;
 
         private Point cursorLockPoint;
@@ -131,8 +132,7 @@ namespace Editor
 
                 controlledGameObject = new GameObject();
                 controlledGameObject.Transform.Position = new Vector3(0, -10, 5);
-                EditorCameraController controller = controlledGameObject.AddComponent<EditorCameraController>();
-                controller.speed = 5;
+                controller = controlledGameObject.AddComponent<EditorCameraController>();
                 camera = controlledGameObject.AddComponent<Camera>();
                 camera.Near = 0.001;
                 camera.Far = 500;
@@ -176,8 +176,9 @@ namespace Editor
             if (!EngineCore.IsAlive || !IsVisible)
                 return;
 
+            controlledGameObject.Update();
             if (keyboardFocused)
-                controlledGameObject.Update();
+                controller.UpdateInput();
 
             GraphicsCore.RenderScene(camera);
 
