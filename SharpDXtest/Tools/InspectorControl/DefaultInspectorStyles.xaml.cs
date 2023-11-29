@@ -21,5 +21,20 @@ namespace Editor
         {
             ((TextBox)sender).GetBindingExpression(TextBox.TextProperty).UpdateTarget();
         }
+
+        private void InspectorTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            ((TextBox)sender).SelectAll();
+        }
+
+        private void InspectorTextBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+            if (!textBox.IsKeyboardFocusWithin)
+            {
+                textBox.Focus();
+                e.Handled = true;
+            }
+        }
     }
 }

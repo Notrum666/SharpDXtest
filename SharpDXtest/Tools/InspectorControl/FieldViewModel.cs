@@ -13,11 +13,10 @@ namespace Editor
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private FieldInfo targetField;
-        public FieldInfo TargetField
-        {
-            get => targetField;
-        }
-        public string DisplayName { get; private set; }
+        public Type TargetType { get; }
+        public string DisplayName { get; }
+        private FieldConverter converter = null;
+        private bool propagateUpdate = false;
         private object cachedBoxedValue;
         private bool invalidated = true;
         public object Value
@@ -29,31 +28,42 @@ namespace Editor
                     if (invalidated)
                     {
                         cachedBoxedValue = targetField.GetValue(parentObject);
+                        if (converter is not null)
+                            cachedBoxedValue = converter.Convert(cachedBoxedValue);
                         invalidated = false;
                     }
                     return cachedBoxedValue;
                 }
-                return targetField.GetValue(parentField.Value);
+                object result = targetField.GetValue(parentField.Value);
+                if (converter is not null)
+                    result = converter.Convert(result);
+                return result;
             }
             set
             {
+                object newValue = value;
+                if (converter is not null)
+                    newValue = converter.ConvertBack(newValue);
                 if (parentField is null)
                 {
                     invalidated = true;
-                    targetField.SetValue(parentObject, value);
+                    targetField.SetValue(parentObject, newValue);
                     if (parentObject is INotifyFieldChanged notifyFieldChanged)
                         notifyFieldChanged.OnFieldChanged(targetField);
                 }
                 else
                 {
                     object box = parentField.Value;
-                    targetField.SetValue(box, value);
+                    targetField.SetValue(box, newValue);
                     parentField.Value = box;
                 }
-                OnPropertyChanged();
+                if (propagateUpdate)
+                    Update();
+                else
+                    OnPropertyChanged();
             }
         }
-        public ObservableCollection<FieldViewModel> StructFieldViewModels { get; private set; } = null;
+        public ObservableCollection<FieldViewModel> StructFieldViewModels { get; } = null;
         private object parentObject;
         private FieldViewModel parentField;
         public FieldViewModel(object parentObject, FieldInfo field)
@@ -63,25 +73,34 @@ namespace Editor
             this.parentObject = parentObject;
             targetField = field;
             this.parentField = parentField;
+            TargetType = targetField.FieldType;
+            DisplayName = field.Name;
 
-            SerializeFieldAttribute attr;
-            if ((attr = field.GetCustomAttribute<SerializeFieldAttribute>()) is not null)
+            DisplayFieldAttribute attr;
+            if ((attr = field.GetCustomAttribute<DisplayFieldAttribute>()) is not null)
             {
-                if (attr.DisplayName is not null)
-                    DisplayName = attr.DisplayName;
-                else
-                    DisplayName = field.Name;
+                DisplayName = attr.DisplayName;
+                propagateUpdate = attr.PropagateStructUpdate;
+                if (attr.ConverterType is not null)
+                {
+                    converter = (FieldConverter)Activator.CreateInstance(attr.ConverterType);
+                    if (converter.SourceType != targetField.FieldType)
+                    {
+                        Logger.Log(LogType.Error, "Incorrect converter input type: " + converter.SourceType.Name + ", while field type is: " + targetField.FieldType);
+                        TargetType = null;
+                        return;
+                    }
+                    TargetType = converter.TargetType;
+                }
             }
-            else
-                DisplayName = field.Name;
 
             if (targetField.FieldType.IsStruct())
             {
                 StructFieldViewModels = new ObservableCollection<FieldViewModel>();
-                FieldInfo[] subFields = targetField.FieldType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                FieldInfo[] subFields = TargetType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 foreach (FieldInfo subField in subFields)
                 {
-                    if (subField.IsPrivate && subField.GetCustomAttribute<SerializeFieldAttribute>() is null)
+                    if (subField.IsPrivate && subField.GetCustomAttribute<DisplayFieldAttribute>() is null)
                         continue;
                     StructFieldViewModels.Add(new FieldViewModel(parentObject, subField, this));
                 }

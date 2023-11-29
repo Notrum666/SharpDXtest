@@ -203,36 +203,85 @@ namespace LinearAlgebra
             double coshalfx = Math.Cos(euler.x / 2.0);
             double coshalfy = Math.Cos(euler.y / 2.0);
             double coshalfz = Math.Cos(euler.z / 2.0);
+            return order switch
+            {
+                EulerOrder.XYZ => new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
+                                  new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
+                                  new Quaternion(coshalfx, sinhalfx, 0.0, 0.0),
+                EulerOrder.XZY => new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
+                                  new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
+                                  new Quaternion(coshalfx, sinhalfx, 0.0, 0.0),
+                EulerOrder.YXZ => new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
+                                  new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
+                                  new Quaternion(coshalfy, 0.0, sinhalfy, 0.0),
+                EulerOrder.YZX => new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
+                                  new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
+                                  new Quaternion(coshalfy, 0.0, sinhalfy, 0.0),
+                EulerOrder.ZXY => new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
+                                  new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
+                                  new Quaternion(coshalfz, 0.0, 0.0, sinhalfz),
+                EulerOrder.ZYX => new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
+                                  new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
+                                  new Quaternion(coshalfz, 0.0, 0.0, sinhalfz),
+                _ => throw new NotImplementedException()
+            };
+        }
+
+        /// <summary>
+        /// Creates euler angles from quaternion in specified order
+        /// </summary>
+        public Vector3 ToEuler(EulerOrder order = EulerOrder.ZXY)
+        {
+            double s2 = 2.0 / norm();
+            double asin;
             switch (order)
             {
                 case EulerOrder.XYZ:
-                    return new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
-                           new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
-                           new Quaternion(coshalfx, sinhalfx, 0.0, 0.0);
+                    asin = Math.Asin(-s2 * (x * z - w * y));
+                    if (Math.Abs(Math.Abs(asin) % Math.PI - Math.PI * 0.5) < 1e-5)
+                        return new Vector3(Math.Asin(Math.Abs(s2 * (x * y - w * z))), asin, 0);
+                    return new Vector3(Math.Atan2(s2 * (y * z + w * x), 1 - s2 * (x * x + y * y)),
+                                       asin,
+                                       Math.Atan2(s2 * (x * y + w * z), 1 - s2 * (y * y + z * z)));
                 case EulerOrder.XZY:
-                    return new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
-                           new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
-                           new Quaternion(coshalfx, sinhalfx, 0.0, 0.0);
+                    asin = Math.Asin(s2 * (x * y + w * z));
+                    if (Math.Abs(Math.Abs(asin) % Math.PI - Math.PI * 0.5) < 1e-5)
+                        return new Vector3(Math.Asin(Math.Abs(s2 * (x * z + w * y))), 0, asin);
+                    return new Vector3(Math.Atan2(-s2 * (y * z - w * x), 1 - s2 * (x * x + z * z)),
+                                       Math.Atan2(-s2 * (x * z - w * y), 1 - s2 * (y * y + z * z)),
+                                       asin);
                 case EulerOrder.YXZ:
-                    return new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
-                           new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
-                           new Quaternion(coshalfy, 0.0, sinhalfy, 0.0);
+                    asin = Math.Asin(s2 * (y * z + w * x));
+                    if (Math.Abs(Math.Abs(asin) % Math.PI - Math.PI * 0.5) < 1e-5)
+                        return new Vector3(asin, Math.Asin(Math.Abs(s2 * (x * y + w * z))), 0);
+                    return new Vector3(asin,
+                                       Math.Atan2(-s2 * (x * z - w * y), 1 - s2 * (x * x + y * y)),
+                                       Math.Atan2(-s2 * (x * y - w * z), 1 - s2 * (x * x + z * z)));
                 case EulerOrder.YZX:
-                    return new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
-                           new Quaternion(coshalfz, 0.0, 0.0, sinhalfz) *
-                           new Quaternion(coshalfy, 0.0, sinhalfy, 0.0);
+                    asin = Math.Asin(-s2 * (x * y - w * z));
+                    if (Math.Abs(Math.Abs(asin) % Math.PI - Math.PI * 0.5) < 1e-5)
+                        return new Vector3(Math.Asin(Math.Abs(s2 * (x * z - w * y))), 0, asin);
+                    return new Vector3(Math.Atan2(s2 * (y * z + w * x), 1 - s2 * (x * x + z * z)),
+                                       Math.Atan2(s2 * (x * z + w * y), 1 - s2 * (y * y + z * z)),
+                                       asin);
                 case EulerOrder.ZXY:
-                    return new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
-                           new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
-                           new Quaternion(coshalfz, 0.0, 0.0, sinhalfz);
+                    asin = Math.Asin(-s2 * (y * z - w * x));
+                    if (Math.Abs(Math.Abs(asin) % Math.PI - Math.PI * 0.5) < 1e-5)
+                        return new Vector3(asin, Math.Asin(Math.Abs(s2 * (x * z - w * y))), 0);
+                    return new Vector3(asin,
+                                       Math.Atan2(s2 * (x * z + w * y), 1 - s2 * (x * x + y * y)),
+                                       Math.Atan2(s2 * (x * y + w * z), 1 - s2 * (x * x + z * z)));
                 case EulerOrder.ZYX:
-                    return new Quaternion(coshalfx, sinhalfx, 0.0, 0.0) *
-                           new Quaternion(coshalfy, 0.0, sinhalfy, 0.0) *
-                           new Quaternion(coshalfz, 0.0, 0.0, sinhalfz);
-            }
-            throw new NotImplementedException();
+                    asin = Math.Asin(s2 * (x * z + w * y));
+                    if (Math.Abs(Math.Abs(asin) % Math.PI - Math.PI * 0.5) < 1e-5)
+                        return new Vector3(Math.Asin(Math.Abs(s2 * (x * y + w * z))), asin, 0);
+                    return new Vector3(Math.Atan2(-s2 * (y * z - w * x), 1 - s2 * (x * x + y * y)),
+                                       asin,
+                                       Math.Atan2(-s2 * (x * y - w * z), 1 - s2 * (y * y + z * z)));
+                default:
+                    throw new NotImplementedException();
+            };
         }
-
         public static Quaternion operator /(in Quaternion lhs, double rhs)
         {
             return new Quaternion(lhs.w / rhs, lhs.x / rhs, lhs.y / rhs, lhs.z / rhs);

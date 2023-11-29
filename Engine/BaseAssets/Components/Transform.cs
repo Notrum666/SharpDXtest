@@ -13,7 +13,7 @@ namespace Engine.BaseAssets.Components
     {
         public event Action Invalidated;
         public Transform Parent { get; private set; }
-        [SerializeField("Position")]
+        [DisplayField("Position")]
         private Vector3 localPosition;
         public Vector3 LocalPosition
         {
@@ -44,6 +44,7 @@ namespace Engine.BaseAssets.Components
                     LocalPosition = Parent.View.TransformPoint(value);
             }
         }
+        [DisplayField("Rotation", typeof(QuaternionToEulerDegreesConverter), true)]
         private Quaternion localRotation;
         public Quaternion LocalRotation
         {
@@ -80,7 +81,7 @@ namespace Engine.BaseAssets.Components
                 LocalRotation = rot;
             }
         }
-        [SerializeField("Scale")]
+        [DisplayField("Scale")]
         private Vector3 localScale;
         public Vector3 LocalScale
         {
