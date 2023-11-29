@@ -256,13 +256,9 @@ namespace Engine
         private interface IResourceViewCollection { }
         private struct ResourceViewCollection<T> : IResourceViewCollection where T : ResourceView
         {
-            public struct ArrayItemView
-            {
-                public List<T> MipsViews;
-            }
-
             public T GeneralView;
-            public List<ArrayItemView> ArrayItemsViews;
+            public List<T> ArrayViews;
+            public List<List<T>> MipsViews;
         }
 
         private bool disposed = false;
@@ -379,25 +375,19 @@ namespace Engine
         {
             if(arraySize < 1)
             {
-                throw new ArgumentNullException(nameof(arraySize));
+                throw new ArgumentOutOfRangeException(nameof(arraySize));
             }
 
             if(mipLevels < 1)
             {
-                throw new ArgumentNullException(nameof(mipLevels));
+                throw new ArgumentOutOfRangeException(nameof(mipLevels));
             }
 
-            ResourceViewCollection<T> collection = new ResourceViewCollection<T>();
-
-            collection.ArrayItemsViews = new List<ResourceViewCollection<T>.ArrayItemView>(arraySize);
-
-            for(int i = 0; i < arraySize; i++)
+            ResourceViewCollection<T> collection = new ResourceViewCollection<T>
             {
-                collection.ArrayItemsViews.Add(new ResourceViewCollection<T>.ArrayItemView
-                {
-                    MipsViews = new List<T>(mipLevels)
-                });
-            }
+                ArrayViews = new List<T>(arraySize),
+                MipsViews = new List<List<T>>(arraySize)
+            };
 
             collection.GeneralView = collection switch
             {
@@ -411,9 +401,32 @@ namespace Engine
             {
                 for (int i = 0; i < arraySize; i++)
                 {
-                    for (int j = 0; j < mipLevels; j++)
+                    T arrayItemView = collection switch
                     {
-                        T view = collection switch
+                        ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, 1, i, 0) as T,
+                        ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, 1, i, 0) as T,
+                        ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, 1, i, mipLevels, 0) as T,
+                        var _ => throw new NotImplementedException(typeof(T).Name)
+                    };
+
+                    collection.ArrayViews.Add(arrayItemView);
+
+                    collection.MipsViews.Add(new List<T>(mipLevels));
+
+                    int mipStartInd = 1;
+
+                    if (arrayItemView is not ShaderResourceView)
+                    {
+                        collection.MipsViews[0].Add(arrayItemView);
+                    }
+                    else
+                    {
+                        mipStartInd = 0;
+                    }
+
+                    for (int j = mipStartInd; j < mipLevels; j++)
+                    {
+                        T mipItemView = collection switch
                         {
                             ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, 1, i, j) as T,
                             ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, 1, i, j) as T,
@@ -421,13 +434,14 @@ namespace Engine
                             var _ => throw new NotImplementedException(typeof(T).Name)
                         };
 
-                        collection.ArrayItemsViews[i].MipsViews.Add(view);
+                        collection.MipsViews[i].Add(mipItemView);
                     }
                 }
             }
             else
             {
-                collection.ArrayItemsViews[0].MipsViews.Add(collection.GeneralView);
+                collection.ArrayViews.Add(collection.GeneralView);
+                collection.MipsViews.Add(new List<T> { collection.GeneralView });
             }
 
             return collection;
@@ -500,9 +514,14 @@ namespace Engine
             return GetResourceViewCollection<T>().GeneralView;
         }
 
-        public T GetSliceView<T>(int arraySliceIndex, int mipSliceIndex = 0) where T : ResourceView
+        public T GetArraySliceView<T>(int arrayIndex) where T : ResourceView
         {
-            return GetResourceViewCollection<T>().ArrayItemsViews[arraySliceIndex].MipsViews[mipSliceIndex];
+            return GetResourceViewCollection<T>().ArrayViews[arrayIndex];
+        }
+
+        public T GetMipSliceView<T>(int arraySliceIndex, int mipSliceIndex) where T : ResourceView
+        {
+            return GetResourceViewCollection<T>().MipsViews[arraySliceIndex][mipSliceIndex];
         }
 
         public void use(string variable, bool targetIsTextureArray = false)
