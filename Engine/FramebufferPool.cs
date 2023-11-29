@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -12,13 +10,7 @@ namespace Engine
         private Stack<FrameBuffer> freeFrameBuffers = new Stack<FrameBuffer>();
         private bool disposed;
 
-        public int PoolCapacity
-        {
-            get
-            {
-                return frameBuffers.Count();
-            }
-        }
+        public int PoolCapacity => frameBuffers.Count();
 
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -39,6 +31,7 @@ namespace Engine
                 freeFrameBuffers.Push(frameBuffers[i]);
             }
         }
+
         public FrameBuffer Get()
         {
             if (disposed)
@@ -57,17 +50,20 @@ namespace Engine
 
             return freeFrameBuffers.Pop();
         }
+
         public void Release(FrameBuffer curFrameBuffer)
         {
             if (disposed)
                 throw new ObjectDisposedException(nameof(FrameBufferPool));
 
             foreach (FrameBuffer fb in frameBuffers)
+            {
                 if (fb == curFrameBuffer)
                 {
                     freeFrameBuffers.Push(curFrameBuffer);
                     return;
                 }
+            }
             throw new ArgumentException("This FrameBuffer does not exist in this FrameBufferPool");
         }
 

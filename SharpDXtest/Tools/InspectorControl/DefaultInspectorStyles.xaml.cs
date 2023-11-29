@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
@@ -15,7 +10,7 @@ namespace Editor
         {
             if (e.Key == Key.Enter || e.Key == Key.Escape)
             {
-                FrameworkElement root = ((FrameworkElement)FocusManager.GetFocusScope((DependencyObject)sender));
+                FrameworkElement root = (FrameworkElement)FocusManager.GetFocusScope((DependencyObject)sender);
                 root.Focus();
                 Keyboard.Focus(root);
             }

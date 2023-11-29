@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -24,20 +23,21 @@ namespace Editor
             }
         }
         public ObservableCollection<ComponentViewModel> ComponentViewModels { get; private set; } = new ObservableCollection<ComponentViewModel>();
-        public GameObjectViewModel()
-        {
 
-        }
+        public GameObjectViewModel() { }
+
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
+
         public void Reload()
         {
             ComponentViewModels.Clear();
             foreach (Component component in target.Components)
                 ComponentViewModels.Add(new ComponentViewModel(component));
         }
+
         public void Update()
         {
             foreach (ComponentViewModel viewModel in ComponentViewModels)

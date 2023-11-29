@@ -1,24 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <OutputType>Library</OutputType>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AssemblyTitle>LinearAlgebra</AssemblyTitle>
-    <Product>LinearAlgebra</Product>
-    <Copyright>Copyright ©  2022</Copyright>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'GraphicsDebug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\GraphicsDebug\</OutputPath>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<OutputType>Library</OutputType>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<AssemblyTitle>LinearAlgebra</AssemblyTitle>
+		<Product>LinearAlgebra</Product>
+		<Copyright>Copyright © 2022</Copyright>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<FileVersion>1.0.0.0</FileVersion>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<UseVSHostingProcess>true</UseVSHostingProcess>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'GraphicsDebug|AnyCPU'">
+		<DebugSymbols>true</DebugSymbols>
+		<OutputPath>bin\GraphicsDebug\</OutputPath>
+		<UseVSHostingProcess>true</UseVSHostingProcess>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0"/>
+		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0"/>
+	</ItemGroup>
 </Project>

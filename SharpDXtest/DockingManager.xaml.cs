@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -18,22 +17,21 @@ namespace Editor
         public static readonly DependencyProperty ItemsSourceProperty = ItemsControl.ItemsSourceProperty.AddOwner(typeof(DockingManager));
         public IEnumerable ItemsSource
         {
-            get { return (IEnumerable)GetValue(ItemsSourceProperty); }
-            set { SetValue(ItemsSourceProperty, value); }
+            get => (IEnumerable)GetValue(ItemsSourceProperty);
+            set => SetValue(ItemsSourceProperty, value);
         }
-        public ItemCollection Items
-        {
-            get { return itemsControl.Items; }
-        }
+        public ItemCollection Items => itemsControl.Items;
 
         private List<FlyingControl> flyingControls = new List<FlyingControl>();
         public ReadOnlyCollection<FlyingControl> FlyingControls => flyingControls.AsReadOnly();
+
         public DockingManager()
         {
             InitializeComponent();
 
             DataContext = this;
         }
+
         public void AddFlyingControl(FlyingControl control)
         {
             if (flyingControls.Contains(control))
@@ -82,6 +80,7 @@ namespace Editor
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             foreach (UIElement child in Items)
+            {
                 if (child is FlyingControl flyingControl)
                 {
                     flyingControl.Loaded += FlyingControl_Loaded;
@@ -89,6 +88,7 @@ namespace Editor
                     flyingControl.PreviewMouseDown += FlyingControl_PreviewMouseDown;
                     flyingControls.Add(flyingControl);
                 }
+            }
 
             updateFlyingControlsOrder();
         }

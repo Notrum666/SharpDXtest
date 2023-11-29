@@ -18,54 +18,41 @@ namespace Editor
         public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register("ItemsSource", typeof(IEnumerable), typeof(ToolsHost));
         public IEnumerable ItemsSource
         {
-            get { return (IEnumerable)GetValue(ItemsSourceProperty); }
-            set { SetValue(ItemsSourceProperty, value); }
+            get => (IEnumerable)GetValue(ItemsSourceProperty);
+            set => SetValue(ItemsSourceProperty, value);
         }
-        public ItemCollection Items
-        {
-            get { return ToolsTabControl.Items; }
-        }
+        public ItemCollection Items => ToolsTabControl.Items;
 
         private RelayCommand closeButton_ClickCommand;
-        public RelayCommand CloseButton_ClickCommand
-        {
-            get => closeButton_ClickCommand ?? (closeButton_ClickCommand = new RelayCommand(obj => ToolsTabControl.Items.Remove(obj)));
-        }
+        public RelayCommand CloseButton_ClickCommand => closeButton_ClickCommand ?? (closeButton_ClickCommand = new RelayCommand(obj => ToolsTabControl.Items.Remove(obj)));
         private RelayCommand contentBackground_MouseDownCommand;
-        public RelayCommand ContentBackground_MouseDownCommand
-        {
-            get => contentBackground_MouseDownCommand ?? (contentBackground_MouseDownCommand = new RelayCommand(obj => (obj as RoutedEventArgs).Handled = true));
-        }
+        public RelayCommand ContentBackground_MouseDownCommand => contentBackground_MouseDownCommand ?? (contentBackground_MouseDownCommand = new RelayCommand(obj => (obj as RoutedEventArgs).Handled = true));
         private RelayCommand headerBackground_MouseDownCommand;
-        public RelayCommand HeaderBackground_MouseDownCommand
-        {
-            get => headerBackground_MouseDownCommand ?? (headerBackground_MouseDownCommand = 
-                new RelayCommand(obj =>
-                {
-                    Tuple<object, EventArgs> data = obj as Tuple<object, EventArgs>;
-                    HeaderBackground_MouseDown(data.Item1, data.Item2 as MouseButtonEventArgs);
-                }));
-        }
+
+        public RelayCommand HeaderBackground_MouseDownCommand => headerBackground_MouseDownCommand ?? (headerBackground_MouseDownCommand =
+            new RelayCommand(obj =>
+            {
+                Tuple<object, EventArgs> data = obj as Tuple<object, EventArgs>;
+                HeaderBackground_MouseDown(data.Item1, data.Item2 as MouseButtonEventArgs);
+            }));
+
         private RelayCommand headerBackground_MouseMoveCommand;
-        public RelayCommand HeaderBackground_MouseMoveCommand
-        {
-            get => headerBackground_MouseMoveCommand ?? (headerBackground_MouseMoveCommand = 
-                new RelayCommand(obj =>
-                {
-                    Tuple<object, EventArgs> data = obj as Tuple<object, EventArgs>;
-                    HeaderBackground_MouseMove(data.Item1, data.Item2 as MouseEventArgs);
-                }));
-        }
+
+        public RelayCommand HeaderBackground_MouseMoveCommand => headerBackground_MouseMoveCommand ?? (headerBackground_MouseMoveCommand =
+            new RelayCommand(obj =>
+            {
+                Tuple<object, EventArgs> data = obj as Tuple<object, EventArgs>;
+                HeaderBackground_MouseMove(data.Item1, data.Item2 as MouseEventArgs);
+            }));
+
         private RelayCommand tabPanel_PreviewMouseWheelCommand;
-        public RelayCommand TabPanel_PreviewMouseWheelCommand
-        {
-            get => tabPanel_PreviewMouseWheelCommand ?? (tabPanel_PreviewMouseWheelCommand =
-                new RelayCommand(obj =>
-                {
-                    Tuple<object, EventArgs> data = obj as Tuple<object, EventArgs>;
-                    TabPanel_PreviewMouseWheel(data.Item1, data.Item2 as MouseWheelEventArgs);
-                }));
-        }
+
+        public RelayCommand TabPanel_PreviewMouseWheelCommand => tabPanel_PreviewMouseWheelCommand ?? (tabPanel_PreviewMouseWheelCommand =
+            new RelayCommand(obj =>
+            {
+                Tuple<object, EventArgs> data = obj as Tuple<object, EventArgs>;
+                TabPanel_PreviewMouseWheel(data.Item1, data.Item2 as MouseWheelEventArgs);
+            }));
 
         public event Action<ToolsHost> OnBecameEmpty;
 
@@ -91,6 +78,7 @@ namespace Editor
                 target.Items.Add(item);
             }
         }
+
         private void TabPanel_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (e.Delta > 0)
@@ -98,6 +86,7 @@ namespace Editor
             else
                 (sender as ScrollViewer).LineRight();
         }
+
         private void HeaderBackground_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (Items.Count < 2)
@@ -119,6 +108,7 @@ namespace Editor
                     e.Handled = true;
             }
         }
+
         private void HeaderBackground_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Released)
@@ -146,6 +136,7 @@ namespace Editor
                 flyingControl.InitiateDrag(localGrabPos);
             }
         }
+
         private void ToolsHost_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             if (Items.Count == 0)

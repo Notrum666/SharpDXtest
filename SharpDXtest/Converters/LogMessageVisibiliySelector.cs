@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Globalization;
-using System.Windows.Data;
-using System.Windows;
-using Engine;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Windows;
+using System.Windows.Data;
+
+using Engine;
 
 namespace Editor
 {
     [ValueConversion(typeof(object[]), typeof(Visibility))]
     public sealed class LogMessageVisibiliySelector : IMultiValueConverter
     {
-        public LogMessageVisibiliySelector()
-        {
-
-        }
+        public LogMessageVisibiliySelector() { }
 
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
