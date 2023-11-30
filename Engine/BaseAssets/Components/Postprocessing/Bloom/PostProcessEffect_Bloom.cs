@@ -219,7 +219,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
                 )
             );
 
-            texture.use("tex");
+            texture.Use("tex");
             sampler.use("texSampler");
         }
     }

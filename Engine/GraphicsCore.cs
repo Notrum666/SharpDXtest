@@ -297,7 +297,7 @@ namespace Engine
                         Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(CurrentCamera);
                         for (int i = 0; i < lightSpaces.Length; i++)
                         {
-                            DepthStencilView curDSV = curLight.ShadowTexture.GetViews<DepthStencilView>().First(view => view.Description.Texture2DArray.FirstArraySlice == i);
+                            DepthStencilView curDSV = curLight.ShadowTexture.GetView<DepthStencilView>(i);
                             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(curDSV, renderTargetView: null);
                             CurrentDevice.ImmediateContext.ClearDepthStencilView(curDSV, DepthStencilClearFlags.Depth, 1.0f, 0);
 
@@ -385,11 +385,11 @@ namespace Engine
                     pipeline.UpdateUniform("modelNorm", (Matrix4x4f)obj.Transform.Model.inverse().transposed());
 
                     pipeline.UploadUpdatedUniforms();
-                    mesh.Material.Albedo.use("albedoMap");
-                    mesh.Material.Normal.use("normalMap");
-                    mesh.Material.Metallic.use("metallicMap");
-                    mesh.Material.Roughness.use("roughnessMap");
-                    mesh.Material.AmbientOcclusion.use("ambientOcclusionMap");
+                    mesh.Material.Albedo.Use("albedoMap");
+                    mesh.Material.Normal.Use("normalMap");
+                    mesh.Material.Metallic.Use("metallicMap");
+                    mesh.Material.Roughness.Use("roughnessMap");
+                    mesh.Material.AmbientOcclusion.Use("ambientOcclusionMap");
                     mesh.model.Render();
                 }
             }
@@ -420,11 +420,11 @@ namespace Engine
                     pipeline.UpdateUniform("model", particleSystem.WorldSpaceParticles ? Matrix4x4f.Identity : (Matrix4x4f)obj.Transform.Model);
 
                     pipeline.UploadUpdatedUniforms();
-                    particleSystem.Material.Albedo.use("albedoMap");
-                    particleSystem.Material.Normal.use("normalMap");
-                    particleSystem.Material.Metallic.use("metallicMap");
-                    particleSystem.Material.Roughness.use("roughnessMap");
-                    particleSystem.Material.AmbientOcclusion.use("ambientOcclusionMap");
+                    particleSystem.Material.Albedo.Use("albedoMap");
+                    particleSystem.Material.Normal.Use("normalMap");
+                    particleSystem.Material.Metallic.Use("metallicMap");
+                    particleSystem.Material.Roughness.Use("roughnessMap");
+                    particleSystem.Material.AmbientOcclusion.Use("ambientOcclusionMap");
 
                     particleSystem.Render();
                 }
@@ -487,9 +487,9 @@ namespace Engine
 
                         pipeline.UploadUpdatedUniforms();
 
-                        curLight.ShadowTexture.use("directionalLight.shadowMaps", true);
+                        curLight.ShadowTexture.Use("directionalLight.shadowMaps");
                         shadowsSampler.use("shadowSampler");
-                        camera.DepthBuffer.use("depthTex");
+                        camera.DepthBuffer.Use("depthTex");
                     }
                     else if (light is PointLight)
                     {
@@ -516,11 +516,11 @@ namespace Engine
                     else
                         throw new NotImplementedException("Light type " + light.GetType().Name + " is not supported.");
 
-                    camera.GBuffer.worldPos.use("worldPosTex");
-                    camera.GBuffer.albedo.use("albedoTex");
-                    camera.GBuffer.normal.use("normalTex");
-                    camera.GBuffer.metallic.use("metallicTex");
-                    camera.GBuffer.roughness.use("roughnessTex");
+                    camera.GBuffer.worldPos.Use("worldPosTex");
+                    camera.GBuffer.albedo.Use("albedoTex");
+                    camera.GBuffer.normal.Use("normalTex");
+                    camera.GBuffer.metallic.Use("metallicTex");
+                    camera.GBuffer.roughness.Use("roughnessTex");
                     sampler.use("texSampler");
                     CurrentDevice.ImmediateContext.Draw(6, 0);
                 }
@@ -533,10 +533,10 @@ namespace Engine
 
             AssetsManager.ShaderPipelines["deferred_addLight"].Use();
 
-            camera.GBuffer.worldPos.use("worldPosTex");
-            camera.GBuffer.albedo.use("albedoTex");
-            camera.GBuffer.ambientOcclusion.use("ambientOcclusionTex");
-            camera.RadianceBuffer.use("radianceTex");
+            camera.GBuffer.worldPos.Use("worldPosTex");
+            camera.GBuffer.albedo.Use("albedoTex");
+            camera.GBuffer.ambientOcclusion.Use("ambientOcclusionTex");
+            camera.RadianceBuffer.Use("radianceTex");
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
         }
@@ -555,7 +555,7 @@ namespace Engine
             ShaderPipeline pipeline = AssetsManager.ShaderPipelines["volume"];
             pipeline.Use();
 
-            camera.DepthBuffer.use("depthTex");
+            camera.DepthBuffer.Use("depthTex");
             sampler.use("texSampler");
 
             pipeline.UpdateUniform("cam_near", (float)camera.Near);
@@ -616,7 +616,7 @@ namespace Engine
 
             AssetsManager.ShaderPipelines["deferred_gamma_correction"].Use();
 
-            camera.ColorBuffer.use("colorTex");
+            camera.ColorBuffer.Use("colorTex");
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
         }
@@ -628,7 +628,7 @@ namespace Engine
 
             AssetsManager.ShaderPipelines["tex_to_screen"].Use();
 
-            tex.use("tex");
+            tex.Use("tex");
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
 
