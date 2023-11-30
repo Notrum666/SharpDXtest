@@ -518,39 +518,77 @@ namespace Engine
             return (ResourceViewCollection<T>)viewsCollectons.First(view => view is ResourceViewCollection<T>);
         }
 
+        /// <summary>
+        /// Check if texture contains ResourceView of specified type
+        /// </summary>
+        /// <typeparam name="T">Type of ResourceView</typeparam>
+        /// <returns>True if contains otherwize false</returns>
         public bool HasViews<T>() where T : ResourceView
         {
             return viewsCollectons.Any(v => v is ResourceViewCollection<T>);
         }
 
+        /// <summary>
+        /// Get specified type of texture's ResourceView
+        /// </summary>
+        /// <typeparam name="T">Type of ResourceView</typeparam>
+        /// <returns>ResourceView of specified type</returns>
         public T GetView<T>() where T : ResourceView
         {
             return GetResourceViewCollection<T>().GeneralView;
         }
 
-        public T GetArraySliceView<T>(int arrayIndex) where T : ResourceView
+        /// <summary>
+        /// Get specified type of array slice texture's ResourceView
+        /// </summary>
+        /// <typeparam name="T">Type of ResourceView</typeparam>
+        /// <param name="arraySlice">Array slice index</param>
+        /// <returns>ResourceView of specified type</returns>
+        public T GetView<T>(int arraySlice) where T : ResourceView
         {
-            return GetResourceViewCollection<T>().ArrayViews[arrayIndex];
+            return GetResourceViewCollection<T>().ArrayViews[arraySlice];
         }
 
-        public T GetMipSliceView<T>(int arraySliceIndex, int mipSliceIndex) where T : ResourceView
+        /// <summary>
+        /// Get specified type of mip slice texture's ResourceView
+        /// </summary>
+        /// <typeparam name="T">Type of ResourceView</typeparam>
+        /// <param name="arraySlice">Array slice index</param>
+        /// <param name="mipSlice">Mip slice index</param>
+        /// <returns>ResourceView of specified type</returns>
+        public T GetView<T>(int arraySlice, int mipSlice) where T : ResourceView
         {
-            return GetResourceViewCollection<T>().MipsViews[arraySliceIndex][mipSliceIndex];
+            return GetResourceViewCollection<T>().MipsViews[arraySlice][mipSlice];
         }
 
-        public void use(string variable)
+        /// <summary>
+        /// Bind texture to current ShaderPipeline as ShaderResourceView
+        /// </summary>
+        /// <param name="variable">Name of texture variable in shaders</param>
+        public void Use(string variable)
         {
             UseInternal(variable, GetView<ShaderResourceView>());
         }
 
+        /// <summary>
+        /// Bind array slice of texture to current ShaderPipeline as ShaderResourceView
+        /// </summary>
+        /// <param name="variable">Name of texture variable in shaders</param>
+        /// <param name="arraySlice">Array slice index</param>
         public void Use(string variable, int arraySlice)
         {
-            UseInternal(variable, GetArraySliceView<ShaderResourceView>(arraySlice));
+            UseInternal(variable, GetView<ShaderResourceView>(arraySlice));
         }
 
+        /// <summary>
+        /// Bind mip slice of texture to current ShaderPipeline as ShaderResourceView
+        /// </summary>
+        /// <param name="variable">Name of texture variable in shaders</param>
+        /// <param name="arraySlice">Array slice index</param>
+        /// <param name="mipSlice">Mip slice index</param>
         public void Use(string variable, int arraySlice, int mipSlice)
         {
-            UseInternal(variable, GetMipSliceView<ShaderResourceView>(arraySlice, mipSlice));
+            UseInternal(variable, GetView<ShaderResourceView>(arraySlice, mipSlice));
         }
 
         private void UseInternal(string variable, ShaderResourceView view)
