@@ -270,7 +270,7 @@ namespace Engine
         private bool disposed = false;
         public Texture2D texture { get; private set; }
 
-        private List<IResourceViewCollection> views = new List<IResourceViewCollection>();
+        private List<IResourceViewCollection> viewsCollectons = new List<IResourceViewCollection>();
 
         public Texture(Bitmap image, bool applyGammaCorrection = true)
         {
@@ -376,12 +376,12 @@ namespace Engine
             bool hasDepthStencils = usage.HasFlag(BindFlags.DepthStencil);
             bool hasShaderResources = usage.HasFlag(BindFlags.ShaderResource);
 
-            if (hasRenderTargets) 
-                views.Add(CreateResourceViewCollection<RenderTargetView>(format, arraySize, mipLevels));
-            if (hasDepthStencils) 
-                views.Add(CreateResourceViewCollection<DepthStencilView>(format, arraySize, mipLevels));
-            if (hasShaderResources) 
-                views.Add(CreateResourceViewCollection<ShaderResourceView>(format, arraySize, mipLevels));
+            if (hasRenderTargets)
+                viewsCollectons.Add(CreateResourceViewCollection<RenderTargetView>(format, arraySize, mipLevels));
+            if (hasDepthStencils)
+                viewsCollectons.Add(CreateResourceViewCollection<DepthStencilView>(format, arraySize, mipLevels));
+            if (hasShaderResources)
+                viewsCollectons.Add(CreateResourceViewCollection<ShaderResourceView>(format, arraySize, mipLevels));
         }
 
         private ResourceViewCollection<T> CreateResourceViewCollection<T>(Format format, int arraySize, int mipLevels) 
@@ -408,7 +408,7 @@ namespace Engine
                 ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, arraySize, 0, 0) as T,
                 ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, arraySize, 0, 0) as T,
                 ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, arraySize, 0, mipLevels, 0) as T,
-                var _ => throw new NotImplementedException(typeof(T).Name)
+                _ => throw new NotImplementedException(typeof(T).Name)
             };
 
             if (arraySize > 1 || mipLevels > 1)
@@ -420,7 +420,7 @@ namespace Engine
                         ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, 1, i, 0) as T,
                         ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, 1, i, 0) as T,
                         ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, 1, i, mipLevels, 0) as T,
-                        var _ => throw new NotImplementedException(typeof(T).Name)
+                        _ => throw new NotImplementedException(typeof(T).Name)
                     };
 
                     collection.ArrayViews.Add(arrayItemView);
@@ -445,7 +445,7 @@ namespace Engine
                             ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, 1, i, j) as T,
                             ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, 1, i, j) as T,
                             ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, 1, i, 1, j) as T,
-                            var _ => throw new NotImplementedException(typeof(T).Name)
+                            _ => throw new NotImplementedException(typeof(T).Name)
                         };
 
                         collection.MipsViews[i].Add(mipItemView);
@@ -515,12 +515,12 @@ namespace Engine
 
         private ResourceViewCollection<T> GetResourceViewCollection<T>() where T : ResourceView
         {
-            return (ResourceViewCollection<T>)views.First(view => view is ResourceViewCollection<T>);
+            return (ResourceViewCollection<T>)viewsCollectons.First(view => view is ResourceViewCollection<T>);
         }
 
         public bool HasViews<T>() where T : ResourceView
         {
-            return views.Any(v => v is ResourceViewCollection<T>);
+            return viewsCollectons.Any(v => v is ResourceViewCollection<T>);
         }
 
         public T GetView<T>() where T : ResourceView
@@ -538,7 +538,22 @@ namespace Engine
             return GetResourceViewCollection<T>().MipsViews[arraySliceIndex][mipSliceIndex];
         }
 
-        public void use(string variable, bool targetIsTextureArray = false)
+        public void use(string variable)
+        {
+            UseInternal(variable, GetView<ShaderResourceView>());
+        }
+
+        public void Use(string variable, int arraySlice)
+        {
+            UseInternal(variable, GetArraySliceView<ShaderResourceView>(arraySlice));
+        }
+
+        public void Use(string variable, int arraySlice, int mipSlice)
+        {
+            UseInternal(variable, GetMipSliceView<ShaderResourceView>(arraySlice, mipSlice));
+        }
+
+        private void UseInternal(string variable, ShaderResourceView view)
         {
             if ((texture.Description.BindFlags & BindFlags.ShaderResource) == BindFlags.None)
                 throw new Exception("This texture is not a shader resource");
@@ -549,10 +564,7 @@ namespace Engine
                 if (shader.Locations.TryGetValue(variable, out location))
                 {
                     correctLocation = true;
-                    if (targetIsTextureArray)
-                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, (ShaderResourceView)views.First(view => view is ShaderResourceView && (view as ShaderResourceView).Description.Texture2DArray.ArraySize > 1));
-                    else
-                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, GetView<ShaderResourceView>());
+                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, view);
                 }
             }
             if (!correctLocation)

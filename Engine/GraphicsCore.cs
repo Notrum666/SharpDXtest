@@ -487,7 +487,7 @@ namespace Engine
 
                         pipeline.UploadUpdatedUniforms();
 
-                        curLight.ShadowTexture.use("directionalLight.shadowMaps", true);
+                        curLight.ShadowTexture.use("directionalLight.shadowMaps");
                         shadowsSampler.use("shadowSampler");
                         camera.DepthBuffer.use("depthTex");
                     }
