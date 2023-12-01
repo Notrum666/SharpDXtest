@@ -12,6 +12,7 @@ using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
+using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 
 using BlendOperation = SharpDX.Direct3D11.BlendOperation;
@@ -22,6 +23,7 @@ using Format = SharpDX.DXGI.Format;
 using Light = Engine.BaseAssets.Components.Light;
 using Query = SharpDX.Direct3D11.Query;
 using QueryType = SharpDX.Direct3D11.QueryType;
+using SwapEffect = SharpDX.Direct3D9.SwapEffect;
 
 namespace Engine
 {
@@ -217,7 +219,7 @@ namespace Engine
                                                     DeviceType.Hardware,
                                                     0,
                                                     CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.FpuPreserve,
-                                                    new PresentParameters()
+                                                    new SharpDX.Direct3D9.PresentParameters()
                                                     {
                                                         Windowed = true,
                                                         SwapEffect = SwapEffect.Discard,

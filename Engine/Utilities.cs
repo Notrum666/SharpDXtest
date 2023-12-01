@@ -254,12 +254,12 @@ namespace Engine
 
         public void Use()
         {
-            Albedo.use("albedoMap");
-            Normal.use("normalMap");
-            Metallic.use("metallicMap");
-            Roughness.use("roughnessMap");
-            AmbientOcclusion.use("ambientOcclusionMap");
-            Emissive.use("emissiveMap");
+            Albedo.Use("albedoMap");
+            Normal.Use("normalMap");
+            Metallic.Use("metallicMap");
+            Roughness.Use("roughnessMap");
+            AmbientOcclusion.Use("ambientOcclusionMap");
+            Emissive.Use("emissiveMap");
             ShaderPipeline.Current.UploadUpdatedUniforms();
         }
     }
