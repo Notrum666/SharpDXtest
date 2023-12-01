@@ -12,6 +12,7 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Windows.Media.Imaging;
 using System.Windows;
+using System.Text;
 
 using SharpDX;
 using SharpDX.Direct3D;
@@ -57,7 +58,7 @@ namespace Engine
         private Buffer indexBuffer;
 
         // material assigned on mesh load
-        public int defaultMaterialIndex;
+        public string defaultMaterial;
 
         ~Primitive()
         {
@@ -97,7 +98,7 @@ namespace Engine
         public void Render()
         {
             if (disposed)
-                throw new Exception("Trying to render disposed primitive");
+                throw new ObjectDisposedException(nameof(Primitive));
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
@@ -248,12 +249,12 @@ namespace Engine
         }
         public Material()
         {
-            albedo = AssetsManager.Textures[0]; // default_albedo
-            normal = AssetsManager.Textures[1]; // default_normal
-            metallic = AssetsManager.Textures[2]; // default_metallic
-            roughness = AssetsManager.Textures[3]; // default_roughness
-            ambientOcclusion = AssetsManager.Textures[4]; // default_ambientOcclusion
-            emissive = AssetsManager.Textures[5]; // default_emissive
+            albedo = AssetsManager.Textures["default_albedo"];
+            normal = AssetsManager.Textures["default_normal"];
+            metallic = AssetsManager.Textures["default_metallic"];
+            roughness = AssetsManager.Textures["default_roughness"];
+            ambientOcclusion = AssetsManager.Textures["default_ambientOcclusion"];
+            emissive = AssetsManager.Textures["default_emissive"];
         }
         public Material(Texture albedo, Texture normal, Texture metallic, Texture roughness, Texture ambientOcclusion, Texture emissive)
         {
@@ -1086,11 +1087,27 @@ namespace Engine
         public static Dictionary<string, Mesh> Meshes { get; } = new Dictionary<string, Mesh>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
         public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
-        public static List<Material> Materials { get; } = new List<Material>();
-        public static List<Texture> Textures { get; } = new List<Texture> ();
+        public static Dictionary<string, Material> Materials { get; } = new Dictionary<string, Material>();
+        public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture> ();
         public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
         public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
         public static Dictionary<string, Sound> Sounds { get; } = new Dictionary<string, Sound>();
+
+        public static string getTextureNameByIndex(int index, string modelPath)
+        {
+            StringBuilder strBuilder = new StringBuilder(modelPath);
+            strBuilder.Append("_texture_");
+            strBuilder.Append(index);
+            return strBuilder.ToString();
+        }
+
+        public static string getMaterialNameByIndex(int index, string modelPath)
+        {
+            StringBuilder strBuilder = new StringBuilder(modelPath);
+            strBuilder.Append("_material_");
+            strBuilder.Append(index);
+            return strBuilder.ToString();
+        }
 
         // loads meshes, materials and textures stored in one model file
         public static void LoadModel(string path, float scaleFactor = 1.0f)
@@ -1098,15 +1115,15 @@ namespace Engine
             AssimpContext aiImporter = new AssimpContext();
 
             Dictionary<string, Mesh> meshes = new Dictionary<string, Mesh>();
-            List<Material> materials = new List<Material>();
+            Dictionary<string, Material> materials = new Dictionary<string, Material>();
 
             // any type model import
             Assimp.Scene aiScene = aiImporter.ImportFile(path);
 
-            foreach (Assimp.Mesh m in aiScene.Meshes)
+            foreach (Assimp.Mesh aiMesh in aiScene.Meshes)
             {
                 // handle only triangles
-                if (m.PrimitiveType != PrimitiveType.Triangle)
+                if (aiMesh.PrimitiveType != PrimitiveType.Triangle)
                 {
                     Logger.Log(LogType.Warning, "Primitive type of mesh is not a triangle, skip");
                     continue;
@@ -1115,19 +1132,19 @@ namespace Engine
                 Mesh mesh;
 
                 // in order to store different primitives into one mesh trying to find it by name
-                if (!meshes.TryGetValue(m.Name, out mesh))
+                if (!meshes.TryGetValue(aiMesh.Name, out mesh))
                 {
                     mesh = new Mesh();
-                    meshes.Add(m.Name, mesh);
+                    meshes.Add(aiMesh.Name, mesh);
                 }
 
                 Primitive primitive = new Primitive();
-                primitive.defaultMaterialIndex = m.MaterialIndex + Materials.Count;
+                primitive.defaultMaterial = getMaterialNameByIndex(aiMesh.MaterialIndex, path);
                 primitive.vertices = new List<Primitive.PrimitiveVertex>();
                 primitive.indices = new List<int>();
-                List<Vector3D> verts = m.Vertices;
-                List<Vector3D> norms = (m.HasNormals) ? m.Normals : null;
-                List<Vector3D> uvs = m.HasTextureCoords(0) ? m.TextureCoordinateChannels[0] : null;
+                List<Vector3D> verts = aiMesh.Vertices;
+                List<Vector3D> norms = (aiMesh.HasNormals) ? aiMesh.Normals : null;
+                List<Vector3D> uvs = aiMesh.HasTextureCoords(0) ? aiMesh.TextureCoordinateChannels[0] : null;
                 for (int i = 0; i < verts.Count; i++)
                 {
                     Vector3D pos = verts[i];
@@ -1140,8 +1157,8 @@ namespace Engine
                     primitive.vertices.Add(vertex);
                 }
 
-                List<Face> faces = m.Faces;
-                foreach (Face face in m.Faces)
+                List<Face> faces = aiMesh.Faces;
+                foreach (Face face in aiMesh.Faces)
                 {
                     if (face.IndexCount != 3)
                         throw new Exception("mesh is not triangulated");
@@ -1154,17 +1171,19 @@ namespace Engine
                 mesh.Primitives.Add(primitive);
             }
 
-            List<Texture> textures = new List<Texture>();
-            foreach (EmbeddedTexture aiTexture in aiScene.Textures)
+            Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
+            for (int i = 0; i < aiScene.Textures.Count; ++i)
             {
+                EmbeddedTexture aiTexture = aiScene.Textures[i];
                 if (aiTexture.HasCompressedData)
-                    textures.Add(new Texture(Texture.DecodeTexture(aiTexture.CompressedData)));
+                    textures.Add(getTextureNameByIndex(i, path), new Texture(Texture.DecodeTexture(aiTexture.CompressedData)));
                 else if (aiTexture.Filename.Length > 0)
-                    textures.Add(new Texture(new Bitmap(aiTexture.Filename)));
+                    textures.Add(getTextureNameByIndex(i, path), new Texture(new Bitmap(aiTexture.Filename)));
             }
 
-            foreach (Assimp.Material aiMaterial in aiScene.Materials)
+            for (int i = 0; i < aiScene.Materials.Count; ++i)
             {
+                Assimp.Material aiMaterial = aiScene.Materials[i];
                 Material material = new Material();
                 Texture albedo = null;
                 Texture normal = null;
@@ -1172,7 +1191,7 @@ namespace Engine
                 {
                     TextureSlot textureSlot;
                     aiMaterial.GetMaterialTexture(TextureType.BaseColor, 0, out textureSlot);
-                    albedo = textures[textureSlot.TextureIndex];
+                    albedo = textures[getTextureNameByIndex(textureSlot.TextureIndex, path)];
                 }
                 else if (aiMaterial.HasColorDiffuse)
                 {
@@ -1184,7 +1203,7 @@ namespace Engine
                 {
                     TextureSlot textureSlot;
                     aiMaterial.GetMaterialTexture(TextureType.Normals, 0, out textureSlot);
-                    normal = textures[textureSlot.TextureIndex];
+                    normal = textures[getTextureNameByIndex(textureSlot.TextureIndex, path)];
                 }
 
                 if (albedo != null)
@@ -1192,7 +1211,7 @@ namespace Engine
                 if (normal != null)
                     material.Normal = normal;
 
-                materials.Add(material);
+                materials.Add(getMaterialNameByIndex(i, path), material);
             }
 
             Materials.AddRange(materials);
@@ -1223,10 +1242,15 @@ namespace Engine
             ShaderPipelines[shaderPipelineName] = shaderPipeline;
             return shaderPipeline;
         }
-        public static Texture LoadTexture(string path, bool applyGammaCorrection = false)
+        public static Texture LoadTexture(string path, string textureName = "", bool applyGammaCorrection = false)
         {
+            if (textureName == "")
+                textureName = Path.GetFileNameWithoutExtension(path);
+            if (Textures.ContainsKey(textureName))
+                return Textures[textureName];
+
             Texture texture = new Texture(new Bitmap(path), applyGammaCorrection);
-            Textures.Add(texture);
+            Textures[textureName] = texture;
 
             return texture;
         }
@@ -1302,13 +1326,13 @@ namespace Engine
                                     throw new Exception(objType.Name + " doesn't have " + name + ".");
                             }
                             // attach materials from loaded mesh to loaded primitives
-                            string materialPropertyName = "materials";
+                            string materialPropertyName = "Materials";
                             PropertyInfo materialProperty = objType.GetProperty(materialPropertyName);
                             List<Material> materials = new List<Material>();
                             foreach (Primitive primitive in Meshes[words[1]].Primitives)
-                                materials.Add(Materials[primitive.defaultMaterialIndex]);
-                            if (property != null)
-                                property.SetValue(obj, materials);
+                                materials.Add((primitive.defaultMaterial == null) ? null : Materials[primitive.defaultMaterial]);
+                            if (materialProperty != null)
+                                materialProperty.SetValue(obj, materials.ToArray());
                             else
                             {
                                 FieldInfo materialField = objType.GetField(materialPropertyName);
@@ -1325,12 +1349,12 @@ namespace Engine
                             //    throw new Exception("Texture " + words[1] + " not loaded.");
                             PropertyInfo property = objType.GetProperty(name);
                             if (property != null)
-                                property.SetValue(obj, Textures[int.Parse(words[1])]);
+                                property.SetValue(obj, Textures[words[1]]);
                             else
                             {
                                 FieldInfo field = objType.GetField(name);
                                 if (field != null)
-                                    field.SetValue(obj, Textures[int.Parse(words[1])]);
+                                    field.SetValue(obj, Textures[words[1]]);
                                 else
                                     throw new Exception(objType.Name + " don't have " + name + ".");
                             }
