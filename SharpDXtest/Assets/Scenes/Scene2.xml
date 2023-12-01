@@ -39,7 +39,7 @@
 			</MeshComponent>
 			<SelfRotation periodInDays="26.6"/>
 		</GameObject>
-		
+
 		<PointLight Radius="500" Brightness="1.0"/>
 		<GameObject x.Name="Mercury">
 			<GameObject>
@@ -60,7 +60,7 @@
 			</GameObject>
 			<OrbitalRotation periodInDays="225" radius="10.8"/>
 		</GameObject>
-		
+
 		<GameObject x.Name="Earth">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
@@ -69,7 +69,7 @@
 				<SelfRotation periodInDays="1"/>
 			</GameObject>
 			<OrbitalRotation periodInDays="365" radius="15"/>
-			
+
 			<GameObject x.Name="Moon">
 				<GameObject>
 					<MeshComponent mesh="{Mesh Ball}">
@@ -80,7 +80,7 @@
 				<OrbitalRotation periodInDays="27" radius="2"/>
 			</GameObject>
 		</GameObject>
-		
+
 		<GameObject x.Name="Mars">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
@@ -98,7 +98,7 @@
 				<OrbitalRotation periodInDays="1.25" radius="4"/>
 			</GameObject>
 		</GameObject>
-		
+
 		<GameObject x.Name="Jupiter">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
@@ -124,7 +124,7 @@
 				<OrbitalRotation periodInDays="17" radius="8"/>
 			</GameObject>
 		</GameObject>
-		
+
 		<GameObject x.Name="Saturn">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
@@ -138,7 +138,7 @@
 				<OrbitalRotation periodInDays="16" radius="2"/>
 			</GameObject>
 		</GameObject>
-		
+
 		<GameObject x.Name="UrAnus">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">
@@ -148,7 +148,7 @@
 			</GameObject>
 			<OrbitalRotation periodInDays="30660" radius="287.5"/>
 		</GameObject>
-		
+
 		<GameObject x.Name="Neptune">
 			<GameObject>
 				<MeshComponent mesh="{Mesh Ball}">

@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Linq;
@@ -14,23 +14,27 @@ using System.Windows.Media.Imaging;
 using System.Windows;
 using System.Text;
 
+using Engine.BaseAssets.Components;
+
+using LinearAlgebra;
+
 using SharpDX;
+using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
-using SharpDX.D3DCompiler;
-using SharpDX.XAudio2;
-using SharpDX.Multimedia;
 using SharpDX.Mathematics.Interop;
+using SharpDX.Multimedia;
+using SharpDX.XAudio2;
 
 using Assimp;
 
 using Buffer = SharpDX.Direct3D11.Buffer;
-
-using Engine.BaseAssets.Components;
-using LinearAlgebra;
-using Vector3 = LinearAlgebra.Vector3;
+using MapFlags = SharpDX.Direct3D11.MapFlags;
 using Quaternion = LinearAlgebra.Quaternion;
+using Rectangle = System.Drawing.Rectangle;
+using Vector2 = LinearAlgebra.Vector2;
+using Vector3 = LinearAlgebra.Vector3;
 
 namespace Engine
 {
@@ -166,10 +170,7 @@ namespace Engine
         private Texture albedo;
         public Texture Albedo
         {
-            get
-            {
-                return albedo;
-            }
+            get => albedo;
             set
             {
                 if (value == null)
@@ -180,10 +181,7 @@ namespace Engine
         private Texture normal;
         public Texture Normal
         {
-            get
-            {
-                return normal;
-            }
+            get => normal;
             set
             {
                 if (value == null)
@@ -194,10 +192,7 @@ namespace Engine
         private Texture metallic;
         public Texture Metallic
         {
-            get
-            {
-                return metallic;
-            }
+            get => metallic;
             set
             {
                 if (value == null)
@@ -208,10 +203,7 @@ namespace Engine
         private Texture roughness;
         public Texture Roughness
         {
-            get
-            {
-                return roughness;
-            }
+            get => roughness;
             set
             {
                 if (value == null)
@@ -222,10 +214,7 @@ namespace Engine
         private Texture ambientOcclusion;
         public Texture AmbientOcclusion
         {
-            get
-            {
-                return ambientOcclusion;
-            }
+            get => ambientOcclusion;
             set
             {
                 if (value == null)
@@ -236,10 +225,7 @@ namespace Engine
         private Texture emissive;
         public Texture Emissive
         {
-            get
-            {
-                return emissive;
-            }
+            get => emissive;
             set
             {
                 if (value == null)
@@ -295,9 +281,10 @@ namespace Engine
                 MinimumLod = 0,
                 MaximumLod = float.MaxValue,
                 BorderColor = borderColor,
-                ComparisonFunction = comparisonFunction,
+                ComparisonFunction = comparisonFunction
             });
         }
+
         public void use(string variable)
         {
             if (disposed)
@@ -305,11 +292,13 @@ namespace Engine
             bool correctLocation = false;
             int location;
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
+            {
                 if (shader.Locations.TryGetValue(variable, out location))
                 {
                     correctLocation = true;
                     GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetSampler(location, sampler);
                 }
+            }
             if (!correctLocation)
                 throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
         }
@@ -337,10 +326,17 @@ namespace Engine
     }
     public class Texture : IDisposable
     {
+        private interface IResourceViewCollection { }
+        private struct ResourceViewCollection<T> : IResourceViewCollection where T : ResourceView
+        {
+            public T GeneralView;
+            public List<T> ArrayViews;
+            public List<List<T>> MipsViews;
+        }
+
         private bool disposed = false;
         public Texture2D texture { get; private set; }
-        private List<ResourceView> views = new List<ResourceView>();
-        public IReadOnlyCollection<ResourceView> Views { get => views.AsReadOnly(); }
+        private List<IResourceViewCollection> viewsCollectons = new List<IResourceViewCollection>();
 
         public static Bitmap DecodeTexture(byte[] bytes)
         {
@@ -370,8 +366,8 @@ namespace Engine
         public Texture(Bitmap image, bool applyGammaCorrection = true)
         {
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
-                image = image.Clone(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
-            BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+                image = image.Clone(new Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
+            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
             texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
             {
@@ -389,19 +385,23 @@ namespace Engine
 
             image.UnlockBits(data);
 
-            generateViews();
+            GenerateViews();
         }
-        public Texture(int width, int height, IEnumerable<byte>? defaultDataPerPixel, Format textureFormat, BindFlags usage, int arraySize = 1)
+
+        public Texture(int width, int height, IEnumerable<byte>? defaultDataPerPixel, Format textureFormat, BindFlags usage, int arraySize = 1, int mipLevels = 1)
         {
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
             if (height <= 0)
                 throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
 
-            Format[] supportedFormats = { Format.B8G8R8A8_UNorm,
-                                          Format.B8G8R8A8_UNorm_SRgb,
-                                          Format.R32G32B32A32_Float,
-                                          Format.R32_Typeless };
+            Format[] supportedFormats =
+            {
+                Format.B8G8R8A8_UNorm,
+                Format.B8G8R8A8_UNorm_SRgb,
+                Format.R32G32B32A32_Float,
+                Format.R32_Typeless
+            };
             if (!supportedFormats.Contains(textureFormat))
                 throw new NotSupportedException("Texture format is not supported: %s" + textureFormat.ToString());
 
@@ -415,6 +415,7 @@ namespace Engine
 
                 IEnumerator<byte> enumerator = defaultDataPerPixel.GetEnumerator();
                 for (int i = 0; i < height; i++)
+                {
                     for (int j = 0; j < width; j++)
                     {
                         int pos = (i * width + j) * bytesPerPixel;
@@ -422,6 +423,7 @@ namespace Engine
                             data[pos + k] = enumerator.Current;
                         enumerator.Reset();
                     }
+                }
 
                 dataPtr = Marshal.AllocHGlobal(width * height * bytesPerPixel);
                 Marshal.Copy(data, 0, dataPtr, width * height * bytesPerPixel);
@@ -439,7 +441,7 @@ namespace Engine
                 Usage = ResourceUsage.Default,
                 CpuAccessFlags = CpuAccessFlags.None,
                 Format = textureFormat,
-                MipLevels = 1,
+                MipLevels = mipLevels,
                 OptionFlags = ResourceOptionFlags.Shared,
                 SampleDescription = new SampleDescription(1, 0)
             }, rectangles);
@@ -447,144 +449,252 @@ namespace Engine
             if (defaultDataPerPixel != null)
                 Marshal.FreeHGlobal(dataPtr);
 
-            generateViews();
+            GenerateViews();
         }
-        private void generateViews()
+
+        private void GenerateViews()
         {
             Format format = texture.Description.Format;
             if (format == Format.R32_Typeless)
                 format = Format.R32_Float;
             BindFlags usage = texture.Description.BindFlags;
+
             int arraySize = texture.Description.ArraySize;
+            int mipLevels = texture.Description.MipLevels;
 
-            if (usage.HasFlag(BindFlags.RenderTarget))
-            {
-                if (arraySize > 1)
-                {
-                    views.Add(new RenderTargetView(GraphicsCore.CurrentDevice, texture,
-                        new RenderTargetViewDescription()
-                        {
-                            Format = format,
-                            Dimension = RenderTargetViewDimension.Texture2DArray,
-                            Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = 0,
-                                ArraySize = texture.Description.ArraySize,
-                                FirstArraySlice = 0
-                            }
-                        }));
-                }
-                for (int i = 0; i < arraySize; i++)
-                {
-                    views.Add(new RenderTargetView(GraphicsCore.CurrentDevice, texture,
-                        new RenderTargetViewDescription()
-                        {
-                            Format = format,
-                            Dimension = RenderTargetViewDimension.Texture2DArray,
-                            Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = 0,
-                                ArraySize = 1,
-                                FirstArraySlice = i
-                            }
-                        }));
-                }
-            }
+            bool hasRenderTargets = usage.HasFlag(BindFlags.RenderTarget);
+            bool hasDepthStencils = usage.HasFlag(BindFlags.DepthStencil);
+            bool hasShaderResources = usage.HasFlag(BindFlags.ShaderResource);
 
-            if (usage.HasFlag(BindFlags.DepthStencil))
-            {
-                if (arraySize > 1)
-                {
-                    views.Add(new DepthStencilView(GraphicsCore.CurrentDevice, texture,
-                        new DepthStencilViewDescription()
-                        {
-                            Format = Format.D32_Float,
-                            Dimension = DepthStencilViewDimension.Texture2DArray,
-                            Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = 0,
-                                ArraySize = texture.Description.ArraySize,
-                                FirstArraySlice = 0
-                            }
-                        }));
-                }
-                for (int i = 0; i < arraySize; i++)
-                {
-                    views.Add(new DepthStencilView(GraphicsCore.CurrentDevice, texture,
-                        new DepthStencilViewDescription()
-                        {
-                            Format = Format.D32_Float,
-                            Dimension = DepthStencilViewDimension.Texture2DArray,
-                            Flags = DepthStencilViewFlags.None,
-                            Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = 0,
-                                ArraySize = 1,
-                                FirstArraySlice = i
-                            }
-                        }));
-                }
-            }
-
-            if (usage.HasFlag(BindFlags.ShaderResource))
-            {
-                if (arraySize > 1)
-                {
-                    views.Add(new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
-                        new ShaderResourceViewDescription()
-                        {
-                            Format = format,
-                            Dimension = ShaderResourceViewDimension.Texture2DArray,
-                            Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
-                            {
-                                MipLevels = texture.Description.MipLevels,
-                                MostDetailedMip = texture.Description.MipLevels - 1,
-                                ArraySize = texture.Description.ArraySize,
-                                FirstArraySlice = 0
-                            }
-                        }));
-                }
-                for (int i = 0; i < arraySize; i++)
-                {
-                    views.Add(new ShaderResourceView(GraphicsCore.CurrentDevice, texture,
-                        new ShaderResourceViewDescription()
-                        {
-                            Format = format,
-                            Dimension = ShaderResourceViewDimension.Texture2DArray,
-                            Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
-                            {
-                                MipLevels = texture.Description.MipLevels,
-                                MostDetailedMip = texture.Description.MipLevels - 1,
-                                ArraySize = 1,
-                                FirstArraySlice = i
-                            }
-                        }));
-                }
-            }
+            if (hasRenderTargets)
+                viewsCollectons.Add(CreateResourceViewCollection<RenderTargetView>(format, arraySize, mipLevels));
+            if (hasDepthStencils)
+                viewsCollectons.Add(CreateResourceViewCollection<DepthStencilView>(format, arraySize, mipLevels));
+            if (hasShaderResources)
+                viewsCollectons.Add(CreateResourceViewCollection<ShaderResourceView>(format, arraySize, mipLevels));
         }
+
+        private ResourceViewCollection<T> CreateResourceViewCollection<T>(Format format, int arraySize, int mipLevels) 
+            where T : ResourceView
+        {
+            if(arraySize < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(arraySize));
+            }
+
+            if(mipLevels < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(mipLevels));
+            }
+
+            ResourceViewCollection<T> collection = new ResourceViewCollection<T>
+            {
+                ArrayViews = new List<T>(arraySize),
+                MipsViews = new List<List<T>>(arraySize)
+            };
+
+            collection.GeneralView = collection switch
+            {
+                ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, arraySize, 0, 0) as T,
+                ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, arraySize, 0, 0) as T,
+                ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, arraySize, 0, mipLevels, 0) as T,
+                _ => throw new NotImplementedException(typeof(T).Name)
+            };
+
+            if (arraySize > 1 || mipLevels > 1)
+            {
+                for (int i = 0; i < arraySize; i++)
+                {
+                    T arrayItemView = collection switch
+                    {
+                        ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, 1, i, 0) as T,
+                        ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, 1, i, 0) as T,
+                        ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, 1, i, mipLevels, 0) as T,
+                        _ => throw new NotImplementedException(typeof(T).Name)
+                    };
+
+                    collection.ArrayViews.Add(arrayItemView);
+
+                    collection.MipsViews.Add(new List<T>(mipLevels));
+
+                    int mipStartInd = 1;
+
+                    if (arrayItemView is not ShaderResourceView)
+                    {
+                        collection.MipsViews[0].Add(arrayItemView);
+                    }
+                    else
+                    {
+                        mipStartInd = 0;
+                    }
+
+                    for (int j = mipStartInd; j < mipLevels; j++)
+                    {
+                        T mipItemView = collection switch
+                        {
+                            ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, 1, i, j) as T,
+                            ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, 1, i, j) as T,
+                            ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, 1, i, 1, j) as T,
+                            _ => throw new NotImplementedException(typeof(T).Name)
+                        };
+
+                        collection.MipsViews[i].Add(mipItemView);
+                    }
+                }
+            }
+            else
+            {
+                collection.ArrayViews.Add(collection.GeneralView);
+                collection.MipsViews.Add(new List<T> { collection.GeneralView });
+            }
+
+            return collection;
+        }
+
+        private RenderTargetView CreateRenderTargetView(Texture2D rawTexture, Format format, int arraySize, int arraySlice, int mipSlice)
+        {
+            return new RenderTargetView(GraphicsCore.CurrentDevice, rawTexture,
+                        new RenderTargetViewDescription()
+                        {
+                            Format = format,
+                            Dimension = RenderTargetViewDimension.Texture2DArray,
+                            Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource()
+                            {
+                                MipSlice = mipSlice,
+                                ArraySize = arraySize,
+                                FirstArraySlice = arraySlice
+                            }
+                        }
+                    );
+        }
+
+        private DepthStencilView CreateDepthStencilView(Texture2D rawTexture, int arraySize, int arraySlice, int mipSlice)
+        {
+            return new DepthStencilView(GraphicsCore.CurrentDevice, rawTexture,
+                        new DepthStencilViewDescription()
+                        {
+                            Format = Format.D32_Float,
+                            Dimension = DepthStencilViewDimension.Texture2DArray,
+                            Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                            {
+                                MipSlice = mipSlice,
+                                ArraySize = arraySize,
+                                FirstArraySlice = arraySlice
+                            }
+                        }
+                    );
+        }
+
+        private ShaderResourceView CreateShaderResourceView(Texture2D rawTexture, Format format, int arraySize, int arraySlice, int mipLevels, int mipSlice)
+        {
+            return new ShaderResourceView(GraphicsCore.CurrentDevice, rawTexture,
+                        new ShaderResourceViewDescription()
+                        {
+                            Format = format,
+                            Dimension = ShaderResourceViewDimension.Texture2DArray,
+                            Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
+                            {
+                                MipLevels = mipLevels,
+                                MostDetailedMip = mipSlice,
+                                ArraySize = arraySize,
+                                FirstArraySlice = arraySlice
+                            }
+                        }
+                    );
+        }
+
+        private ResourceViewCollection<T> GetResourceViewCollection<T>() where T : ResourceView
+        {
+            return (ResourceViewCollection<T>)viewsCollectons.First(view => view is ResourceViewCollection<T>);
+        }
+
+        /// <summary>
+        /// Check if texture contains ResourceView of specified type
+        /// </summary>
+        /// <typeparam name="T">Type of ResourceView</typeparam>
+        /// <returns>True if contains otherwize false</returns>
+        public bool HasViews<T>() where T : ResourceView
+        {
+            return viewsCollectons.Any(v => v is ResourceViewCollection<T>);
+        }
+
+        /// <summary>
+        /// Get specified type of texture's ResourceView
+        /// </summary>
+        /// <typeparam name="T">Type of ResourceView</typeparam>
+        /// <returns>ResourceView of specified type</returns>
         public T GetView<T>() where T : ResourceView
         {
-            return (T)views.First(view => view is T);
+            return GetResourceViewCollection<T>().GeneralView;
         }
-        public IList<T> GetViews<T>() where T : ResourceView
+
+        /// <summary>
+        /// Get specified type of array slice texture's ResourceView
+        /// </summary>
+        /// <typeparam name="T">Type of ResourceView</typeparam>
+        /// <param name="arraySlice">Array slice index</param>
+        /// <returns>ResourceView of specified type</returns>
+        public T GetView<T>(int arraySlice) where T : ResourceView
         {
-            return views.Where(view => view is T).Cast<T>().ToList();
+            return GetResourceViewCollection<T>().ArrayViews[arraySlice];
         }
-        public void use(string variable, bool targetIsTextureArray = false)
+
+        /// <summary>
+        /// Get specified type of mip slice texture's ResourceView
+        /// </summary>
+        /// <typeparam name="T">Type of ResourceView</typeparam>
+        /// <param name="arraySlice">Array slice index</param>
+        /// <param name="mipSlice">Mip slice index</param>
+        /// <returns>ResourceView of specified type</returns>
+        public T GetView<T>(int arraySlice, int mipSlice) where T : ResourceView
+        {
+            return GetResourceViewCollection<T>().MipsViews[arraySlice][mipSlice];
+        }
+
+        /// <summary>
+        /// Bind texture to current ShaderPipeline as ShaderResourceView
+        /// </summary>
+        /// <param name="variable">Name of texture variable in shaders</param>
+        public void Use(string variable)
+        {
+            UseInternal(variable, GetView<ShaderResourceView>());
+        }
+
+        /// <summary>
+        /// Bind array slice of texture to current ShaderPipeline as ShaderResourceView
+        /// </summary>
+        /// <param name="variable">Name of texture variable in shaders</param>
+        /// <param name="arraySlice">Array slice index</param>
+        public void Use(string variable, int arraySlice)
+        {
+            UseInternal(variable, GetView<ShaderResourceView>(arraySlice));
+        }
+
+        /// <summary>
+        /// Bind mip slice of texture to current ShaderPipeline as ShaderResourceView
+        /// </summary>
+        /// <param name="variable">Name of texture variable in shaders</param>
+        /// <param name="arraySlice">Array slice index</param>
+        /// <param name="mipSlice">Mip slice index</param>
+        public void Use(string variable, int arraySlice, int mipSlice)
+        {
+            UseInternal(variable, GetView<ShaderResourceView>(arraySlice, mipSlice));
+        }
+
+        private void UseInternal(string variable, ShaderResourceView view)
         {
             if ((texture.Description.BindFlags & BindFlags.ShaderResource) == BindFlags.None)
                 throw new Exception("This texture is not a shader resource");
             bool correctLocation = false;
             int location;
             foreach (Shader shader in ShaderPipeline.Current.Shaders)
+            {
                 if (shader.Locations.TryGetValue(variable, out location))
                 {
                     correctLocation = true;
-                    if (targetIsTextureArray)
-                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, (ShaderResourceView)views.First(view => view is ShaderResourceView && (view as ShaderResourceView).Description.Texture2DArray.ArraySize > 1));
-                    else
-                        GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, GetView<ShaderResourceView>());
+                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, view);
                 }
+            }
             if (!correctLocation)
                 throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
         }
@@ -615,7 +725,7 @@ namespace Engine
         public AudioBuffer Buffer { get; private set; }
         public WaveFormat Format { get; private set; }
         public uint[] DecodedPacketsInfo { get; private set; }
-        
+
         private bool disposed = false;
 
         public Sound(AudioBuffer buffer, WaveFormat format, uint[] decodedPacketsInfo)
@@ -633,10 +743,12 @@ namespace Engine
                 disposed = true;
             }
         }
+
         ~Sound()
         {
             Dispose(disposing: false);
         }
+
         public void Dispose()
         {
             Dispose(disposing: true);
@@ -659,17 +771,22 @@ namespace Engine
         protected List<ShaderBuffer> buffers = new List<ShaderBuffer>();
 
         public abstract void use();
+
         public bool hasVariable(string name)
         {
             foreach (ShaderBuffer buffer in buffers)
+            {
                 if (buffer.variables.ContainsKey(name))
                     return true;
+            }
             return false;
         }
+
         public void updateUniform(string name, object value)
         {
             ShaderVariable variable;
             foreach (ShaderBuffer buffer in buffers)
+            {
                 if (buffer.variables.TryGetValue(name, out variable))
                 {
                     if (variable.size < Marshal.SizeOf(value))
@@ -678,12 +795,15 @@ namespace Engine
                     buffer.invalidated = true;
                     return;
                 }
+            }
             throw new ArgumentException("Variable does not exists.");
         }
+
         public bool tryUpdateUniform(string name, object value)
         {
             ShaderVariable variable;
             foreach (ShaderBuffer buffer in buffers)
+            {
                 if (buffer.variables.TryGetValue(name, out variable))
                 {
                     if (variable.size < Marshal.SizeOf(value))
@@ -692,8 +812,10 @@ namespace Engine
                     buffer.invalidated = true;
                     return true;
                 }
+            }
             return false;
         }
+
         protected void generateBuffersAndLocations(ShaderReflection reflection)
         {
             for (int i = 0; i < reflection.Description.ConstantBuffers; i++)
@@ -720,10 +842,12 @@ namespace Engine
                 }
             }
         }
+
         private Dictionary<string, ShaderVariable> parseShaderVariable(ShaderReflectionVariable variable)
         {
             return parseShaderVariableType(variable.GetVariableType(), variable.Description.Name, variable.Description.StartOffset, variable.Description.Size);
         }
+
         private Dictionary<string, ShaderVariable> parseShaderVariableType(ShaderReflectionType type, string varName, int parentOffset, int varSize)
         {
             int elementCount = type.Description.ElementCount;
@@ -739,12 +863,14 @@ namespace Engine
 
             return variables;
         }
+
         private Dictionary<string, ShaderVariable> parseNonArrayShaderVariableType(ShaderReflectionType type, string varName, int parentOffset, int varSize)
         {
             Dictionary<string, ShaderVariable> variables = new Dictionary<string, ShaderVariable>();
             if (type.Description.MemberCount == 0)
                 variables.Add(varName, new ShaderVariable() { offset = parentOffset + type.Description.Offset, size = varSize, value = null });
             else
+            {
                 for (int i = 0; i < type.Description.MemberCount; i++)
                 {
                     ShaderReflectionType subtype = type.GetMemberType(i);
@@ -755,15 +881,18 @@ namespace Engine
                         memberSize = type.GetMemberType(i + 1).Description.Offset - subtype.Description.Offset;
                     variables.AddRange(parseShaderVariableType(subtype, varName + "." + type.GetMemberTypeName(i), parentOffset + type.Description.Offset, memberSize));
                 }
+            }
             return variables;
         }
+
         public void uploadUpdatedUniforms()
         {
             foreach (ShaderBuffer buf in buffers)
+            {
                 if (buf.invalidated)
                 {
                     DataStream stream;
-                    GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.buffer, 0, MapMode.WriteDiscard, SharpDX.Direct3D11.MapFlags.None, out stream);
+                    GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.buffer, 0, MapMode.WriteDiscard, MapFlags.None, out stream);
                     foreach (ShaderVariable variable in buf.variables.Values)
                     {
                         if (variable.value == null)
@@ -774,7 +903,9 @@ namespace Engine
                     GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.buffer, 0);
                     buf.invalidated = false;
                 }
+            }
         }
+
         public static Shader Create(string path)
         {
             string extension = Path.GetExtension(path);
@@ -796,6 +927,7 @@ namespace Engine
                     throw new ArgumentException("Can't get shader type from extension, consider using other Shader.Create() overload.");
             }
         }
+
         public static Shader Create(string path, ShaderType type)
         {
             switch (type)
@@ -832,7 +964,7 @@ namespace Engine
 
         private class Shader_Vertex : Shader
         {
-            public override ShaderType Type { get => ShaderType.VertexShader; }
+            public override ShaderType Type => ShaderType.VertexShader;
             private InputLayout layout;
             private VertexShader shader;
 
@@ -922,6 +1054,7 @@ namespace Engine
                 shader = new VertexShader(GraphicsCore.CurrentDevice, bytecode);
                 generateBuffersAndLocations(reflection);
             }
+
             public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.InputLayout = layout;
@@ -931,8 +1064,9 @@ namespace Engine
         }
         private class Shader_Hull : Shader
         {
-            public override ShaderType Type { get => ShaderType.HullShader; }
+            public override ShaderType Type => ShaderType.HullShader;
             private HullShader shader;
+
             public Shader_Hull(string path)
             {
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "hs_5_0");
@@ -940,6 +1074,7 @@ namespace Engine
                 shader = new HullShader(GraphicsCore.CurrentDevice, bytecode);
                 generateBuffersAndLocations(reflection);
             }
+
             public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.HullShader.Set(shader);
@@ -948,8 +1083,9 @@ namespace Engine
         }
         private class Shader_Domain : Shader
         {
-            public override ShaderType Type { get => ShaderType.DomainShader; }
+            public override ShaderType Type => ShaderType.DomainShader;
             private DomainShader shader;
+
             public Shader_Domain(string path)
             {
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "ds_5_0");
@@ -957,6 +1093,7 @@ namespace Engine
                 shader = new DomainShader(GraphicsCore.CurrentDevice, bytecode);
                 generateBuffersAndLocations(reflection);
             }
+
             public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.Set(shader);
@@ -965,8 +1102,9 @@ namespace Engine
         }
         private class Shader_Geometry : Shader
         {
-            public override ShaderType Type { get => ShaderType.GeometryShader; }
+            public override ShaderType Type => ShaderType.GeometryShader;
             private GeometryShader shader;
+
             public Shader_Geometry(string path)
             {
 #if !GraphicsDebugging
@@ -978,6 +1116,7 @@ namespace Engine
                 shader = new GeometryShader(GraphicsCore.CurrentDevice, bytecode);
                 generateBuffersAndLocations(reflection);
             }
+
             public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.Set(shader);
@@ -986,8 +1125,9 @@ namespace Engine
         }
         private class Shader_Fragment : Shader
         {
-            public override ShaderType Type { get => ShaderType.FragmentShader; }
+            public override ShaderType Type => ShaderType.FragmentShader;
             private PixelShader shader;
+
             public Shader_Fragment(string path)
             {
 #if !GraphicsDebugging
@@ -999,6 +1139,7 @@ namespace Engine
                 shader = new PixelShader(GraphicsCore.CurrentDevice, bytecode);
                 generateBuffersAndLocations(reflection);
             }
+
             public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.Set(shader);
@@ -1007,8 +1148,9 @@ namespace Engine
         }
         private class Shader_Compute : Shader
         {
-            public override ShaderType Type { get => ShaderType.ComputeShader; }
+            public override ShaderType Type => ShaderType.ComputeShader;
             private ComputeShader shader;
+
             public Shader_Compute(string path)
             {
                 ShaderBytecode bytecode = ShaderBytecode.CompileFromFile(path, "main", "cs_5_0");
@@ -1016,6 +1158,7 @@ namespace Engine
                 shader = new ComputeShader(GraphicsCore.CurrentDevice, bytecode);
                 generateBuffersAndLocations(reflection);
             }
+
             public override void use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.Set(shader);
@@ -1026,7 +1169,7 @@ namespace Engine
     public class ShaderPipeline
     {
         private List<Shader> shaders = new List<Shader>();
-        public ReadOnlyCollection<Shader> Shaders { get => shaders.AsReadOnly(); }
+        public ReadOnlyCollection<Shader> Shaders => shaders.AsReadOnly();
         public static ShaderPipeline Current { get; private set; }
 
         public ShaderPipeline(params Shader[] shaders)
@@ -1044,25 +1187,50 @@ namespace Engine
             if (!shaderTypes.Contains(ShaderType.FragmentShader))
                 throw new ArgumentException("Fragment shader is required for shader pipeline.");
         }
+
         public void UpdateUniform(string name, object value)
         {
             bool exists = false;
             foreach (Shader shader in shaders)
+            {
                 if (shader.tryUpdateUniform(name, value))
                     exists = true;
+            }
 
             if (!exists)
                 throw new ArgumentException("Variable \n" + name + "\n does not exists in this shader pipeline.");
         }
+
+        public void UploadTexture(string variable, ShaderResourceView view)
+        {
+            bool correctLocation = false;
+            int location;
+
+            foreach (Shader shader in shaders)
+            {
+                if (shader.Locations.TryGetValue(variable, out location))
+                {
+                    correctLocation = true;
+                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, view);
+                }
+            }
+
+            if (!correctLocation)
+                throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
+        }
+
         public bool TryUpdateUniform(string name, object value)
         {
             bool exists = false;
             foreach (Shader shader in shaders)
+            {
                 if (shader.tryUpdateUniform(name, value))
                     exists = true;
+            }
 
             return exists;
         }
+
         public void Use()
         {
             GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.Set(null);
@@ -1072,6 +1240,7 @@ namespace Engine
                 shader.use();
             Current = this;
         }
+
         public void UploadUpdatedUniforms()
         {
             foreach (Shader shader in shaders)
@@ -1226,6 +1395,7 @@ namespace Engine
             Shaders[shaderName] = shader;
             return shader;
         }
+
         public static Shader LoadShader(string shaderName, string shaderPath, ShaderType shaderType)
         {
             if (Shaders.ContainsKey(shaderName))
@@ -1234,6 +1404,7 @@ namespace Engine
             Shaders[shaderName] = shader;
             return shader;
         }
+
         public static ShaderPipeline LoadShaderPipeline(string shaderPipelineName, params Shader[] shaders)
         {
             if (ShaderPipelines.ContainsKey(shaderPipelineName))
@@ -1242,6 +1413,7 @@ namespace Engine
             ShaderPipelines[shaderPipelineName] = shaderPipeline;
             return shaderPipeline;
         }
+
         public static Texture LoadTexture(string path, string textureName = "", bool applyGammaCorrection = false)
         {
             if (textureName == "")
@@ -1250,17 +1422,19 @@ namespace Engine
                 return Textures[textureName];
 
             Texture texture = new Texture(new Bitmap(path), applyGammaCorrection);
+
             Textures[textureName] = texture;
 
             return texture;
         }
+
         public static Sound LoadSound(string path, string soundName = "")
         {
             if (soundName == "")
                 soundName = Path.GetFileNameWithoutExtension(path);
             if (Sounds.ContainsKey(soundName))
                 return Sounds[soundName];
-                //throw new ArgumentException("Sound with name \"" + soundName + "\" is already loaded.");
+            //throw new ArgumentException("Sound with name \"" + soundName + "\" is already loaded.");
 
             SoundStream stream = new SoundStream(File.OpenRead(path));
             AudioBuffer buffer = new AudioBuffer
@@ -1275,11 +1449,13 @@ namespace Engine
             Sounds[soundName] = sound;
             return sound;
         }
+
         private struct Reference
         {
             public object obj;
             public string fieldName;
             public string referenceObjName;
+
             public Reference(object obj, string fieldName, string referenceObjName)
             {
                 this.obj = obj;
@@ -1287,10 +1463,11 @@ namespace Engine
                 this.referenceObjName = referenceObjName;
             }
         }
+
         public static Scene LoadScene(string path)
         {
             XDocument document = XDocument.Parse(File.ReadAllText(path));
-        
+
             Dictionary<string, object> namedObjects = new Dictionary<string, object>();
             List<Reference> references = new List<Reference>();
             List<Type> types = new List<Type>();
@@ -1469,6 +1646,7 @@ namespace Engine
                                         {
                                             bool found = false;
                                             foreach (ParameterInfo param in parameters)
+                                            {
                                                 if (param.Name == attrib.Name.LocalName)
                                                 {
                                                     if (parameterValues.ContainsKey(param.Name))
@@ -1479,11 +1657,12 @@ namespace Engine
                                                     found = true;
                                                     break;
                                                 }
+                                            }
                                             if (!found)
                                                 throw new Exception("Attribute \"" + attrib.Name.LocalName + "\" not found.");
                                         }
                                         method.Invoke(null, parameters.Select(p => parameterValues.ContainsKey(p.Name) ? parameterValues[p.Name] :
-                                                        (p.IsOptional ? p.DefaultValue : throw new Exception("Missing required attribute: \"" + p.Name + "\""))).ToArray());
+                                                                                  p.IsOptional ? p.DefaultValue : throw new Exception("Missing required attribute: \"" + p.Name + "\"")).ToArray());
                                     }
                                     continue;
                                 }
@@ -1498,6 +1677,7 @@ namespace Engine
                                         {
                                             bool found = false;
                                             foreach (ParameterInfo param in parameters)
+                                            {
                                                 if (param.Name == attrib.Name.LocalName)
                                                 {
                                                     if (parameterValues.ContainsKey(param.Name))
@@ -1508,11 +1688,12 @@ namespace Engine
                                                     found = true;
                                                     break;
                                                 }
+                                            }
                                             if (!found)
                                                 throw new Exception("Attribute \"" + attrib.Name.LocalName + "\" not found.");
                                         }
                                         method.Invoke(null, parameters.Select(p => parameterValues.ContainsKey(p.Name) ? parameterValues[p.Name] :
-                                                        (p.IsOptional ? p.DefaultValue : throw new Exception("Missing required attribute: \"" + p.Name + "\""))).ToArray());
+                                                                                  p.IsOptional ? p.DefaultValue : throw new Exception("Missing required attribute: \"" + p.Name + "\"")).ToArray());
                                     }
                                     continue;
                                 }
@@ -1527,6 +1708,7 @@ namespace Engine
                                         {
                                             bool found = false;
                                             foreach (ParameterInfo param in parameters)
+                                            {
                                                 if (param.Name == attrib.Name.LocalName)
                                                 {
                                                     if (parameterValues.ContainsKey(param.Name))
@@ -1537,11 +1719,12 @@ namespace Engine
                                                     found = true;
                                                     break;
                                                 }
+                                            }
                                             if (!found)
                                                 throw new Exception("Attribute \"" + attrib.Name.LocalName + "\" not found.");
                                         }
                                         method.Invoke(null, parameters.Select(p => parameterValues.ContainsKey(p.Name) ? parameterValues[p.Name] :
-                                                        (p.IsOptional ? p.DefaultValue : throw new Exception("Missing required attribute: \"" + p.Name + "\""))).ToArray());
+                                                                                  p.IsOptional ? p.DefaultValue : throw new Exception("Missing required attribute: \"" + p.Name + "\"")).ToArray());
                                     }
                                     continue;
                                 }
@@ -1748,11 +1931,11 @@ namespace Engine
                 }
                 return curObj;
             }
-        
+
             object scene = parseElement(null, null, document.Root);
             if (!(scene is Scene))
                 throw new Exception("Scene must be as root.");
-        
+
             foreach (Reference reference in references)
             {
                 if (!namedObjects.ContainsKey(reference.referenceObjName))
@@ -1769,7 +1952,7 @@ namespace Engine
                         throw new Exception(reference.obj.GetType().Name + " don't have " + reference.fieldName + ".");
                 }
             }
-        
+
             Scenes[Path.GetFileNameWithoutExtension(path)] = scene as Scene;
             return scene as Scene;
         }

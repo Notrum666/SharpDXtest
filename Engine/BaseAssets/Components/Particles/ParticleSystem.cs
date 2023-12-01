@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SharpDX.Direct3D11;
+using System.Runtime.InteropServices;
+
+using Engine.BaseAssets.Components.Particles;
 
 using LinearAlgebra;
 
-using Buffer = SharpDX.Direct3D11.Buffer;
-using System.Runtime.InteropServices;
 using SharpDX;
-using Engine.BaseAssets.Components.Particles;
+using SharpDX.Direct3D;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+
+using Buffer = SharpDX.Direct3D11.Buffer;
+using MapFlags = SharpDX.Direct3D11.MapFlags;
 
 namespace Engine.BaseAssets.Components
 {
@@ -26,10 +28,7 @@ namespace Engine.BaseAssets.Components
         private Material material = new Material();
         public Material Material
         {
-            get
-            {
-                return material;
-            }
+            get => material;
             set
             {
                 if (value == null)
@@ -40,22 +39,13 @@ namespace Engine.BaseAssets.Components
         private Vector2f size = new Vector2f(1.0f, 1.0f);
         public Vector2f Size
         {
-            get
-            {
-                return size;
-            }
-            set
-            {
-                size = value;
-            }
+            get => size;
+            set => size = value;
         }
         private int maxParticles = 1024;
         public int MaxParticles
         {
-            get
-            {
-                return maxParticles;
-            }
+            get => maxParticles;
             set
             {
                 if (value <= 0)
@@ -82,15 +72,18 @@ namespace Engine.BaseAssets.Components
         private Buffer counterRetrieveBuffer;
 
         private int kernelsCount = 0;
+
         public ParticleSystem()
         {
             counterRetrieveBuffer = new Buffer(GraphicsCore.CurrentDevice, sizeof(uint), ResourceUsage.Staging, BindFlags.None, CpuAccessFlags.Read, ResourceOptionFlags.None, 0);
         }
+
         public void Render()
         {
             GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(0, particlesPoolResourceView);
             GraphicsCore.CurrentDevice.ImmediateContext.Draw(CurParticles, 0);
         }
+
         private int getParticlesAmount()
         {
             GraphicsCore.CurrentDevice.ImmediateContext.CopyStructureCount(counterRetrieveBuffer, 0, particlesPoolView);
@@ -100,6 +93,7 @@ namespace Engine.BaseAssets.Components
             GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(counterRetrieveBuffer, 0);
             return (int)amount;
         }
+
         protected override void Initialized()
         {
             kernelsCount = (int)Math.Ceiling(maxParticles / 64.0);
@@ -110,7 +104,7 @@ namespace Engine.BaseAssets.Components
             particlesPoolView = new UnorderedAccessView(GraphicsCore.CurrentDevice, particlesPool, new UnorderedAccessViewDescription()
             {
                 Dimension = UnorderedAccessViewDimension.Buffer,
-                Format = SharpDX.DXGI.Format.Unknown,
+                Format = Format.Unknown,
                 Buffer = new UnorderedAccessViewDescription.BufferResource()
                 {
                     ElementCount = maxParticles,
@@ -121,8 +115,8 @@ namespace Engine.BaseAssets.Components
 
             particlesPoolResourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, particlesPool, new ShaderResourceViewDescription()
             {
-                Dimension = SharpDX.Direct3D.ShaderResourceViewDimension.Buffer,
-                Format = SharpDX.DXGI.Format.Unknown,
+                Dimension = ShaderResourceViewDimension.Buffer,
+                Format = Format.Unknown,
                 Buffer = new ShaderResourceViewDescription.BufferResource()
                 {
                     FirstElement = 0,
@@ -141,7 +135,7 @@ namespace Engine.BaseAssets.Components
             rngPoolView = new UnorderedAccessView(GraphicsCore.CurrentDevice, rngPool, new UnorderedAccessViewDescription()
             {
                 Dimension = UnorderedAccessViewDimension.Buffer,
-                Format = SharpDX.DXGI.Format.Unknown,
+                Format = Format.Unknown,
                 Buffer = new UnorderedAccessViewDescription.BufferResource()
                 {
                     ElementCount = kernelsCount,
@@ -162,6 +156,7 @@ namespace Engine.BaseAssets.Components
 
             energyUpdater = new ParticleEffect_UpdateEnergy();
         }
+
         public override void Update()
         {
             foreach (ParticleEffect effect in ParticleEffects)
@@ -182,6 +177,7 @@ namespace Engine.BaseAssets.Components
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, null);
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(1, null);
         }
+
         private void sortParticles()
         {
             Shader sortShader = AssetsManager.Shaders["particles_bitonic_sort_step"];
@@ -198,6 +194,7 @@ namespace Engine.BaseAssets.Components
                 }
             }
         }
+
         private void applyEffect(ParticleEffect effect)
         {
             effect.Use(this);

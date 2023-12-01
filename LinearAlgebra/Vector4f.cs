@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LinearAlgebra
 {
@@ -32,11 +28,12 @@ namespace LinearAlgebra
         /// </summary>
         public static readonly Vector4f UnitW = new Vector4f(0f, 0f, 0f, 1f);
 
-        public float x { get; set; }
-        public float y { get; set; }
-        public float z { get; set; }
-        public float w { get; set; }
-        public Vector3f xyz { get { return new Vector3f(x, y, z); } }
+        public float x;
+        public float y;
+        public float z;
+        public float w;
+        public Vector3f xyz => new Vector3f(x, y, z);
+
         public Vector4f(float x = 0f, float y = 0f, float z = 0f, float w = 0f)
         {
             this.x = x;
@@ -44,6 +41,7 @@ namespace LinearAlgebra
             this.z = z;
             this.w = w;
         }
+
         public Vector4f(in Vector2f vec, float z = 0f, float w = 0f)
         {
             x = vec.x;
@@ -51,6 +49,7 @@ namespace LinearAlgebra
             this.z = z;
             this.w = w;
         }
+
         public Vector4f(in Vector3f vec, float w = 0f)
         {
             x = vec.x;
@@ -58,6 +57,7 @@ namespace LinearAlgebra
             z = vec.z;
             this.w = w;
         }
+
         public Vector4f(params float[] values)
         {
             if (values.Length != 4)
@@ -69,7 +69,10 @@ namespace LinearAlgebra
             w = values[3];
         }
 
-        public static explicit operator Vector4f(in Vector4 vec) => new Vector4f((float)vec.x, (float)vec.y, (float)vec.z, (float)vec.w);
+        public static explicit operator Vector4f(in Vector4 vec)
+        {
+            return new Vector4f((float)vec.x, (float)vec.y, (float)vec.z, (float)vec.w);
+        }
 
         /// <summary>
         /// Magnitude of vector. Same as length
@@ -78,6 +81,7 @@ namespace LinearAlgebra
         {
             return (float)Math.Sqrt(squaredMagnitude());
         }
+
         /// <summary>
         /// Magnitude of vector without root. Same as squaredLength
         /// </summary>
@@ -85,6 +89,7 @@ namespace LinearAlgebra
         {
             return dotMul(this);
         }
+
         /// <summary>
         /// Length of vector. Same as length
         /// </summary>
@@ -92,6 +97,7 @@ namespace LinearAlgebra
         {
             return magnitude();
         }
+
         /// <summary>
         /// Length of vector without root. Same as squaredMagnitude
         /// </summary>
@@ -99,6 +105,7 @@ namespace LinearAlgebra
         {
             return squaredMagnitude();
         }
+
         /// <summary>
         /// Checks if vector small enough to be considered a zero vector
         /// </summary>
@@ -106,34 +113,42 @@ namespace LinearAlgebra
         {
             return squaredMagnitude() < Constants.SqrFloatEpsilon;
         }
+
         public static Vector4f operator +(in Vector4f v1, in Vector4f v2)
         {
             return new Vector4f(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z, v1.w + v2.w);
         }
+
         public static Vector4f operator -(in Vector4f v1, in Vector4f v2)
         {
             return new Vector4f(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z, v1.w - v2.w);
         }
+
         public static Vector4f operator *(in Vector4f vec, float value)
         {
             return new Vector4f(vec.x * value, vec.y * value, vec.z * value, vec.w * value);
         }
+
         public static Vector4f operator *(float value, in Vector4f vec)
         {
             return new Vector4f(vec.x * value, vec.y * value, vec.z * value, vec.w * value);
         }
+
         public static Vector4f operator /(in Vector4f vec, float value)
         {
             return new Vector4f(vec.x / value, vec.y / value, vec.z / value, vec.w / value);
         }
+
         public static Vector4f operator /(float value, in Vector4f vec)
         {
             return new Vector4f(value / vec.x, value / vec.y, value / vec.z, value / vec.w);
         }
+
         public static Vector4f operator -(in Vector4f vec)
         {
             return new Vector4f(-vec.x, -vec.y, -vec.z, -vec.w);
         }
+
         /// <summary>
         /// Dot product
         /// </summary>
@@ -141,6 +156,7 @@ namespace LinearAlgebra
         {
             return v1.dotMul(v2);
         }
+
         /// <summary>
         /// Dot product
         /// </summary>
@@ -148,6 +164,7 @@ namespace LinearAlgebra
         {
             return x * vec.x + y * vec.y + z * vec.z + w * vec.w;
         }
+
         /// <summary>
         /// Component multiplication
         /// </summary>
@@ -156,6 +173,7 @@ namespace LinearAlgebra
         {
             return new Vector4f(x * vec.x, y * vec.y, z * vec.z, w * vec.w);
         }
+
         /// <summary>
         /// Component division
         /// </summary>
@@ -164,6 +182,7 @@ namespace LinearAlgebra
         {
             return new Vector4f(x / vec.x, y / vec.y, z / vec.z, w / vec.w);
         }
+
         /// <summary>
         /// Returns normalized copy of this vector
         /// </summary>
@@ -171,6 +190,7 @@ namespace LinearAlgebra
         {
             return this / magnitude();
         }
+
         /// <summary>
         /// Normalizes this vector
         /// </summary>
@@ -182,6 +202,7 @@ namespace LinearAlgebra
             z /= magn;
             w /= magn;
         }
+
         /// <summary>
         /// Checks if vectors are equal enough to be considered equal
         /// </summary>
@@ -189,15 +210,17 @@ namespace LinearAlgebra
         {
             return (vec - this).isZero();
         }
+
         /// <summary>
         /// Projects vector on another vector
         /// </summary>
         public Vector4f projectOnVector(in Vector4f vec)
         {
             if (vec.isZero())
-                return Vector4f.Zero;
+                return Zero;
             return vec * (this * vec / vec.squaredMagnitude());
         }
+
         /// <summary>
         /// Projects vector on flat
         /// </summary>
@@ -207,10 +230,12 @@ namespace LinearAlgebra
         {
             return this - flatNorm * (this * flatNorm / flatNorm.squaredMagnitude());
         }
+
         public override string ToString()
         {
             return "(" + x.ToString() + ", " + y.ToString() + ", " + z.ToString() + ", " + w.ToString() + ")";
         }
+
         public string ToString(string format)
         {
             return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ", " + w.ToString(format) + ")";

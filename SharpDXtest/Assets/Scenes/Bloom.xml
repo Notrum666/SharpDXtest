@@ -1,88 +1,88 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
-  <Assets>
-    <Textures>
-      <Texture path="Sun.jpg"/>
-      <Texture path="white.jpg"/>
-      <Texture path="red.jpg"/>
-      <Texture path="blue.jpg"/>
-      <Texture path="Uranus.jpg"/>
-      <Texture path="Jupiter.jpg"/>
-      <Texture path="Prototype.png"/>
-    </Textures>
+	<Assets>
+		<Models>
+			<Model path="Cube.obj"/>
+			<Model path="Ball.obj"/>
+		</Models>
 
-    <Meshes>
-      <Mesh path="Cube.obj"/>
-      <Mesh path="Ball.obj"/>
-    </Meshes>
-  </Assets>
+		<Textures>
+			<Texture path="Sun.jpg"/>
+			<Texture path="white.jpg"/>
+			<Texture path="red.jpg"/>
+			<Texture path="blue.jpg"/>
+			<Texture path="Uranus.jpg"/>
+			<Texture path="Jupiter.jpg"/>
+			<Texture path="Prototype.png"/>
+		</Textures>
+	</Assets>
 
-  <GameObject x.Name="Camera">
-    <Transform>
-      <Transform.Position x="30"/>
-      <Transform.Rotation z="90"/>
-    </Transform>
-    <Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.7777"/>
-    <CameraController speed="10"/>
-  </GameObject>
+	<GameObject x.Name="Camera">
+		<Transform>
+			<Transform.Position x="30"/>
+			<Transform.Rotation z="90"/>
+		</Transform>
+		<Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.7777"/>
+		<CameraController speed="10"/>
+	</GameObject>
 
-  <GameObject x.Name="Point_light">
-    <Transform>
-      <Transform.Position x="10" y="0" z="0"/>
-    </Transform>
-    <MeshComponent mesh="{Mesh Cube}">
-      <MeshComponent.Material Albedo="{Texture 7}"/>
-    </MeshComponent>
-    <PointLight Radius="1000" Brightness="10"/>
-  </GameObject>
-  
-  <GameObject x.Name="Sun">
-    <Transform>
-      <Transform.Position x="0" y="0" z="0"/>
-      <Transform.LocalScale x="10" y="10" z="10"/>
-    </Transform>
-    <MeshComponent mesh="{Mesh Ball}">
-      <MeshComponent.Material Albedo="{Texture 0}"/>
-    </MeshComponent>
-  </GameObject>
+	<GameObject x.Name="Point_light">
+		<Transform>
+			<Transform.Position x="10" y="0" z="0"/>
+		</Transform>
+		<Mesh model="{Model Cube}">
+			<Mesh.Material Albedo="{Texture Prototype}"/>
+		</Mesh>
+		<PointLight Radius="1000" Brightness="10"/>
+	</GameObject>
 
-  <GameObject x.Name="Uranus">
-    <Transform>
-      <Transform.Position x="10" y="-20" z="0"/>
-      <Transform.LocalScale x="5" y="5" z="5"/>
-    </Transform>
-    <MeshComponent mesh="{Mesh Ball}">
-      <MeshComponent.Material Albedo="{Texture 4}"/>
-    </MeshComponent>
-  </GameObject>
+	<GameObject x.Name="Sun">
+		<Transform>
+			<Transform.Position x="0" y="0" z="0"/>
+			<Transform.LocalScale x="10" y="10" z="10"/>
+		</Transform>
+		<Mesh model="{Model Ball}">
+			<Mesh.Material Albedo="{Texture Sun}"/>
+		</Mesh>
+	</GameObject>
 
-  <GameObject x.Name="Jupiter">
-    <Transform>
-      <Transform.Position x="10" y="20" z="0"/>
-      <Transform.LocalScale x="5" y="5" z="5"/>
-    </Transform>
-    <MeshComponent mesh="{Mesh Ball}">
-      <MeshComponent.Material Albedo="{Texture 5}"/>
-    </MeshComponent>
-  </GameObject>
+	<GameObject x.Name="Uranus">
+		<Transform>
+			<Transform.Position x="10" y="-20" z="0"/>
+			<Transform.LocalScale x="5" y="5" z="5"/>
+		</Transform>
+		<Mesh model="{Model Ball}">
+			<Mesh.Material Albedo="{Texture Uranus}"/>
+		</Mesh>
+	</GameObject>
 
-  <GameObject x.Name="Cube_1">
-    <Transform>
-      <Transform.Position x="10" y="0" z="20"/>
-      <Transform.LocalScale x="10" y="10" z="10"/>
-    </Transform>
-    <MeshComponent mesh="{Mesh Cube}">
-      <MeshComponent.Material Albedo="{Texture 3}"/>
-    </MeshComponent>
-  </GameObject>
+	<GameObject x.Name="Jupiter">
+		<Transform>
+			<Transform.Position x="10" y="20" z="0"/>
+			<Transform.LocalScale x="5" y="5" z="5"/>
+		</Transform>
+		<Mesh model="{Model Ball}">
+			<Mesh.Material Albedo="{Texture Jupiter}"/>
+		</Mesh>
+	</GameObject>
 
-<GameObject x.Name="Cube_2">
-    <Transform>
-      <Transform.Position x="10" y="0" z="-20"/>
-      <Transform.LocalScale x="10" y="10" z="10"/>
-    </Transform>
-    <MeshComponent mesh="{Mesh Cube}">
-      <MeshComponent.Material Albedo="{Texture 2}"/>
-    </MeshComponent>
-  </GameObject>
+	<GameObject x.Name="Cube_1">
+		<Transform>
+			<Transform.Position x="10" y="0" z="20"/>
+			<Transform.LocalScale x="10" y="10" z="10"/>
+		</Transform>
+		<Mesh model="{Model Cube}">
+			<Mesh.Material Albedo="{Texture blue}"/>
+		</Mesh>
+	</GameObject>
+
+	<GameObject x.Name="Cube_2">
+		<Transform>
+			<Transform.Position x="10" y="0" z="-20"/>
+			<Transform.LocalScale x="10" y="10" z="10"/>
+		</Transform>
+		<Mesh model="{Model Cube}">
+			<Mesh.Material Albedo="{Texture red}"/>
+		</Mesh>
+	</GameObject>
 </Scene>

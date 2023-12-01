@@ -10,7 +10,7 @@
 			<Mesh path="Cube.obj"/>
 		</Meshes>
 	</Assets>
-	
+
 	<GameObject>
 		<Transform>
 			<Transform.Position y="-5" z="5"/>
@@ -35,7 +35,7 @@
 		</ParticleSystem>
 		<ObjectController/>
 	</GameObject>
-	
+
 	<GameObject>
 		<Transform>
 			<Transform.Position z="2"/>
@@ -46,7 +46,7 @@
 			<MeshComponent.Material Albedo="{Texture 0}"/>
 		</MeshComponent>
 	</GameObject>
-	
+
 	<GameObject>
 		<Transform>
 			<Transform.LocalScale x="50" y="50" z="0.5"/>
@@ -62,7 +62,7 @@
 		</Transform>
 		<PointLight Radius="10"/>
 	</GameObject>
-	
+
 	<GameObject>
 		<Transform>
 			<Transform.LocalPosition x="-5" z="3"/>

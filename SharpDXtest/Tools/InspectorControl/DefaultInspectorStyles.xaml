@@ -1,0 +1,35 @@
+﻿<ResourceDictionary x:Class="Editor.DefaultInspectorStyles"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <DataTemplate x:Key="FieldNotImplementedTemplate">
+        <Grid HorizontalAlignment="Stretch">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" SharedSizeGroup="FieldValueSizeGroup"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="{Binding TargetField.Name}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                       Foreground="{DynamicResource ForegroundBrush}" Margin="4"/>
+            <Border Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="6,4,10,4" BorderThickness="1"
+                    BorderBrush="{DynamicResource InspectorInputBorderBrush}" Background="{DynamicResource BackgroundBrush}">
+                <TextBlock Foreground="{StaticResource ForegroundBrush}">
+                    <TextBlock.Inlines>
+                        <Run Text="Type "/>
+                        <Run Text="{Binding TargetField.FieldType.Name, Mode=OneWay}"/>
+                        <Run Text=" is not implemented yet."/>
+                    </TextBlock.Inlines>
+                </TextBlock>
+            </Border>
+        </Grid>
+    </DataTemplate>
+
+    <Style x:Key="InspectorTextBox" TargetType="TextBox">
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+        <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+        <Setter Property="BorderBrush" Value="{StaticResource InspectorInputBorderBrush}"/>
+        <EventSetter Event="KeyDown" Handler="InspectorTextBox_KeyDown"/>
+        <EventSetter Event="LostFocus" Handler="InspectorTextBox_LostFocus"/>
+    </Style>
+</ResourceDictionary>

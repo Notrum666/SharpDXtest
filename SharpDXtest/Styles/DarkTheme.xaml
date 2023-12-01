@@ -5,7 +5,7 @@
 
     <Color x:Key="SelectedMenuItemColor">#FF505050</Color>
     <SolidColorBrush x:Key="SelectedMenuItemBrush" Color="{StaticResource SelectedMenuItemColor}"/>
-    
+
     <Color x:Key="BorderColor">#FF606060</Color>
     <SolidColorBrush x:Key="BorderBrush" Color="{StaticResource BorderColor}"/>
 
@@ -24,10 +24,10 @@
     <!--#region ItemTab-->
     <Color x:Key="ItemTabColor">#FF303030</Color>
     <SolidColorBrush x:Key="ItemTabBrush" Color="{StaticResource ItemTabColor}"/>
-    
+
     <Color x:Key="HoverItemTabColor">#FF404040</Color>
     <SolidColorBrush x:Key="HoverItemTabBrush" Color="{StaticResource HoverItemTabColor}"/>
-    
+
     <Color x:Key="SelectedItemTabColor">#FF505050</Color>
     <SolidColorBrush x:Key="SelectedItemTabBrush" Color="{StaticResource SelectedItemTabColor}"/>
     <!--#endregion-->
@@ -39,7 +39,7 @@
     <Color x:Key="InactiveMenuForegroundColor">#FF909090</Color>
     <SolidColorBrush x:Key="InactiveMenuForegroundBrush" Color="{StaticResource InactiveMenuForegroundColor}"/>
     <!--#endregion-->
-    
+
     <!--#region ClearOutputButton-->
     <Color x:Key="ClearOutputButtonBorderColor">#FFA0A0A0</Color>
     <SolidColorBrush x:Key="ClearOutputButtonBorderBrush" Color="{StaticResource ClearOutputButtonBorderColor}"/>
@@ -60,7 +60,7 @@
 
     <Color x:Key="ToggledLogTypeVisibilityButtonBackgroundColor">#FF404040</Color>
     <SolidColorBrush x:Key="ToggledLogTypeVisibilityButtonBackgroundBrush" Color="{StaticResource ToggledLogTypeVisibilityButtonBackgroundColor}"/>
-    
+
     <Color x:Key="PressLogTypeVisibilityButtonBackgroundColor">#FF101010</Color>
     <SolidColorBrush x:Key="PressLogTypeVisibilityButtonBackgroundBrush" Color="{StaticResource PressLogTypeVisibilityButtonBackgroundColor}"/>
     <!--#endregion-->
@@ -74,7 +74,7 @@
     <Color x:Key="PressCloseToolButtonBackgroundColor">#FF404040</Color>
     <SolidColorBrush x:Key="PressCloseToolButtonBackgroundBrush" Color="{StaticResource PressCloseToolButtonBackgroundColor}"/>
     <!--#endregion-->
-    
+
     <!--#region WindowButton-->
     <SolidColorBrush x:Key="WindowButtonBackgroundBrush" Color="Transparent"/>
 
@@ -83,5 +83,35 @@
 
     <Color x:Key="PressWindowButtonBackgroundColor">#FF404040</Color>
     <SolidColorBrush x:Key="PressWindowButtonBackgroundBrush" Color="{StaticResource PressWindowButtonBackgroundColor}"/>
+    <!--#endregion-->
+
+    <!--#region ComboBox-->
+    <Color x:Key="ComboBoxBackgroundColor">#FF303030</Color>
+    <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="{StaticResource ComboBoxBackgroundColor}"/>
+
+    <Color x:Key="HoverComboBoxBackgroundColor">#FF505050</Color>
+    <SolidColorBrush x:Key="HoverComboBoxBackgroundBrush" Color="{StaticResource HoverComboBoxBackgroundColor}"/>
+
+    <Color x:Key="ComboBoxBorderColor">#FF505050</Color>
+    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="{StaticResource ComboBoxBorderColor}"/>
+    <!--#endregion-->
+
+    <!--#region CameraRenderControl-->
+    <Color x:Key="CameraRenderControlBackgroundColor">#FF101010</Color>
+    <SolidColorBrush x:Key="CameraRenderControlBackgroundBrush" Color="{StaticResource CameraRenderControlBackgroundColor}"/>
+    <!--#endregion-->
+
+    <!--#region InspectorControl-->
+    <Color x:Key="InspectorComponentHeaderBackgroundColor">#FF505050</Color>
+    <SolidColorBrush x:Key="InspectorComponentHeaderBackgroundBrush" Color="{StaticResource InspectorComponentHeaderBackgroundColor}"/>
+
+    <Color x:Key="InspectorComponentBackgroundColor">#FF383838</Color>
+    <SolidColorBrush x:Key="InspectorComponentBackgroundBrush" Color="{StaticResource InspectorComponentBackgroundColor}"/>
+
+    <Color x:Key="InspectorInputBorderColor">#FF909090</Color>
+    <SolidColorBrush x:Key="InspectorInputBorderBrush" Color="{StaticResource InspectorInputBorderColor}"/>
+
+    <Color x:Key="InspectorCheckMarkColor">#FF0080FF</Color>
+    <SolidColorBrush x:Key="InspectorCheckMarkBrush" Color="{StaticResource InspectorCheckMarkColor}"/>
     <!--#endregion-->
 </ResourceDictionary>

@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
 namespace LinearAlgebra.Test
 {
     [TestClass]
@@ -73,7 +72,7 @@ namespace LinearAlgebra.Test
                                            5, 7);
 
             Matrix2x2 expected = new Matrix2x2(7, -4,
-                                              -5, 3);
+                                               -5, 3);
             //act
             Matrix2x2 actual = MatX.inverse();
 
@@ -91,7 +90,7 @@ namespace LinearAlgebra.Test
                                            5, 7);
 
             Matrix2x2 expected = new Matrix2x2(7, -4,
-                                              -5, 3);
+                                               -5, 3);
             //act
             MatX.invert();
             Matrix2x2 actual = MatX;

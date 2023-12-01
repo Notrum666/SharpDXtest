@@ -1,6 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-
 namespace LinearAlgebra.Test
 {
     [TestClass]
@@ -15,15 +14,15 @@ namespace LinearAlgebra.Test
         {
             //arrange
             Matrix3x3f MatX = new Matrix3x3f(1f, 2f, 3f,
-                                            3f, 2f, 1f,
-                                            2f, 1f, 3f);
+                                             3f, 2f, 1f,
+                                             2f, 1f, 3f);
             Matrix3x3f MatY = new Matrix3x3f(1f, 3f, 4f,
-                                           2f, 1f, 2f,
-                                           4f, 3f, 1f);
+                                             2f, 1f, 2f,
+                                             4f, 3f, 1f);
 
             Matrix3x3f expected = new Matrix3x3f(17f, 14f, 11f,
-                                               11f, 14f, 17f,
-                                               16f, 16f, 13f);
+                                                 11f, 14f, 17f,
+                                                 16f, 16f, 13f);
             //act
             Matrix3x3 actual = MatX * MatY;
 
@@ -77,12 +76,12 @@ namespace LinearAlgebra.Test
         public void inverse_257_634_5m2m3__1m11_m3841m34_27m2924returned()
         {
             Matrix3x3f MatX = new Matrix3x3f(2f, 5f, 7f,
-                                           6f, 3f, 4f,
-                                           5f, -2f, -3f);
+                                             6f, 3f, 4f,
+                                             5f, -2f, -3f);
 
             Matrix3x3f expected = new Matrix3x3f(1f, -1f, 1f,
-                                              -38f, 41f, -34f,
-                                               27f, -29f, 24f);
+                                                 -38f, 41f, -34f,
+                                                 27f, -29f, 24f);
             //act
             Matrix3x3f actual = MatX.inverse();
 
@@ -99,12 +98,12 @@ namespace LinearAlgebra.Test
         {
             //arrange
             Matrix3x3f MatX = new Matrix3x3f(2f, 5f, 7f,
-                                           6f, 3f, 4f,
-                                           5f, -2f, -3f);
+                                             6f, 3f, 4f,
+                                             5f, -2f, -3f);
 
             Matrix3x3f expected = new Matrix3x3f(1f, -1f, 1f,
-                                              -38f, 41f, -34f,
-                                               27f, -29f, 24f);
+                                                 -38f, 41f, -34f,
+                                                 27f, -29f, 24f);
             //act
 
             MatX.invert();
@@ -121,13 +120,13 @@ namespace LinearAlgebra.Test
         {
             //arrange
             Matrix3x3f MatX = new Matrix3x3f(2f, 5f, 7f,
-                                           6f, 3f, 4f,
-                                           5f, -2f, -3f);
+                                             6f, 3f, 4f,
+                                             5f, -2f, -3f);
 
 
             Matrix3x3f expected = new Matrix3x3f(2f, 6f, 5f,
-                                               5f, 3f, -2f,
-                                               7f, 4f, -3f);
+                                                 5f, 3f, -2f,
+                                                 7f, 4f, -3f);
             //act
             Matrix3x3f actual = MatX.transposed();
 
@@ -143,20 +142,19 @@ namespace LinearAlgebra.Test
         {
             //arrange
             Matrix3x3f MatX = new Matrix3x3f(2f, 5f, 7f,
-                                           6f, 3f, 4f,
-                                           5f, -2f, -3f);
+                                             6f, 3f, 4f,
+                                             5f, -2f, -3f);
 
 
             Matrix3x3f expected = new Matrix3x3f(2f, 6f, 5f,
-                                               5f, 3f, -2f,
-                                               7f, 4f, -3f);
+                                                 5f, 3f, -2f,
+                                                 7f, 4f, -3f);
             //act
             MatX.transpose();
             Matrix3x3f actual = MatX;
 
             //assert
             Assert.AreEqual(expected, actual);
-        }  
+        }
     }
 }
-

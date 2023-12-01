@@ -1,26 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using SharpDX.Direct3D11;
 
 using LinearAlgebra;
+
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
 
 namespace Engine.BaseAssets.Components
 {
     public class DirectionalLight : Light
     {
         private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.1f, 0.3f, 1.0f };
-        public static float[] CascadeFrustumDistances { get => cascadeFrustumDistances; }
+        public static float[] CascadeFrustumDistances => cascadeFrustumDistances;
         private int shadowSize = 2048;
         public int ShadowSize
         {
-            get
-            {
-                return shadowSize;
-            }
+            get => shadowSize;
             set
             {
                 if (value <= 0)
@@ -28,17 +22,18 @@ namespace Engine.BaseAssets.Components
                 shadowSize = value;
             }
         }
+
         private Matrix4x4f getLightSpaceForFrustumSlice(Matrix4x4f frustumToView, float fromZ, float toZ, float lightSpaceDepthScale)
         {
             Vector3f[] corners = new Vector3f[8];
             corners[0] = frustumToView.TransformPoint(new Vector3f(-1.0f, -1.0f, fromZ));
-            corners[1] = frustumToView.TransformPoint(new Vector3f( 1.0f, -1.0f, fromZ));
-            corners[2] = frustumToView.TransformPoint(new Vector3f(-1.0f,  1.0f, fromZ));
-            corners[3] = frustumToView.TransformPoint(new Vector3f( 1.0f,  1.0f, fromZ));
+            corners[1] = frustumToView.TransformPoint(new Vector3f(1.0f, -1.0f, fromZ));
+            corners[2] = frustumToView.TransformPoint(new Vector3f(-1.0f, 1.0f, fromZ));
+            corners[3] = frustumToView.TransformPoint(new Vector3f(1.0f, 1.0f, fromZ));
             corners[4] = frustumToView.TransformPoint(new Vector3f(-1.0f, -1.0f, toZ));
-            corners[5] = frustumToView.TransformPoint(new Vector3f( 1.0f, -1.0f, toZ));
-            corners[6] = frustumToView.TransformPoint(new Vector3f(-1.0f,  1.0f, toZ));
-            corners[7] = frustumToView.TransformPoint(new Vector3f( 1.0f,  1.0f, toZ));
+            corners[5] = frustumToView.TransformPoint(new Vector3f(1.0f, -1.0f, toZ));
+            corners[6] = frustumToView.TransformPoint(new Vector3f(-1.0f, 1.0f, toZ));
+            corners[7] = frustumToView.TransformPoint(new Vector3f(1.0f, 1.0f, toZ));
 
             float minX = corners[0].x;
             float maxX = corners[0].x;
@@ -74,6 +69,7 @@ namespace Engine.BaseAssets.Components
                                   0.0f, invDy, 0.0f, -minY * invDy,
                                   0.0f, 0.0f, 0.0f, 1.0f);
         }
+
         public Matrix4x4f[] GetLightSpaces(Camera camera)
         {
             Matrix4x4f view = (Matrix4x4f)GameObject.Transform.View;
@@ -93,10 +89,12 @@ namespace Engine.BaseAssets.Components
 
             return result;
         }
+
         public Texture ShadowTexture { get; private set; }
+
         public DirectionalLight()
         {
-            ShadowTexture = new Texture(shadowSize, shadowSize, null, SharpDX.DXGI.Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil, cascadeFrustumDistances.Length - 1);
+            ShadowTexture = new Texture(shadowSize, shadowSize, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil, cascadeFrustumDistances.Length - 1);
         }
     }
 }

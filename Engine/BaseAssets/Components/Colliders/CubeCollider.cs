@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using LinearAlgebra;
 
@@ -11,12 +7,9 @@ namespace Engine.BaseAssets.Components.Colliders
     public class CubeCollider : MeshCollider
     {
         private Vector3 size;
-        public Vector3 Size 
-        { 
-            get
-            {
-                return size;
-            }
+        public Vector3 Size
+        {
+            get => size;
             set
             {
                 if (value.x <= 0 || value.y <= 0 || value.z <= 0)
@@ -28,23 +21,20 @@ namespace Engine.BaseAssets.Components.Colliders
             }
         }
         private Vector3 inertiaTensor;
-        public override Vector3 InertiaTensor
-        {
-            get
-            {
-                return inertiaTensor;
-            }
-        }
+        public override Vector3 InertiaTensor => inertiaTensor;
+
         public CubeCollider()
         {
             Size = new Vector3(1.0, 1.0, 1.0);
             Offset = Vector3.Zero;
         }
+
         public CubeCollider(Vector3 size)
         {
             Size = size;
             Offset = Vector3.Zero;
         }
+
         public CubeCollider(Vector3 size, Vector3 offset)
         {
             Size = size;
@@ -82,6 +72,7 @@ namespace Engine.BaseAssets.Components.Colliders
             vertices.Add(0.5 * new Vector3(Size.x, -Size.y, -Size.z));
             vertices.Add(0.5 * new Vector3(Size.x, -Size.y, Size.z));
         }
+
         private void generateNormals()
         {
             normals.Clear();
@@ -101,6 +92,7 @@ namespace Engine.BaseAssets.Components.Colliders
             nonCollinearNormals.Add(Vector3.Forward);
             nonCollinearNormals.Add(Vector3.Right);
         }
+
         private void buildPolygons()
         {
             polygons.Clear();
@@ -114,6 +106,7 @@ namespace Engine.BaseAssets.Components.Colliders
             polygons.Add(new int[] { 0, 1, 3, 2 }); // Left
             polygons.Add(new int[] { 4, 5, 7, 6 }); // Right
         }
+
         private void buildEdges()
         {
             edges.Clear();

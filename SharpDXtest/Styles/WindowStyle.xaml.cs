@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Interop;
 using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows.Interop;
 
 namespace Editor
 {
     partial class WindowStyle
     {
-        void WindowLoaded(object sender, RoutedEventArgs e)
+        private void WindowLoaded(object sender, RoutedEventArgs e)
         {
             ((Window)sender).StateChanged += WindowStateChanged;
+            WindowStateChanged((Window)sender, e);
         }
-        void WindowStateChanged(object sender, EventArgs e)
+
+        private void WindowStateChanged(object sender, EventArgs e)
         {
             Window window = (Window)sender;
             nint handle = new WindowInteropHelper(window).Handle;
@@ -20,21 +23,25 @@ namespace Editor
             if (window.WindowState == WindowState.Maximized)
             {
                 // Make sure window doesn't overlap with the taskbar.
-                System.Windows.Forms.Screen screen = System.Windows.Forms.Screen.FromHandle(handle);
+                Screen screen = Screen.FromHandle(handle);
                 if (screen.Primary)
+                {
                     containerBorder.Padding = new Thickness(
                         SystemParameters.WorkArea.Left + 7,
                         SystemParameters.WorkArea.Top + 7,
                         SystemParameters.PrimaryScreenWidth - SystemParameters.WorkArea.Right + 7,
                         SystemParameters.PrimaryScreenHeight - SystemParameters.WorkArea.Bottom + 7);
+                }
             }
             else
                 containerBorder.Padding = new Thickness(7);
         }
+
         private Window GetWindowFromTemplate(object templateFrameworkElement)
         {
             return ((FrameworkElement)templateFrameworkElement).TemplatedParent as Window;
         }
+
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
             GetWindowFromTemplate(sender).WindowState = WindowState.Minimized;
@@ -49,6 +56,7 @@ namespace Editor
         {
             GetWindowFromTemplate(sender).Close();
         }
+
         private void SwitchState(Window window)
         {
             window.WindowState = window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;

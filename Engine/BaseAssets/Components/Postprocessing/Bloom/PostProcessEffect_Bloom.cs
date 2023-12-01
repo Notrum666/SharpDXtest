@@ -1,9 +1,13 @@
-﻿using LinearAlgebra;
-using SharpDX;
-using SharpDX.DXGI;
-using SharpDX.Direct3D11;
-using System;
+﻿using System;
 using System.Collections.Generic;
+
+using LinearAlgebra;
+
+using SharpDX;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+
+using Device = SharpDX.Direct3D11.Device;
 
 namespace Engine.BaseAssets.Components.Postprocessing
 {
@@ -11,15 +15,15 @@ namespace Engine.BaseAssets.Components.Postprocessing
     {
         public const int MaxIterationsCount = 16;
 
-        public int Iterations 
+        public int Iterations
         {
             get => iterations;
             set
             {
-                if(value < 1 || value > MaxIterationsCount)
+                if (value < 1 || value > MaxIterationsCount)
                     throw new ArgumentOutOfRangeException("Iterations", "Iterations must be greater than 1 and less or equal than MaxIterationsCount");
                 iterations = value;
-            } 
+            }
         }
         private int iterations = 5;
 
@@ -28,7 +32,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
             get => treshold;
             set
             {
-                if(value < 0)
+                if (value < 0)
                     throw new ArgumentOutOfRangeException("Treshold", "Treshold can't be negative");
 
                 treshold = value;
@@ -36,7 +40,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
         }
         private float treshold = 1.0f;
 
-        private static SharpDX.Direct3D11.Device device => GraphicsCore.CurrentDevice;
+        private static Device device => GraphicsCore.CurrentDevice;
 
         private static Sampler sampler;
         private static RasterizerState backCullingRasterizerState;
@@ -93,7 +97,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
 
         public override void Process(Texture inputTexture)
         {
-            if(inputTextureWidth != inputTexture.texture.Description.Width 
+            if (inputTextureWidth != inputTexture.texture.Description.Width
                 || inputTextureHeight != inputTexture.texture.Description.Height
                 || samplingsTextures == null)
             {
@@ -215,7 +219,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
                 )
             );
 
-            texture.use("tex");
+            texture.Use("tex");
             sampler.use("texSampler");
         }
     }

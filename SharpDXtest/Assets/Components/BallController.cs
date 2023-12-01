@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+
 using Engine;
 using Engine.BaseAssets.Components;
 using Engine.BaseAssets.Components.Colliders;
+
 using LinearAlgebra;
+
 using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
@@ -17,6 +15,7 @@ namespace SharpDXtest.Assets.Components
         public GameObject CameraObject;
         public double Force;
         private bool initialized = false;
+
         public override void Update()
         {
             if (!initialized)

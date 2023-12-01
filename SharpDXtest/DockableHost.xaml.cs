@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Markup;
 
 namespace Editor
@@ -15,17 +16,15 @@ namespace Editor
     [ContentProperty("Items")]
     public partial class DockableHost : UserControl, INotifyPropertyChanged
     {
-        public static readonly DependencyProperty ItemsProperty = DependencyProperty.Register("Items", 
-            typeof(ObservableCollection<FrameworkElement>), typeof(DockableHost),
-            new FrameworkPropertyMetadata(OnItemsPropertyChanged));
+        public static readonly DependencyProperty ItemsProperty = DependencyProperty.Register("Items",
+                                                                                              typeof(ObservableCollection<FrameworkElement>), typeof(DockableHost),
+                                                                                              new FrameworkPropertyMetadata(OnItemsPropertyChanged));
         public ObservableCollection<FrameworkElement> Items
         {
-            get 
-            { 
-                return (ObservableCollection<FrameworkElement>)GetValue(ItemsProperty); 
-            }
-            set { SetValue(ItemsProperty, value); }
+            get => (ObservableCollection<FrameworkElement>)GetValue(ItemsProperty);
+            set => SetValue(ItemsProperty, value);
         }
+
         private static void OnItemsPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             DockableHost control = sender as DockableHost;
@@ -45,30 +44,33 @@ namespace Editor
         }
 
         public static readonly DependencyProperty OrientationProperty = DependencyProperty.Register("Orientation", typeof(Orientation), typeof(DockableHost),
-            new FrameworkPropertyMetadata(OnOrientationPropertyChanged));
+                                                                                                    new FrameworkPropertyMetadata(OnOrientationPropertyChanged));
         public Orientation Orientation
         {
-            get { return (Orientation)GetValue(OrientationProperty); }
-            set { SetValue(OrientationProperty, value); }
+            get => (Orientation)GetValue(OrientationProperty);
+            set => SetValue(OrientationProperty, value);
         }
+
         private static void OnOrientationPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             (sender as DockableHost).UpdateConfiguration();
         }
 
         public static readonly DependencyProperty SplitLocationProperty = DependencyProperty.Register("SplitLocation", typeof(double), typeof(DockableHost),
-            new FrameworkPropertyMetadata(0.5, OnSplitLocationPropertyChanged),
-            new ValidateValueCallback(IsValidSplitLocation));
+                                                                                                      new FrameworkPropertyMetadata(0.5, OnSplitLocationPropertyChanged),
+                                                                                                      new ValidateValueCallback(IsValidSplitLocation));
         public double SplitLocation
         {
-            get { return (double)GetValue(SplitLocationProperty); }
-            set { SetValue(SplitLocationProperty, value); }
+            get => (double)GetValue(SplitLocationProperty);
+            set => SetValue(SplitLocationProperty, value);
         }
+
         private static bool IsValidSplitLocation(object obj)
         {
             double value = (double)obj;
             return value >= 0.0 && value <= 1.0;
         }
+
         private static void OnSplitLocationPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             DockableHost obj = (DockableHost)sender;
@@ -127,12 +129,15 @@ namespace Editor
 
         public DockableHost()
         {
+            IsLocked = true;
+
             InitializeComponent();
 
             DataContext = this;
 
             Items = new ObservableCollection<FrameworkElement>();
         }
+
         private void MoveDataTo(DockableHost target, bool targetIsAnAncestor)
         {
             if (targetIsAnAncestor)
@@ -144,6 +149,7 @@ namespace Editor
             target.IsLocked = false;
             target.Items = items;
         }
+
         private void MoveDataTo(ToolsHost target)
         {
             if (Items.Count == 1)
@@ -161,18 +167,21 @@ namespace Editor
                 UpdateConfiguration();
             }
         }
+
         private DockableHost CreateCopyAndStealItems()
         {
             DockableHost copy = new DockableHost();
             MoveDataTo(copy, false);
             return copy;
         }
+
         private void UpdateConfiguration()
         {
             if (IsLocked)
                 return;
 
             for (int i = 0; i < ContentGrid.Children.Count; i++)
+            {
                 if (ContentGrid.Children[i] != ColumnsSplitter && ContentGrid.Children[i] != RowsSplitter)
                 {
                     if (ContentGrid.Children[i] is DockableHost dockableHost)
@@ -182,6 +191,7 @@ namespace Editor
                     ContentGrid.Children.RemoveAt(i);
                     i--;
                 }
+            }
 
             if (Items.Count > 2)
                 throw new Exception("Dockable host can't have more than 2 children.");
@@ -215,6 +225,7 @@ namespace Editor
                     break;
                 case 2:
                     for (int i = 0; i < 2; i++)
+                    {
                         if (Items[i] is not DockableHost)
                         {
                             DockableHost wrapper = new DockableHost();
@@ -222,6 +233,7 @@ namespace Editor
                             Items[i] = wrapper;
                             return;
                         }
+                    }
 
                     Orientation orientation = Orientation;
 
@@ -236,8 +248,8 @@ namespace Editor
                     Grid.SetColumn(Items[1], orientation == Orientation.Horizontal ? 2 : 0);
                     Grid.SetRow(Items[1], orientation == Orientation.Vertical ? 2 : 0);
 
-                    ColumnsSplitter.Visibility = (orientation == Orientation.Horizontal ? Visibility.Visible : Visibility.Collapsed);
-                    RowsSplitter.Visibility = (orientation == Orientation.Vertical ? Visibility.Visible : Visibility.Collapsed);
+                    ColumnsSplitter.Visibility = orientation == Orientation.Horizontal ? Visibility.Visible : Visibility.Collapsed;
+                    RowsSplitter.Visibility = orientation == Orientation.Vertical ? Visibility.Visible : Visibility.Collapsed;
 
                     (Items[0] as DockableHost).OnConfigurationUpdated += DockableHostItem_OnConfigurationUpdated;
                     (Items[1] as DockableHost).OnConfigurationUpdated += DockableHostItem_OnConfigurationUpdated;
@@ -268,6 +280,7 @@ namespace Editor
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
+
         private void UserControl_DragEnter(object sender, DragEventArgs e)
         {
             object data = e.Data.GetData(DataFormats.Serializable);
@@ -282,7 +295,7 @@ namespace Editor
             object data = e.Data.GetData(DataFormats.Serializable);
             if (data is not FlyingControl || Items.Count > 1)
                 return;
-            
+
             ShowDockingOverlay = false;
         }
 
@@ -378,16 +391,22 @@ namespace Editor
             ShowDockingOverlay = false;
         }
 
-        private void ColumnsSplitter_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        private void ColumnsSplitter_DragDelta(object sender, DragDeltaEventArgs e)
         {
             SplitLocation = ContentGrid.ColumnDefinitions[0].ActualWidth /
-                (ContentGrid.ColumnDefinitions[0].ActualWidth + ContentGrid.ColumnDefinitions[2].ActualWidth);
+                            (ContentGrid.ColumnDefinitions[0].ActualWidth + ContentGrid.ColumnDefinitions[2].ActualWidth);
         }
 
-        private void RowsSplitter_DragDelta(object sender, System.Windows.Controls.Primitives.DragDeltaEventArgs e)
+        private void RowsSplitter_DragDelta(object sender, DragDeltaEventArgs e)
         {
             SplitLocation = ContentGrid.RowDefinitions[0].ActualHeight /
-                (ContentGrid.RowDefinitions[0].ActualHeight + ContentGrid.RowDefinitions[2].ActualHeight);
+                            (ContentGrid.RowDefinitions[0].ActualHeight + ContentGrid.RowDefinitions[2].ActualHeight);
+        }
+
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            IsLocked = false;
+            UpdateConfiguration();
         }
     }
 }
