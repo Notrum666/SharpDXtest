@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -107,7 +108,7 @@ namespace Engine
 
         public static void AddObject(GameObject obj)
         {
-            if (CurrentScene == null || CurrentScene.objects.Contains(obj) || newObjects.Contains(obj))
+            if (CurrentScene == null)
                 return;
 
             newObjects.Add(obj);
@@ -118,8 +119,11 @@ namespace Engine
             if (CurrentScene == null)
                 return;
 
-            CurrentScene.objects.RemoveAll(obj => obj.PendingDestroy);
-            CurrentScene.objects.AddRange(newObjects);
+            IEnumerable<GameObject> objectsToDestroy = CurrentScene.Objects.Where(obj => obj.PendingDestroy);
+            foreach (GameObject obj in objectsToDestroy)
+                CurrentScene.RemoveObject(obj);
+            foreach (GameObject obj in newObjects)
+                CurrentScene.AddObject(obj);
             newObjects.Clear();
 
             initialize();
@@ -142,38 +146,34 @@ namespace Engine
 
         private static void initialize()
         {
-            foreach (GameObject obj in CurrentScene.objects)
+            foreach (GameObject obj in CurrentScene.Objects)
                 obj.Initialize();
         }
 
         private static void update()
         {
-            foreach (GameObject obj in CurrentScene.objects)
-            {
+            foreach (GameObject obj in CurrentScene.Objects)
                 if (obj.Enabled)
                     obj.Update();
-            }
         }
 
         private static void fixedUpdate()
         {
             InputManager.FixedUpdate();
 
-            foreach (GameObject obj in CurrentScene.objects)
-            {
+            foreach (GameObject obj in CurrentScene.Objects)
                 if (obj.Enabled)
                     obj.FixedUpdate();
-            }
 
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
-            for (int i = 0; i < CurrentScene.objects.Count; i++)
+            for (int i = 0; i < CurrentScene.Objects.Count; i++)
             {
-                if (!CurrentScene.objects[i].Enabled)
+                if (!CurrentScene.Objects[i].Enabled)
                     continue;
-                Rigidbody rigidbody = CurrentScene.objects[i].GetComponent<Rigidbody>();
+                Rigidbody rigidbody = CurrentScene.Objects[i].GetComponent<Rigidbody>();
                 if (rigidbody != null)
                 {
-                    foreach (Collider collider in CurrentScene.objects[i].GetComponents<Collider>())
+                    foreach (Collider collider in CurrentScene.Objects[i].GetComponents<Collider>())
                         collider.updateData();
                     foreach (Rigidbody otherRigidbody in rigidbodies)
                         rigidbody.solveCollisionWith(otherRigidbody);

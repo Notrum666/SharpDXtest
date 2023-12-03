@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
 
 using LinearAlgebra;
@@ -9,6 +11,8 @@ namespace Engine.BaseAssets.Components
     {
         public event Action Invalidated;
         public Transform Parent { get; private set; }
+        private List<Transform> children = new List<Transform>();
+        public ReadOnlyCollection<Transform> Children => children.AsReadOnly();
         [DisplayField("Position")]
         private Vector3 localPosition;
         public Vector3 LocalPosition
@@ -250,15 +254,21 @@ namespace Engine.BaseAssets.Components
 
         public void SetParent(Transform transform, bool keepRelative = true)
         {
-            if (Parent != null)
-                Parent.Invalidated -= invalidateCachedData;
-
             Transform tmp = transform;
             while (tmp != null)
             {
                 if (tmp == this)
-                    throw new ArgumentException("Object can't be ancestor of itself in transform hierarchy.");
+                {
+                    Logger.Log(LogType.Error, "Object cannot be an ancestor of itself.");
+                    return;
+                }
                 tmp = tmp.Parent;
+            }
+
+            if (Parent != null)
+            {
+                Parent.Invalidated -= invalidateCachedData;
+                Parent.children.Remove(this);
             }
 
             if (keepRelative)
@@ -273,7 +283,10 @@ namespace Engine.BaseAssets.Components
             invalidateCachedData();
 
             if (Parent != null)
+            {
                 Parent.Invalidated += invalidateCachedData;
+                Parent.children.Add(this);
+            }
         }
 
         public void OnFieldChanged(FieldInfo fieldInfo)

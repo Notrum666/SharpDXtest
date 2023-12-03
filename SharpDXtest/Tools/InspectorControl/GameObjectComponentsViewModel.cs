@@ -8,7 +8,7 @@ using Component = Engine.BaseAssets.Components.Component;
 
 namespace Editor
 {
-    public class GameObjectViewModel : INotifyPropertyChanged
+    public class GameObjectComponentsViewModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
         private GameObject target = null;
@@ -24,7 +24,7 @@ namespace Editor
         }
         public ObservableCollection<ComponentViewModel> ComponentViewModels { get; private set; } = new ObservableCollection<ComponentViewModel>();
 
-        public GameObjectViewModel() { }
+        public GameObjectComponentsViewModel() { }
 
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {

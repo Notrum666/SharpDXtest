@@ -1031,7 +1031,38 @@ namespace Engine
     }
     public class Scene
     {
-        public List<GameObject> objects { get; } = new List<GameObject>();
+        public event Action<Scene, GameObject> OnObjectAdded;
+        public event Action<Scene, GameObject> OnObjectRemoved;
+        private List<GameObject> objects = new List<GameObject>();
+        public ReadOnlyCollection<GameObject> Objects => objects.AsReadOnly();
+        internal void AddObject(GameObject obj)
+        {
+            if (objects.Contains(obj))
+            {
+                Logger.Log(LogType.Error, "Scene already contains GameObject " + obj.ToString());
+                return;
+            }
+            objects.Add(obj);
+            OnObjectAdded?.Invoke(this, obj);
+        }
+        internal void RemoveObject(GameObject obj)
+        {
+            if (!objects.Contains(obj))
+            {
+                Logger.Log(LogType.Error, "Scene does not contain GameObject " + obj.ToString());
+                return;
+            }
+            Queue<GameObject> queue = new Queue<GameObject>();
+            queue.Enqueue(obj);
+            while (queue.Count > 0)
+            {
+                obj = queue.Dequeue();
+                objects.Remove(obj);
+                OnObjectRemoved?.Invoke(this, obj);
+                foreach (Transform transform in obj.Transform.Children)
+                    queue.Enqueue(transform.GameObject);
+            }
+        }
     }
     public static class AssetsManager
     {
@@ -1543,7 +1574,8 @@ namespace Engine
                             if (sceneObject != null && !(sceneObject is GameObject))
                                 throw new Exception("Scene can contain only GameObjects.");
                         }
-                        (curObj as Scene).objects.AddRange(gameObjects);
+                        foreach (GameObject gameObject in gameObjects)
+                            (curObj as Scene).AddObject(gameObject);
                     }
                     else
                     {

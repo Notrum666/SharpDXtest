@@ -60,6 +60,15 @@
 		<Mesh model="{Model Cube}">
 			<Mesh.Material Albedo="{Texture Prototype}"/>
 		</Mesh>
+		
+		<GameObject>
+			<Transform>
+				<Transform.LocalPosition z="2"/>
+			</Transform>
+			<Mesh model="{Model Cube}">
+				<Mesh.Material Albedo="{Texture Prototype}"/>
+			</Mesh>
+		</GameObject>
 	</GameObject>
 
 	<GameObject>

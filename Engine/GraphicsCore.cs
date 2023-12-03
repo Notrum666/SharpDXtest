@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 
@@ -239,7 +240,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.State = frontCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
-            List<GameObject> objects = EngineCore.CurrentScene.objects;
+            ReadOnlyCollection<GameObject> objects = EngineCore.CurrentScene.Objects;
 
             ShaderPipeline pipeline = null;
 
@@ -363,7 +364,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
             CurrentDevice.ImmediateContext.ClearDepthStencilView(camera.DepthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
 
-            List<GameObject> objects = EngineCore.CurrentScene.objects;
+            ReadOnlyCollection<GameObject> objects = EngineCore.CurrentScene.Objects;
 
             ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_geometry"];
             pipeline.Use();
@@ -443,7 +444,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.RadianceBuffer.GetView<RenderTargetView>());
 
-            List<GameObject> objects = EngineCore.CurrentScene.objects;
+            ReadOnlyCollection<GameObject> objects = EngineCore.CurrentScene.Objects;
 
             foreach (GameObject obj in objects)
             {
@@ -550,7 +551,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(viewport);
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
 
-            List<GameObject> objects = EngineCore.CurrentScene.objects;
+            ReadOnlyCollection<GameObject> objects = EngineCore.CurrentScene.Objects;
 
             ShaderPipeline pipeline = AssetsManager.ShaderPipelines["volume"];
             pipeline.Use();
