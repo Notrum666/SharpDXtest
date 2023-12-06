@@ -62,7 +62,7 @@ namespace Engine
         private Buffer indexBuffer;
 
         // material assigned on mesh load
-        public string defaultMaterial;
+        public Material DefaultMaterial { get; set; } = null;
 
         ~Primitive()
         {
@@ -134,7 +134,7 @@ namespace Engine
     public class Mesh : IDisposable
     {
         private bool disposed;
-        public List<Primitive> Primitives { get; private set; } = new List<Primitive>();
+        public List<Primitive> Primitives { get; } = new List<Primitive>();
 
         ~Mesh()
         {
@@ -1262,25 +1262,13 @@ namespace Engine
         public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
         public static Dictionary<string, Sound> Sounds { get; } = new Dictionary<string, Sound>();
 
-        public static string getTextureNameByIndex(int index, string modelPath)
-        {
-            StringBuilder strBuilder = new StringBuilder(modelPath);
-            strBuilder.Append("_texture_");
-            strBuilder.Append(index);
-            return strBuilder.ToString();
-        }
-
-        public static string getMaterialNameByIndex(int index, string modelPath)
-        {
-            StringBuilder strBuilder = new StringBuilder(modelPath);
-            strBuilder.Append("_material_");
-            strBuilder.Append(index);
-            return strBuilder.ToString();
-        }
-
         // loads meshes, materials and textures stored in one model file
         public static void LoadModel(string path, float scaleFactor = 1.0f)
         {
+            string modelName = Path.GetFileNameWithoutExtension(path);
+            string texturePrefix = modelName + "_texture";
+            string materialPrefix = modelName + "_materials";
+
             AssimpContext aiImporter = new AssimpContext();
 
             Dictionary<string, Mesh> meshes = new Dictionary<string, Mesh>();
@@ -1289,12 +1277,57 @@ namespace Engine
             // any type model import
             Assimp.Scene aiScene = aiImporter.ImportFile(path);
 
+            Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
+            for (int i = 0; i < aiScene.Textures.Count; ++i)
+            {
+                EmbeddedTexture aiTexture = aiScene.Textures[i];
+                if (aiTexture.HasCompressedData)
+                    textures.Add(texturePrefix + i.ToString(), new Texture(Texture.DecodeTexture(aiTexture.CompressedData)));
+                else if (aiTexture.Filename.Length > 0)
+                    textures.Add(texturePrefix + i.ToString(), new Texture(new Bitmap(aiTexture.Filename)));
+            }
+
+            for (int i = 0; i < aiScene.Materials.Count; ++i)
+            {
+                Assimp.Material aiMaterial = aiScene.Materials[i];
+                Material material = new Material();
+                Texture albedo = null;
+                Texture normal = null;
+                if (aiMaterial.GetMaterialTextureCount(TextureType.BaseColor) > 0)
+                {
+                    TextureSlot textureSlot;
+                    aiMaterial.GetMaterialTexture(TextureType.BaseColor, 0, out textureSlot);
+                    albedo = textures[texturePrefix + textureSlot.TextureIndex.ToString()];
+                }
+                else if (aiMaterial.HasColorDiffuse)
+                {
+                    Color4D color = aiMaterial.ColorDiffuse;
+                    albedo = new Texture(64, 64, new Vector4f(color.B, color.G, color.R, color.A).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource);
+                }
+
+                if (aiMaterial.GetMaterialTextureCount(TextureType.Normals) > 0)
+                {
+                    TextureSlot textureSlot;
+                    aiMaterial.GetMaterialTexture(TextureType.Normals, 0, out textureSlot);
+                    normal = textures[texturePrefix + textureSlot.TextureIndex.ToString()];
+                }
+
+                if (albedo != null)
+                    material.Albedo = albedo;
+                if (normal != null)
+                    material.Normal = normal;
+
+                materials.Add(materialPrefix + i.ToString(), material);
+            }
+
+            Materials.AddRange(materials);
+
             foreach (Assimp.Mesh aiMesh in aiScene.Meshes)
             {
                 // handle only triangles
                 if (aiMesh.PrimitiveType != PrimitiveType.Triangle)
                 {
-                    Logger.Log(LogType.Warning, "Primitive type of mesh is not a triangle, skip");
+                    Logger.Log(LogType.Warning, path + ": Non-triangulated primitives are not supported");
                     continue;
                 }
 
@@ -1308,7 +1341,7 @@ namespace Engine
                 }
 
                 Primitive primitive = new Primitive();
-                primitive.defaultMaterial = getMaterialNameByIndex(aiMesh.MaterialIndex, path);
+                primitive.DefaultMaterial = materials[materialPrefix + aiMesh.MaterialIndex.ToString()];
                 primitive.vertices = new List<Primitive.PrimitiveVertex>();
                 primitive.indices = new List<int>();
                 List<Vector3D> verts = aiMesh.Vertices;
@@ -1326,64 +1359,14 @@ namespace Engine
                     primitive.vertices.Add(vertex);
                 }
 
-                List<Face> faces = aiMesh.Faces;
                 foreach (Face face in aiMesh.Faces)
-                {
-                    if (face.IndexCount != 3)
-                        throw new Exception("mesh is not triangulated");
-                    foreach (int index in face.Indices)
-                        primitive.indices.Add(index);
-                }
+                    primitive.indices.AddRange(face.Indices);
 
                 primitive.GenerateGPUData();
 
                 mesh.Primitives.Add(primitive);
             }
 
-            Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
-            for (int i = 0; i < aiScene.Textures.Count; ++i)
-            {
-                EmbeddedTexture aiTexture = aiScene.Textures[i];
-                if (aiTexture.HasCompressedData)
-                    textures.Add(getTextureNameByIndex(i, path), new Texture(Texture.DecodeTexture(aiTexture.CompressedData)));
-                else if (aiTexture.Filename.Length > 0)
-                    textures.Add(getTextureNameByIndex(i, path), new Texture(new Bitmap(aiTexture.Filename)));
-            }
-
-            for (int i = 0; i < aiScene.Materials.Count; ++i)
-            {
-                Assimp.Material aiMaterial = aiScene.Materials[i];
-                Material material = new Material();
-                Texture albedo = null;
-                Texture normal = null;
-                if (aiMaterial.GetMaterialTextureCount(TextureType.BaseColor) > 0)
-                {
-                    TextureSlot textureSlot;
-                    aiMaterial.GetMaterialTexture(TextureType.BaseColor, 0, out textureSlot);
-                    albedo = textures[getTextureNameByIndex(textureSlot.TextureIndex, path)];
-                }
-                else if (aiMaterial.HasColorDiffuse)
-                {
-                    Color4D color = aiMaterial.ColorDiffuse;
-                    albedo = new Texture(64, 64, new Vector4f(color.B, color.G, color.R, color.A).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource);
-                }
-
-                if (aiMaterial.GetMaterialTextureCount(TextureType.Normals) > 0)
-                {
-                    TextureSlot textureSlot;
-                    aiMaterial.GetMaterialTexture(TextureType.Normals, 0, out textureSlot);
-                    normal = textures[getTextureNameByIndex(textureSlot.TextureIndex, path)];
-                }
-
-                if (albedo != null)
-                    material.Albedo = albedo;
-                if (normal != null)
-                    material.Normal = normal;
-
-                materials.Add(getMaterialNameByIndex(i, path), material);
-            }
-
-            Materials.AddRange(materials);
             Meshes.AddRange(meshes);
         }
 
@@ -1501,22 +1484,6 @@ namespace Engine
                                     field.SetValue(obj, Meshes[words[1]]);
                                 else
                                     throw new Exception(objType.Name + " doesn't have " + name + ".");
-                            }
-                            // attach materials from loaded mesh to loaded primitives
-                            string materialPropertyName = "Materials";
-                            PropertyInfo materialProperty = objType.GetProperty(materialPropertyName);
-                            List<Material> materials = new List<Material>();
-                            foreach (Primitive primitive in Meshes[words[1]].Primitives)
-                                materials.Add((primitive.defaultMaterial == null) ? null : Materials[primitive.defaultMaterial]);
-                            if (materialProperty != null)
-                                materialProperty.SetValue(obj, materials.ToArray());
-                            else
-                            {
-                                FieldInfo materialField = objType.GetField(materialPropertyName);
-                                if (materialField != null)
-                                    materialField.SetValue(obj, materials);
-                                else
-                                    throw new Exception(objType.Name + " doesn't have " + materialPropertyName + ".");
                             }
                             break;
                         }
@@ -1842,7 +1809,18 @@ namespace Engine
                                     addMethod.Invoke(curObj, new object[] { listElement });
                                 }
                                 if (curType.IsArray)
-                                    property.SetValue(parent, genericListType.GetMethod("ToArray").Invoke(curObj, null));
+                                {
+                                    if (property.SetMethod.IsPrivate)
+                                    {
+                                        int originalLength = ((Array)property.GetValue(parent)).Length;
+                                        int curLength = Math.Min(((System.Collections.IList)curObj).Count, originalLength);
+                                        object boxedArray = property.GetValue(parent);
+                                        for (int i = 0; i < originalLength; i++)
+                                            ((Array)boxedArray).SetValue(i < curLength ? ((System.Collections.IList)curObj)[i] : null, i);
+                                    }
+                                    else
+                                        property.SetValue(parent, genericListType.GetMethod("ToArray").Invoke(curObj, null));
+                                }
                                 else
                                     property.SetValue(parent, curObj);
                             }

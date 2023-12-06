@@ -9,9 +9,9 @@ namespace Engine.BaseAssets.Components.Colliders
 {
     public class MeshCollider : Collider
     {
-        public MeshComponent Mesh
+        public Mesh Mesh
         {
-            set => FromMesh(value.mesh);
+            set => FromMesh(value);
         }
 
         protected List<Vector3> vertices = new List<Vector3>();

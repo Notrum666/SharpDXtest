@@ -1,43 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.BaseAssets.Components
 {
     public class MeshComponent : Component
     {
-        public Mesh mesh;
-        public Material[] Materials
+        private Mesh mesh = null;
+        public Mesh Mesh
         {
-            get
+            get => mesh;
+            set
             {
-                return materials.ToArray();
-            }
-          private set
-            {
-                if (materials != null)
-                {
-                    throw new InvalidOperationException("material slots are already allocated");
-                }
-                materials = new List<Material>();
-                materials.AddRange(value);
+                mesh = value;
+                if (mesh is null)
+                    Materials = new Material[0];
+                else
+                    Materials = value.Primitives.Select(p => p.DefaultMaterial).ToArray();
             }
         }
-        private List<Material> materials = null;
+        public Material[] Materials { get; private set; } = new Material[0];
 
         public void Render()
         {
-            if (mesh.Primitives.Count != materials.Count)
-                throw new Exception("Primitives exceed materials count");
+            if (mesh is null)
+            {
+                Logger.Log(LogType.Warning, GameObject.ToString() + ": trying to render MeshComponent with no mesh set");
+                return;
+            }
+
             for (int i = 0; i < mesh.Primitives.Count; ++i)
             {
-                if (materials[i] == null)
-                {
-                    (new Material()).Use();
-                }
-                else
-                {
-                    materials[i].Use();
-                }
+                Material curMaterial = Materials[i];
+                if (curMaterial is null)
+                    curMaterial = mesh.Primitives[i].DefaultMaterial;
+                if (curMaterial is null)
+                    curMaterial = AssetsManager.Materials["default"];
+                curMaterial.Use();
                 mesh.Primitives[i].Render();
             }
         }
