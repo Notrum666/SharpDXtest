@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,6 +10,9 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Xml;
 using System.Xml.Linq;
+using System.Windows.Media.Imaging;
+using System.Windows;
+using System.Text;
 
 using Engine.BaseAssets.Components;
 
@@ -25,6 +27,8 @@ using SharpDX.Mathematics.Interop;
 using SharpDX.Multimedia;
 using SharpDX.XAudio2;
 
+using Assimp;
+
 using Buffer = SharpDX.Direct3D11.Buffer;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 using Quaternion = LinearAlgebra.Quaternion;
@@ -34,166 +38,229 @@ using Vector3 = LinearAlgebra.Vector3;
 
 namespace Engine
 {
-    public class Model : IDisposable
-    {
-        public List<Vector3> v = null;
-        public List<Vector2> t = null;
-        public List<Vector3> n = null;
-        public List<int[]> v_i = null;
-        public List<int[]> t_i = null;
-        public List<int[]> n_i = null;
+    // model contains a number of meshes
+    // materials from model should be loaded as separate assets too
+    // materials contain a number of textures
+    // each of them: meshes, materials, textures should be loaded as separate assets
 
-        private Buffer vertexBuffer;
-        private VertexBufferBinding vertexBufferBinding;
-        private Buffer indexBuffer;
+    public class Primitive : IDisposable
+    {
         private bool disposed;
 
-        private struct ModelVertex
+        public struct PrimitiveVertex
         {
             public Vector3f v;
             public Vector2f t;
             public Vector3f n;
             public Vector3f tx;
-        }
-        private struct ModelVertexWithIndex
+        };
+        public List<PrimitiveVertex> vertices = null;
+        public List<int> indices = null;
+
+        private Buffer vertexBuffer;
+        private VertexBufferBinding vertexBufferBinding;
+        private Buffer indexBuffer;
+
+        // material assigned on mesh load
+        public Material DefaultMaterial { get; set; } = null;
+
+        ~Primitive()
         {
-            public ModelVertex v;
-            public uint index;
-
-            public ModelVertexWithIndex(ModelVertex v, uint index)
-            {
-                this.v = v;
-                this.index = index;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (obj is ModelVertexWithIndex)
-                    return v.Equals(((ModelVertexWithIndex)obj).v);
-                return false;
-            }
-
-            public override int GetHashCode()
-            {
-                return v.GetHashCode();
-            }
+            Dispose(disposing: false);
         }
 
-        public void updateModel()
+        public void GenerateGPUData()
         {
-            if (v == null || v_i == null)
-                throw new Exception("Model can't be empty.");
+            if (vertices == null || indices == null)
+                throw new Exception("Geometry data can't be empty.");
 
-            List<ModelVertex> vertexes = new List<ModelVertex>();
-            HashSet<ModelVertexWithIndex> vertexesHashTable = new HashSet<ModelVertexWithIndex>(v.Count);
-            ModelVertex[] curPolygon = new ModelVertex[3];
-            int polygonsCount = v_i.Count;
-            uint[] indexes = new uint[3 * polygonsCount];
-            for (int i = 0; i < polygonsCount; i++)
+            for (int i = 0; i < indices.Count / 3; i++)
             {
-                for (int j = 0; j < 3; j++)
-                {
-                    ModelVertex curVertex = new ModelVertex();
-                    curVertex.v.x = (float)v[v_i[i][j]].x;
-                    curVertex.v.y = (float)v[v_i[i][j]].y;
-                    curVertex.v.z = (float)v[v_i[i][j]].z;
-                    if (t != null)
-                    {
-                        curVertex.t.x = (float)t[t_i[i][j]].x;
-                        curVertex.t.y = (float)t[t_i[i][j]].y;
-                    }
-                    else
-                    {
-                        curVertex.t.x = 0;
-                        curVertex.t.y = 0;
-                    }
-                    if (n != null)
-                    {
-                        curVertex.n.x = (float)n[n_i[i][j]].x;
-                        curVertex.n.y = (float)n[n_i[i][j]].y;
-                        curVertex.n.z = (float)n[n_i[i][j]].z;
-                    }
-                    else
-                    {
-                        Vector3 p1 = v[v_i[i][0]];
-                        Vector3 p2 = v[v_i[i][1]];
-                        Vector3 p3 = v[v_i[i][2]];
-                        Vector3 normal = (p2 - p1).vecMul(p3 - p1).normalized();
-                        curVertex.n.x = (float)normal.x;
-                        curVertex.n.y = (float)normal.y;
-                        curVertex.n.z = (float)normal.z;
-                    }
+                Vector3f edge1 = vertices[i * 3 + 1].v - vertices[i * 3 + 0].v;
+                Vector3f edge2 = vertices[i * 3 + 2].v - vertices[i * 3 + 0].v;
+                Vector2f UVedge1 = vertices[i * 3 + 1].t - vertices[i * 3 + 0].t;
+                Vector2f UVedge2 = vertices[i * 3 + 2].t - vertices[i * 3 + 0].t;
+                Vector3f tx = ((edge1 * UVedge2.y - edge2 * UVedge1.y) / (UVedge1.x * UVedge2.y - UVedge1.y * UVedge2.x)).normalized();
+                PrimitiveVertex vertex0 = vertices[i * 3 + 0];
+                PrimitiveVertex vertex1 = vertices[i * 3 + 1];
+                PrimitiveVertex vertex2 = vertices[i * 3 + 2];
 
-                    curPolygon[j] = curVertex;
-                }
+                vertex0.tx = new Vector3f(tx.x, tx.y, tx.z);
+                vertex1.tx = new Vector3f(tx.x, tx.y, tx.z);
+                vertex2.tx = new Vector3f(tx.x, tx.y, tx.z);
 
-                Vector3 edge1 = curPolygon[1].v - curPolygon[0].v;
-                Vector3 edge2 = curPolygon[2].v - curPolygon[0].v;
-                Vector2 UVedge1 = curPolygon[1].t - curPolygon[0].t;
-                Vector2 UVedge2 = curPolygon[2].t - curPolygon[0].t;
-
-                curPolygon[0].tx = curPolygon[1].tx = curPolygon[2].tx =
-                    (Vector3f)((edge1 * UVedge2.y - edge2 * UVedge1.y) / (UVedge1.x * UVedge2.y - UVedge1.y * UVedge2.x)).normalized();
-
-                for (int j = 0; j < 3; j++)
-                {
-                    ModelVertex curVertex = curPolygon[j];
-                    uint k = (uint)vertexes.Count;
-                    ModelVertexWithIndex actualVertex;
-                    if (vertexesHashTable.TryGetValue(new ModelVertexWithIndex(curVertex, 0), out actualVertex))
-                        k = actualVertex.index;
-                    indexes[i * 3 + j] = k;
-                    vertexes.Add(curVertex);
-                    vertexesHashTable.Add(new ModelVertexWithIndex(curVertex, k));
-                }
+                vertices[i * 3 + 0] = vertex0;
+                vertices[i * 3 + 1] = vertex1;
+                vertices[i * 3 + 2] = vertex2;
             }
 
-            vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, vertexes.ToArray());
-            vertexBufferBinding = new VertexBufferBinding(vertexBuffer, Utilities.SizeOf<ModelVertex>(), 0);
-            indexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.IndexBuffer, indexes);
+            vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, vertices.ToArray());
+            vertexBufferBinding = new VertexBufferBinding(vertexBuffer, Utilities.SizeOf<PrimitiveVertex>(), 0);
+            indexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.IndexBuffer, indices.ToArray());
         }
 
         public void Render()
         {
             if (disposed)
-                throw new ObjectDisposedException(nameof(Model));
+                throw new ObjectDisposedException(nameof(Primitive));
+            GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
-            GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(v_i.Count * 3, 0, 0);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                if (disposing)
-                {
-                    v = null;
-                    t = null;
-                    n = null;
-                    v_i = null;
-                    t_i = null;
-                    n_i = null;
-                }
-
-                if (vertexBuffer != null)
-                    vertexBuffer.Dispose();
-                if (indexBuffer != null)
-                    indexBuffer.Dispose();
-
-                disposed = true;
-            }
-        }
-
-        ~Model()
-        {
-            Dispose(disposing: false);
+            GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(indices.Count, 0, 0);
         }
 
         public void Dispose()
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
+        }
+
+        public virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            vertices = null;
+            indices = null;
+
+            if (vertexBuffer != null)
+                vertexBuffer.Dispose();
+            if (indexBuffer != null)
+                indexBuffer.Dispose();
+
+            disposed = true;
+        }
+    }
+    public class Mesh : IDisposable
+    {
+        private bool disposed;
+        public List<Primitive> Primitives { get; } = new List<Primitive>();
+
+        ~Mesh()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Render()
+        {
+            if (disposed)
+                throw new ObjectDisposedException(nameof(Mesh));
+            foreach (Primitive primitive in Primitives)
+                primitive.Render();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                foreach(Primitive primitive in Primitives)
+                    primitive.Dispose(disposing);
+                disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+    };
+    public class Material
+    {
+        private Texture albedo;
+        public Texture Albedo
+        {
+            get => albedo;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Albedo", "Texture can't be null.");
+                albedo = value;
+            }
+        }
+        private Texture normal;
+        public Texture Normal
+        {
+            get => normal;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Normal", "Texture can't be null.");
+                normal = value;
+            }
+        }
+        private Texture metallic;
+        public Texture Metallic
+        {
+            get => metallic;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Metallic", "Texture can't be null.");
+                metallic = value;
+            }
+        }
+        private Texture roughness;
+        public Texture Roughness
+        {
+            get => roughness;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Roughness", "Texture can't be null.");
+                roughness = value;
+            }
+        }
+        private Texture ambientOcclusion;
+        public Texture AmbientOcclusion
+        {
+            get => ambientOcclusion;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("AmbientOcclusion", "Texture can't be null.");
+                ambientOcclusion = value;
+            }
+        }
+        private Texture emissive;
+        public Texture Emissive
+        {
+            get => emissive;
+            set
+            {
+                if (value == null)
+                    throw new ArgumentNullException("Emissive", "Texture can't be null.");
+                emissive = value;
+            }
+        }
+        public Material()
+        {
+            albedo = AssetsManager.Textures["default_albedo"];
+            normal = AssetsManager.Textures["default_normal"];
+            metallic = AssetsManager.Textures["default_metallic"];
+            roughness = AssetsManager.Textures["default_roughness"];
+            ambientOcclusion = AssetsManager.Textures["default_ambientOcclusion"];
+            emissive = AssetsManager.Textures["default_emissive"];
+        }
+        public Material(Texture albedo, Texture normal, Texture metallic, Texture roughness, Texture ambientOcclusion, Texture emissive)
+        {
+            Albedo = albedo;
+            Normal = normal;
+            Metallic = metallic;
+            Roughness = roughness;
+            AmbientOcclusion = ambientOcclusion;
+            Emissive = emissive;
+        }
+
+        public void Use()
+        {
+            Albedo.Use("albedoMap");
+            Normal.Use("normalMap");
+            Metallic.Use("metallicMap");
+            Roughness.Use("roughnessMap");
+            AmbientOcclusion.Use("ambientOcclusionMap");
+            Emissive.Use("emissiveMap");
+            ShaderPipeline.Current.UploadUpdatedUniforms();
         }
     }
     public class Sampler : IDisposable
@@ -269,12 +336,35 @@ namespace Engine
 
         private bool disposed = false;
         public Texture2D texture { get; private set; }
-
         private List<IResourceViewCollection> viewsCollectons = new List<IResourceViewCollection>();
+
+        public static Bitmap DecodeTexture(byte[] bytes)
+        {
+            Stream stream = new MemoryStream(bytes);
+            BitmapDecoder decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.Default);
+            return GetBitmap(decoder.Frames[0]);
+        }
+        public static Bitmap GetBitmap(BitmapSource source)
+        {
+            Bitmap bmp = new Bitmap(
+              source.PixelWidth,
+              source.PixelHeight,
+              PixelFormat.Format32bppPArgb);
+            BitmapData data = bmp.LockBits(
+              new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp.Size),
+              ImageLockMode.WriteOnly,
+              PixelFormat.Format32bppPArgb);
+            source.CopyPixels(
+              Int32Rect.Empty,
+              data.Scan0,
+              data.Height * data.Stride,
+              data.Stride);
+            bmp.UnlockBits(data);
+            return bmp;
+        }
 
         public Texture(Bitmap image, bool applyGammaCorrection = true)
         {
-
             if (image.PixelFormat != PixelFormat.Format32bppArgb)
                 image = image.Clone(new Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
             BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
@@ -1163,142 +1253,121 @@ namespace Engine
     }
     public static class AssetsManager
     {
-        public static Dictionary<string, Model> Models { get; } = new Dictionary<string, Model>();
+        public static Dictionary<string, Mesh> Meshes { get; } = new Dictionary<string, Mesh>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
         public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
-        public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture>();
+        public static Dictionary<string, Material> Materials { get; } = new Dictionary<string, Material>();
+        public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture> ();
         public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
         public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
         public static Dictionary<string, Sound> Sounds { get; } = new Dictionary<string, Sound>();
 
-        public static Dictionary<string, Model> LoadModelsFile(string path, float scaleFactor = 1.0f, bool reverse = false)
+        // loads meshes, materials and textures stored in one model file
+        public static void LoadModel(string path, float scaleFactor = 1.0f)
         {
-            StreamReader reader = new StreamReader(File.OpenRead(path));
-
-            Dictionary<string, Model> models = new Dictionary<string, Model>();
-
             string modelName = Path.GetFileNameWithoutExtension(path);
-            Model model = new Model();
-            string line;
-            int offset_v = 0;
-            int offset_t = 0;
-            int offset_n = 0;
-            char[] separator = new char[] { ' ' };
-            while ((line = reader.ReadLine()) != null)
+            string texturePrefix = modelName + "_texture";
+            string materialPrefix = modelName + "_materials";
+
+            AssimpContext aiImporter = new AssimpContext();
+
+            Dictionary<string, Mesh> meshes = new Dictionary<string, Mesh>();
+            Dictionary<string, Material> materials = new Dictionary<string, Material>();
+
+            // any type model import
+            Assimp.Scene aiScene = aiImporter.ImportFile(path);
+
+            Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
+            for (int i = 0; i < aiScene.Textures.Count; ++i)
             {
-                if (NumberFormatInfo.CurrentInfo.NumberDecimalSeparator == ",")
-                    line = line.Replace('.', ',');
-                else
-                    line = line.Replace(',', '.');
-                string[] words = line.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-                if (words.Length == 0)
+                EmbeddedTexture aiTexture = aiScene.Textures[i];
+                if (aiTexture.HasCompressedData)
+                    textures.Add(texturePrefix + i.ToString(), new Texture(Texture.DecodeTexture(aiTexture.CompressedData)));
+                else if (aiTexture.Filename.Length > 0)
+                    textures.Add(texturePrefix + i.ToString(), new Texture(new Bitmap(aiTexture.Filename)));
+            }
+
+            for (int i = 0; i < aiScene.Materials.Count; ++i)
+            {
+                Assimp.Material aiMaterial = aiScene.Materials[i];
+                Material material = new Material();
+                Texture albedo = null;
+                Texture normal = null;
+                if (aiMaterial.GetMaterialTextureCount(TextureType.BaseColor) > 0)
+                {
+                    TextureSlot textureSlot;
+                    aiMaterial.GetMaterialTexture(TextureType.BaseColor, 0, out textureSlot);
+                    albedo = textures[texturePrefix + textureSlot.TextureIndex.ToString()];
+                }
+                else if (aiMaterial.HasColorDiffuse)
+                {
+                    Color4D color = aiMaterial.ColorDiffuse;
+                    albedo = new Texture(64, 64, new Vector4f(color.B, color.G, color.R, color.A).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource);
+                }
+
+                if (aiMaterial.GetMaterialTextureCount(TextureType.Normals) > 0)
+                {
+                    TextureSlot textureSlot;
+                    aiMaterial.GetMaterialTexture(TextureType.Normals, 0, out textureSlot);
+                    normal = textures[texturePrefix + textureSlot.TextureIndex.ToString()];
+                }
+
+                if (albedo != null)
+                    material.Albedo = albedo;
+                if (normal != null)
+                    material.Normal = normal;
+
+                materials.Add(materialPrefix + i.ToString(), material);
+            }
+
+            Materials.AddRange(materials);
+
+            foreach (Assimp.Mesh aiMesh in aiScene.Meshes)
+            {
+                // handle only triangles
+                if (aiMesh.PrimitiveType != PrimitiveType.Triangle)
+                {
+                    Logger.Log(LogType.Warning, path + ": Non-triangulated primitives are not supported");
                     continue;
-                switch (words[0])
-                {
-                    case "o":
-                        if (model.v != null)
-                        {
-                            if (models.ContainsKey(modelName))
-                                throw new ArgumentException("File can't have more than one model with the same name.");
-                            if (!Models.ContainsKey(modelName))
-                            {
-                                //throw new ArgumentException("Model with name \"" + modelName + "\" already loaded.");
-                                models[modelName] = model;
-                                Models[modelName] = model;
-                            }
-                            offset_v += model.v.Count;
-                            if (model.t != null)
-                                offset_t += model.t.Count;
-                            if (model.n != null)
-                                offset_n += model.n.Count;
-                            model = new Model();
-                        }
-                        modelName = line.Substring(2);
-                        break;
-                    case "v":
-                        if (model.v == null)
-                        {
-                            model.v = new List<Vector3>();
-                            model.v_i = new List<int[]>();
-                        }
-                        model.v.Add(new Vector3(double.Parse(words[1]) * scaleFactor, double.Parse(words[2]) * scaleFactor, double.Parse(words[3]) * scaleFactor));
-                        break;
-                    case "vt":
-                        if (model.t == null)
-                        {
-                            model.t = new List<Vector2>();
-                            model.t_i = new List<int[]>();
-                        }
-                        model.t.Add(new Vector2(double.Parse(words[1]), double.Parse(words[2])));
-                        break;
-                    case "vn":
-                        if (model.n == null)
-                        {
-                            model.n = new List<Vector3>();
-                            model.n_i = new List<int[]>();
-                        }
-                        model.n.Add(new Vector3(double.Parse(words[1]), double.Parse(words[2]), double.Parse(words[3])));
-                        break;
-                    case "f":
-                        int vertexesCount = words.Length - 1;
-                        if (vertexesCount > 3)
-                            throw new NotSupportedException("DirectX does not support non-triangulated models.");
-                        int[] v_i = new int[vertexesCount];
-                        int[] t_i = null;
-                        int[] n_i = null;
-                        if (model.t_i != null)
-                            t_i = new int[vertexesCount];
-                        if (model.n_i != null)
-                            n_i = new int[vertexesCount];
-                        if (reverse)
-                        {
-                            for (int i = 0; i < vertexesCount; i++)
-                            {
-                                string[] values = words[1 + i].Split('/');
-                                v_i[vertexesCount - i - 1] = int.Parse(values[0]) - offset_v - 1;
-                                if (t_i != null)
-                                    t_i[vertexesCount - i - 1] = int.Parse(values[1]) - offset_t - 1;
-                                if (n_i != null)
-                                    n_i[vertexesCount - i - 1] = int.Parse(values[2]) - offset_n - 1;
-                            }
-                        }
-                        else
-                        {
-                            for (int i = 0; i < vertexesCount; i++)
-                            {
-                                string[] values = words[1 + i].Split('/');
-                                v_i[i] = int.Parse(values[0]) - offset_v - 1;
-                                if (t_i != null)
-                                    t_i[i] = int.Parse(values[1]) - offset_t - 1;
-                                if (n_i != null)
-                                    n_i[i] = int.Parse(values[2]) - offset_n - 1;
-                            }
-                        }
-                        for (int i = 1; i < vertexesCount - 1; i++)
-                        {
-                            model.v_i.Add(new int[3] { v_i[0], v_i[i], v_i[i + 1] });
-                            if (t_i != null)
-                                model.t_i.Add(new int[3] { t_i[0], t_i[i], t_i[i + 1] });
-                            if (n_i != null)
-                                model.n_i.Add(new int[3] { n_i[0], n_i[i], n_i[i + 1] });
-                        }
-                        break;
                 }
-            }
-            if (model.v != null)
-            {
-                if (models.ContainsKey(modelName))
-                    throw new ArgumentException("File can't have more than one model with the same name.");
-                if (!Models.ContainsKey(modelName))
+
+                Mesh mesh;
+
+                // in order to store different primitives into one mesh trying to find it by name
+                if (!meshes.TryGetValue(aiMesh.Name, out mesh))
                 {
-                    //throw new ArgumentException("Model with name \"" + modelName + "\" already loaded.");
-                    models[modelName] = model;
-                    Models[modelName] = model;
+                    mesh = new Mesh();
+                    meshes.Add(aiMesh.Name, mesh);
                 }
+
+                Primitive primitive = new Primitive();
+                primitive.DefaultMaterial = materials[materialPrefix + aiMesh.MaterialIndex.ToString()];
+                primitive.vertices = new List<Primitive.PrimitiveVertex>();
+                primitive.indices = new List<int>();
+                List<Vector3D> verts = aiMesh.Vertices;
+                List<Vector3D> norms = (aiMesh.HasNormals) ? aiMesh.Normals : null;
+                List<Vector3D> uvs = aiMesh.HasTextureCoords(0) ? aiMesh.TextureCoordinateChannels[0] : null;
+                for (int i = 0; i < verts.Count; i++)
+                {
+                    Vector3D pos = verts[i];
+                    Vector3D norm = (norms != null) ? norms[i] : new Vector3D(0, 1, 0); // Y-up by default
+                    Vector3D uv = (uvs != null) ? uvs[i] : new Vector3D(0, 0, 0);
+                    Primitive.PrimitiveVertex vertex = new Primitive.PrimitiveVertex();
+                    vertex.v = new Vector3f(pos.X * scaleFactor, pos.Y * scaleFactor, pos.Z * scaleFactor);
+                    vertex.n = new Vector3f(norm.X, norm.Y, norm.Z);
+                    vertex.t = new Vector2f(uv.X, 1 - uv.Y);
+                    primitive.vertices.Add(vertex);
+                }
+
+                foreach (Face face in aiMesh.Faces)
+                    primitive.indices.AddRange(face.Indices);
+
+                primitive.GenerateGPUData();
+
+                mesh.Primitives.Add(primitive);
             }
-            foreach (Model mdl in models.Values)
-                mdl.updateModel();
-            return models;
+
+            Meshes.AddRange(meshes);
         }
 
         public static Shader LoadShader(string shaderName, string shaderPath)
@@ -1334,7 +1403,6 @@ namespace Engine
                 textureName = Path.GetFileNameWithoutExtension(path);
             if (Textures.ContainsKey(textureName))
                 return Textures[textureName];
-            //throw new ArgumentException("Texture with name \"" + textureName + "\" is already loaded.");
 
             Texture texture = new Texture(new Bitmap(path), applyGammaCorrection);
 
@@ -1402,18 +1470,18 @@ namespace Engine
                     case "Reference":
                         references.Add(new Reference(obj, name, words[1]));
                         break;
-                    case "Model":
+                    case "Mesh":
                         {
-                            if (!Models.ContainsKey(words[1]))
-                                throw new Exception("Model " + words[1] + " is not loaded.");
+                            if (!Meshes.ContainsKey(words[1]))
+                                throw new Exception("Mesh " + words[1] + " is not loaded.");
                             PropertyInfo property = objType.GetProperty(name);
                             if (property != null)
-                                property.SetValue(obj, Models[words[1]]);
+                                property.SetValue(obj, Meshes[words[1]]);
                             else
                             {
                                 FieldInfo field = objType.GetField(name);
                                 if (field != null)
-                                    field.SetValue(obj, Models[words[1]]);
+                                    field.SetValue(obj, Meshes[words[1]]);
                                 else
                                     throw new Exception(objType.Name + " doesn't have " + name + ".");
                             }
@@ -1421,8 +1489,8 @@ namespace Engine
                         }
                     case "Texture":
                         {
-                            if (!Textures.ContainsKey(words[1]))
-                                throw new Exception("Texture " + words[1] + " not loaded.");
+                            //if (!Textures.ContainsKey(words[1]))
+                            //    throw new Exception("Texture " + words[1] + " not loaded.");
                             PropertyInfo property = objType.GetProperty(name);
                             if (property != null)
                                 property.SetValue(obj, Textures[words[1]]);
@@ -1534,14 +1602,14 @@ namespace Engine
                     {
                         switch (assetsSet.Name.LocalName)
                         {
-                            case "Models":
+                            case "Meshes":
                                 {
-                                    foreach (XElement model in assetsSet.Elements())
+                                    foreach (XElement mesh in assetsSet.Elements())
                                     {
-                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadModelsFile");
+                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadModel");
                                         ParameterInfo[] parameters = method.GetParameters();
                                         Dictionary<string, object> parameterValues = new Dictionary<string, object>();
-                                        foreach (XAttribute attrib in model.Attributes())
+                                        foreach (XAttribute attrib in mesh.Attributes())
                                         {
                                             bool found = false;
                                             foreach (ParameterInfo param in parameters)
@@ -1741,7 +1809,18 @@ namespace Engine
                                     addMethod.Invoke(curObj, new object[] { listElement });
                                 }
                                 if (curType.IsArray)
-                                    property.SetValue(parent, genericListType.GetMethod("ToArray").Invoke(curObj, null));
+                                {
+                                    if (property.SetMethod.IsPrivate)
+                                    {
+                                        int originalLength = ((Array)property.GetValue(parent)).Length;
+                                        int curLength = Math.Min(((System.Collections.IList)curObj).Count, originalLength);
+                                        object boxedArray = property.GetValue(parent);
+                                        for (int i = 0; i < originalLength; i++)
+                                            ((Array)boxedArray).SetValue(i < curLength ? ((System.Collections.IList)curObj)[i] : null, i);
+                                    }
+                                    else
+                                        property.SetValue(parent, genericListType.GetMethod("ToArray").Invoke(curObj, null));
+                                }
                                 else
                                     property.SetValue(parent, curObj);
                             }

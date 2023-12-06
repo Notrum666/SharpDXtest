@@ -6,8 +6,8 @@
 
 struct vert_in
 {
-    float2 v : SV_POSITION;
-    float2 t : TEX;
+	float2 v : SV_POSITION;
+	float2 t : TEX;
 };
 
 static const vert_in vertexes[6] =

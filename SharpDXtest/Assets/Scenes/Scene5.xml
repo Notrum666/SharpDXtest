@@ -1,16 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Scene>
 	<Assets>
-		<Models>
-			<Model path="Ball.obj"/>
-			<Model path="Cube.obj"/>
-		</Models>
-
 		<Textures>
-			<Texture path="Sun.jpg"/>
 			<Texture path="Prototype.png"/>
-			<Texture path="Prototype_Light.png"/>
 		</Textures>
+
+		<Meshes>
+			<Mesh path="Ball.obj"/>
+			<Mesh path="Cube.obj"/>
+			<Mesh path="cube_materials.fbx"/>
+		</Meshes>
 	</Assets>
 
 	<GameObject>
@@ -57,18 +56,16 @@
 			<Transform.LocalScale x="1" y="1" z="2"/>
 			<Transform.LocalRotation x="0" y="45" z="0"/>
 		</Transform>
-		<Mesh model="{Model Cube}">
-			<Mesh.Material Albedo="{Texture Prototype}"/>
-		</Mesh>
+		<MeshComponent Mesh="{Mesh Cube.002}">
+		</MeshComponent>
 	</GameObject>
 
 	<GameObject>
 		<Transform>
 			<Transform.LocalScale x="50" y="50" z="0.5"/>
 		</Transform>
-		<Mesh model="{Model Cube}">
-			<Mesh.Material Albedo="{Texture Prototype}"/>
-		</Mesh>
+		<MeshComponent Mesh="{Mesh Cube}">
+		</MeshComponent>
 	</GameObject>
 
 	<GameObject>

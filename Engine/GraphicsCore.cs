@@ -12,6 +12,7 @@ using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
+using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 
 using BlendOperation = SharpDX.Direct3D11.BlendOperation;
@@ -20,9 +21,9 @@ using FillMode = SharpDX.Direct3D11.FillMode;
 using Filter = SharpDX.Direct3D11.Filter;
 using Format = SharpDX.DXGI.Format;
 using Light = Engine.BaseAssets.Components.Light;
-using Mesh = Engine.BaseAssets.Components.Mesh;
 using Query = SharpDX.Direct3D11.Query;
 using QueryType = SharpDX.Direct3D11.QueryType;
+using SwapEffect = SharpDX.Direct3D9.SwapEffect;
 
 namespace Engine
 {
@@ -34,15 +35,17 @@ namespace Engine
         public Texture metallic;
         public Texture roughness;
         public Texture ambientOcclusion;
+        public Texture emission;
 
         public GBuffer(int width, int height)
         {
-            worldPos = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            albedo = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            normal = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            metallic = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            roughness = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            ambientOcclusion = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            worldPos =          new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            albedo =            new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            normal =            new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            metallic =          new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            roughness =         new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            ambientOcclusion =  new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            emission =          new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
         }
     }
 
@@ -75,13 +78,17 @@ namespace Engine
         {
             InitDirectX(HWND, width, height);
 
-            AssetsManager.Textures["default_albedo"] = new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource);
-            AssetsManager.Textures["default_normal"] = new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource);
-            AssetsManager.Textures["default_metallic"] = new Texture(64, 64, 0.1f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource);
-            AssetsManager.Textures["default_roughness"] = new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource);
-            AssetsManager.Textures["default_ambientOcclusion"] = new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource);
+            if (AssetsManager.Textures.Count > 0)
+                throw new Exception("AssetsManager.Textures must be empty on GraphicsCore init stage");
+            AssetsManager.Textures.Add("default_albedo", new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
+            AssetsManager.Textures.Add("default_normal", new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
+            AssetsManager.Textures.Add("default_metallic", new Texture(64, 64, 0.1f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
+            AssetsManager.Textures.Add("default_roughness", new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
+            AssetsManager.Textures.Add("default_ambientOcclusion", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
+            AssetsManager.Textures.Add("default_emissive", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
+            AssetsManager.Materials.Add("default", new Material());
 
-            //AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"), 
+            //AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"),
             //                                            Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
             sampler = AssetsManager.Samplers["default"] = new Sampler(TextureAddressMode.Wrap, TextureAddressMode.Wrap);
 
@@ -130,7 +137,7 @@ namespace Engine
                     {
                         Width = 1,
                         Height = 1,
-                        Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
+                        Format = Format.B8G8R8A8_UNorm,
                         RefreshRate = new Rational(60, 1),
                         Scaling = DisplayModeScaling.Unspecified,
                         ScanlineOrdering = DisplayModeScanlineOrder.Unspecified
@@ -213,7 +220,7 @@ namespace Engine
                                                     DeviceType.Hardware,
                                                     0,
                                                     CreateFlags.HardwareVertexProcessing | CreateFlags.Multithreaded | CreateFlags.FpuPreserve,
-                                                    new PresentParameters()
+                                                    new SharpDX.Direct3D9.PresentParameters()
                                                     {
                                                         Windowed = true,
                                                         SwapEffect = SwapEffect.Discard,
@@ -249,15 +256,15 @@ namespace Engine
                 {
                     if (!obj.Enabled)
                         continue;
-                    foreach (Mesh mesh in obj.GetComponents<Mesh>())
+                    foreach (MeshComponent meshComponent in obj.GetComponents<MeshComponent>())
                     {
-                        if (!mesh.Enabled)
+                        if (!meshComponent.Enabled)
                             continue;
                         pipeline.UpdateUniform("model", (Matrix4x4f)obj.Transform.Model);
 
                         pipeline.UploadUpdatedUniforms();
 
-                        mesh.model.Render();
+                        meshComponent.Render();
                     }
                 }
             }
@@ -353,14 +360,24 @@ namespace Engine
             //CurrentDevice.ImmediateContext.OutputMerger.DepthStencilState = depthState_checkDepth;
 
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Width, camera.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(camera.DepthBuffer.GetView<DepthStencilView>(), camera.GBuffer.worldPos.GetView<RenderTargetView>(),
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(camera.DepthBuffer.GetView<DepthStencilView>(),
+                                                                   camera.GBuffer.worldPos.GetView<RenderTargetView>(),
                                                                    camera.GBuffer.albedo.GetView<RenderTargetView>(),
                                                                    camera.GBuffer.normal.GetView<RenderTargetView>(),
                                                                    camera.GBuffer.metallic.GetView<RenderTargetView>(),
                                                                    camera.GBuffer.roughness.GetView<RenderTargetView>(),
-                                                                   camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>());
-
+                                                                   camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.emission.GetView<RenderTargetView>());
+            
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+#if GraphicsDebugging
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.albedo.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.normal.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.metallic.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.roughness.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.emission.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+#endif
             CurrentDevice.ImmediateContext.ClearDepthStencilView(camera.DepthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
 
             List<GameObject> objects = EngineCore.CurrentScene.objects;
@@ -377,20 +394,15 @@ namespace Engine
             {
                 if (!obj.Enabled)
                     continue;
-                foreach (Mesh mesh in obj.GetComponents<Mesh>())
+                foreach (MeshComponent meshComponent in obj.GetComponents<MeshComponent>())
                 {
-                    if (!mesh.Enabled)
+                    if (!meshComponent.Enabled)
                         continue;
                     pipeline.UpdateUniform("model", (Matrix4x4f)obj.Transform.Model);
                     pipeline.UpdateUniform("modelNorm", (Matrix4x4f)obj.Transform.Model.inverse().transposed());
 
                     pipeline.UploadUpdatedUniforms();
-                    mesh.Material.Albedo.Use("albedoMap");
-                    mesh.Material.Normal.Use("normalMap");
-                    mesh.Material.Metallic.Use("metallicMap");
-                    mesh.Material.Roughness.Use("roughnessMap");
-                    mesh.Material.AmbientOcclusion.Use("ambientOcclusionMap");
-                    mesh.model.Render();
+                    meshComponent.Render();
                 }
             }
 
@@ -420,12 +432,7 @@ namespace Engine
                     pipeline.UpdateUniform("model", particleSystem.WorldSpaceParticles ? Matrix4x4f.Identity : (Matrix4x4f)obj.Transform.Model);
 
                     pipeline.UploadUpdatedUniforms();
-                    particleSystem.Material.Albedo.Use("albedoMap");
-                    particleSystem.Material.Normal.Use("normalMap");
-                    particleSystem.Material.Metallic.Use("metallicMap");
-                    particleSystem.Material.Roughness.Use("roughnessMap");
-                    particleSystem.Material.AmbientOcclusion.Use("ambientOcclusionMap");
-
+                    particleSystem.Material.Use();
                     particleSystem.Render();
                 }
             }

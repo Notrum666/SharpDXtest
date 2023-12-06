@@ -15,6 +15,7 @@ cbuffer materialBuf
 	Texture2D metallicMap;
 	Texture2D roughnessMap;
 	Texture2D ambientOcclusionMap;
+	Texture2D emissiveMap;
 };
 
 struct GBuffer
@@ -25,6 +26,7 @@ struct GBuffer
 	float metallic : SV_Target3;
 	float roughness : SV_Target4;
 	float ambientOcclusion : SV_Target5;
+	float emissive : SV_Target6;
 };
 
 SamplerState texSampler;
@@ -40,7 +42,7 @@ GBuffer main(vert_in v)
 	res.metallic = metallicMap.Sample(texSampler, v.t).x;
 	res.roughness = roughnessMap.Sample(texSampler, v.t).x;
 	res.ambientOcclusion = ambientOcclusionMap.Sample(texSampler, v.t).x;
+	res.emissive = emissiveMap.Sample(texSampler, v.t).x;
 
 	return res;
 }
-	

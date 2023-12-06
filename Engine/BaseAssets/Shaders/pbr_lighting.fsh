@@ -72,6 +72,7 @@ cbuffer materialBuf
 	Texture2D metallicMap;
 	Texture2D roughnessMap;
 	Texture2D ambientOcclusionMap;
+	Texture2D emissiveMap;
 };
 
 cbuffer lightsBuf
@@ -229,12 +230,13 @@ float PercentageCloserFilteringWithLinearization(Texture2DArray shadowMaps, int 
 }
 
 float4 main(vert_in v) : SV_Target
-{	
+{
 	float3 albedo = albedoMap.Sample(texSampler, v.t).xyz;
 	float3 normal = normalize(mul(normalMap.Sample(texSampler, v.t).xyz * 2.0f - 1.0f, v.ttw));
 	float metallic = metallicMap.Sample(texSampler, v.t).x;
 	float roughness = roughnessMap.Sample(texSampler, v.t).x;
 	float ambientOcclusion = ambientOcclusionMap.Sample(texSampler, v.t).x;
+	float emissive = emissiveMap.Sample(texSampler, v.t).x;
 	
 	float3 camDir = normalize(camPos - v.v);
 	float ndotc = max(dot(camDir, normal), 0.0f);
@@ -361,4 +363,3 @@ float4 main(vert_in v) : SV_Target
 	
 	return float4(pow(result / (result + 1.0f), 1.0f / 2.2f), 1.0f);
 }
-	

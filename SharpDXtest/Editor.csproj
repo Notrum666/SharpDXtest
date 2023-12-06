@@ -26,6 +26,12 @@
 		<None Remove="Images\big-gear.png"/>
 	</ItemGroup>
 	<ItemGroup>
+		<None Update="Assets\Models\rgb_sphere.gltf">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
+		<None Update="Assets\Models\cube_materials.fbx">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="Assets\Models\Ball.obj">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
