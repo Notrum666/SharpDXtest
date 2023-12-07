@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Text;
 
 namespace Engine
 {
@@ -29,6 +32,19 @@ namespace Engine
         public static void Log(LogType type, string message)
         {
             OnLog?.Invoke(new LogMessage(type, DateTime.Now, message));
+        }
+        
+        public static void Assert([DoesNotReturnIf(false)] bool condition, string message = null)
+        {
+            if (!condition)
+            {
+                StackTrace stackTrace = new StackTrace(0, true);
+                StringBuilder sb = new StringBuilder("Assertion failed:");
+                sb.AppendLine(message);
+                sb.AppendLine(stackTrace.ToString());
+                
+                Log(LogType.Error, sb.ToString());
+            }
         }
 
         private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs e)
