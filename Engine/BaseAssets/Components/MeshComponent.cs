@@ -35,7 +35,7 @@ namespace Engine.BaseAssets.Components
                 if (curMaterial is null)
                     curMaterial = mesh.Primitives[i].DefaultMaterial;
                 if (curMaterial is null)
-                    curMaterial = AssetsManager.Materials["default"];
+                    curMaterial = AssetsManager_Old.Materials["default"];
                 curMaterial.Use();
                 mesh.Primitives[i].Render();
             }

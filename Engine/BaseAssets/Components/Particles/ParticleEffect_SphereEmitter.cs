@@ -45,7 +45,7 @@ namespace Engine.BaseAssets.Components.Particles
 
         public ParticleEffect_SphereEmitter()
         {
-            EffectShader = AssetsManager.Shaders["particles_emit_sphere"];
+            EffectShader = AssetsManager_Old.Shaders["particles_emit_sphere"];
         }
 
         public override void Update(ParticleSystem system)

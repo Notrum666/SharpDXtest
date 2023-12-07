@@ -235,12 +235,12 @@ namespace Engine
         }
         public Material()
         {
-            albedo = AssetsManager.Textures["default_albedo"];
-            normal = AssetsManager.Textures["default_normal"];
-            metallic = AssetsManager.Textures["default_metallic"];
-            roughness = AssetsManager.Textures["default_roughness"];
-            ambientOcclusion = AssetsManager.Textures["default_ambientOcclusion"];
-            emissive = AssetsManager.Textures["default_emissive"];
+            albedo = AssetsManager_Old.Textures["default_albedo"];
+            normal = AssetsManager_Old.Textures["default_normal"];
+            metallic = AssetsManager_Old.Textures["default_metallic"];
+            roughness = AssetsManager_Old.Textures["default_roughness"];
+            ambientOcclusion = AssetsManager_Old.Textures["default_ambientOcclusion"];
+            emissive = AssetsManager_Old.Textures["default_emissive"];
         }
         public Material(Texture albedo, Texture normal, Texture metallic, Texture roughness, Texture ambientOcclusion, Texture emissive)
         {
@@ -1251,7 +1251,9 @@ namespace Engine
     {
         public List<GameObject> objects { get; } = new List<GameObject>();
     }
-    public static class AssetsManager
+    
+    [Obsolete]
+    public static class AssetsManager_Old
     {
         public static Dictionary<string, Mesh> Meshes { get; } = new Dictionary<string, Mesh>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
@@ -1606,7 +1608,7 @@ namespace Engine
                                 {
                                     foreach (XElement mesh in assetsSet.Elements())
                                     {
-                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadModel");
+                                        MethodInfo method = typeof(AssetsManager_Old).GetMethod("LoadModel");
                                         ParameterInfo[] parameters = method.GetParameters();
                                         Dictionary<string, object> parameterValues = new Dictionary<string, object>();
                                         foreach (XAttribute attrib in mesh.Attributes())
@@ -1637,7 +1639,7 @@ namespace Engine
                                 {
                                     foreach (XElement texture in assetsSet.Elements())
                                     {
-                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadTexture");
+                                        MethodInfo method = typeof(AssetsManager_Old).GetMethod("LoadTexture");
                                         ParameterInfo[] parameters = method.GetParameters();
                                         Dictionary<string, object> parameterValues = new Dictionary<string, object>();
                                         foreach (XAttribute attrib in texture.Attributes())
@@ -1668,7 +1670,7 @@ namespace Engine
                                 {
                                     foreach (XElement sound in assetsSet.Elements())
                                     {
-                                        MethodInfo method = typeof(AssetsManager).GetMethod("LoadSound");
+                                        MethodInfo method = typeof(AssetsManager_Old).GetMethod("LoadSound");
                                         ParameterInfo[] parameters = method.GetParameters();
                                         Dictionary<string, object> parameterValues = new Dictionary<string, object>();
                                         foreach (XAttribute attrib in sound.Attributes())

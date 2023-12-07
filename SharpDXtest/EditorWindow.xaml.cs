@@ -38,7 +38,7 @@ namespace Editor
         {
             EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
 
-            EngineCore.CurrentScene = AssetsManager.LoadScene("Assets\\Scenes\\Scene5.xml");
+            EngineCore.CurrentScene = AssetsManager_Old.LoadScene("Assets\\Scenes\\Scene5.xml");
 
             EngineCore.IsPaused = true;
             EngineCore.Run();
