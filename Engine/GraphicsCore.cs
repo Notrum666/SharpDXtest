@@ -78,48 +78,48 @@ namespace Engine
         {
             InitDirectX(HWND, width, height);
 
-            if (AssetsManager.Textures.Count > 0)
+            if (AssetsManager_Old.Textures.Count > 0)
                 throw new Exception("AssetsManager.Textures must be empty on GraphicsCore init stage");
-            AssetsManager.Textures.Add("default_albedo", new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
-            AssetsManager.Textures.Add("default_normal", new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
-            AssetsManager.Textures.Add("default_metallic", new Texture(64, 64, 0.1f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager.Textures.Add("default_roughness", new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager.Textures.Add("default_ambientOcclusion", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager.Textures.Add("default_emissive", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager.Materials.Add("default", new Material());
+            AssetsManager_Old.Textures.Add("default_albedo", new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
+            AssetsManager_Old.Textures.Add("default_normal", new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
+            AssetsManager_Old.Textures.Add("default_metallic", new Texture(64, 64, 0.1f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
+            AssetsManager_Old.Textures.Add("default_roughness", new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
+            AssetsManager_Old.Textures.Add("default_ambientOcclusion", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
+            AssetsManager_Old.Textures.Add("default_emissive", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
+            AssetsManager_Old.Materials.Add("default", new Material());
 
             //AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"),
             //                                            Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
-            sampler = AssetsManager.Samplers["default"] = new Sampler(TextureAddressMode.Wrap, TextureAddressMode.Wrap);
+            sampler = AssetsManager_Old.Samplers["default"] = new Sampler(TextureAddressMode.Wrap, TextureAddressMode.Wrap);
 
-            AssetsManager.LoadShaderPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
+            AssetsManager_Old.LoadShaderPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
                                              Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
-            shadowsSampler = AssetsManager.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.ComparisonMinMagMipLinear, 0, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f), Comparison.LessEqual);
+            shadowsSampler = AssetsManager_Old.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.ComparisonMinMagMipLinear, 0, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f), Comparison.LessEqual);
 
-            AssetsManager.LoadShaderPipeline("deferred_geometry", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.vsh"),
+            AssetsManager_Old.LoadShaderPipeline("deferred_geometry", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.vsh"),
                                              Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.fsh"));
 
-            AssetsManager.LoadShaderPipeline("deferred_geometry_particles", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.vsh"),
+            AssetsManager_Old.LoadShaderPipeline("deferred_geometry_particles", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.vsh"),
                                              Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
                                              Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
-            AssetsManager.LoadShader("particles_bitonic_sort_step", "BaseAssets\\Shaders\\Particles\\particles_bitonic_sort_step.csh");
-            AssetsManager.LoadShader("particles_emit_point", "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
-            AssetsManager.LoadShader("particles_emit_sphere", "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
-            AssetsManager.LoadShader("particles_force_constant", "BaseAssets\\Shaders\\Particles\\particles_force_constant.csh");
-            AssetsManager.LoadShader("particles_force_point", "BaseAssets\\Shaders\\Particles\\particles_force_point.csh");
-            AssetsManager.LoadShader("particles_init", "BaseAssets\\Shaders\\Particles\\particles_init.csh");
-            AssetsManager.LoadShader("particles_update_energy", "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
-            AssetsManager.LoadShader("particles_update_physics", "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
-            AssetsManager.LoadShader("screen_quad", "BaseAssets\\Shaders\\screen_quad.vsh");
+            AssetsManager_Old.LoadShader("particles_bitonic_sort_step", "BaseAssets\\Shaders\\Particles\\particles_bitonic_sort_step.csh");
+            AssetsManager_Old.LoadShader("particles_emit_point", "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
+            AssetsManager_Old.LoadShader("particles_emit_sphere", "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
+            AssetsManager_Old.LoadShader("particles_force_constant", "BaseAssets\\Shaders\\Particles\\particles_force_constant.csh");
+            AssetsManager_Old.LoadShader("particles_force_point", "BaseAssets\\Shaders\\Particles\\particles_force_point.csh");
+            AssetsManager_Old.LoadShader("particles_init", "BaseAssets\\Shaders\\Particles\\particles_init.csh");
+            AssetsManager_Old.LoadShader("particles_update_energy", "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
+            AssetsManager_Old.LoadShader("particles_update_physics", "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
+            AssetsManager_Old.LoadShader("screen_quad", "BaseAssets\\Shaders\\screen_quad.vsh");
 
-            AssetsManager.LoadShaderPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
+            AssetsManager_Old.LoadShaderPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
                                              Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
 
-            Shader screenQuadShader = AssetsManager.Shaders["screen_quad"];
-            AssetsManager.LoadShaderPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
-            AssetsManager.LoadShaderPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
-            AssetsManager.LoadShaderPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
-            AssetsManager.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
+            Shader screenQuadShader = AssetsManager_Old.Shaders["screen_quad"];
+            AssetsManager_Old.LoadShaderPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
+            AssetsManager_Old.LoadShaderPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
+            AssetsManager_Old.LoadShaderPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
+            AssetsManager_Old.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
 
             bloomEffect = new PostProcessEffect_Bloom();
         }
@@ -282,7 +282,7 @@ namespace Engine
                     {
                         SpotLight curLight = light as SpotLight;
 
-                        pipeline = AssetsManager.ShaderPipelines["depth_only"];
+                        pipeline = AssetsManager_Old.ShaderPipelines["depth_only"];
                         pipeline.Use();
                         CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, curLight.ShadowSize, curLight.ShadowSize, 0.0f, 1.0f));
                         CurrentDevice.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.GetView<DepthStencilView>(), renderTargetView: null);
@@ -296,7 +296,7 @@ namespace Engine
                     {
                         DirectionalLight curLight = light as DirectionalLight;
 
-                        pipeline = AssetsManager.ShaderPipelines["depth_only"];
+                        pipeline = AssetsManager_Old.ShaderPipelines["depth_only"];
                         pipeline.Use();
 
                         CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, curLight.ShadowSize, curLight.ShadowSize, 0.0f, 1.0f));
@@ -382,7 +382,7 @@ namespace Engine
 
             List<GameObject> objects = EngineCore.CurrentScene.objects;
 
-            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_geometry"];
+            ShaderPipeline pipeline = AssetsManager_Old.ShaderPipelines["deferred_geometry"];
             pipeline.Use();
 
             sampler.use("texSampler");
@@ -408,7 +408,7 @@ namespace Engine
 
             CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.PointList;
 
-            pipeline = AssetsManager.ShaderPipelines["deferred_geometry_particles"];
+            pipeline = AssetsManager_Old.ShaderPipelines["deferred_geometry_particles"];
             pipeline.Use();
 
             sampler.use("texSampler");
@@ -470,7 +470,7 @@ namespace Engine
                     else if (light is DirectionalLight)
                     {
                         DirectionalLight curLight = light as DirectionalLight;
-                        ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_light_directional"];
+                        ShaderPipeline pipeline = AssetsManager_Old.ShaderPipelines["deferred_light_directional"];
                         pipeline.Use();
 
                         pipeline.UpdateUniform("camPos", (Vector3f)camera.GameObject.Transform.Position);
@@ -501,7 +501,7 @@ namespace Engine
                     else if (light is PointLight)
                     {
                         PointLight curLight = light as PointLight;
-                        ShaderPipeline pipeline = AssetsManager.ShaderPipelines["deferred_light_point"];
+                        ShaderPipeline pipeline = AssetsManager_Old.ShaderPipelines["deferred_light_point"];
                         pipeline.Use();
 
                         pipeline.UpdateUniform("camPos", (Vector3f)camera.GameObject.Transform.Position);
@@ -538,7 +538,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.ColorBuffer.GetView<RenderTargetView>(), camera.BackgroundColor);
 
-            AssetsManager.ShaderPipelines["deferred_addLight"].Use();
+            AssetsManager_Old.ShaderPipelines["deferred_addLight"].Use();
 
             camera.GBuffer.worldPos.Use("worldPosTex");
             camera.GBuffer.albedo.Use("albedoTex");
@@ -559,7 +559,7 @@ namespace Engine
 
             List<GameObject> objects = EngineCore.CurrentScene.objects;
 
-            ShaderPipeline pipeline = AssetsManager.ShaderPipelines["volume"];
+            ShaderPipeline pipeline = AssetsManager_Old.ShaderPipelines["volume"];
             pipeline.Use();
 
             camera.DepthBuffer.Use("depthTex");
@@ -621,7 +621,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.Backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
 
-            AssetsManager.ShaderPipelines["deferred_gamma_correction"].Use();
+            AssetsManager_Old.ShaderPipelines["deferred_gamma_correction"].Use();
 
             camera.ColorBuffer.Use("colorTex");
             sampler.use("texSampler");
@@ -633,7 +633,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.Backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
 
-            AssetsManager.ShaderPipelines["tex_to_screen"].Use();
+            AssetsManager_Old.ShaderPipelines["tex_to_screen"].Use();
 
             tex.Use("tex");
             sampler.use("texSampler");

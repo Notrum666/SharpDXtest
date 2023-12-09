@@ -144,7 +144,7 @@ namespace Engine.BaseAssets.Components
                 }
             });
 
-            Shader initShader = AssetsManager.Shaders["particles_init"];
+            Shader initShader = AssetsManager_Old.Shaders["particles_init"];
 
             initShader.use();
             initShader.updateUniform("maxParticles", maxParticles);
@@ -180,7 +180,7 @@ namespace Engine.BaseAssets.Components
 
         private void sortParticles()
         {
-            Shader sortShader = AssetsManager.Shaders["particles_bitonic_sort_step"];
+            Shader sortShader = AssetsManager_Old.Shaders["particles_bitonic_sort_step"];
             sortShader.use();
             sortShader.updateUniform("maxParticles", maxParticles);
             for (int subArraySize = 2; subArraySize >> 1 < maxParticles; subArraySize <<= 1)

@@ -139,5 +139,6 @@
 		<PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
 		<PackageReference Include="SharpDX.XAudio2" Version="4.2.0" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+		<PackageReference Include="YamlDotNet" Version="13.7.1" />
 	</ItemGroup>
 </Project>

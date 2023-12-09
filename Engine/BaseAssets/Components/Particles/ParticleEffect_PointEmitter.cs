@@ -23,7 +23,7 @@ namespace Engine.BaseAssets.Components.Particles
 
         public ParticleEffect_PointEmitter()
         {
-            EffectShader = AssetsManager.Shaders["particles_emit_point"];
+            EffectShader = AssetsManager_Old.Shaders["particles_emit_point"];
         }
 
         public override void Update(ParticleSystem system)
