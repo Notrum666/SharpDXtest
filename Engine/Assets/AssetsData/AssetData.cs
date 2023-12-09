@@ -8,6 +8,9 @@ namespace Engine.AssetsData
         public virtual void Serialize(BinaryWriter writer) { }
         public virtual void Deserialize(BinaryReader reader) { }
 
-        public virtual object ToRealAsset(Type assetType) => null;
+        public virtual object ToRealAsset(Type assetType)
+        {
+            return null;
+        }
     }
 }

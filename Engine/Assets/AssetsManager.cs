@@ -92,8 +92,11 @@ namespace Engine
             if (!artifactDatabase.TryGetValue(contentAssetPath, out Dictionary<string, Type> savedArtifacts))
                 return null;
 
-            if (savedArtifacts.Count == 0)
+            if (savedArtifacts.Count != 1)
+            {
+                Logger.Log(LogType.Warning, $"Found {savedArtifacts.Count} artifacts for asset at {contentAssetPath}");
                 return null;
+            }
 
             KeyValuePair<string, Type> firstArtifact = savedArtifacts.FirstOrDefault();
             return LoadAssetByGuid(firstArtifact.Key, firstArtifact.Value, assetType);
@@ -104,6 +107,7 @@ namespace Engine
             return (T)LoadAssetAtPath(contentAssetPath, typeof(T));
         }
 
+        //TODO: dependency collection (return false if could not delete safely)
         public static bool DeleteAsset(string contentAssetPath)
         {
             artifactDatabase.Remove(contentAssetPath);
@@ -113,11 +117,14 @@ namespace Engine
 
         public static bool UpdateAssetPath(string oldContentAssetPath, string newContentAssetPath)
         {
-            if (string.IsNullOrWhiteSpace(newContentAssetPath))
+            if (string.IsNullOrWhiteSpace(newContentAssetPath) || !artifactDatabase.ContainsKey(oldContentAssetPath))
                 return false;
 
-            if (!artifactDatabase.ContainsKey(oldContentAssetPath))
+            if (artifactDatabase.ContainsKey(newContentAssetPath))
+            {
+                Logger.Log(LogType.Warning, $"Tried to update path = \"{oldContentAssetPath}\" to already existing path = \"{newContentAssetPath}\"");
                 return false;
+            }
 
             artifactDatabase[newContentAssetPath] = artifactDatabase[oldContentAssetPath];
             artifactDatabase.Remove(oldContentAssetPath);
@@ -125,13 +132,13 @@ namespace Engine
             return true;
         }
 
-        public static DateTime GetAssetImportDate(string contentAssetPath)
+        public static DateTime? GetAssetImportDate(string contentAssetPath)
         {
             if (!artifactDatabase.TryGetValue(contentAssetPath, out Dictionary<string, Type> savedArtifacts))
-                return DateTime.MinValue;
+                return null;
 
             if (savedArtifacts.Count == 0)
-                return DateTime.MinValue;
+                return null;
 
             string firstGuid = savedArtifacts.First().Key;
             string artifactPath = GetArtifactPathFromGuid(firstGuid);

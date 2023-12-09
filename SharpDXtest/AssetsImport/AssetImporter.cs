@@ -13,7 +13,7 @@ namespace Editor.AssetsImport
     {
         [YamlTagMapped]
         public class BaseImportSettings { }
-        
+
         protected abstract BaseImportSettings GetDefaultSettings();
 
         protected abstract AssetData OnImportAsset(string assetPath, AssetMeta assetMeta);
@@ -25,9 +25,10 @@ namespace Editor.AssetsImport
             string contentRelativePath = AssetsRegistry.GetContentAssetPath(assetSourcePath);
 
             AssetMeta assetMeta = LoadMetaFile(metaPath);
+            DateTime? artifactImportDate = AssetsManager.GetAssetImportDate(contentRelativePath);
 
             bool metaOutOfDate = assetMeta.ImportDate < File.GetLastWriteTimeUtc(assetSourcePath);
-            bool artifactOutOfDate = AssetsManager.GetAssetImportDate(contentRelativePath) < assetMeta.ImportDate;
+            bool artifactOutOfDate = artifactImportDate == null || artifactImportDate < assetMeta.ImportDate;
 
             Logger.Log(LogType.Error, $"metaOutOfDate = {metaOutOfDate} | artifactOutOfDate = {artifactOutOfDate}");
 
@@ -60,7 +61,7 @@ namespace Editor.AssetsImport
             assetMeta.ImportDate = DateTime.UtcNow;
             YamlManager.SaveToFile(metaPath, assetMeta);
         }
-        
+
         private string GetMetaPath(string assetSourcePath)
         {
             string assetExtension = Path.GetExtension(assetSourcePath);

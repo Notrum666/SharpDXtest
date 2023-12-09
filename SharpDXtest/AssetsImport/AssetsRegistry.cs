@@ -31,6 +31,12 @@ namespace Editor
                 AssetImporterAttribute importerAttribute = type.GetCustomAttribute<AssetImporterAttribute>();
                 if (importerAttribute != null)
                 {
+                    if (!type.IsSubclassOf(typeof(AssetImporter)))
+                    {
+                        Logger.Log(LogType.Warning, $"Type \"{type.Name}\" has AssetImporterAttribute attribute but is not derived from AssetImporter");
+                        continue;
+                    }
+
                     AssetImporter importer = Activator.CreateInstance(type) as AssetImporter;
                     foreach (string extension in importerAttribute.Extensions)
                     {
@@ -57,14 +63,17 @@ namespace Editor
 
         #region AssetOperations //Import, Copy, Move, Rename, Delete
 
-        public static void ImportAsset(string assetPath)
+        public static bool ImportAsset(string assetPath)
         {
             if (!Path.Exists(assetPath))
-                return;
+                return false;
 
             string assetExtension = Path.GetExtension(assetPath);
-            if (assetImporters.TryGetValue(assetExtension, out AssetImporter importer))
-                importer.ImportAsset(assetPath);
+            if (!assetImporters.TryGetValue(assetExtension, out AssetImporter importer))
+                return false;
+
+            importer.ImportAsset(assetPath);
+            return true;
         }
 
         public static bool CopyAsset(string assetPath, string newAssetPath)
@@ -74,8 +83,7 @@ namespace Editor
 
             newAssetPath = GenerateUniquePath(newAssetPath);
             File.Copy(assetPath, newAssetPath);
-            ImportAsset(newAssetPath);
-            return true;
+            return ImportAsset(newAssetPath);
         }
 
         public static bool MoveAsset(string oldAssetPath, string newAssetPath)
@@ -112,6 +120,11 @@ namespace Editor
                 return false;
 
             File.Delete(assetPath);
+
+            string assetExtension = Path.GetExtension(assetPath);
+            string metaPath = Path.ChangeExtension(assetPath, $"{assetExtension}{AssetMeta.MetaExtension}");
+            File.Delete(metaPath);
+
             return true;
         }
 
@@ -123,9 +136,9 @@ namespace Editor
         {
             if (!Path.Exists(folderPath))
                 return;
-            Console.WriteLine($"Folder import at {folderPath}");
+            Logger.Log(LogType.Info, $"Folder import at {folderPath}");
 
-            foreach (FileSystemHelper.PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
+            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
             {
                 if (!pathInfo.IsDirectory)
                     ImportAsset(pathInfo.FullPath);
@@ -147,7 +160,7 @@ namespace Editor
             newFolderPath = GenerateUniquePath(newFolderPath);
             Directory.CreateDirectory(newFolderPath);
 
-            foreach (FileSystemHelper.PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
+            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
             {
                 if (!pathInfo.IsDirectory)
                     continue;
@@ -155,7 +168,7 @@ namespace Editor
                 Directory.CreateDirectory(Path.Combine(newFolderPath, relativePath));
             }
 
-            foreach (FileSystemHelper.PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
+            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
             {
                 if (pathInfo.IsDirectory || Path.GetExtension(pathInfo.FullPath) == AssetMeta.MetaExtension)
                     continue;
@@ -172,7 +185,7 @@ namespace Editor
             if (!Path.Exists(oldFolderPath) || Path.Exists(newFolderPath))
                 return false;
 
-            foreach (FileSystemHelper.PathInfo pathInfo in EnumeratePathInfoEntries(oldFolderPath, "*", true))
+            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(oldFolderPath, "*", true))
             {
                 if (pathInfo.IsDirectory || !IsSupportedAssetFile(pathInfo.FullPath))
                     continue;
@@ -204,7 +217,7 @@ namespace Editor
             if (!Path.Exists(folderPath))
                 return false;
 
-            foreach (FileSystemHelper.PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
+            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
             {
                 if (pathInfo.IsDirectory || !IsSupportedAssetFile(pathInfo.FullPath))
                     continue;
