@@ -30,8 +30,6 @@ namespace Editor.AssetsImport
             bool metaOutOfDate = assetMeta.ImportDate < File.GetLastWriteTimeUtc(assetSourcePath);
             bool artifactOutOfDate = artifactImportDate == null || artifactImportDate < assetMeta.ImportDate;
 
-            Logger.Log(LogType.Error, $"metaOutOfDate = {metaOutOfDate} | artifactOutOfDate = {artifactOutOfDate}");
-
             if (metaOutOfDate || artifactOutOfDate)
             {
                 AssetData importedAsset = OnImportAsset(assetSourcePath, assetMeta);
@@ -45,6 +43,12 @@ namespace Editor.AssetsImport
             }
 
             return assetMeta;
+        }
+
+        protected bool TryGetTypedImportSettings<T>(AssetMeta assetMeta, out T importSettings) where T : class
+        {
+            importSettings = assetMeta.ImportSettings as T;
+            return importSettings != null;
         }
 
         private AssetMeta LoadMetaFile(string metaPath)
