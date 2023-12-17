@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-
 using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.ObjectFactories;
 
 namespace Engine
 {
@@ -11,8 +13,12 @@ namespace Engine
         private static ISerializer Serializer { get; }
         private static IDeserializer Deserializer { get; }
 
+        private static CustomObjectFactory ObjectFactory { get; }
+
         static YamlManager()
         {
+            ObjectFactory = new CustomObjectFactory(new DefaultObjectFactory());
+
             Serializer = BuildSerializer();
             Deserializer = BuildDeserializer();
         }
@@ -22,6 +28,7 @@ namespace Engine
             SerializerBuilder builder = new SerializerBuilder();
 
             builder.RegisterTagMappedClasses();
+            builder.EnsureRoundtrip();
 
             return builder.Build();
         }
@@ -31,6 +38,7 @@ namespace Engine
             DeserializerBuilder builder = new DeserializerBuilder();
 
             builder.RegisterTagMappedClasses();
+            builder.WithObjectFactory(ObjectFactory);
 
             return builder.Build();
         }
@@ -55,10 +63,35 @@ namespace Engine
             return builder;
         }
 
+        public static void SaveToStream<T>(Stream stream, T obj)
+        {
+            using StreamWriter writer = new StreamWriter(stream, leaveOpen: true);
+            Serializer.Serialize(writer, obj, typeof(T));
+        }
+
         public static void SaveToFile<T>(string filePath, T obj)
         {
-            using StreamWriter writer = new StreamWriter(filePath, false);
-            Serializer.Serialize(writer, obj, typeof(T));
+            using FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            SaveToStream(fileStream, obj);
+        }
+
+        public static object LoadFromStream(Stream stream, Type type)
+        {
+            using StreamReader reader = new StreamReader(stream, leaveOpen: true);
+            return Deserializer.Deserialize(reader, type);
+        }
+
+        public static T LoadFromStream<T>(Stream stream)
+        {
+            return (T)LoadFromStream(stream, typeof(T));
+        }
+
+        public static void LoadFromStream<T>(Stream stream, T instance)
+        {
+            ObjectFactory.SetObjectInstance(typeof(T), instance);
+
+            using StreamReader reader = new StreamReader(stream, leaveOpen: true);
+            Deserializer.Deserialize(reader, typeof(T));
         }
 
         public static object LoadFromFile(string filePath, Type type)
@@ -66,13 +99,80 @@ namespace Engine
             if (!File.Exists(filePath))
                 return null;
 
-            using StreamReader reader = new StreamReader(filePath);
-            return Deserializer.Deserialize(reader, type);
+            using FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return LoadFromStream(fileStream, type);
         }
 
         public static T LoadFromFile<T>(string filePath)
         {
             return (T)LoadFromFile(filePath, typeof(T));
+        }
+
+        private class CustomObjectFactory : IObjectFactory
+        {
+            private readonly Dictionary<Type, object> instancedObjects = new Dictionary<Type, object>();
+            private readonly IObjectFactory fallback;
+
+            public CustomObjectFactory(IObjectFactory fallback)
+            {
+                this.fallback = fallback;
+            }
+
+            public void SetObjectInstance(Type type, object instance)
+            {
+                instancedObjects[type] = instance;
+            }
+
+            public void ClearObjectInstance(Type type)
+            {
+                instancedObjects.Remove(type);
+            }
+
+            public object Create(Type type)
+            {
+                if (instancedObjects.TryGetValue(type, out object instance))
+                {
+                    ClearObjectInstance(type);
+                    return instance;
+                }
+
+                return fallback.Create(type);
+            }
+
+            public object CreatePrimitive(Type type)
+            {
+                return fallback.CreatePrimitive(type);
+            }
+
+            public bool GetDictionary(IObjectDescriptor descriptor, out IDictionary dictionary, out Type[] genericArguments)
+            {
+                return fallback.GetDictionary(descriptor, out dictionary, out genericArguments);
+            }
+
+            public Type GetValueType(Type type)
+            {
+                return fallback.GetValueType(type);
+            }
+
+            public void ExecuteOnDeserializing(object value)
+            {
+                fallback.ExecuteOnDeserializing(value);
+            }
+
+            public void ExecuteOnDeserialized(object value)
+            {
+                fallback.ExecuteOnDeserialized(value);
+            }
+
+            public void ExecuteOnSerializing(object value)
+            {
+                fallback.ExecuteOnSerializing(value);
+            }
+
+            public void ExecuteOnSerialized(object value)
+            {
+                fallback.ExecuteOnSerialized(value);
+            }
         }
     }
 
