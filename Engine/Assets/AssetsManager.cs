@@ -84,7 +84,13 @@ namespace Engine
         public static object LoadAssetByGuid(string guid, Type artifactType, Type assetType)
         {
             AssetData artifact = LoadArtifact(guid, artifactType);
-            return artifact?.ToRealAsset(assetType);
+            return artifact?.ToRealAsset(assetType, guid);
+        }
+
+        public static T LoadAssetByGuid<T>(string guid, Type artifactType) where T : BaseAsset
+        {
+            AssetData artifact = LoadArtifact(guid, artifactType);
+            return (T)artifact?.ToRealAsset(typeof(T), guid);
         }
 
         public static object LoadAssetAtPath(string contentAssetPath, Type assetType)

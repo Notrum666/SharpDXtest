@@ -722,41 +722,6 @@ namespace Engine
             GC.SuppressFinalize(this);
         }
     }
-    public class Sound : IDisposable
-    {
-        public AudioBuffer Buffer { get; private set; }
-        public WaveFormat Format { get; private set; }
-        public uint[] DecodedPacketsInfo { get; private set; }
-
-        private bool disposed = false;
-
-        public Sound(AudioBuffer buffer, WaveFormat format, uint[] decodedPacketsInfo)
-        {
-            Buffer = buffer;
-            Format = format;
-            DecodedPacketsInfo = decodedPacketsInfo;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                Buffer.Stream.Dispose();
-                disposed = true;
-            }
-        }
-
-        ~Sound()
-        {
-            Dispose(disposing: false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-    }
     public enum ShaderType
     {
         VertexShader,
