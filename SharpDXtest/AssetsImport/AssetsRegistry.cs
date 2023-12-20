@@ -63,17 +63,16 @@ namespace Editor
 
         #region AssetOperations //Import, Copy, Move, Rename, Delete
 
-        public static bool ImportAsset(string assetPath)
+        public static string ImportAsset(string assetPath)
         {
             if (!Path.Exists(assetPath))
-                return false;
+                return null;
 
             string assetExtension = Path.GetExtension(assetPath);
             if (!assetImporters.TryGetValue(assetExtension, out AssetImporter importer))
-                return false;
+                return null;
 
-            importer.ImportAsset(assetPath);
-            return true;
+            return importer.ImportAsset(assetPath);
         }
 
         public static bool CopyAsset(string assetPath, string newAssetPath)
@@ -83,7 +82,7 @@ namespace Editor
 
             newAssetPath = GenerateUniquePath(newAssetPath);
             File.Copy(assetPath, newAssetPath);
-            return ImportAsset(newAssetPath);
+            return ImportAsset(newAssetPath) != null;
         }
 
         public static bool MoveAsset(string oldAssetPath, string newAssetPath)
