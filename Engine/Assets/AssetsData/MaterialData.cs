@@ -71,9 +71,6 @@ namespace Engine.AssetsData
                 case MaterialTextureType.AmbientOcclusion:
                     material.AmbientOcclusion = AssetsManager.LoadAssetByGuid<Texture>(guid, typeof(TextureData));
                     break;
-                default:
-                    Logger.Log(LogType.Error, "Ya zaebavsya, poka tolko 2");
-                    break;
             }
         }
     }
