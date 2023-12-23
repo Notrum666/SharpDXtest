@@ -609,7 +609,7 @@ namespace Engine
     [Obsolete]
     public static class AssetsManager_Old
     {
-        public static Dictionary<string, Mesh> Meshes { get; } = new Dictionary<string, Mesh>();
+        public static Dictionary<string, Model> Models { get; } = new Dictionary<string, Model>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
         public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
         public static Dictionary<string, Material> Materials { get; } = new Dictionary<string, Material>();
@@ -627,7 +627,7 @@ namespace Engine
 
             AssimpContext aiImporter = new AssimpContext();
 
-            Dictionary<string, Mesh> meshes = new Dictionary<string, Mesh>();
+            Dictionary<string, Model> models = new Dictionary<string, Model>();
             Dictionary<string, Material> materials = new Dictionary<string, Material>();
 
             // any type model import
@@ -646,7 +646,7 @@ namespace Engine
             for (int i = 0; i < aiScene.Materials.Count; ++i)
             {
                 Assimp.Material aiMaterial = aiScene.Materials[i];
-                Material material = Material.Default();
+                Material material = Material.Default;
                 Texture albedo = null;
                 Texture normal = null;
                 if (aiMaterial.GetMaterialTextureCount(TextureType.BaseColor) > 0)
@@ -687,19 +687,19 @@ namespace Engine
                     continue;
                 }
 
-                Mesh mesh;
+                Model model;
 
                 // in order to store different primitives into one mesh trying to find it by name
-                if (!meshes.TryGetValue(aiMesh.Name, out mesh))
+                if (!models.TryGetValue(aiMesh.Name, out model))
                 {
-                    mesh = new Mesh();
-                    meshes.Add(aiMesh.Name, mesh);
+                    model = new Model();
+                    models.Add(aiMesh.Name, model);
                 }
 
-                Primitive primitive = new Primitive();
-                primitive.DefaultMaterial = materials[materialPrefix + aiMesh.MaterialIndex.ToString()];
-                primitive.vertices = new List<Primitive.PrimitiveVertex>();
-                primitive.indices = new List<int>();
+                Mesh mesh = new Mesh();
+                mesh.DefaultMaterial = materials[materialPrefix + aiMesh.MaterialIndex.ToString()];
+                mesh.vertices = new List<Mesh.PrimitiveVertex>();
+                mesh.indices = new List<int>();
                 List<Vector3D> verts = aiMesh.Vertices;
                 List<Vector3D> norms = (aiMesh.HasNormals) ? aiMesh.Normals : null;
                 List<Vector3D> uvs = aiMesh.HasTextureCoords(0) ? aiMesh.TextureCoordinateChannels[0] : null;
@@ -708,22 +708,22 @@ namespace Engine
                     Vector3D pos = verts[i];
                     Vector3D norm = (norms != null) ? norms[i] : new Vector3D(0, 1, 0); // Y-up by default
                     Vector3D uv = (uvs != null) ? uvs[i] : new Vector3D(0, 0, 0);
-                    Primitive.PrimitiveVertex vertex = new Primitive.PrimitiveVertex();
+                    Mesh.PrimitiveVertex vertex = new Mesh.PrimitiveVertex();
                     vertex.v = new Vector3f(pos.X * scaleFactor, pos.Y * scaleFactor, pos.Z * scaleFactor);
                     vertex.n = new Vector3f(norm.X, norm.Y, norm.Z);
                     vertex.t = new Vector2f(uv.X, 1 - uv.Y);
-                    primitive.vertices.Add(vertex);
+                    mesh.vertices.Add(vertex);
                 }
 
                 foreach (Face face in aiMesh.Faces)
-                    primitive.indices.AddRange(face.Indices);
+                    mesh.indices.AddRange(face.Indices);
 
-                primitive.GenerateGPUData();
+                mesh.GenerateGPUData();
 
-                mesh.Primitives.Add(primitive);
+                model.Meshes.Add(mesh);
             }
 
-            Meshes.AddRange(meshes);
+            Models.AddRange(models);
         }
 
         public static Shader LoadShader(string shaderName, string shaderPath)
@@ -828,16 +828,16 @@ namespace Engine
                         break;
                     case "Mesh":
                         {
-                            if (!Meshes.ContainsKey(words[1]))
+                            if (!Models.ContainsKey(words[1]))
                                 throw new Exception("Mesh " + words[1] + " is not loaded.");
                             PropertyInfo property = objType.GetProperty(name);
                             if (property != null)
-                                property.SetValue(obj, Meshes[words[1]]);
+                                property.SetValue(obj, Models[words[1]]);
                             else
                             {
                                 FieldInfo field = objType.GetField(name);
                                 if (field != null)
-                                    field.SetValue(obj, Meshes[words[1]]);
+                                    field.SetValue(obj, Models[words[1]]);
                                 else
                                     throw new Exception(objType.Name + " doesn't have " + name + ".");
                             }

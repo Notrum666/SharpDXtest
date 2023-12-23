@@ -97,7 +97,7 @@ namespace Editor.AssetsImport
 
             foreach (Assimp.Material material in currentScene.Materials)
             {
-                currentModelData.Materials.Add(ProcessMaterial(material, sourceAssetFolder));
+                currentModelData.MaterialsGuids.Add(ProcessMaterial(material, sourceAssetFolder));
             }
         }
 
@@ -171,7 +171,7 @@ namespace Editor.AssetsImport
             string subGuid = currentImportContext.AddSubAsset("Skeleton", skeleton);
 
             currentImportSettings.SkeletonOverride ??= subGuid;
-            currentModelData.Skeleton = currentImportSettings.SkeletonOverride;
+            currentModelData.SkeletonGuid = currentImportSettings.SkeletonOverride;
         }
 
         private int ProcessNodeAsBone(Node currentNode, int parentBoneIndex, SkeletonData skeleton)
@@ -220,8 +220,8 @@ namespace Editor.AssetsImport
 
             if (!currentImportSettings.MeshMaterialsOverride.ContainsKey(meshData.Name))
                 currentImportSettings.MeshMaterialsOverride[meshData.Name] = null;
-            currentImportSettings.MeshMaterialsOverride[meshData.Name] ??= currentModelData.Materials.ElementAtOrDefault(mesh.MaterialIndex);
-            meshData.Material = currentModelData.Materials.ElementAtOrDefault(mesh.MaterialIndex);
+            currentImportSettings.MeshMaterialsOverride[meshData.Name] ??= currentModelData.MaterialsGuids.ElementAtOrDefault(mesh.MaterialIndex);
+            meshData.Material = currentModelData.MaterialsGuids.ElementAtOrDefault(mesh.MaterialIndex);
 
             int vertexCount = mesh.VertexCount;
             List<VertexData> vertices = meshData.Vertices;

@@ -9,17 +9,17 @@ using Buffer = SharpDX.Direct3D11.Buffer;
 
 namespace Engine
 {
-    public class Mesh : BaseAsset //TODO: rename to model?
+    public class Model : BaseAsset
     {
         private bool disposed;
-        public List<Primitive> Primitives { get; } = new List<Primitive>();
+        public List<Mesh> Meshes { get; } = new List<Mesh>();
 
         public void Render()
         {
             if (disposed)
-                throw new ObjectDisposedException(nameof(Mesh));
-            foreach (Primitive primitive in Primitives)
-                primitive.Render();
+                throw new ObjectDisposedException(nameof(Model));
+            foreach (Mesh mesh in Meshes)
+                mesh.Render();
         }
 
         protected override void Dispose(bool disposing)
@@ -29,8 +29,8 @@ namespace Engine
 
             if (disposing)
             {
-                foreach (Primitive primitive in Primitives)
-                    primitive.Dispose(disposing);
+                foreach (Mesh mesh in Meshes)
+                    mesh.Dispose(disposing);
             }
             disposed = true;
 
@@ -38,7 +38,7 @@ namespace Engine
         }
     }
 
-    public class Primitive : IDisposable //TODO: rename to mesh?
+    public class Mesh : IDisposable
     {
         // material assigned on mesh load
         public Material DefaultMaterial { get; set; } = null;
@@ -85,7 +85,7 @@ namespace Engine
         public void Render()
         {
             if (disposed)
-                throw new ObjectDisposedException(nameof(Primitive));
+                throw new ObjectDisposedException(nameof(Mesh));
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
@@ -117,7 +117,7 @@ namespace Engine
             disposed = true;
         }
 
-        ~Primitive()
+        ~Mesh()
         {
             Dispose(disposing: false);
         }

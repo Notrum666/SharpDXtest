@@ -25,7 +25,7 @@ namespace Engine.BaseAssets.Components
             public Vector3f velocity;
         }
 
-        private Material material = Material.Default();
+        private Material material = Material.Default;
         public Material Material
         {
             get => material;

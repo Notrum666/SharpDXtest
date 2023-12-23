@@ -8,22 +8,22 @@ namespace Engine.AssetsData
 {
     public class ModelData : AssetData
     {
-        public string Skeleton = null;
+        public string SkeletonGuid = null;
 
-        public Dictionary<string, string> EmbeddedTextures = new Dictionary<string, string>();
+        public Dictionary<string, string> EmbeddedTexturesGuids = new Dictionary<string, string>();
 
-        public List<string> Materials = new List<string>();
+        public List<string> MaterialsGuids = new List<string>();
 
         public List<MeshData> Meshes = new List<MeshData>();
 
         public void AddEmbeddedTexture(string fileName, string guid)
         {
-            EmbeddedTextures[fileName] = guid;
+            EmbeddedTexturesGuids[fileName] = guid;
         }
 
         public string GetEmbeddedTexture(string fileName)
         {
-            return EmbeddedTextures[fileName];
+            return EmbeddedTexturesGuids[fileName];
         }
 
         public override void Serialize(BinaryWriter writer)
@@ -36,35 +36,35 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Mesh ToRealAsset(Type assetType)
+        public override Model ToRealAsset(Type assetType)
         {
-            if (assetType != typeof(Mesh))
+            if (assetType != typeof(Model))
                 return null;
 
-            Mesh mesh = new Mesh();
+            Model model = new Model();
 
             foreach (MeshData meshData in Meshes)
             {
-                Primitive primitive = new Primitive();
-                primitive.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material, typeof(MaterialData));
+                Mesh mesh = new Mesh();
+                mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material, typeof(MaterialData));
 
-                primitive.vertices = new List<Primitive.PrimitiveVertex>();
+                mesh.vertices = new List<Mesh.PrimitiveVertex>();
                 foreach (VertexData vertexData in meshData.Vertices)
                 {
-                    Primitive.PrimitiveVertex vertex = new Primitive.PrimitiveVertex
+                    Mesh.PrimitiveVertex vertex = new Mesh.PrimitiveVertex
                     {
                         v = vertexData.Position,
                         n = vertexData.Normal,
                         t = vertexData.Texture
                     };
-                    primitive.vertices.Add(vertex);
+                    mesh.vertices.Add(vertex);
                 }
-                primitive.indices.AddRange(meshData.Indices);
+                mesh.indices.AddRange(meshData.Indices);
 
-                mesh.Primitives.Add(primitive);
+                model.Meshes.Add(mesh);
             }
 
-            return mesh;
+            return model;
         }
     }
 

@@ -86,7 +86,7 @@ namespace Engine
             AssetsManager_Old.Textures.Add("default_roughness", new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
             AssetsManager_Old.Textures.Add("default_ambientOcclusion", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
             AssetsManager_Old.Textures.Add("default_emissive", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager_Old.Materials.Add("default", Material.Default());
+            AssetsManager_Old.Materials.Add("default", Material.Default);
 
             //AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"),
             //                                            Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));

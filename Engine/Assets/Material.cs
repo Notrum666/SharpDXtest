@@ -75,18 +75,15 @@ namespace Engine
 
         #region Legacy
 
-        public static Material Default()
+        public static Material Default => new Material()
         {
-            Material material = new Material();
-            material.albedo = AssetsManager_Old.Textures["default_albedo"];
-            material.normal = AssetsManager_Old.Textures["default_normal"];
-            material.metallic = AssetsManager_Old.Textures["default_metallic"];
-            material.roughness = AssetsManager_Old.Textures["default_roughness"];
-            material.ambientOcclusion = AssetsManager_Old.Textures["default_ambientOcclusion"];
-            material.emissive = AssetsManager_Old.Textures["default_emissive"];
-
-            return material;
-        }
+            albedo = AssetsManager_Old.Textures["default_albedo"],
+            normal = AssetsManager_Old.Textures["default_normal"],
+            metallic = AssetsManager_Old.Textures["default_metallic"],
+            roughness = AssetsManager_Old.Textures["default_roughness"],
+            ambientOcclusion = AssetsManager_Old.Textures["default_ambientOcclusion"],
+            emissive = AssetsManager_Old.Textures["default_emissive"]
+        };
 
         #endregion
 

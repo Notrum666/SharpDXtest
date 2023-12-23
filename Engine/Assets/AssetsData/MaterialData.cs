@@ -6,22 +6,22 @@ namespace Engine.AssetsData
 {
     public class MaterialData : AssetData
     {
-        public Dictionary<MaterialTextureType, string> Textures = new Dictionary<MaterialTextureType, string>();
+        public Dictionary<MaterialTextureType, string> TexturesGuids = new Dictionary<MaterialTextureType, string>();
 
         public void AddTexture(MaterialTextureType textureType, string guid)
         {
             if (!string.IsNullOrEmpty(guid))
-                Textures[textureType] = guid;
+                TexturesGuids[textureType] = guid;
         }
 
         public bool HasTexture(MaterialTextureType textureType)
         {
-            return Textures.ContainsKey(textureType);
+            return TexturesGuids.ContainsKey(textureType);
         }
 
         public bool IsDefault()
         {
-            return Textures.Count == 0;
+            return TexturesGuids.Count == 0;
         }
 
         public override void Serialize(BinaryWriter writer)
@@ -41,7 +41,7 @@ namespace Engine.AssetsData
 
             Material material = new Material();
 
-            foreach (KeyValuePair<MaterialTextureType, string> texturePair in Textures)
+            foreach (KeyValuePair<MaterialTextureType, string> texturePair in TexturesGuids)
             {
                 LoadTextureToMaterial(material, texturePair.Key, texturePair.Value);
             }
