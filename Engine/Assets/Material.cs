@@ -1,4 +1,7 @@
 using System;
+using LinearAlgebra;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
 
 namespace Engine
 {
@@ -77,12 +80,12 @@ namespace Engine
 
         public static Material Default => new Material()
         {
-            albedo = AssetsManager_Old.Textures["default_albedo"],
-            normal = AssetsManager_Old.Textures["default_normal"],
-            metallic = AssetsManager_Old.Textures["default_metallic"],
-            roughness = AssetsManager_Old.Textures["default_roughness"],
-            ambientOcclusion = AssetsManager_Old.Textures["default_ambientOcclusion"],
-            emissive = AssetsManager_Old.Textures["default_emissive"]
+            albedo = new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource),
+            normal = new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource),
+            metallic = new Texture(64, 64, 0.1f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource),
+            roughness = new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource),
+            ambientOcclusion = new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource),
+            emissive = new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource)
         };
 
         #endregion

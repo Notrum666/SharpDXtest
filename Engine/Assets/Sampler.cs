@@ -9,6 +9,13 @@ namespace Engine
         private SamplerState sampler;
         private bool disposed;
 
+        #region Legacy
+
+        public static Sampler Default => new Sampler(TextureAddressMode.Wrap, TextureAddressMode.Wrap);
+        public static Sampler DefaultShadows => new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.ComparisonMinMagMipLinear, 0, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f), Comparison.LessEqual);
+
+        #endregion Legacy
+
         public Sampler(TextureAddressMode addressU, TextureAddressMode addressV, Filter filter = Filter.Anisotropic, int maximumAnisotropy = 8, RawColor4 borderColor = new RawColor4(), Comparison comparisonFunction = Comparison.Always, TextureAddressMode addressW = TextureAddressMode.Clamp)
         {
             sampler = new SamplerState(GraphicsCore.CurrentDevice, new SamplerStateDescription()

@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-
 using Engine.BaseAssets.Components;
 using Engine.BaseAssets.Components.Postprocessing;
-
 using LinearAlgebra;
-
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
 using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
-
 using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using Device = SharpDX.Direct3D11.Device;
 using FillMode = SharpDX.Direct3D11.FillMode;
@@ -39,13 +35,13 @@ namespace Engine
 
         public GBuffer(int width, int height)
         {
-            worldPos =          new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            albedo =            new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            normal =            new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            metallic =          new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            roughness =         new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            ambientOcclusion =  new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            emission =          new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            worldPos = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            albedo = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            normal = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            metallic = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            roughness = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            ambientOcclusion = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            emission = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
         }
     }
 
@@ -80,28 +76,21 @@ namespace Engine
 
             if (AssetsManager_Old.Textures.Count > 0)
                 throw new Exception("AssetsManager.Textures must be empty on GraphicsCore init stage");
-            AssetsManager_Old.Textures.Add("default_albedo", new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_normal", new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_metallic", new Texture(64, 64, 0.1f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_roughness", new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_ambientOcclusion", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_emissive", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager_Old.Materials.Add("default", Material.Default);
 
             //AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"),
             //                                            Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
-            sampler = AssetsManager_Old.Samplers["default"] = new Sampler(TextureAddressMode.Wrap, TextureAddressMode.Wrap);
+            sampler = Sampler.Default;
+            shadowsSampler = Sampler.DefaultShadows;
 
             AssetsManager_Old.LoadShaderPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
-            shadowsSampler = AssetsManager_Old.Samplers["default_shadows"] = new Sampler(TextureAddressMode.Border, TextureAddressMode.Border, Filter.ComparisonMinMagMipLinear, 0, new RawColor4(0.0f, 0.0f, 0.0f, 0.0f), Comparison.LessEqual);
+                                                 Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
 
             AssetsManager_Old.LoadShaderPipeline("deferred_geometry", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.vsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.fsh"));
+                                                 Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.fsh"));
 
             AssetsManager_Old.LoadShaderPipeline("deferred_geometry_particles", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.vsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
+                                                 Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
+                                                 Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
             AssetsManager_Old.LoadShader("particles_bitonic_sort_step", "BaseAssets\\Shaders\\Particles\\particles_bitonic_sort_step.csh");
             AssetsManager_Old.LoadShader("particles_emit_point", "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
             AssetsManager_Old.LoadShader("particles_emit_sphere", "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
@@ -113,7 +102,7 @@ namespace Engine
             AssetsManager_Old.LoadShader("screen_quad", "BaseAssets\\Shaders\\screen_quad.vsh");
 
             AssetsManager_Old.LoadShaderPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
+                                                 Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
 
             Shader screenQuadShader = AssetsManager_Old.Shaders["screen_quad"];
             AssetsManager_Old.LoadShaderPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
@@ -368,7 +357,7 @@ namespace Engine
                                                                    camera.GBuffer.roughness.GetView<RenderTargetView>(),
                                                                    camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>(),
                                                                    camera.GBuffer.emission.GetView<RenderTargetView>());
-            
+
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
 #if GraphicsDebugging
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.albedo.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
