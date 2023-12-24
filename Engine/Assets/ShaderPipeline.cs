@@ -44,7 +44,7 @@ namespace Engine
             CreateStaticPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
                                  Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
 
-            Shader screenQuadShader = Shader.LoadStaticShader("screen_quad");
+            Shader screenQuadShader = Shader.GetStaticShader("screen_quad");
             CreateStaticPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
             CreateStaticPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
             CreateStaticPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));

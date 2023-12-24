@@ -23,7 +23,7 @@ namespace Engine.BaseAssets.Components.Particles
 
         public ParticleEffect_PointEmitter()
         {
-            EffectShader = Shader.LoadStaticShader("particles_emit_point");
+            EffectShader = Shader.GetStaticShader("particles_emit_point");
         }
 
         public override void Update(ParticleSystem system)

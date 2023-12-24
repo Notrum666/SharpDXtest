@@ -89,7 +89,7 @@ namespace Engine.BaseAssets.Components.Postprocessing
 
             additiveBlendState = new BlendState(device, blendStateDesc);
 
-            Shader screenQuadShader = Shader.LoadStaticShader("screen_quad");
+            Shader screenQuadShader = Shader.GetStaticShader("screen_quad");
             downsampleBoxPipeline = new ShaderPipeline(new Shader[] { screenQuadShader, Shader.Create("BaseAssets\\Shaders\\Bloom\\bloom_downsample_box.fsh") });
             upsampleBoxPipeline = new ShaderPipeline(new Shader[] { screenQuadShader, Shader.Create("BaseAssets\\Shaders\\Bloom\\bloom_upsample_box.fsh") });
             prefilterPipeline = new ShaderPipeline(new Shader[] { screenQuadShader, Shader.Create("BaseAssets\\Shaders\\Bloom\\bloom_prefilter.fsh") });

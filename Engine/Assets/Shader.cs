@@ -21,7 +21,7 @@ namespace Engine
 
         private static readonly Dictionary<string, Shader> staticShaders = new Dictionary<string, Shader>();
 
-        public static Shader LoadStaticShader(string name)
+        public static Shader GetStaticShader(string name)
         {
             return staticShaders[name];
         }
@@ -32,7 +32,7 @@ namespace Engine
                 throw new ArgumentException($"Shader with name {shaderName} is already loaded.");
             
             staticShaders[shaderName] = Create(path);
-            return LoadStaticShader(shaderName);
+            return GetStaticShader(shaderName);
         }
 
         public static Shader Create(string path)

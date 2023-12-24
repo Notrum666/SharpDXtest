@@ -4,7 +4,7 @@
     {
         public ParticleEffect_UpdateEnergy()
         {
-            EffectShader = Shader.LoadStaticShader("particles_update_energy");
+            EffectShader = Shader.GetStaticShader("particles_update_energy");
         }
 
         public override void Use(ParticleSystem system)
