@@ -40,7 +40,7 @@ namespace Engine.AssetsData
             foreach (ShaderBufferData bufferData in Buffers)
             {
                 Shader.ShaderBuffer shaderBuffer = new Shader.ShaderBuffer();
-                shaderBuffer.buffer = new Buffer(null, bufferData.BufferSize, ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
+                shaderBuffer.buffer = new Buffer(GraphicsCore.CurrentDevice, bufferData.BufferSize, ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
 
                 foreach (KeyValuePair<string, ShaderBufferData.ShaderVariableData> variable in bufferData.Variables)
                 {

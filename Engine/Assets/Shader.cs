@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D11;
@@ -210,15 +211,15 @@ namespace Engine
 
                     inputDescription.Add(inputElementDescription);
                 }
-                layout = new InputLayout(null, bytecode, inputDescription.ToArray());
-                shader = new VertexShader(null, bytecode);
+                layout = new InputLayout(GraphicsCore.CurrentDevice, bytecode, inputDescription.ToArray());
+                shader = new VertexShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
             public override void use()
             {
-                // GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.InputLayout = layout;
-                // GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.Set(shader);
-                // GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.InputLayout = layout;
+                GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.Set(shader);
+                GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Hull : Shader
@@ -228,13 +229,13 @@ namespace Engine
 
             public Shader_Hull(byte[] bytecode)
             {
-                shader = new HullShader(null, bytecode);
+                shader = new HullShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
             public override void use()
             {
-                // GraphicsCore.CurrentDevice.ImmediateContext.HullShader.Set(shader);
-                // GraphicsCore.CurrentDevice.ImmediateContext.HullShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.HullShader.Set(shader);
+                GraphicsCore.CurrentDevice.ImmediateContext.HullShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Domain : Shader
@@ -244,13 +245,13 @@ namespace Engine
 
             public Shader_Domain(byte[] bytecode)
             {
-                shader = new DomainShader(null, bytecode);
+                shader = new DomainShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
             public override void use()
             {
-                // GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.Set(shader);
-                // GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.Set(shader);
+                GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Geometry : Shader
@@ -260,13 +261,13 @@ namespace Engine
 
             public Shader_Geometry(byte[] bytecode)
             {
-                shader = new GeometryShader(null, bytecode);
+                shader = new GeometryShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
             public override void use()
             {
-                // GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.Set(shader);
-                // GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.Set(shader);
+                GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Fragment : Shader
@@ -276,13 +277,13 @@ namespace Engine
 
             public Shader_Fragment(byte[] bytecode)
             {
-                shader = new PixelShader(null, bytecode);
+                shader = new PixelShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
             public override void use()
             {
-                // GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.Set(shader);
-                // GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.Set(shader);
+                GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
         private class Shader_Compute : Shader
@@ -292,13 +293,13 @@ namespace Engine
 
             public Shader_Compute(byte[] bytecode)
             {
-                shader = new ComputeShader(null, bytecode);
+                shader = new ComputeShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
             public override void use()
             {
-                // GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.Set(shader);
-                // GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.Set(shader);
+                GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
             }
         }
     }

@@ -43,12 +43,9 @@ namespace Editor.AssetsImport
 
         private void CompileBytecode(Stream dataStream)
         {
-            byte[] data;
-            using MemoryStream memoryStream = new MemoryStream();
-            {
-                dataStream.CopyTo(memoryStream);
-                data = memoryStream.ToArray();
-            }
+            string data = null;
+            using (StreamReader reader = new StreamReader(dataStream))
+                data = reader.ReadToEnd();
 
             ShaderFlags shaderFlags = ShaderFlags.None;
 #if GraphicsDebugging
