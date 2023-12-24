@@ -6,7 +6,7 @@ using Engine.BaseAssets.Components;
 
 namespace Engine
 {
-    public sealed class GameObject
+    public sealed class GameObject : SerializedObject
     {
         private bool enabled = true;
         public bool Enabled { get => Transform.Parent == null ? enabled : enabled && Transform.Parent.GameObject.enabled; set => enabled = value; }
