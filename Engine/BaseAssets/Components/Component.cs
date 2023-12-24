@@ -2,7 +2,7 @@
 
 namespace Engine.BaseAssets.Components
 {
-    public abstract class Component
+    public abstract class Component : SerializedObject
     {
         private bool enabled = true;
         public bool Enabled { get => enabled && GameObject.Enabled; set => enabled = value; }

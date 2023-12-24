@@ -15,11 +15,8 @@ using System.Windows.Media.Imaging;
 using System.Windows;
 using System.Text;
 using System.Text.RegularExpressions;
-
 using Engine.BaseAssets.Components;
-
 using LinearAlgebra;
-
 using SharpDX;
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
@@ -28,9 +25,7 @@ using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using SharpDX.Multimedia;
 using SharpDX.XAudio2;
-
 using Assimp;
-
 using Buffer = SharpDX.Direct3D11.Buffer;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 using Quaternion = LinearAlgebra.Quaternion;
@@ -45,7 +40,6 @@ namespace Engine
     // materials contain a number of textures
     // each of them: meshes, materials, textures should be loaded as separate assets
 
-    
 
     public class Sampler : IDisposable
     {
@@ -108,7 +102,7 @@ namespace Engine
             GC.SuppressFinalize(this);
         }
     }
-    
+
     public enum ShaderType
     {
         VertexShader,
@@ -601,11 +595,7 @@ namespace Engine
                 shader.uploadUpdatedUniforms();
         }
     }
-    public class Scene
-    {
-        public List<GameObject> objects { get; } = new List<GameObject>();
-    }
-    
+
     [Obsolete]
     public static class AssetsManager_Old
     {
@@ -613,7 +603,7 @@ namespace Engine
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
         public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
         public static Dictionary<string, Material> Materials { get; } = new Dictionary<string, Material>();
-        public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture> ();
+        public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture>();
         public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
         public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
         public static Dictionary<string, Sound> Sounds { get; } = new Dictionary<string, Sound>();
@@ -1291,7 +1281,7 @@ namespace Engine
             return scene as Scene;
         }
     }
-    
+
     public static partial class FileSystemHelper
     {
         private static readonly EnumerationOptions defaultEnumerator = new EnumerationOptions() { IgnoreInaccessible = true };
