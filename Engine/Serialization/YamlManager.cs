@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Engine.Serialization;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
 
@@ -14,9 +15,11 @@ namespace Engine
         private static IDeserializer Deserializer { get; }
 
         private static CustomObjectFactory ObjectFactory { get; }
+        private static BaseAssetConverter BaseAssetConverter { get; }
 
         static YamlManager()
         {
+            BaseAssetConverter = new BaseAssetConverter();
             ObjectFactory = new CustomObjectFactory(new DefaultObjectFactory());
 
             Serializer = BuildSerializer();
@@ -26,9 +29,10 @@ namespace Engine
         private static ISerializer BuildSerializer()
         {
             SerializerBuilder builder = new SerializerBuilder();
+            builder.EnsureRoundtrip();
 
             builder.RegisterTagMappedClasses();
-            builder.EnsureRoundtrip();
+            builder.WithTypeConverter(BaseAssetConverter);
 
             return builder.Build();
         }
@@ -39,6 +43,7 @@ namespace Engine
 
             builder.RegisterTagMappedClasses();
             builder.WithObjectFactory(ObjectFactory);
+            builder.WithTypeConverter(BaseAssetConverter);
 
             return builder.Build();
         }

@@ -79,6 +79,21 @@ namespace Engine
             artifactDatabase[contentAssetPath][guid] = assetData.GetType();
             SaveArtifactDatabase();
         }
+        
+        public static object LoadAssetByGuid(string guid, Type assetType)
+        {
+            Type artifactType = null;
+            foreach (Dictionary<string, Type> artifact in artifactDatabase.Values)
+            {
+                if (artifact.TryGetValue(guid, out artifactType))
+                    break;
+            }
+
+            if (artifactType == null)
+                return null;
+
+            return LoadAssetByGuid(guid, artifactType, assetType);
+        }
 
         public static object LoadAssetByGuid(string guid, Type artifactType, Type assetType)
         {
