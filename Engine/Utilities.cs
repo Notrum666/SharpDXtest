@@ -33,7 +33,7 @@ namespace Engine
     public static class AssetsManager_Old
     {
         public static Dictionary<string, Model> Models { get; } = new Dictionary<string, Model>();
-        public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
+        // public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
         // public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
         public static Dictionary<string, Material> Materials { get; } = new Dictionary<string, Material>();
         public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture>();
@@ -147,15 +147,6 @@ namespace Engine
             }
 
             Models.AddRange(models);
-        }
-
-        public static ShaderPipeline LoadShaderPipeline(string shaderPipelineName, params Shader[] shaders)
-        {
-            if (ShaderPipelines.ContainsKey(shaderPipelineName))
-                throw new ArgumentException("Shader pipeline with name \"" + shaderPipelineName + "\" is already loaded.");
-            ShaderPipeline shaderPipeline = new ShaderPipeline(shaders);
-            ShaderPipelines[shaderPipelineName] = shaderPipeline;
-            return shaderPipeline;
         }
 
         public static Texture LoadTexture(string path, string textureName = "", bool applyGammaCorrection = false)

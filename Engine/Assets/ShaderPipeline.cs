@@ -11,6 +11,46 @@ namespace Engine
         public ReadOnlyCollection<Shader> Shaders => shaders.AsReadOnly();
         public static ShaderPipeline Current { get; private set; }
 
+        private static readonly Dictionary<string, ShaderPipeline> staticPipelines = new Dictionary<string, ShaderPipeline>();
+
+        public static ShaderPipeline GetStaticPipeline(string name)
+        {
+            return staticPipelines[name];
+        }
+
+        public static ShaderPipeline CreateStaticPipeline(string pipelineName, params Shader[] shaders)
+        {
+            if (staticPipelines.ContainsKey(pipelineName))
+                throw new ArgumentException($"Shader pipeline with name {pipelineName} is already loaded.");
+
+            staticPipelines[pipelineName] = new ShaderPipeline(shaders);
+            return GetStaticPipeline(pipelineName);
+        }
+
+        public static void InitializeStaticPipelines()
+        {
+            // CreateStaticPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"),
+            //                      Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
+            
+            CreateStaticPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
+                                 Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
+
+            CreateStaticPipeline("deferred_geometry", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.vsh"),
+                                 Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.fsh"));
+
+            CreateStaticPipeline("deferred_geometry_particles", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.vsh"),
+                                 Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
+                                 Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
+            CreateStaticPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
+                                 Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
+
+            Shader screenQuadShader = Shader.LoadStaticShader("screen_quad");
+            CreateStaticPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
+            CreateStaticPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
+            CreateStaticPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
+            CreateStaticPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
+        }
+
         public ShaderPipeline(params Shader[] shaders)
         {
             List<ShaderType> shaderTypes = new List<ShaderType>();
