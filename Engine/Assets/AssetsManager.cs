@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
-
 using Engine.AssetsData;
 
 namespace Engine
@@ -84,7 +83,12 @@ namespace Engine
         public static object LoadAssetByGuid(string guid, Type artifactType, Type assetType)
         {
             AssetData artifact = LoadArtifact(guid, artifactType);
-            return artifact?.ToRealAsset(assetType);
+            return artifact?.ToRealAsset(assetType, guid);
+        }
+
+        public static T LoadAssetByGuid<T>(string guid, Type artifactType) where T : BaseAsset
+        {
+            return (T)LoadAssetByGuid(guid, artifactType, typeof(T));
         }
 
         public static object LoadAssetAtPath(string contentAssetPath, Type assetType)

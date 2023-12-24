@@ -45,226 +45,8 @@ namespace Engine
     // materials contain a number of textures
     // each of them: meshes, materials, textures should be loaded as separate assets
 
-    public class Primitive : IDisposable
-    {
-        private bool disposed;
+    
 
-        public struct PrimitiveVertex
-        {
-            public Vector3f v;
-            public Vector2f t;
-            public Vector3f n;
-            public Vector3f tx;
-        };
-        public List<PrimitiveVertex> vertices = null;
-        public List<int> indices = null;
-
-        private Buffer vertexBuffer;
-        private VertexBufferBinding vertexBufferBinding;
-        private Buffer indexBuffer;
-
-        // material assigned on mesh load
-        public Material DefaultMaterial { get; set; } = null;
-
-        ~Primitive()
-        {
-            Dispose(disposing: false);
-        }
-
-        public void GenerateGPUData()
-        {
-            if (vertices == null || indices == null)
-                throw new Exception("Geometry data can't be empty.");
-
-            for (int i = 0; i < indices.Count / 3; i++)
-            {
-                Vector3f edge1 = vertices[i * 3 + 1].v - vertices[i * 3 + 0].v;
-                Vector3f edge2 = vertices[i * 3 + 2].v - vertices[i * 3 + 0].v;
-                Vector2f UVedge1 = vertices[i * 3 + 1].t - vertices[i * 3 + 0].t;
-                Vector2f UVedge2 = vertices[i * 3 + 2].t - vertices[i * 3 + 0].t;
-                Vector3f tx = ((edge1 * UVedge2.y - edge2 * UVedge1.y) / (UVedge1.x * UVedge2.y - UVedge1.y * UVedge2.x)).normalized();
-                PrimitiveVertex vertex0 = vertices[i * 3 + 0];
-                PrimitiveVertex vertex1 = vertices[i * 3 + 1];
-                PrimitiveVertex vertex2 = vertices[i * 3 + 2];
-
-                vertex0.tx = new Vector3f(tx.x, tx.y, tx.z);
-                vertex1.tx = new Vector3f(tx.x, tx.y, tx.z);
-                vertex2.tx = new Vector3f(tx.x, tx.y, tx.z);
-
-                vertices[i * 3 + 0] = vertex0;
-                vertices[i * 3 + 1] = vertex1;
-                vertices[i * 3 + 2] = vertex2;
-            }
-
-            vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, vertices.ToArray());
-            vertexBufferBinding = new VertexBufferBinding(vertexBuffer, Utilities.SizeOf<PrimitiveVertex>(), 0);
-            indexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.IndexBuffer, indices.ToArray());
-        }
-
-        public void Render()
-        {
-            if (disposed)
-                throw new ObjectDisposedException(nameof(Primitive));
-            GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
-            GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
-            GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
-            GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(indices.Count, 0, 0);
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        public virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            vertices = null;
-            indices = null;
-
-            if (vertexBuffer != null)
-                vertexBuffer.Dispose();
-            if (indexBuffer != null)
-                indexBuffer.Dispose();
-
-            disposed = true;
-        }
-    }
-    public class Mesh : IDisposable
-    {
-        private bool disposed;
-        public List<Primitive> Primitives { get; } = new List<Primitive>();
-
-        ~Mesh()
-        {
-            Dispose(disposing: false);
-        }
-
-        public void Render()
-        {
-            if (disposed)
-                throw new ObjectDisposedException(nameof(Mesh));
-            foreach (Primitive primitive in Primitives)
-                primitive.Render();
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                foreach(Primitive primitive in Primitives)
-                    primitive.Dispose(disposing);
-                disposed = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-    };
-    public class Material
-    {
-        private Texture albedo;
-        public Texture Albedo
-        {
-            get => albedo;
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("Albedo", "Texture can't be null.");
-                albedo = value;
-            }
-        }
-        private Texture normal;
-        public Texture Normal
-        {
-            get => normal;
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("Normal", "Texture can't be null.");
-                normal = value;
-            }
-        }
-        private Texture metallic;
-        public Texture Metallic
-        {
-            get => metallic;
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("Metallic", "Texture can't be null.");
-                metallic = value;
-            }
-        }
-        private Texture roughness;
-        public Texture Roughness
-        {
-            get => roughness;
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("Roughness", "Texture can't be null.");
-                roughness = value;
-            }
-        }
-        private Texture ambientOcclusion;
-        public Texture AmbientOcclusion
-        {
-            get => ambientOcclusion;
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("AmbientOcclusion", "Texture can't be null.");
-                ambientOcclusion = value;
-            }
-        }
-        private Texture emissive;
-        public Texture Emissive
-        {
-            get => emissive;
-            set
-            {
-                if (value == null)
-                    throw new ArgumentNullException("Emissive", "Texture can't be null.");
-                emissive = value;
-            }
-        }
-        public Material()
-        {
-            albedo = AssetsManager_Old.Textures["default_albedo"];
-            normal = AssetsManager_Old.Textures["default_normal"];
-            metallic = AssetsManager_Old.Textures["default_metallic"];
-            roughness = AssetsManager_Old.Textures["default_roughness"];
-            ambientOcclusion = AssetsManager_Old.Textures["default_ambientOcclusion"];
-            emissive = AssetsManager_Old.Textures["default_emissive"];
-        }
-        public Material(Texture albedo, Texture normal, Texture metallic, Texture roughness, Texture ambientOcclusion, Texture emissive)
-        {
-            Albedo = albedo;
-            Normal = normal;
-            Metallic = metallic;
-            Roughness = roughness;
-            AmbientOcclusion = ambientOcclusion;
-            Emissive = emissive;
-        }
-
-        public void Use()
-        {
-            Albedo.Use("albedoMap");
-            Normal.Use("normalMap");
-            Metallic.Use("metallicMap");
-            Roughness.Use("roughnessMap");
-            AmbientOcclusion.Use("ambientOcclusionMap");
-            Emissive.Use("emissiveMap");
-            ShaderPipeline.Current.UploadUpdatedUniforms();
-        }
-    }
     public class Sampler : IDisposable
     {
         private SamplerState sampler;
@@ -326,437 +108,7 @@ namespace Engine
             GC.SuppressFinalize(this);
         }
     }
-    public class Texture : IDisposable
-    {
-        private interface IResourceViewCollection { }
-        private struct ResourceViewCollection<T> : IResourceViewCollection where T : ResourceView
-        {
-            public T GeneralView;
-            public List<T> ArrayViews;
-            public List<List<T>> MipsViews;
-        }
-
-        private bool disposed = false;
-        public Texture2D texture { get; private set; }
-        private List<IResourceViewCollection> viewsCollectons = new List<IResourceViewCollection>();
-
-        public static Bitmap DecodeTexture(byte[] bytes)
-        {
-            Stream stream = new MemoryStream(bytes);
-            BitmapDecoder decoder = BitmapDecoder.Create(stream, BitmapCreateOptions.None, BitmapCacheOption.Default);
-            return GetBitmap(decoder.Frames[0]);
-        }
-        public static Bitmap GetBitmap(BitmapSource source)
-        {
-            Bitmap bmp = new Bitmap(
-              source.PixelWidth,
-              source.PixelHeight,
-              PixelFormat.Format32bppPArgb);
-            BitmapData data = bmp.LockBits(
-              new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp.Size),
-              ImageLockMode.WriteOnly,
-              PixelFormat.Format32bppPArgb);
-            source.CopyPixels(
-              Int32Rect.Empty,
-              data.Scan0,
-              data.Height * data.Stride,
-              data.Stride);
-            bmp.UnlockBits(data);
-            return bmp;
-        }
-
-        public Texture(Bitmap image, bool applyGammaCorrection = true)
-        {
-            if (image.PixelFormat != PixelFormat.Format32bppArgb)
-                image = image.Clone(new Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
-            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-
-            texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
-            {
-                Width = image.Width,
-                Height = image.Height,
-                ArraySize = 1,
-                BindFlags = BindFlags.ShaderResource,
-                Usage = ResourceUsage.Immutable,
-                CpuAccessFlags = CpuAccessFlags.None,
-                Format = applyGammaCorrection ? Format.B8G8R8A8_UNorm_SRgb : Format.B8G8R8A8_UNorm,
-                MipLevels = 1,
-                OptionFlags = ResourceOptionFlags.Shared,
-                SampleDescription = new SampleDescription(1, 0)
-            }, new DataRectangle(data.Scan0, data.Stride));
-
-            image.UnlockBits(data);
-
-            GenerateViews();
-        }
-
-        public Texture(int width, int height, IEnumerable<byte>? defaultDataPerPixel, Format textureFormat, BindFlags usage, int arraySize = 1, int mipLevels = 1)
-        {
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException("width", "Texture width must be positive.");
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException("height", "Texture height must be positive.");
-
-            Format[] supportedFormats =
-            {
-                Format.B8G8R8A8_UNorm,
-                Format.B8G8R8A8_UNorm_SRgb,
-                Format.R32G32B32A32_Float,
-                Format.R32_Typeless
-            };
-            if (!supportedFormats.Contains(textureFormat))
-                throw new NotSupportedException("Texture format is not supported: %s" + textureFormat.ToString());
-
-            nint dataPtr = 0;
-            DataRectangle[]? rectangles = null;
-            if (defaultDataPerPixel != null)
-            {
-                int bytesPerPixel = textureFormat.SizeOfInBytes();
-
-                byte[] data = new byte[width * height * bytesPerPixel];
-
-                IEnumerator<byte> enumerator = defaultDataPerPixel.GetEnumerator();
-                for (int i = 0; i < height; i++)
-                {
-                    for (int j = 0; j < width; j++)
-                    {
-                        int pos = (i * width + j) * bytesPerPixel;
-                        for (int k = 0; k < bytesPerPixel && enumerator.MoveNext(); k++)
-                            data[pos + k] = enumerator.Current;
-                        enumerator.Reset();
-                    }
-                }
-
-                dataPtr = Marshal.AllocHGlobal(width * height * bytesPerPixel);
-                Marshal.Copy(data, 0, dataPtr, width * height * bytesPerPixel);
-
-                rectangles = new DataRectangle[arraySize];
-                for (int i = 0; i < arraySize; i++)
-                    rectangles[i] = new DataRectangle(dataPtr, width * bytesPerPixel);
-            }
-            texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
-            {
-                Width = width,
-                Height = height,
-                ArraySize = arraySize,
-                BindFlags = usage,
-                Usage = ResourceUsage.Default,
-                CpuAccessFlags = CpuAccessFlags.None,
-                Format = textureFormat,
-                MipLevels = mipLevels,
-                OptionFlags = ResourceOptionFlags.Shared,
-                SampleDescription = new SampleDescription(1, 0)
-            }, rectangles);
-
-            if (defaultDataPerPixel != null)
-                Marshal.FreeHGlobal(dataPtr);
-
-            GenerateViews();
-        }
-
-        private void GenerateViews()
-        {
-            Format format = texture.Description.Format;
-            if (format == Format.R32_Typeless)
-                format = Format.R32_Float;
-            BindFlags usage = texture.Description.BindFlags;
-
-            int arraySize = texture.Description.ArraySize;
-            int mipLevels = texture.Description.MipLevels;
-
-            bool hasRenderTargets = usage.HasFlag(BindFlags.RenderTarget);
-            bool hasDepthStencils = usage.HasFlag(BindFlags.DepthStencil);
-            bool hasShaderResources = usage.HasFlag(BindFlags.ShaderResource);
-
-            if (hasRenderTargets)
-                viewsCollectons.Add(CreateResourceViewCollection<RenderTargetView>(format, arraySize, mipLevels));
-            if (hasDepthStencils)
-                viewsCollectons.Add(CreateResourceViewCollection<DepthStencilView>(format, arraySize, mipLevels));
-            if (hasShaderResources)
-                viewsCollectons.Add(CreateResourceViewCollection<ShaderResourceView>(format, arraySize, mipLevels));
-        }
-
-        private ResourceViewCollection<T> CreateResourceViewCollection<T>(Format format, int arraySize, int mipLevels) 
-            where T : ResourceView
-        {
-            if(arraySize < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(arraySize));
-            }
-
-            if(mipLevels < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(mipLevels));
-            }
-
-            ResourceViewCollection<T> collection = new ResourceViewCollection<T>
-            {
-                ArrayViews = new List<T>(arraySize),
-                MipsViews = new List<List<T>>(arraySize)
-            };
-
-            collection.GeneralView = collection switch
-            {
-                ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, arraySize, 0, 0) as T,
-                ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, arraySize, 0, 0) as T,
-                ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, arraySize, 0, mipLevels, 0) as T,
-                _ => throw new NotImplementedException(typeof(T).Name)
-            };
-
-            if (arraySize > 1 || mipLevels > 1)
-            {
-                for (int i = 0; i < arraySize; i++)
-                {
-                    T arrayItemView = collection switch
-                    {
-                        ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, 1, i, 0) as T,
-                        ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, 1, i, 0) as T,
-                        ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, 1, i, mipLevels, 0) as T,
-                        _ => throw new NotImplementedException(typeof(T).Name)
-                    };
-
-                    collection.ArrayViews.Add(arrayItemView);
-
-                    collection.MipsViews.Add(new List<T>(mipLevels));
-
-                    int mipStartInd = 1;
-
-                    if (arrayItemView is not ShaderResourceView)
-                    {
-                        collection.MipsViews[0].Add(arrayItemView);
-                    }
-                    else
-                    {
-                        mipStartInd = 0;
-                    }
-
-                    for (int j = mipStartInd; j < mipLevels; j++)
-                    {
-                        T mipItemView = collection switch
-                        {
-                            ResourceViewCollection<RenderTargetView> => CreateRenderTargetView(texture, format, 1, i, j) as T,
-                            ResourceViewCollection<DepthStencilView> => CreateDepthStencilView(texture, 1, i, j) as T,
-                            ResourceViewCollection<ShaderResourceView> => CreateShaderResourceView(texture, format, 1, i, 1, j) as T,
-                            _ => throw new NotImplementedException(typeof(T).Name)
-                        };
-
-                        collection.MipsViews[i].Add(mipItemView);
-                    }
-                }
-            }
-            else
-            {
-                collection.ArrayViews.Add(collection.GeneralView);
-                collection.MipsViews.Add(new List<T> { collection.GeneralView });
-            }
-
-            return collection;
-        }
-
-        private RenderTargetView CreateRenderTargetView(Texture2D rawTexture, Format format, int arraySize, int arraySlice, int mipSlice)
-        {
-            return new RenderTargetView(GraphicsCore.CurrentDevice, rawTexture,
-                        new RenderTargetViewDescription()
-                        {
-                            Format = format,
-                            Dimension = RenderTargetViewDimension.Texture2DArray,
-                            Texture2DArray = new RenderTargetViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = mipSlice,
-                                ArraySize = arraySize,
-                                FirstArraySlice = arraySlice
-                            }
-                        }
-                    );
-        }
-
-        private DepthStencilView CreateDepthStencilView(Texture2D rawTexture, int arraySize, int arraySlice, int mipSlice)
-        {
-            return new DepthStencilView(GraphicsCore.CurrentDevice, rawTexture,
-                        new DepthStencilViewDescription()
-                        {
-                            Format = Format.D32_Float,
-                            Dimension = DepthStencilViewDimension.Texture2DArray,
-                            Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
-                            {
-                                MipSlice = mipSlice,
-                                ArraySize = arraySize,
-                                FirstArraySlice = arraySlice
-                            }
-                        }
-                    );
-        }
-
-        private ShaderResourceView CreateShaderResourceView(Texture2D rawTexture, Format format, int arraySize, int arraySlice, int mipLevels, int mipSlice)
-        {
-            return new ShaderResourceView(GraphicsCore.CurrentDevice, rawTexture,
-                        new ShaderResourceViewDescription()
-                        {
-                            Format = format,
-                            Dimension = ShaderResourceViewDimension.Texture2DArray,
-                            Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
-                            {
-                                MipLevels = mipLevels,
-                                MostDetailedMip = mipSlice,
-                                ArraySize = arraySize,
-                                FirstArraySlice = arraySlice
-                            }
-                        }
-                    );
-        }
-
-        private ResourceViewCollection<T> GetResourceViewCollection<T>() where T : ResourceView
-        {
-            return (ResourceViewCollection<T>)viewsCollectons.First(view => view is ResourceViewCollection<T>);
-        }
-
-        /// <summary>
-        /// Check if texture contains ResourceView of specified type
-        /// </summary>
-        /// <typeparam name="T">Type of ResourceView</typeparam>
-        /// <returns>True if contains otherwize false</returns>
-        public bool HasViews<T>() where T : ResourceView
-        {
-            return viewsCollectons.Any(v => v is ResourceViewCollection<T>);
-        }
-
-        /// <summary>
-        /// Get specified type of texture's ResourceView
-        /// </summary>
-        /// <typeparam name="T">Type of ResourceView</typeparam>
-        /// <returns>ResourceView of specified type</returns>
-        public T GetView<T>() where T : ResourceView
-        {
-            return GetResourceViewCollection<T>().GeneralView;
-        }
-
-        /// <summary>
-        /// Get specified type of array slice texture's ResourceView
-        /// </summary>
-        /// <typeparam name="T">Type of ResourceView</typeparam>
-        /// <param name="arraySlice">Array slice index</param>
-        /// <returns>ResourceView of specified type</returns>
-        public T GetView<T>(int arraySlice) where T : ResourceView
-        {
-            return GetResourceViewCollection<T>().ArrayViews[arraySlice];
-        }
-
-        /// <summary>
-        /// Get specified type of mip slice texture's ResourceView
-        /// </summary>
-        /// <typeparam name="T">Type of ResourceView</typeparam>
-        /// <param name="arraySlice">Array slice index</param>
-        /// <param name="mipSlice">Mip slice index</param>
-        /// <returns>ResourceView of specified type</returns>
-        public T GetView<T>(int arraySlice, int mipSlice) where T : ResourceView
-        {
-            return GetResourceViewCollection<T>().MipsViews[arraySlice][mipSlice];
-        }
-
-        /// <summary>
-        /// Bind texture to current ShaderPipeline as ShaderResourceView
-        /// </summary>
-        /// <param name="variable">Name of texture variable in shaders</param>
-        public void Use(string variable)
-        {
-            UseInternal(variable, GetView<ShaderResourceView>());
-        }
-
-        /// <summary>
-        /// Bind array slice of texture to current ShaderPipeline as ShaderResourceView
-        /// </summary>
-        /// <param name="variable">Name of texture variable in shaders</param>
-        /// <param name="arraySlice">Array slice index</param>
-        public void Use(string variable, int arraySlice)
-        {
-            UseInternal(variable, GetView<ShaderResourceView>(arraySlice));
-        }
-
-        /// <summary>
-        /// Bind mip slice of texture to current ShaderPipeline as ShaderResourceView
-        /// </summary>
-        /// <param name="variable">Name of texture variable in shaders</param>
-        /// <param name="arraySlice">Array slice index</param>
-        /// <param name="mipSlice">Mip slice index</param>
-        public void Use(string variable, int arraySlice, int mipSlice)
-        {
-            UseInternal(variable, GetView<ShaderResourceView>(arraySlice, mipSlice));
-        }
-
-        private void UseInternal(string variable, ShaderResourceView view)
-        {
-            if ((texture.Description.BindFlags & BindFlags.ShaderResource) == BindFlags.None)
-                throw new Exception("This texture is not a shader resource");
-            bool correctLocation = false;
-            int location;
-            foreach (Shader shader in ShaderPipeline.Current.Shaders)
-            {
-                if (shader.Locations.TryGetValue(variable, out location))
-                {
-                    correctLocation = true;
-                    GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(location, view);
-                }
-            }
-            if (!correctLocation)
-                throw new ArgumentException("Variable " + variable + " not found in current pipeline.");
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                texture.Dispose();
-
-                disposed = true;
-            }
-        }
-
-        ~Texture()
-        {
-            Dispose(disposing: false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-    }
-    public class Sound : IDisposable
-    {
-        public AudioBuffer Buffer { get; private set; }
-        public WaveFormat Format { get; private set; }
-        public uint[] DecodedPacketsInfo { get; private set; }
-
-        private bool disposed = false;
-
-        public Sound(AudioBuffer buffer, WaveFormat format, uint[] decodedPacketsInfo)
-        {
-            Buffer = buffer;
-            Format = format;
-            DecodedPacketsInfo = decodedPacketsInfo;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                Buffer.Stream.Dispose();
-                disposed = true;
-            }
-        }
-
-        ~Sound()
-        {
-            Dispose(disposing: false);
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-    }
+    
     public enum ShaderType
     {
         VertexShader,
@@ -1257,7 +609,7 @@ namespace Engine
     [Obsolete]
     public static class AssetsManager_Old
     {
-        public static Dictionary<string, Mesh> Meshes { get; } = new Dictionary<string, Mesh>();
+        public static Dictionary<string, Model> Models { get; } = new Dictionary<string, Model>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
         public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
         public static Dictionary<string, Material> Materials { get; } = new Dictionary<string, Material>();
@@ -1275,7 +627,7 @@ namespace Engine
 
             AssimpContext aiImporter = new AssimpContext();
 
-            Dictionary<string, Mesh> meshes = new Dictionary<string, Mesh>();
+            Dictionary<string, Model> models = new Dictionary<string, Model>();
             Dictionary<string, Material> materials = new Dictionary<string, Material>();
 
             // any type model import
@@ -1294,7 +646,7 @@ namespace Engine
             for (int i = 0; i < aiScene.Materials.Count; ++i)
             {
                 Assimp.Material aiMaterial = aiScene.Materials[i];
-                Material material = new Material();
+                Material material = Material.Default;
                 Texture albedo = null;
                 Texture normal = null;
                 if (aiMaterial.GetMaterialTextureCount(TextureType.BaseColor) > 0)
@@ -1335,19 +687,19 @@ namespace Engine
                     continue;
                 }
 
-                Mesh mesh;
+                Model model;
 
                 // in order to store different primitives into one mesh trying to find it by name
-                if (!meshes.TryGetValue(aiMesh.Name, out mesh))
+                if (!models.TryGetValue(aiMesh.Name, out model))
                 {
-                    mesh = new Mesh();
-                    meshes.Add(aiMesh.Name, mesh);
+                    model = new Model();
+                    models.Add(aiMesh.Name, model);
                 }
 
-                Primitive primitive = new Primitive();
-                primitive.DefaultMaterial = materials[materialPrefix + aiMesh.MaterialIndex.ToString()];
-                primitive.vertices = new List<Primitive.PrimitiveVertex>();
-                primitive.indices = new List<int>();
+                Mesh mesh = new Mesh();
+                mesh.DefaultMaterial = materials[materialPrefix + aiMesh.MaterialIndex.ToString()];
+                mesh.vertices = new List<Mesh.PrimitiveVertex>();
+                mesh.indices = new List<int>();
                 List<Vector3D> verts = aiMesh.Vertices;
                 List<Vector3D> norms = (aiMesh.HasNormals) ? aiMesh.Normals : null;
                 List<Vector3D> uvs = aiMesh.HasTextureCoords(0) ? aiMesh.TextureCoordinateChannels[0] : null;
@@ -1356,22 +708,22 @@ namespace Engine
                     Vector3D pos = verts[i];
                     Vector3D norm = (norms != null) ? norms[i] : new Vector3D(0, 1, 0); // Y-up by default
                     Vector3D uv = (uvs != null) ? uvs[i] : new Vector3D(0, 0, 0);
-                    Primitive.PrimitiveVertex vertex = new Primitive.PrimitiveVertex();
+                    Mesh.PrimitiveVertex vertex = new Mesh.PrimitiveVertex();
                     vertex.v = new Vector3f(pos.X * scaleFactor, pos.Y * scaleFactor, pos.Z * scaleFactor);
                     vertex.n = new Vector3f(norm.X, norm.Y, norm.Z);
                     vertex.t = new Vector2f(uv.X, 1 - uv.Y);
-                    primitive.vertices.Add(vertex);
+                    mesh.vertices.Add(vertex);
                 }
 
                 foreach (Face face in aiMesh.Faces)
-                    primitive.indices.AddRange(face.Indices);
+                    mesh.indices.AddRange(face.Indices);
 
-                primitive.GenerateGPUData();
+                mesh.GenerateGPUData();
 
-                mesh.Primitives.Add(primitive);
+                model.Meshes.Add(mesh);
             }
 
-            Meshes.AddRange(meshes);
+            Models.AddRange(models);
         }
 
         public static Shader LoadShader(string shaderName, string shaderPath)
@@ -1476,16 +828,16 @@ namespace Engine
                         break;
                     case "Mesh":
                         {
-                            if (!Meshes.ContainsKey(words[1]))
+                            if (!Models.ContainsKey(words[1]))
                                 throw new Exception("Mesh " + words[1] + " is not loaded.");
                             PropertyInfo property = objType.GetProperty(name);
                             if (property != null)
-                                property.SetValue(obj, Meshes[words[1]]);
+                                property.SetValue(obj, Models[words[1]]);
                             else
                             {
                                 FieldInfo field = objType.GetField(name);
                                 if (field != null)
-                                    field.SetValue(obj, Meshes[words[1]]);
+                                    field.SetValue(obj, Models[words[1]]);
                                 else
                                     throw new Exception(objType.Name + " doesn't have " + name + ".");
                             }
