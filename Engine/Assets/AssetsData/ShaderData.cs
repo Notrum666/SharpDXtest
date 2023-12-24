@@ -53,8 +53,10 @@ namespace Engine.AssetsData
                     };
                     shaderBuffer.variables[variable.Key] = shaderVariable;
                 }
+
+                shader.AddBuffer(shaderBuffer);
             }
-            
+
             return shader;
         }
 

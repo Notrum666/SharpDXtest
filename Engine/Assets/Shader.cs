@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using SharpDX;
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 using Buffer = SharpDX.Direct3D11.Buffer;
+using MapFlags = SharpDX.Direct3D11.MapFlags;
 
 namespace Engine
 {
@@ -96,23 +99,28 @@ namespace Engine
 
         public void uploadUpdatedUniforms()
         {
-            // foreach (ShaderBuffer buf in buffers)
-            // {
-            //     if (buf.invalidated)
-            //     {
-            //         DataStream stream;
-            //         GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.buffer, 0, MapMode.WriteDiscard, MapFlags.None, out stream);
-            //         foreach (ShaderVariable variable in buf.variables.Values)
-            //         {
-            //             if (variable.value == null)
-            //                 continue;
-            //
-            //             Marshal.StructureToPtr(variable.value, stream.PositionPointer + variable.offset, true);
-            //         }
-            //         GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.buffer, 0);
-            //         buf.invalidated = false;
-            //     }
-            // }
+            foreach (ShaderBuffer buf in buffers)
+            {
+                if (buf.invalidated)
+                {
+                    DataStream stream;
+                    GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.buffer, 0, MapMode.WriteDiscard, MapFlags.None, out stream);
+                    foreach (ShaderVariable variable in buf.variables.Values)
+                    {
+                        if (variable.value == null)
+                            continue;
+
+                        Marshal.StructureToPtr(variable.value, stream.PositionPointer + variable.offset, true);
+                    }
+                    GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.buffer, 0);
+                    buf.invalidated = false;
+                }
+            }
+        }
+
+        internal void AddBuffer(ShaderBuffer shaderBuffer)
+        {
+            buffers.Add(shaderBuffer);
         }
 
         public class ShaderBuffer
