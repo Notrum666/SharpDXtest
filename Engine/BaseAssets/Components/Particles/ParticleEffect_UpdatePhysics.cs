@@ -9,7 +9,7 @@
 
         public override void Use(ParticleSystem system)
         {
-            EffectShader.use();
+            EffectShader.Use();
         }
     }
 }

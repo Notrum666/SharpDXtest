@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using SharpDX;
@@ -15,9 +14,8 @@ namespace Engine
     public abstract class Shader : BaseAsset
     {
         public abstract ShaderType Type { get; }
-
         public Dictionary<string, int> Locations { get; } = new Dictionary<string, int>();
-        protected List<ShaderBuffer> buffers = new List<ShaderBuffer>();
+        private readonly List<ShaderBuffer> buffers = new List<ShaderBuffer>();
 
         private static readonly Dictionary<string, Shader> staticShaders = new Dictionary<string, Shader>();
 
@@ -67,69 +65,68 @@ namespace Engine
             }
         }
 
-        public abstract void use();
+        public abstract void Use();
 
-        public bool hasVariable(string name)
+        public bool HasVariable(string name)
         {
             foreach (ShaderBuffer buffer in buffers)
             {
-                if (buffer.variables.ContainsKey(name))
+                if (buffer.Variables.ContainsKey(name))
                     return true;
             }
             return false;
         }
 
-        public void updateUniform(string name, object value)
+        public void UpdateUniform(string name, object value)
         {
             ShaderVariable variable;
             foreach (ShaderBuffer buffer in buffers)
             {
-                if (buffer.variables.TryGetValue(name, out variable))
+                if (buffer.Variables.TryGetValue(name, out variable))
                 {
-                    if (variable.size < Marshal.SizeOf(value))
-                        throw new ArgumentException("Value size can't be bigger than " + variable.size.ToString() + " bytes for \"" + name + "\".");
-                    variable.value = value;
-                    buffer.invalidated = true;
+                    if (variable.Size < Marshal.SizeOf(value))
+                        throw new ArgumentException("Value size can't be bigger than " + variable.Size.ToString() + " bytes for \"" + name + "\".");
+                    variable.Value = value;
+                    buffer.Invalidated = true;
                     return;
                 }
             }
             throw new ArgumentException("Variable does not exists.");
         }
 
-        public bool tryUpdateUniform(string name, object value)
+        public bool TryUpdateUniform(string name, object value)
         {
             ShaderVariable variable;
             foreach (ShaderBuffer buffer in buffers)
             {
-                if (buffer.variables.TryGetValue(name, out variable))
+                if (buffer.Variables.TryGetValue(name, out variable))
                 {
-                    if (variable.size < Marshal.SizeOf(value))
+                    if (variable.Size < Marshal.SizeOf(value))
                         return false;
-                    variable.value = value;
-                    buffer.invalidated = true;
+                    variable.Value = value;
+                    buffer.Invalidated = true;
                     return true;
                 }
             }
             return false;
         }
 
-        public void uploadUpdatedUniforms()
+        public void UploadUpdatedUniforms()
         {
             foreach (ShaderBuffer buf in buffers)
             {
-                if (buf.invalidated)
+                if (buf.Invalidated)
                 {
-                    DataStream stream;
-                    GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.buffer, 0, MapMode.WriteDiscard, MapFlags.None, out stream);
-                    foreach (ShaderVariable variable in buf.variables.Values)
+                    GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(buf.Buffer, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                    foreach (ShaderVariable variable in buf.Variables.Values)
                     {
-                        if (variable.value == null)
+                        if (variable.Value == null)
                             continue;
 
-                        Marshal.StructureToPtr(variable.value, stream.PositionPointer + variable.offset, true);
+                        Marshal.StructureToPtr(variable.Value, stream.PositionPointer + variable.Offset, true);
                     }
-                    GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.buffer, 0);
-                    buf.invalidated = false;
+                    GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(buf.Buffer, 0);
+                    buf.Invalidated = false;
                 }
             }
         }
@@ -141,22 +138,22 @@ namespace Engine
 
         public class ShaderBuffer
         {
-            public Dictionary<string, ShaderVariable> variables = new Dictionary<string, ShaderVariable>();
-            public Buffer buffer;
-            public bool invalidated = true;
+            public Dictionary<string, ShaderVariable> Variables = new Dictionary<string, ShaderVariable>();
+            public Buffer Buffer;
+            public bool Invalidated = true;
         }
         public class ShaderVariable
         {
-            public int size;
-            public int offset;
-            public object value;
+            public int Size;
+            public int Offset;
+            public object Value;
         }
 
         private class Shader_Vertex : Shader
         {
             public override ShaderType Type => ShaderType.VertexShader;
-            private InputLayout layout;
-            private VertexShader shader;
+            private readonly InputLayout layout;
+            private readonly VertexShader shader;
 
             public Shader_Vertex(byte[] bytecode)
             {
@@ -239,91 +236,91 @@ namespace Engine
                 shader = new VertexShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
-            public override void use()
+            public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.InputLayout = layout;
                 GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.Set(shader);
-                GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetConstantBuffers(0, buffers.Select(buf => buf.Buffer).ToArray());
             }
         }
         private class Shader_Hull : Shader
         {
             public override ShaderType Type => ShaderType.HullShader;
-            private HullShader shader;
+            private readonly HullShader shader;
 
             public Shader_Hull(byte[] bytecode)
             {
                 shader = new HullShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
-            public override void use()
+            public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.HullShader.Set(shader);
-                GraphicsCore.CurrentDevice.ImmediateContext.HullShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.HullShader.SetConstantBuffers(0, buffers.Select(buf => buf.Buffer).ToArray());
             }
         }
         private class Shader_Domain : Shader
         {
             public override ShaderType Type => ShaderType.DomainShader;
-            private DomainShader shader;
+            private readonly DomainShader shader;
 
             public Shader_Domain(byte[] bytecode)
             {
                 shader = new DomainShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
-            public override void use()
+            public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.Set(shader);
-                GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.DomainShader.SetConstantBuffers(0, buffers.Select(buf => buf.Buffer).ToArray());
             }
         }
         private class Shader_Geometry : Shader
         {
             public override ShaderType Type => ShaderType.GeometryShader;
-            private GeometryShader shader;
+            private readonly GeometryShader shader;
 
             public Shader_Geometry(byte[] bytecode)
             {
                 shader = new GeometryShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
-            public override void use()
+            public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.Set(shader);
-                GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.SetConstantBuffers(0, buffers.Select(buf => buf.Buffer).ToArray());
             }
         }
         private class Shader_Fragment : Shader
         {
             public override ShaderType Type => ShaderType.FragmentShader;
-            private PixelShader shader;
+            private readonly PixelShader shader;
 
             public Shader_Fragment(byte[] bytecode)
             {
                 shader = new PixelShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
-            public override void use()
+            public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.Set(shader);
-                GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetConstantBuffers(0, buffers.Select(buf => buf.Buffer).ToArray());
             }
         }
         private class Shader_Compute : Shader
         {
             public override ShaderType Type => ShaderType.ComputeShader;
-            private ComputeShader shader;
+            private readonly ComputeShader shader;
 
             public Shader_Compute(byte[] bytecode)
             {
                 shader = new ComputeShader(GraphicsCore.CurrentDevice, bytecode);
             }
 
-            public override void use()
+            public override void Use()
             {
                 GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.Set(shader);
-                GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetConstantBuffers(0, buffers.Select(buf => buf.buffer).ToArray());
+                GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetConstantBuffers(0, buffers.Select(buf => buf.Buffer).ToArray());
             }
         }
     }

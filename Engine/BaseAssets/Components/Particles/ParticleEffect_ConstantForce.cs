@@ -14,13 +14,13 @@ namespace Engine.BaseAssets.Components.Particles
 
         public override void Use(ParticleSystem system)
         {
-            EffectShader.use();
+            EffectShader.Use();
             if (Global == system.WorldSpaceParticles)
-                EffectShader.updateUniform("force", Force);
+                EffectShader.UpdateUniform("force", Force);
             else if (Global)
-                EffectShader.updateUniform("force", (Vector3f)system.GameObject.Transform.View.TransformDirection(Force));
+                EffectShader.UpdateUniform("force", (Vector3f)system.GameObject.Transform.View.TransformDirection(Force));
             else
-                EffectShader.updateUniform("force", (Vector3f)system.GameObject.Transform.Model.TransformDirection(Force));
+                EffectShader.UpdateUniform("force", (Vector3f)system.GameObject.Transform.Model.TransformDirection(Force));
         }
     }
 }

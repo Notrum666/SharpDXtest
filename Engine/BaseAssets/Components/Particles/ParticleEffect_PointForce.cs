@@ -15,14 +15,14 @@ namespace Engine.BaseAssets.Components.Particles
 
         public override void Use(ParticleSystem system)
         {
-            EffectShader.use();
+            EffectShader.Use();
             if (Global == system.WorldSpaceParticles)
-                EffectShader.updateUniform("location", Point);
+                EffectShader.UpdateUniform("location", Point);
             else if (Global)
-                EffectShader.updateUniform("location", (Vector3f)system.GameObject.Transform.View.TransformPoint(Point));
+                EffectShader.UpdateUniform("location", (Vector3f)system.GameObject.Transform.View.TransformPoint(Point));
             else
-                EffectShader.updateUniform("location", (Vector3f)system.GameObject.Transform.Model.TransformPoint(Point));
-            EffectShader.updateUniform("force", Force);
+                EffectShader.UpdateUniform("location", (Vector3f)system.GameObject.Transform.Model.TransformPoint(Point));
+            EffectShader.UpdateUniform("force", Force);
         }
     }
 }

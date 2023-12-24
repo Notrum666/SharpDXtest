@@ -7,7 +7,7 @@ namespace Engine
 {
     public class ShaderPipeline
     {
-        private List<Shader> shaders = new List<Shader>();
+        private readonly List<Shader> shaders = new List<Shader>();
         public ReadOnlyCollection<Shader> Shaders => shaders.AsReadOnly();
         public static ShaderPipeline Current { get; private set; }
 
@@ -72,7 +72,7 @@ namespace Engine
             bool exists = false;
             foreach (Shader shader in shaders)
             {
-                if (shader.tryUpdateUniform(name, value))
+                if (shader.TryUpdateUniform(name, value))
                     exists = true;
             }
 
@@ -103,7 +103,7 @@ namespace Engine
             bool exists = false;
             foreach (Shader shader in shaders)
             {
-                if (shader.tryUpdateUniform(name, value))
+                if (shader.TryUpdateUniform(name, value))
                     exists = true;
             }
 
@@ -116,14 +116,14 @@ namespace Engine
             GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.Set(null);
             GraphicsCore.CurrentDevice.ImmediateContext.GeometryShader.Set(null);
             foreach (Shader shader in shaders)
-                shader.use();
+                shader.Use();
             Current = this;
         }
 
         public void UploadUpdatedUniforms()
         {
             foreach (Shader shader in shaders)
-                shader.uploadUpdatedUniforms();
+                shader.UploadUpdatedUniforms();
         }
     }
 }

@@ -40,18 +40,18 @@ namespace Engine.AssetsData
             foreach (ShaderBufferData bufferData in Buffers)
             {
                 Shader.ShaderBuffer shaderBuffer = new Shader.ShaderBuffer();
-                shaderBuffer.buffer = new Buffer(GraphicsCore.CurrentDevice, bufferData.BufferSize, ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
+                shaderBuffer.Buffer = new Buffer(GraphicsCore.CurrentDevice, bufferData.BufferSize, ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
 
                 foreach (KeyValuePair<string, ShaderBufferData.ShaderVariableData> variable in bufferData.Variables)
                 {
                     ShaderBufferData.ShaderVariableData variableData = variable.Value;
                     Shader.ShaderVariable shaderVariable = new Shader.ShaderVariable
                     {
-                        offset = variableData.Offset,
-                        size = variableData.Size,
-                        value = null
+                        Offset = variableData.Offset,
+                        Size = variableData.Size,
+                        Value = null
                     };
-                    shaderBuffer.variables[variable.Key] = shaderVariable;
+                    shaderBuffer.Variables[variable.Key] = shaderVariable;
                 }
 
                 shader.AddBuffer(shaderBuffer);
