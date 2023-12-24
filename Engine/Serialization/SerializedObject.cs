@@ -1,4 +1,6 @@
 using System;
+using Engine.Serialization;
+using YamlDotNet.Serialization.Callbacks;
 
 namespace Engine
 {
@@ -33,7 +35,11 @@ namespace Engine
         protected virtual void InitializeInternal() { }
 
         protected virtual void DestroyInternal() { }
-        
-        //TODO: Add OnDeserialized
+
+        [OnDeserialized]
+        protected void OnDeserialized()
+        {
+            SerializedObjectPromise.RegisterLoadedObject(this);
+        }
     }
 }

@@ -6,6 +6,7 @@ using System.Reflection;
 using Engine.Serialization;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
+using YamlDotNet.Serialization.Utilities;
 
 namespace Engine
 {
@@ -16,11 +17,15 @@ namespace Engine
 
         private static CustomObjectFactory ObjectFactory { get; }
         private static BaseAssetConverter BaseAssetConverter { get; }
+        private static SerializedObjectConverter SerializedObjectConverter { get; }
 
         static YamlManager()
         {
             BaseAssetConverter = new BaseAssetConverter();
             ObjectFactory = new CustomObjectFactory(new DefaultObjectFactory());
+
+            SerializedObjectConverter = new SerializedObjectConverter();
+            TypeConverter.RegisterTypeConverter<SerializedObject, SerializedObjectPromiseConverter>();
 
             Serializer = BuildSerializer();
             Deserializer = BuildDeserializer();
@@ -34,6 +39,10 @@ namespace Engine
             builder.RegisterTagMappedClasses();
             builder.WithTypeConverter(BaseAssetConverter);
 
+            builder.WithTypeResolver(new SerializedObjectTypeResolver());
+            builder.WithTypeInspector(_ => new SerializedFieldsTypeInspector());
+            builder.WithTypeConverter(SerializedObjectConverter);
+
             return builder.Build();
         }
 
@@ -44,6 +53,11 @@ namespace Engine
             builder.RegisterTagMappedClasses();
             builder.WithObjectFactory(ObjectFactory);
             builder.WithTypeConverter(BaseAssetConverter);
+
+            builder.WithTypeResolver(new SerializedObjectTypeResolver());
+            builder.WithTypeInspector(_ => new SerializedFieldsTypeInspector());
+            builder.WithNodeTypeResolver(new SerializedObjectNodeTypeResolver());
+            builder.WithTypeConverter(SerializedObjectConverter);
 
             return builder.Build();
         }
