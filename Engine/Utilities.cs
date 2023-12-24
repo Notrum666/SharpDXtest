@@ -34,10 +34,10 @@ namespace Engine
     {
         public static Dictionary<string, Model> Models { get; } = new Dictionary<string, Model>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
-        public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
+        // public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
         public static Dictionary<string, Material> Materials { get; } = new Dictionary<string, Material>();
         public static Dictionary<string, Texture> Textures { get; } = new Dictionary<string, Texture>();
-        public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
+        // public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
         public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
         public static Dictionary<string, Sound> Sounds { get; } = new Dictionary<string, Sound>();
 
@@ -147,24 +147,6 @@ namespace Engine
             }
 
             Models.AddRange(models);
-        }
-
-        public static Shader LoadShader(string shaderName, string shaderPath)
-        {
-            if (Shaders.ContainsKey(shaderName))
-                throw new ArgumentException("Shader with name \"" + shaderName + "\" is already loaded.");
-            Shader shader = Shader.Create(shaderPath);
-            Shaders[shaderName] = shader;
-            return shader;
-        }
-
-        public static Shader LoadShader(string shaderName, string shaderPath, ShaderType shaderType)
-        {
-            if (Shaders.ContainsKey(shaderName))
-                throw new ArgumentException("Shader with name \"" + shaderName + "\" is already loaded.");
-            Shader shader = Shader.Create(shaderPath, shaderType);
-            Shaders[shaderName] = shader;
-            return shader;
         }
 
         public static ShaderPipeline LoadShaderPipeline(string shaderPipelineName, params Shader[] shaders)

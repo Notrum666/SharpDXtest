@@ -91,20 +91,20 @@ namespace Engine
             AssetsManager_Old.LoadShaderPipeline("deferred_geometry_particles", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.vsh"),
                                                  Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
                                                  Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
-            AssetsManager_Old.LoadShader("particles_bitonic_sort_step", "BaseAssets\\Shaders\\Particles\\particles_bitonic_sort_step.csh");
-            AssetsManager_Old.LoadShader("particles_emit_point", "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
-            AssetsManager_Old.LoadShader("particles_emit_sphere", "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
-            AssetsManager_Old.LoadShader("particles_force_constant", "BaseAssets\\Shaders\\Particles\\particles_force_constant.csh");
-            AssetsManager_Old.LoadShader("particles_force_point", "BaseAssets\\Shaders\\Particles\\particles_force_point.csh");
-            AssetsManager_Old.LoadShader("particles_init", "BaseAssets\\Shaders\\Particles\\particles_init.csh");
-            AssetsManager_Old.LoadShader("particles_update_energy", "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
-            AssetsManager_Old.LoadShader("particles_update_physics", "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
-            AssetsManager_Old.LoadShader("screen_quad", "BaseAssets\\Shaders\\screen_quad.vsh");
+            Shader.CreateStaticShader("particles_bitonic_sort_step", "BaseAssets\\Shaders\\Particles\\particles_bitonic_sort_step.csh");
+            Shader.CreateStaticShader("particles_emit_point", "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
+            Shader.CreateStaticShader("particles_emit_sphere", "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
+            Shader.CreateStaticShader("particles_force_constant", "BaseAssets\\Shaders\\Particles\\particles_force_constant.csh");
+            Shader.CreateStaticShader("particles_force_point", "BaseAssets\\Shaders\\Particles\\particles_force_point.csh");
+            Shader.CreateStaticShader("particles_init", "BaseAssets\\Shaders\\Particles\\particles_init.csh");
+            Shader.CreateStaticShader("particles_update_energy", "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
+            Shader.CreateStaticShader("particles_update_physics", "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
+            Shader.CreateStaticShader("screen_quad", "BaseAssets\\Shaders\\screen_quad.vsh");
 
             AssetsManager_Old.LoadShaderPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
                                                  Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
 
-            Shader screenQuadShader = AssetsManager_Old.Shaders["screen_quad"];
+            Shader screenQuadShader = Shader.LoadStaticShader("screen_quad");
             AssetsManager_Old.LoadShaderPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
             AssetsManager_Old.LoadShaderPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
             AssetsManager_Old.LoadShaderPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));

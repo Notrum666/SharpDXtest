@@ -9,7 +9,7 @@ namespace Engine.BaseAssets.Components.Particles
 
         public ParticleEffect_ConstantForce()
         {
-            EffectShader = AssetsManager_Old.Shaders["particles_force_constant"];
+            EffectShader = Shader.LoadStaticShader("particles_force_constant");
         }
 
         public override void Use(ParticleSystem system)

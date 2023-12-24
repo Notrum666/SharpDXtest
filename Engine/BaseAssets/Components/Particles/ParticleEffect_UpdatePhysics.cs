@@ -4,7 +4,7 @@
     {
         public ParticleEffect_UpdatePhysics()
         {
-            EffectShader = AssetsManager_Old.Shaders["particles_update_physics"];
+            EffectShader = Shader.LoadStaticShader("particles_update_physics");
         }
 
         public override void Use(ParticleSystem system)

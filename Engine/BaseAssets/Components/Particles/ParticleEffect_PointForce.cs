@@ -10,7 +10,7 @@ namespace Engine.BaseAssets.Components.Particles
 
         public ParticleEffect_PointForce()
         {
-            EffectShader = AssetsManager_Old.Shaders["particles_force_point"];
+            EffectShader = Shader.LoadStaticShader("particles_force_point");
         }
 
         public override void Use(ParticleSystem system)
