@@ -6,6 +6,7 @@ namespace Engine.BaseAssets.Components
 {
     public class MeshComponent : Component
     {
+        public Model Mesh { get => Model; set => Model = value; }
         private Model model = null;
         public Model Model
         {

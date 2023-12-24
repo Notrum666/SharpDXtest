@@ -9,6 +9,7 @@ namespace Engine.BaseAssets.Components.Colliders
 {
     public class MeshCollider : Collider
     {
+        public Model Mesh { set => Model = value; }
         public Model Model
         {
             set => FromMesh(value);
