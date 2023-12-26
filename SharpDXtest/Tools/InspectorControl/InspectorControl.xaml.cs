@@ -86,10 +86,17 @@ namespace Editor
             if (e.RightButton != MouseButtonState.Pressed)
                 return;
 
+            Scene currentScene = Scene.CurrentScene;
+            if (currentScene == null || currentScene.GameObjects.Count == 0)
+            {
+                GameObjectViewModel.Target = null;
+                return;
+            }
+            
             objectIndex++;
-            if (objectIndex >= Scene.CurrentScene.GameObjects.Count)
+            if (objectIndex >= currentScene.GameObjects.Count)
                 objectIndex = 0;
-            GameObjectViewModel.Target = Scene.CurrentScene.GameObjects[objectIndex];
+            GameObjectViewModel.Target = currentScene.GameObjects[objectIndex];
         }
     }
 }
