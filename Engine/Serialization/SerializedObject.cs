@@ -8,38 +8,119 @@ namespace Engine
     public class SerializedObject
     {
         [SerializedField]
-        private Guid instanceId;
+        private readonly Guid instanceId;
 
         public Guid InstanceId => instanceId;
+
+        private bool destroyed;
 
         protected SerializedObject()
         {
             instanceId = Guid.NewGuid();
         }
 
-        public static T Instantiate<T>() where T : SerializedObject
+        protected static object Instantiate(Type type)
         {
-            SerializedObject newObject = Activator.CreateInstance<T>();
-            return (T)newObject;
+            return Activator.CreateInstance(type);
         }
 
-        protected static SerializedObject Instantiate(Type type)
+        protected static T Instantiate<T>()
         {
-            if (!type.IsSubclassOf(typeof(SerializedObject)))
-                return null;
-
-            SerializedObject newObject = (SerializedObject)Activator.CreateInstance(type);
-            return newObject;
+            return Activator.CreateInstance<T>();
         }
 
-        protected virtual void InitializeInternal() { }
+        internal void DestroyImmediate()
+        {
+            if (destroyed)
+                return;
+            destroyed = true;
 
-        protected virtual void DestroyInternal() { }
+            DestroyImmediateInternal();
+            OnDestroyed?.Invoke(this);
+        }
+
+        private protected virtual void DestroyImmediateInternal() { }
 
         [OnDeserialized]
-        protected void OnDeserialized()
+        protected void OnSelfDeserialized()
         {
             SerializedObjectPromise.RegisterLoadedObject(this);
         }
+
+        internal virtual void OnDeserialized() { }
+
+        #region Runtime
+
+        public bool Initialized { get; private set; }
+        public bool PendingDestroy { get; private set; }
+        internal event Action<SerializedObject> OnDestroyed;
+
+        public void Initialize()
+        {
+            if (Initialized)
+                return;
+            Initialized = true;
+
+            InitializeInner();
+        }
+
+        private protected virtual void InitializeInner() { }
+
+        /// <summary>
+        /// Mark GameObject or Component pending for destruction
+        /// </summary>
+        public void Destroy()
+        {
+            if (PendingDestroy)
+                return;
+            PendingDestroy = true;
+        }
+
+        #endregion Runtime
+
+        #region Comparison
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(InstanceId);
+        }
+
+        public override bool Equals(object other)
+        {
+            if (other is SerializedObject otherObj)
+                return CompareObjects(this, otherObj);
+
+            return false;
+        }
+
+        public static bool operator ==(SerializedObject obj1, SerializedObject obj2)
+        {
+            return CompareObjects(obj1, obj2);
+        }
+
+        public static bool operator !=(SerializedObject obj1, SerializedObject obj2)
+        {
+            return !CompareObjects(obj1, obj2);
+        }
+
+        private static bool CompareObjects(SerializedObject lhs, SerializedObject rhs)
+        {
+            bool lhsNull = (object)lhs == null;
+            bool rhsNull = (object)rhs == null;
+
+            if (rhsNull & lhsNull)
+                return true;
+
+            if (rhsNull)
+                return lhs.destroyed;
+
+            if (lhsNull)
+                return rhs.destroyed;
+
+            return lhs.InstanceId == rhs.InstanceId;
+        }
+
+        #endregion Comparison
+
     }
 }

@@ -4,7 +4,7 @@ using SharpDX.X3DAudio;
 
 namespace Engine.BaseAssets.Components
 {
-    public sealed class SoundSource : Component
+    public sealed class SoundSource : BehaviourComponent
     {
         public Emitter Source { get; private set; }
 

@@ -8,7 +8,7 @@ using SharpDX.DXGI;
 
 namespace Engine.BaseAssets.Components
 {
-    public sealed class GasVolume : Component
+    public sealed class GasVolume : BehaviourComponent
     {
         private Vector3f size = new Vector3f(1.0f, 1.0f, 1.0f);
         public Vector3f Size

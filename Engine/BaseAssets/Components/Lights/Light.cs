@@ -4,7 +4,7 @@ using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {
-    public abstract class Light : Component
+    public abstract class Light : BehaviourComponent
     {
         public Vector3f color = new Vector3f(1f, 1f, 1f);
         protected float brightness = 1.0f;

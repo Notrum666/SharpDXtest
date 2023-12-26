@@ -8,7 +8,7 @@ using SharpDX.DXGI;
 
 namespace Engine.BaseAssets.Components
 {
-    public class Camera : Component
+    public class Camera : BehaviourComponent
     {
         private double fov = Math.PI / 2;
         public double FOV

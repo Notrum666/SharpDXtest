@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Engine.BaseAssets.Components
 {
-    public class MeshComponent : Component
+    public class MeshComponent : BehaviourComponent
     {
         public Model Mesh { get => Model; set => Model = value; }
         private Model model = null;

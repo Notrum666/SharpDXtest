@@ -16,7 +16,7 @@ using MapFlags = SharpDX.Direct3D11.MapFlags;
 
 namespace Engine.BaseAssets.Components
 {
-    public sealed class ParticleSystem : Component
+    public sealed class ParticleSystem : BehaviourComponent
     {
         public struct Particle
         {
@@ -94,7 +94,7 @@ namespace Engine.BaseAssets.Components
             return (int)amount;
         }
 
-        protected override void Initialized()
+        protected override void OnInitialized()
         {
             kernelsCount = (int)Math.Ceiling(maxParticles / 64.0);
 

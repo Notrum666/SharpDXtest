@@ -7,7 +7,7 @@ using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
 {
-    public class CameraController : Component
+    public class CameraController : BehaviourComponent
     {
         public float speed;
 
