@@ -328,6 +328,22 @@ namespace LinearAlgebra
                                   0, 0, 0, 1);
         }
 
+        public static Matrix4x4f FromScale(in Vector3f scale)
+        {
+            return new Matrix4x4f(scale.x, 0, 0, 0,
+                                  0, scale.y, 0, 0,
+                                  0, 0, scale.z, 0,
+                                  0, 0, 0, 1);
+        }
+
+        public static Matrix4x4f FromTranslation(in Vector3f translation)
+        {
+            return new Matrix4x4f(1, 0, 0, translation.x,
+                                  0, 1, 0, translation.y,
+                                  0, 0, 1, translation.z,
+                                  0, 0, 0, 1);
+        }
+
         public bool IsIdentity()
         {
             if (Math.Abs(v00 - 1.0f) > Constants.FloatEpsilon || Math.Abs(v01) > Constants.FloatEpsilon || Math.Abs(v02) > Constants.FloatEpsilon || Math.Abs(v03) > Constants.FloatEpsilon ||

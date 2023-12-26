@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 
 namespace LinearAlgebra
 {
@@ -245,6 +246,41 @@ namespace LinearAlgebra
                            new Quaternion(coshalfz, 0.0, 0.0, sinhalfz);
             }
             throw new NotImplementedException();
+        }
+
+        public static Quaternion Slerp(Quaternion start, Quaternion end, double factor)
+        {
+            double num = start.x * end.x + start.y * end.y + start.z * end.z + start.w * end.w;
+            if (num < 0f)
+            {
+                num = 0f - num;
+                end.x = 0f - end.x;
+                end.y = 0f - end.y;
+                end.z = 0f - end.z;
+                end.w = 0f - end.w;
+            }
+
+            double num4;
+            double num5;
+            if (1f - num > 0.0001f)
+            {
+                double num2 = Math.Acos(num);
+                double num3 = Math.Sin(num2);
+                num4 = Math.Sin((1f - factor) * num2) / num3;
+                num5 = Math.Sin(factor * num2) / num3;
+            }
+            else
+            {
+                num4 = 1f - factor;
+                num5 = factor;
+            }
+
+            Quaternion result = default(Quaternion);
+            result.x = num4 * start.x + num5 * end.x;
+            result.y = num4 * start.y + num5 * end.y;
+            result.z = num4 * start.z + num5 * end.z;
+            result.w = num4 * start.w + num5 * end.w;
+            return result;
         }
 
         public static Quaternion operator /(in Quaternion lhs, double rhs)

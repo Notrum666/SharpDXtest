@@ -47,6 +47,9 @@
 		<None Update="Assets\Models\Wall.obj">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
+		<None Update="Assets\Models\cesium_man.fbx">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<None Update="Assets\Scenes\Bloom.xml">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
