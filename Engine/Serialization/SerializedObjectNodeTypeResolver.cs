@@ -8,7 +8,7 @@ namespace Engine.Serialization
     {
         public bool Resolve(NodeEvent nodeEvent, ref Type currentType)
         {
-            if (currentType.IsSubclassOf(typeof(SerializedObject)))
+            if (currentType.IsSubclassOf(typeof(SerializableObject)))
             {
                 currentType = typeof(SerializedObjectPromise);
                 return true;

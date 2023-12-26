@@ -5,7 +5,7 @@ using YamlDotNet.Serialization.Callbacks;
 namespace Engine
 {
     [YamlTagMapped]
-    public class SerializedObject
+    public class SerializableObject
     {
         [SerializedField]
         private readonly Guid instanceId;
@@ -14,7 +14,7 @@ namespace Engine
 
         private bool destroyed;
 
-        protected SerializedObject()
+        protected SerializableObject()
         {
             instanceId = Guid.NewGuid();
         }
@@ -53,7 +53,7 @@ namespace Engine
 
         public bool Initialized { get; private set; }
         public bool PendingDestroy { get; private set; }
-        internal event Action<SerializedObject> OnDestroyed;
+        internal event Action<SerializableObject> OnDestroyed;
 
         public void Initialize()
         {
@@ -87,23 +87,23 @@ namespace Engine
 
         public override bool Equals(object other)
         {
-            if (other is SerializedObject otherObj)
+            if (other is SerializableObject otherObj)
                 return CompareObjects(this, otherObj);
 
             return false;
         }
 
-        public static bool operator ==(SerializedObject obj1, SerializedObject obj2)
+        public static bool operator ==(SerializableObject obj1, SerializableObject obj2)
         {
             return CompareObjects(obj1, obj2);
         }
 
-        public static bool operator !=(SerializedObject obj1, SerializedObject obj2)
+        public static bool operator !=(SerializableObject obj1, SerializableObject obj2)
         {
             return !CompareObjects(obj1, obj2);
         }
 
-        private static bool CompareObjects(SerializedObject lhs, SerializedObject rhs)
+        private static bool CompareObjects(SerializableObject lhs, SerializableObject rhs)
         {
             bool lhsNull = (object)lhs == null;
             bool rhsNull = (object)rhs == null;

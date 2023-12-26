@@ -10,7 +10,7 @@ namespace Engine.Serialization
 
         private readonly Guid instanceId;
 
-        private static readonly Dictionary<Guid, SerializedObject> loadedObjects = new Dictionary<Guid, SerializedObject>();
+        private static readonly Dictionary<Guid, SerializableObject> loadedObjects = new Dictionary<Guid, SerializableObject>();
         private static event Action InjectObjectsEvent;
 
         public SerializedObjectPromise(Guid instanceId)
@@ -27,14 +27,14 @@ namespace Engine.Serialization
             loadedObjects.Clear();
         }
 
-        public static void RegisterLoadedObject(SerializedObject serializedObject)
+        public static void RegisterLoadedObject(SerializableObject serializableObject)
         {
-            loadedObjects[serializedObject.InstanceId] = serializedObject;
+            loadedObjects[serializableObject.InstanceId] = serializableObject;
         }
 
         private void OnInjectObject()
         {
-            SerializedObject obj = loadedObjects.GetValueOrDefault(instanceId, null);
+            SerializableObject obj = loadedObjects.GetValueOrDefault(instanceId, null);
             ValueAvailable?.Invoke(obj);
         }
     }

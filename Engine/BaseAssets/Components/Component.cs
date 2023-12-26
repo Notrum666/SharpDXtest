@@ -2,7 +2,7 @@
 
 namespace Engine.BaseAssets.Components
 {
-    public abstract class Component : SerializedObject
+    public abstract class Component : SerializableObject
     {
         [SerializedField]
         private GameObject gameObject = null;

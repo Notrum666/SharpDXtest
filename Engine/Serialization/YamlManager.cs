@@ -27,7 +27,7 @@ namespace Engine
             ObjectFactory = new CustomObjectFactory(new DefaultObjectFactory());
 
             SerializedObjectConverter = new SerializedObjectConverter();
-            TypeConverter.RegisterTypeConverter<SerializedObject, SerializedObjectPromiseConverter>();
+            TypeConverter.RegisterTypeConverter<SerializableObject, SerializedObjectPromiseConverter>();
 
             Serializer = BuildSerializer();
             Deserializer = BuildDeserializer();

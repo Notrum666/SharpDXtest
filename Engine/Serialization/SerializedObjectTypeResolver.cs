@@ -7,7 +7,7 @@ namespace Engine.Serialization
     {
         public Type Resolve(Type staticType, object actualValue)
         {
-            if (staticType.IsSubclassOf(typeof(SerializedObject)))
+            if (staticType.IsSubclassOf(typeof(SerializableObject)))
                 return typeof(SerializedObjectPromise);
 
             return actualValue == null ? staticType : actualValue.GetType();

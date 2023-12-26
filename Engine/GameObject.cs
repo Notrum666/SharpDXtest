@@ -6,7 +6,7 @@ using Engine.BaseAssets.Components;
 
 namespace Engine
 {
-    public sealed class GameObject : SerializedObject
+    public sealed class GameObject : SerializableObject
     {
         [SerializedField]
         private string name;

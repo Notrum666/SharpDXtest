@@ -53,7 +53,7 @@ namespace Engine
 
         internal void DestroyPendingObjects()
         {
-            List<SerializedObject> objectsToDestroy = new List<SerializedObject>();
+            List<SerializableObject> objectsToDestroy = new List<SerializableObject>();
             foreach (GameObject gameObject in gameObjects)
             {
                 if (gameObject.PendingDestroy)
@@ -65,7 +65,7 @@ namespace Engine
                 objectsToDestroy.AddRange(gameObject.Components.Where(x => x.PendingDestroy));
             }
 
-            foreach (SerializedObject objectToDestroy in objectsToDestroy)
+            foreach (SerializableObject objectToDestroy in objectsToDestroy)
             {
                 if (objectToDestroy != null)
                     objectToDestroy.DestroyImmediate();
@@ -90,10 +90,10 @@ namespace Engine
             }
         }
 
-        private void OnObjectDestroyed(SerializedObject serializedObject)
+        private void OnObjectDestroyed(SerializableObject serializableObject)
         {
-            serializedObject.OnDestroyed -= OnObjectDestroyed;
-            gameObjects.Remove(serializedObject as GameObject);
+            serializableObject.OnDestroyed -= OnObjectDestroyed;
+            gameObjects.Remove(serializableObject as GameObject);
         }
     }
 }
