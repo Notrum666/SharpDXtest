@@ -37,6 +37,8 @@ using Quaternion = LinearAlgebra.Quaternion;
 using Rectangle = System.Drawing.Rectangle;
 using Vector2 = LinearAlgebra.Vector2;
 using Vector3 = LinearAlgebra.Vector3;
+using Assimp.Unmanaged;
+using System.Windows.Media.Media3D;
 
 namespace Engine
 {
@@ -44,6 +46,46 @@ namespace Engine
     // materials from model should be loaded as separate assets too
     // materials contain a number of textures
     // each of them: meshes, materials, textures should be loaded as separate assets
+
+    public class Bone
+    {
+        public Bone parent = null;
+        public List<Bone> children = new List<Bone>();
+        public Matrix4x4f offsetMatrix;
+        public Matrix4x4f globalTransformMatrix;
+    }
+
+    public class AnimationChannel
+    {
+        public Bone Bone;
+
+        public class ScalingKey
+        {
+            public float Time;
+            public Vector3f Scaling;
+        }
+        public List<ScalingKey> ScalingKeys = new List<ScalingKey>();
+
+        public class RotationKey
+        {
+            public float Time;
+            public Quaternion Rotation;
+        }
+        public List<RotationKey> RotationKeys = new List<RotationKey>();
+
+        public class PositionKey
+        {
+            public float Time;
+            public Vector3f Position;
+        }
+        public List<PositionKey> PositionKeys = new List<PositionKey>();
+    }
+    public class Animation
+    {
+        public float Duration;
+        public float TickPerSecond;
+        public List<AnimationChannel> Channels = new List<AnimationChannel>();
+    }
 
     public class Primitive : IDisposable
     {
@@ -55,6 +97,35 @@ namespace Engine
             public Vector2f t;
             public Vector3f n;
             public Vector3f tx;
+            public Vector4i bones;
+            public Vector4f weights;
+            public void AddVertexBone(int boneID, float weight)
+            {
+                if (bones.x == 0)
+                {
+                    bones.x = boneID;
+                    weights.x = weight;
+                }
+                else if (bones.y == 0)
+                {
+                    bones.y = boneID;
+                    weights.y = weight;
+                }
+                else if (bones.z == 0)
+                {
+                    bones.z = boneID;
+                    weights.z = weight;
+                }
+                else if (bones.w == 0)
+                {
+                    bones.w = boneID;
+                    weights.w = weight;
+                }
+                else
+                {
+                    throw new Exception("per-vertex bone data overflow");
+                }
+            }
         };
         public List<PrimitiveVertex> vertices = null;
         public List<int> indices = null;
@@ -62,6 +133,16 @@ namespace Engine
         private Buffer vertexBuffer;
         private VertexBufferBinding vertexBufferBinding;
         private Buffer indexBuffer;
+
+        public string RootBoneName;
+        private Buffer bonesBuffer;
+        private ShaderResourceView bonesResourceView;
+
+        public List<Matrix4x4f> BonesOffsetMatrices;
+        public List<Matrix4x4f> BonesTransformations;
+
+        public string AnimationName = string.Empty;
+        public Matrix4x4f GlobalInverseTransform;
 
         // material assigned on mesh load
         public Material DefaultMaterial { get; set; } = null;
@@ -99,15 +180,121 @@ namespace Engine
             vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, vertices.ToArray());
             vertexBufferBinding = new VertexBufferBinding(vertexBuffer, Utilities.SizeOf<PrimitiveVertex>(), 0);
             indexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.IndexBuffer, indices.ToArray());
+
+            bonesBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.ShaderResource, BonesTransformations.ToArray());
+            bonesResourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, bonesBuffer, new ShaderResourceViewDescription()
+            {
+                Dimension = ShaderResourceViewDimension.Buffer,
+                Format = Format.Unknown,
+                Buffer = new ShaderResourceViewDescription.BufferResource()
+                {
+                    FirstElement = 0,
+                    ElementCount = BonesTransformations.Count
+                }
+            });
+        }
+
+        private void UpdateTransform(float AnimationTime, Bone parentBone, Matrix4x4f transform)
+        {
+            AnimationChannel curAnimation = null;
+            foreach (AnimationChannel animationChannel in AssetsManager_Old.Animations[AnimationName].Channels)
+            {
+                if (animationChannel.Bone == parentBone)
+                {
+                    curAnimation = animationChannel;
+                    break;
+                }
+            }
+            // get current keys
+            // scaling
+            Vector3f scaling;
+            if (curAnimation.ScalingKeys.Count == 1)
+                scaling = curAnimation.ScalingKeys[0].Scaling;
+            else
+            {
+                int curIndex = 0;
+                for (int i = 0; i < curAnimation.ScalingKeys.Count - 1; ++i)
+                    if (AnimationTime < curAnimation.ScalingKeys[i + 1].Time)
+                    {
+                        curIndex = i;
+                        break;
+                    }
+                int nextIndex = curIndex + 1;
+
+                float DeltaTime = (float)(curAnimation.ScalingKeys[nextIndex].Time - curAnimation.ScalingKeys[curIndex].Time);
+                float Factor = (AnimationTime - (float)curAnimation.ScalingKeys[curIndex].Time) / DeltaTime;
+                Vector3f start = curAnimation.ScalingKeys[curIndex].Scaling;
+                Vector3f end = curAnimation.ScalingKeys[nextIndex].Scaling;
+                Vector3f delta = end - start;
+                scaling = start + Factor * delta;
+            }
+
+            // rotation
+            Quaternion rotation;
+            if (curAnimation.RotationKeys.Count == 1)
+                rotation = curAnimation.RotationKeys[0].Rotation;
+            else
+            {
+                int curIndex = 0;
+                for (int i = 0; i < curAnimation.RotationKeys.Count - 1; ++i)
+                    if (AnimationTime < curAnimation.RotationKeys[i + 1].Time)
+                    {
+                        curIndex = i;
+                        break;
+                    }
+                int nextIndex = curIndex + 1;
+
+                float DeltaTime = (float)(curAnimation.RotationKeys[nextIndex].Time - curAnimation.RotationKeys[curIndex].Time);
+                float Factor = (AnimationTime - (float)curAnimation.RotationKeys[curIndex].Time) / DeltaTime;
+                Quaternion start = curAnimation.RotationKeys[curIndex].Rotation;
+                Quaternion end = curAnimation.RotationKeys[nextIndex].Rotation;
+                rotation = Quaternion.Slerp(start, end, Factor);
+                rotation.normalize();
+            }
+
+            // position
+            Vector3f position;
+            if (curAnimation.PositionKeys.Count == 1)
+                position = curAnimation.PositionKeys[0].Position;
+            else
+            {
+                int curIndex = 0;
+                for (int i = 0; i < curAnimation.PositionKeys.Count - 1; ++i)
+                    if (AnimationTime < curAnimation.PositionKeys[i + 1].Time)
+                    {
+                        curIndex = i;
+                        break;
+                    }
+                int nextIndex = curIndex + 1;
+
+                float DeltaTime = (float)(curAnimation.PositionKeys[nextIndex].Time - curAnimation.PositionKeys[curIndex].Time);
+                float Factor = (AnimationTime - (float)curAnimation.PositionKeys[curIndex].Time) / DeltaTime;
+                Vector3f start = curAnimation.PositionKeys[curIndex].Position;
+                Vector3f end = curAnimation.PositionKeys[nextIndex].Position;
+                Vector3f delta = end - start;
+                position = start + Factor * delta;
+            }
         }
 
         public void Render()
         {
             if (disposed)
                 throw new ObjectDisposedException(nameof(Primitive));
+
+            // calculate transform matrices
+            if (AnimationName.Length > 0) {
+                Animation curAnimation = AssetsManager_Old.Animations[AnimationName];
+                float TicksPerSecond = (float)(curAnimation.TickPerSecond != 0 ? curAnimation.TickPerSecond : 25.0f);
+                float TimeInTicks = (float)Time.TotalTime * TicksPerSecond;
+                float AnimationTime = TimeInTicks % curAnimation.Duration;
+
+                UpdateTransform(AnimationTime, AssetsManager_Old.Bones[RootBoneName], Matrix4x4f.Identity);
+            }
+
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
+            GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(0, bonesResourceView);
             GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(indices.Count, 0, 0);
         }
 
@@ -147,6 +334,7 @@ namespace Engine
         {
             if (disposed)
                 throw new ObjectDisposedException(nameof(Mesh));
+
             foreach (Primitive primitive in Primitives)
                 primitive.Render();
         }
@@ -1257,6 +1445,8 @@ namespace Engine
     [Obsolete]
     public static class AssetsManager_Old
     {
+        public static Dictionary<string, Bone> Bones { get; } = new Dictionary<string, Bone>();
+        public static Dictionary<string, Animation> Animations { get; } = new Dictionary<string, Animation>();
         public static Dictionary<string, Mesh> Meshes { get; } = new Dictionary<string, Mesh>();
         public static Dictionary<string, ShaderPipeline> ShaderPipelines { get; } = new Dictionary<string, ShaderPipeline>();
         public static Dictionary<string, Shader> Shaders { get; } = new Dictionary<string, Shader>();
@@ -1265,6 +1455,29 @@ namespace Engine
         public static Dictionary<string, Sampler> Samplers { get; } = new Dictionary<string, Sampler>();
         public static Dictionary<string, Scene> Scenes { get; } = new Dictionary<string, Scene>();
         public static Dictionary<string, Sound> Sounds { get; } = new Dictionary<string, Sound>();
+
+        public static Matrix4x4f toMatrix4x4f(Assimp.Matrix4x4 other)
+        {
+            Matrix4x4f mat = new Matrix4x4f(other.A1, other.A2, other.A3, other.A4,
+                                            other.B1, other.B2, other.B3, other.B4,
+                                            other.C1, other.C2, other.C3, other.C4,
+                                            other.D1, other.D2, other.D3, other.D4);
+
+            return mat;
+        }
+
+        private static void LoadBone(Bone parent, Assimp.Node node, string modelName)
+        {
+            Bone currentBone = new Bone();
+            Bones.Add(modelName + "_" + node.Name, currentBone);
+            if (parent is not null)
+            {
+                parent.children.Add(currentBone);
+                currentBone.parent = parent;
+            }
+            for (int i = 0; i < node.Children.Count; i++)
+                LoadBone(currentBone, node.Children[i], modelName);
+        }
 
         // loads meshes, materials and textures stored in one model file
         public static void LoadModel(string path, float scaleFactor = 1.0f)
@@ -1276,12 +1489,50 @@ namespace Engine
             AssimpContext aiImporter = new AssimpContext();
 
             Dictionary<string, Mesh> meshes = new Dictionary<string, Mesh>();
+            Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
             Dictionary<string, Material> materials = new Dictionary<string, Material>();
 
             // any type model import
             Assimp.Scene aiScene = aiImporter.ImportFile(path);
 
-            Dictionary<string, Texture> textures = new Dictionary<string, Texture>();
+            LoadBone(null, aiScene.RootNode, modelName);
+
+            foreach (Assimp.Animation aiAnimation in aiScene.Animations)
+            {
+                Animation animation = new Animation();
+                animation.Duration = (float)aiAnimation.DurationInTicks;
+                animation.TickPerSecond = (float)aiAnimation.TicksPerSecond;
+                foreach (Assimp.NodeAnimationChannel aiAnimChannel in aiAnimation.NodeAnimationChannels)
+                {
+                    AnimationChannel animationChannel = new AnimationChannel();
+                    foreach (VectorKey aiScalingKey in aiAnimChannel.ScalingKeys)
+                    {
+                        AnimationChannel.ScalingKey scalingKey = new AnimationChannel.ScalingKey();
+                        scalingKey.Time = (float)aiScalingKey.Time;
+                        scalingKey.Scaling = new Vector3f(aiScalingKey.Value.X, aiScalingKey.Value.Y, aiScalingKey.Value.Z);
+                        animationChannel.ScalingKeys.Add(scalingKey);
+                    }
+                    foreach (VectorKey aiPositionKey in aiAnimChannel.PositionKeys)
+                    {
+                        AnimationChannel.PositionKey positionKey = new AnimationChannel.PositionKey();
+                        positionKey.Time = (float)aiPositionKey.Time;
+                        positionKey.Position = new Vector3f(aiPositionKey.Value.X, aiPositionKey.Value.Y, aiPositionKey.Value.Z);
+                        animationChannel.PositionKeys.Add(positionKey);
+                    }
+                    foreach (QuaternionKey aiRotationKey in aiAnimChannel.RotationKeys)
+                    {
+                        AnimationChannel.RotationKey rotationKey = new AnimationChannel.RotationKey();
+                        rotationKey.Time = (float)aiRotationKey.Time;
+                        rotationKey.Rotation = new Quaternion(aiRotationKey.Value.W, aiRotationKey.Value.X, aiRotationKey.Value.Y, aiRotationKey.Value.Z);
+                        animationChannel.RotationKeys.Add(rotationKey);
+                    }
+                    animationChannel.Bone = Bones[modelName + "_" + aiAnimChannel.NodeName];
+                    animation.Channels.Add(animationChannel);
+                }
+
+                Animations.Add(modelName + "_" + aiAnimation.Name, animation);
+            }
+
             for (int i = 0; i < aiScene.Textures.Count; ++i)
             {
                 EmbeddedTexture aiTexture = aiScene.Textures[i];
@@ -1326,6 +1577,9 @@ namespace Engine
 
             Materials.AddRange(materials);
 
+            Assimp.Matrix4x4 globalInverseTransform = aiScene.RootNode.Transform;
+            globalInverseTransform.Inverse();
+
             foreach (Assimp.Mesh aiMesh in aiScene.Meshes)
             {
                 // handle only triangles
@@ -1348,6 +1602,10 @@ namespace Engine
                 primitive.DefaultMaterial = materials[materialPrefix + aiMesh.MaterialIndex.ToString()];
                 primitive.vertices = new List<Primitive.PrimitiveVertex>();
                 primitive.indices = new List<int>();
+                primitive.BonesTransformations = new List<Matrix4x4f>();
+                primitive.BonesOffsetMatrices = new List<Matrix4x4f>();
+                primitive.GlobalInverseTransform = toMatrix4x4f(globalInverseTransform);
+                primitive.RootBoneName = modelName + "_" + aiMesh.Bones[0];
                 List<Vector3D> verts = aiMesh.Vertices;
                 List<Vector3D> norms = (aiMesh.HasNormals) ? aiMesh.Normals : null;
                 List<Vector3D> uvs = aiMesh.HasTextureCoords(0) ? aiMesh.TextureCoordinateChannels[0] : null;
@@ -1361,6 +1619,17 @@ namespace Engine
                     vertex.n = new Vector3f(norm.X, norm.Y, norm.Z);
                     vertex.t = new Vector2f(uv.X, 1 - uv.Y);
                     primitive.vertices.Add(vertex);
+                }
+
+                for (int i = 0; i < aiMesh.BoneCount; ++i)
+                {
+                    for (int j = 0; j < aiMesh.Bones[i].VertexWeightCount; ++j)
+                        primitive.vertices[aiMesh.Bones[i].VertexWeights[j].VertexID].AddVertexBone(j, aiMesh.Bones[i].VertexWeights[j].Weight);
+                    primitive.BonesOffsetMatrices.Add(new Matrix4x4f(new Vector4f(aiMesh.Bones[i].OffsetMatrix.A1, aiMesh.Bones[i].OffsetMatrix.A2, aiMesh.Bones[i].OffsetMatrix.A3, aiMesh.Bones[i].OffsetMatrix.A4),
+                        new Vector4f(aiMesh.Bones[i].OffsetMatrix.B1, aiMesh.Bones[i].OffsetMatrix.B2, aiMesh.Bones[i].OffsetMatrix.B3, aiMesh.Bones[i].OffsetMatrix.B4),
+                        new Vector4f(aiMesh.Bones[i].OffsetMatrix.C1, aiMesh.Bones[i].OffsetMatrix.C2, aiMesh.Bones[i].OffsetMatrix.C3, aiMesh.Bones[i].OffsetMatrix.C4),
+                        new Vector4f(aiMesh.Bones[i].OffsetMatrix.D1, aiMesh.Bones[i].OffsetMatrix.D2, aiMesh.Bones[i].OffsetMatrix.D3, aiMesh.Bones[i].OffsetMatrix.D4)));
+                    primitive.BonesTransformations.Add(Matrix4x4f.Identity);
                 }
 
                 foreach (Face face in aiMesh.Faces)
