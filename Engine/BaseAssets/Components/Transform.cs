@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Reflection;
-
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
@@ -239,7 +238,6 @@ namespace Engine.BaseAssets.Components
         public Vector3 Forward => Rotation * Vector3.Forward;
         public Vector3 Right => Rotation * Vector3.Right;
         public Vector3 Up => Rotation * Vector3.Up;
-
 
         public Transform()
         {

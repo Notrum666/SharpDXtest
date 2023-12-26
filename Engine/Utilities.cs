@@ -493,7 +493,9 @@ namespace Engine
                             if (sceneObject != null && !(sceneObject is GameObject))
                                 throw new Exception("Scene can contain only GameObjects.");
                         }
-                        (curObj as Scene).objects.AddRange(gameObjects);
+                        Engine.Scene scene = curObj as Scene;
+                        gameObjects.ForEach(x => scene?.AddObject(x));
+                        scene.ProcessNewObjects();
                     }
                     else
                     {

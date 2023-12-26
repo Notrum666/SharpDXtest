@@ -30,8 +30,10 @@ namespace Engine.AssetsData
             foreach (SerializedObject serializedObject in SerializedObjects)
             {
                 if (serializedObject is GameObject gameObject)
-                    scene.objects.Add(gameObject);
+                    scene.AddObject(gameObject);
             }
+            
+            scene.ProcessNewObjects();
 
             return scene;
         }

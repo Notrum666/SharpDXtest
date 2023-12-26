@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-
 using Engine.BaseAssets.Components;
 
 namespace Engine
@@ -28,6 +27,8 @@ namespace Engine
         public GameObject()
         {
             Transform = AddComponent<Transform>();
+            if (Scene.CurrentScene != null)
+                Scene.CurrentScene.AddObject(this);
         }
 
         public static GameObject Instantiate(string objectName = null, Transform parent = null)

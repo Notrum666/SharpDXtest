@@ -41,8 +41,6 @@ namespace SharpDXtest.Assets.Components
 
                     //PointLight light = obj.addComponent<PointLight>();
                     //light.Radius = 10;
-
-                    EngineCore.AddObject(obj);
                 }
             }
         }
