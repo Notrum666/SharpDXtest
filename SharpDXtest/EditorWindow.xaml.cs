@@ -44,7 +44,7 @@ namespace Editor
             
             EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
 
-            Scene.CurrentScene = AssetsManager_Old.LoadScene("Assets\\Scenes\\Scene5.xml");
+            CreateBaseScene();
 
             EngineCore.IsPaused = true;
             EngineCore.Run();
@@ -61,5 +61,11 @@ namespace Editor
             Keyboard.ClearFocus();
         }
 
+        private void CreateBaseScene()
+        {
+            Scene.CurrentScene = new Scene();
+            GameObject obj1 = GameObject.Instantiate("TestObject_1");
+            GameObject obj2 = GameObject.Instantiate("TestObject_2", obj1.Transform);
+        }
     }
 }

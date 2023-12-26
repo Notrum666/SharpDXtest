@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Engine.BaseAssets.Components;
 using Engine.BaseAssets.Components.Postprocessing;
@@ -9,12 +7,10 @@ using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
-using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using Device = SharpDX.Direct3D11.Device;
 using FillMode = SharpDX.Direct3D11.FillMode;
-using Filter = SharpDX.Direct3D11.Filter;
 using Format = SharpDX.DXGI.Format;
 using Light = Engine.BaseAssets.Components.Light;
 using Query = SharpDX.Direct3D11.Query;
@@ -73,9 +69,6 @@ namespace Engine
         public static void Init(nint HWND, int width, int height)
         {
             InitDirectX(HWND, width, height);
-
-            if (AssetsManager_Old.Textures.Count > 0)
-                throw new Exception("AssetsManager.Textures must be empty on GraphicsCore init stage");
 
             sampler = Sampler.Default;
             shadowsSampler = Sampler.DefaultShadows;
@@ -500,7 +493,7 @@ namespace Engine
             Viewport viewport = new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f);
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(viewport);
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
-            
+
             ShaderPipeline pipeline = ShaderPipeline.GetStaticPipeline("volume");
             pipeline.Use();
 
