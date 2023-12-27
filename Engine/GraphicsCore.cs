@@ -218,7 +218,7 @@ namespace Engine
             {
                 foreach (MeshComponent meshComponent in Scene.FindComponentsOfType<MeshComponent>())
                 {
-                    if (!meshComponent.Enabled)
+                    if (!meshComponent.LocalEnabled)
                         continue;
                     pipeline.UpdateUniform("model", (Matrix4x4f)meshComponent.GameObject.Transform.Model);
 
@@ -230,7 +230,7 @@ namespace Engine
 
             foreach (Light light in Scene.FindComponentsOfType<Light>())
             {
-                if (!light.Enabled)
+                if (!light.LocalEnabled)
                     continue;
 
                 if (light is SpotLight)
@@ -344,7 +344,7 @@ namespace Engine
 
             foreach (MeshComponent meshComponent in Scene.FindComponentsOfType<MeshComponent>())
             {
-                if (!meshComponent.Enabled)
+                if (!meshComponent.LocalEnabled)
                     continue;
 
                 Transform transform = meshComponent.GameObject.Transform;
@@ -372,7 +372,7 @@ namespace Engine
 
             foreach (ParticleSystem particleSystem in Scene.FindComponentsOfType<ParticleSystem>())
             {
-                if (!particleSystem.Enabled)
+                if (!particleSystem.LocalEnabled)
                     continue;
                 pipeline.UpdateUniform("model", particleSystem.WorldSpaceParticles ? Matrix4x4f.Identity : (Matrix4x4f)particleSystem.GameObject.Transform.Model);
 
@@ -396,7 +396,7 @@ namespace Engine
 
             foreach (Light light in Scene.FindComponentsOfType<Light>())
             {
-                if (!light.Enabled)
+                if (!light.LocalEnabled)
                     continue;
 
                 if (light is SpotLight)
@@ -507,7 +507,7 @@ namespace Engine
 
             foreach (GasVolume volume in Scene.FindComponentsOfType<GasVolume>())
             {
-                if (!volume.Enabled)
+                if (!volume.LocalEnabled)
                     continue;
 
                 Transform transform = volume.GameObject.Transform;

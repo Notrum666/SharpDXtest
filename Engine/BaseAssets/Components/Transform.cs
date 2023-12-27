@@ -7,8 +7,11 @@ using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {
-    public partial class Transform : Component, INotifyFieldChanged
+    public class Transform : Component, INotifyFieldChanged
     {
+
+        #region ComponentLogic
+
         [SerializedField]
         private Transform parent = null;
 
@@ -91,10 +94,11 @@ namespace Engine.BaseAssets.Components
             Invalidated?.Invoke();
             requiresCachedDataRecalculation = true;
         }
-    }
 
-    public partial class Transform
-    {
+        #endregion ComponentLogic
+
+        #region TransformData
+
         [SerializedField]
         private Vector3 localPosition;
         [SerializedField]
@@ -336,5 +340,8 @@ namespace Engine.BaseAssets.Components
 
             return res;
         }
+
+        #endregion TransformData
+
     }
 }

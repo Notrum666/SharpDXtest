@@ -11,21 +11,22 @@ namespace Engine
         [SerializedField]
         private string name;
         [SerializedField]
-        private bool localEnable = true;
+        private bool localEnabled = true;
         [SerializedField]
         private Transform transform = null;
         [SerializedField]
         private readonly List<Component> components = new List<Component>();
 
-        public string Name { get => name; set => name = value; }
-        public bool LocalEnabled { get => localEnable; set => localEnable = value; }
+        public string Name { get => name; set => name = string.IsNullOrEmpty(value) ? name : value; }
+        public bool LocalEnabled { get => localEnabled; set => localEnabled = value; }
         public Transform Transform { get => transform; private init => transform = value; }
         public ReadOnlyCollection<Component> Components => components.AsReadOnly();
 
-        public bool Enabled => localEnable && Transform != null && (Transform.Parent?.GameObject?.Enabled ?? true); //TODO: maybe better cache value
+        public bool Enabled => localEnabled && Transform != null && (Transform.Parent?.GameObject?.Enabled ?? true); //TODO: maybe better cache value
 
         public GameObject()
         {
+            Name = "NewObject";
             Transform = AddComponent<Transform>();
             if (Scene.CurrentScene != null)
                 Scene.CurrentScene.AddObject(this);
@@ -35,7 +36,7 @@ namespace Engine
         {
             GameObject gameObject = Instantiate<GameObject>();
 
-            gameObject.Name = string.IsNullOrEmpty(objectName) ? "NewObject" : objectName;
+            gameObject.Name = objectName;
             gameObject.Transform.SetParent(parent);
 
             return gameObject;
