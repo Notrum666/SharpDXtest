@@ -25,7 +25,7 @@ namespace Engine.Serialization
 
         public void WriteYaml(IEmitter emitter, object value, Type type)
         {
-            Guid? id = (value as SerializedObject)?.InstanceId;
+            Guid? id = (value as SerializableObject)?.InstanceId;
             Scalar idScalar = new Scalar(id?.ToString("N") ?? string.Empty);
             emitter.Emit(idScalar);
         }

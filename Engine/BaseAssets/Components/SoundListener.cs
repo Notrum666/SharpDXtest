@@ -4,7 +4,7 @@ using SharpDX.X3DAudio;
 
 namespace Engine.BaseAssets.Components
 {
-    public sealed class SoundListener : Component
+    public sealed class SoundListener : BehaviourComponent
     {
         public Listener Listener { get; private set; }
         public bool IsCurrent

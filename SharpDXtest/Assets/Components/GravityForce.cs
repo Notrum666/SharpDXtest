@@ -4,7 +4,7 @@ using LinearAlgebra;
 
 namespace SharpDXtest.Assets.Components
 {
-    class GravityForce : Component
+    class GravityForce : BehaviourComponent
     {
         public double periodInDays;
 

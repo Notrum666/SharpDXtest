@@ -2,11 +2,11 @@
 
 namespace Engine.BaseAssets.Components
 {
-    public abstract class Component : SerializedObject
+    public abstract class Component : SerializableObject
     {
-        private bool enabled = true;
-        public bool Enabled { get => enabled && GameObject.Enabled; set => enabled = value; }
+        [SerializedField]
         private GameObject gameObject = null;
+
         public GameObject GameObject
         {
             get => gameObject;
@@ -17,20 +17,30 @@ namespace Engine.BaseAssets.Components
                 gameObject = value;
             }
         }
-        public bool IsInitialized { get; internal set; }
 
-        public void Initialize()
+        private protected override void InitializeInner()
         {
-            if (IsInitialized)
-                return;
-            IsInitialized = true;
-            Initialized();
+            OnInitialized();
         }
 
-        protected virtual void Initialized() { }
+        /// <summary>
+        /// Calls OnDestroy and removes GameObject linking
+        /// </summary>
+        private protected override void DestroyImmediateInternal()
+        {
+            OnDestroy();
+            gameObject.RemoveComponent(this);
+            gameObject = null;
+        }
 
-        public virtual void Update() { }
+        /// <summary>
+        /// Called immediately after being added to GameObject
+        /// </summary>
+        protected virtual void OnInitialized() { }
 
-        public virtual void FixedUpdate() { }
+        /// <summary>
+        /// If called as result of upper hierarchy object destroy, all upper objects may be already invalid
+        /// </summary>
+        protected virtual void OnDestroy() { }
     }
 }

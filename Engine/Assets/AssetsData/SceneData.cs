@@ -8,7 +8,7 @@ namespace Engine.AssetsData
 {
     public class SceneData : AssetData
     {
-        public List<SerializedObject> SerializedObjects = new List<SerializedObject>();
+        public List<SerializableObject> SerializableObjects = new List<SerializableObject>();
 
         public override void Serialize(BinaryWriter writer)
         {
@@ -27,18 +27,20 @@ namespace Engine.AssetsData
 
             Scene scene = new Scene();
 
-            foreach (SerializedObject serializedObject in SerializedObjects)
+            foreach (SerializableObject serializableObject in SerializableObjects)
             {
-                if (serializedObject is GameObject gameObject)
-                    scene.objects.Add(gameObject);
+                if (serializableObject is GameObject gameObject)
+                    scene.AddObject(gameObject);
             }
+            
+            scene.ProcessNewObjects();
 
             return scene;
         }
 
-        public void AddObject(SerializedObject serializedObject)
+        public void AddObject(SerializableObject serializableObject)
         {
-            SerializedObjects.Add(serializedObject);
+            SerializableObjects.Add(serializableObject);
         }
 
         [OnDeserialized]

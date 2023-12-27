@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Engine.BaseAssets.Components;
 
 namespace Engine
 {
     public static class EngineCore
     {
-        public static Scene CurrentScene { get; set; }
-        private static List<GameObject> newObjects = new List<GameObject>();
         private static double accumulator = 0.0;
         private static bool isAlive = false;
         public static bool IsAlive => isAlive;
@@ -105,24 +101,14 @@ namespace Engine
             SoundCore.Dispose();
         }
 
-        public static void AddObject(GameObject obj)
-        {
-            if (CurrentScene == null || CurrentScene.objects.Contains(obj) || newObjects.Contains(obj))
-                return;
-
-            newObjects.Add(obj);
-        }
-
         public static void Update()
         {
-            if (CurrentScene == null)
+            if (Scene.CurrentScene == null)
                 return;
 
-            CurrentScene.objects.RemoveAll(obj => obj.PendingDestroy);
-            CurrentScene.objects.AddRange(newObjects);
-            newObjects.Clear();
+            Scene.CurrentScene.ProcessNewObjects();
 
-            initialize();
+            InitializeGameObjects();
 
             accumulator += Time.DeltaTime;
 
@@ -131,55 +117,50 @@ namespace Engine
                 Time.SwitchToFixed();
                 do
                 {
-                    fixedUpdate();
+                    FixedUpdate();
                     accumulator -= Time.FixedDeltaTime;
                 } while (accumulator >= Time.FixedDeltaTime);
                 Time.SwitchToVariating();
             }
 
-            update();
+            UpdateGameObjects();
+
+            Scene.CurrentScene.DestroyPendingObjects();
         }
 
-        private static void initialize()
+        private static void InitializeGameObjects()
         {
-            foreach (GameObject obj in CurrentScene.objects)
+            foreach (GameObject obj in Scene.CurrentScene.GameObjects)
                 obj.Initialize();
         }
 
-        private static void update()
+        private static void UpdateGameObjects()
         {
-            foreach (GameObject obj in CurrentScene.objects)
+            foreach (GameObject obj in Scene.CurrentScene.GameObjects)
             {
-                if (obj.Enabled)
-                    obj.Update();
+                obj.Update();
             }
         }
 
-        private static void fixedUpdate()
+        private static void FixedUpdate()
         {
             InputManager.FixedUpdate();
 
-            foreach (GameObject obj in CurrentScene.objects)
+            foreach (GameObject obj in Scene.CurrentScene.GameObjects)
             {
-                if (obj.Enabled)
-                    obj.FixedUpdate();
+                obj.FixedUpdate();
             }
 
-            List<Rigidbody> rigidbodies = new List<Rigidbody>();
-            for (int i = 0; i < CurrentScene.objects.Count; i++)
+            Rigidbody[] rigidbodies = Scene.FindComponentsOfType<Rigidbody>();
+            for (int i = 0; i < rigidbodies.Length; i++)
             {
-                if (!CurrentScene.objects[i].Enabled)
-                    continue;
-                Rigidbody rigidbody = CurrentScene.objects[i].GetComponent<Rigidbody>();
-                if (rigidbody != null)
-                {
-                    foreach (Collider collider in CurrentScene.objects[i].GetComponents<Collider>())
-                        collider.updateData();
-                    foreach (Rigidbody otherRigidbody in rigidbodies)
-                        rigidbody.solveCollisionWith(otherRigidbody);
-                    rigidbodies.Add(rigidbody);
-                }
+                Rigidbody rigidbody = rigidbodies[i];
+                foreach (Collider collider in rigidbody.GameObject.GetComponents<Collider>())
+                    collider.updateData();
+                for (int j = 0; j < i; j++)
+                    rigidbody.solveCollisionWith(rigidbodies[j]);
             }
+
             foreach (Rigidbody rb in rigidbodies)
                 rb.updateCollidingPairs();
 

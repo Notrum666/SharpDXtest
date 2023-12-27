@@ -1,77 +1,131 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Reflection;
-
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {
     public class Transform : Component, INotifyFieldChanged
     {
-        public event Action Invalidated;
-        public Transform Parent { get; private set; }
-        [SerializeField("Position")]
+
+        #region ComponentLogic
+
+        [SerializedField]
+        private Transform parent = null;
+
+        [SerializedField]
+        private readonly List<Transform> children = new List<Transform>();
+
+        public Transform Parent { get => parent; private set => parent = value; }
+        public ReadOnlyCollection<Transform> Children => children.AsReadOnly();
+
+        private event Action Invalidated;
+        private bool requiresCachedDataRecalculation;
+
+        /// <summary>
+        /// Calls <see cref="GameObject.DestroyImmediateInternal()">GameObject.DestroyImmediate()</see> <br/>
+        /// Calls <see cref="Component.DestroyImmediateInternal()">Component.DestroyImmediate()</see> <br/>
+        /// Calls <see cref="Transform.DestroyImmediateInternal()">Transform.DestroyImmediate()</see> on all children <br/>
+        /// Removes Parent(Transform) linking 
+        /// </summary>
+        private protected override void DestroyImmediateInternal()
+        {
+            GameObject.DestroyImmediate();
+
+            base.DestroyImmediateInternal();
+
+            foreach (Transform child in children.ToImmutableArray())
+                child.DestroyImmediate();
+
+            if (Parent != null)
+            {
+                Parent.children.Remove(this);
+                Parent.Invalidated -= InvalidateCachedData;
+                Parent = null;
+            }
+        }
+
+        internal override void OnDeserialized()
+        {
+            requiresCachedDataRecalculation = true;
+
+            if (Parent != null)
+                Parent.Invalidated += InvalidateCachedData;
+        }
+
+        public void SetParent(Transform transform, bool keepRelative = true)
+        {
+            if (Parent != null)
+                Parent.Invalidated -= InvalidateCachedData;
+
+            Transform tmp = transform;
+            while (tmp != null)
+            {
+                if (tmp == this)
+                    throw new ArgumentException("Object can't be ancestor of itself in transform hierarchy.");
+                tmp = tmp.Parent;
+            }
+
+            if (keepRelative)
+            {
+                Matrix4x4 model = transform == null ? Model : transform.View * Model;
+                DecomposeModel(model, out localPosition, out localRotation, out localScale);
+            }
+            Parent = transform;
+
+            InvalidateCachedData();
+
+            if (Parent != null)
+            {
+                Parent.Invalidated += InvalidateCachedData;
+                Parent.children.Add(this);
+            }
+        }
+
+        public void OnFieldChanged(FieldInfo fieldInfo)
+        {
+            InvalidateCachedData();
+        }
+
+        private void InvalidateCachedData()
+        {
+            Invalidated?.Invoke();
+            requiresCachedDataRecalculation = true;
+        }
+
+        #endregion ComponentLogic
+
+        #region TransformData
+
+        [SerializedField]
         private Vector3 localPosition;
+        [SerializedField]
+        private Quaternion localRotation;
+        [SerializedField]
+        private Vector3 localScale;
+
         public Vector3 LocalPosition
         {
             get => localPosition;
             set
             {
                 localPosition = value;
-                invalidateCachedData();
+                InvalidateCachedData();
             }
         }
-        private Vector3 position;
-        public Vector3 Position
-        {
-            get
-            {
-                if (requiresCachedDataRecalculation)
-                    recalculateCachedData();
-                return position;
-            }
-            set
-            {
-                if (Parent == null)
-                    LocalPosition = value;
-                else
-                    LocalPosition = Parent.View.TransformPoint(value);
-            }
-        }
-        private Quaternion localRotation;
+
         public Quaternion LocalRotation
         {
             get => localRotation;
             set
             {
                 localRotation = value;
-                invalidateCachedData();
+                InvalidateCachedData();
             }
         }
-        private Quaternion rotation;
-        public Quaternion Rotation
-        {
-            get
-            {
-                if (requiresCachedDataRecalculation)
-                    recalculateCachedData();
-                return rotation;
-            }
-            set
-            {
-                if (Parent == null)
-                {
-                    LocalRotation = value;
-                    return;
-                }
 
-                Quaternion rot;
-                decomposeModel(Parent.View * createModel(Position, value, Scale), out _, out rot, out _);
-
-                LocalRotation = rot;
-            }
-        }
-        [SerializeField("Scale")]
-        private Vector3 localScale;
         public Vector3 LocalScale
         {
             get => localScale;
@@ -82,74 +136,136 @@ namespace Engine.BaseAssets.Components
                     Math.Abs(value.z) <= Constants.Epsilon)
                     throw new ArgumentOutOfRangeException(nameof(LocalScale), "Scale can't be zero in any direction.");
                 localScale = value;
-                invalidateCachedData();
+                InvalidateCachedData();
             }
         }
-        private Vector3 scale;
-        private Vector3 Scale
-        {
-            get
-            {
-                if (requiresCachedDataRecalculation)
-                    recalculateCachedData();
-                return scale;
-            }
-        }
+
         private Matrix4x4 localModel;
         public Matrix4x4 LocalModel
         {
             get
             {
                 if (requiresCachedDataRecalculation)
-                    recalculateCachedData();
+                    RecalculateCachedData();
                 return localModel;
             }
         }
-        private Matrix4x4 model;
-        public Matrix4x4 Model
-        {
-            get
-            {
-                if (requiresCachedDataRecalculation)
-                    recalculateCachedData();
-                return model;
-            }
-        }
+
         private Matrix4x4 localView;
         public Matrix4x4 LocalView
         {
             get
             {
                 if (requiresCachedDataRecalculation)
-                    recalculateCachedData();
+                    RecalculateCachedData();
                 return localView;
             }
         }
+
+        private Vector3 position;
+        public Vector3 Position
+        {
+            get
+            {
+                if (requiresCachedDataRecalculation)
+                    RecalculateCachedData();
+                return position;
+            }
+            set
+            {
+                if (Parent == null)
+                    LocalPosition = value;
+                else
+                    LocalPosition = Parent.View.TransformPoint(value);
+            }
+        }
+
+        private Quaternion rotation;
+        public Quaternion Rotation
+        {
+            get
+            {
+                if (requiresCachedDataRecalculation)
+                    RecalculateCachedData();
+                return rotation;
+            }
+            set
+            {
+                if (Parent == null)
+                {
+                    LocalRotation = value;
+                    return;
+                }
+
+                DecomposeModel(Parent.View * CreateModel(Position, value, Scale), out _, out Quaternion rot, out _);
+
+                LocalRotation = rot;
+            }
+        }
+
+        private Vector3 scale;
+        private Vector3 Scale
+        {
+            get
+            {
+                if (requiresCachedDataRecalculation)
+                    RecalculateCachedData();
+                return scale;
+            }
+        }
+
+        private Matrix4x4 model;
+        public Matrix4x4 Model
+        {
+            get
+            {
+                if (requiresCachedDataRecalculation)
+                    RecalculateCachedData();
+                return model;
+            }
+        }
+
         private Matrix4x4 view;
         public Matrix4x4 View
         {
             get
             {
                 if (requiresCachedDataRecalculation)
-                    recalculateCachedData();
+                    RecalculateCachedData();
                 return view;
             }
         }
+
         public Vector3 LocalForward => LocalRotation * Vector3.Forward;
         public Vector3 LocalRight => LocalRotation * Vector3.Right;
         public Vector3 LocalUp => LocalRotation * Vector3.Up;
         public Vector3 Forward => Rotation * Vector3.Forward;
         public Vector3 Right => Rotation * Vector3.Right;
         public Vector3 Up => Rotation * Vector3.Up;
-        private bool requiresCachedDataRecalculation;
 
-        private void invalidateCachedData()
+        public Transform()
         {
-            Invalidated?.Invoke();
-            requiresCachedDataRecalculation = true;
+            localPosition = Vector3.Zero;
+            localRotation = Quaternion.Identity;
+            localScale = new Vector3(1.0, 1.0, 1.0);
+
+            RecalculateCachedData();
         }
 
-        private void decomposeModel(in Matrix4x4 model, out Vector3 position, out Quaternion rotation, out Vector3 scale)
+        private void RecalculateCachedData()
+        {
+            localModel = CreateModel(localPosition, localRotation, localScale);
+            model = Parent == null ? localModel : Parent.Model * localModel;
+
+            localView = CreateView(localPosition, localRotation, localScale);
+            view = Parent == null ? localView : localView * Parent.View;
+
+            DecomposeModel(model, out position, out rotation, out scale);
+
+            requiresCachedDataRecalculation = false;
+        }
+
+        private void DecomposeModel(in Matrix4x4 model, out Vector3 position, out Quaternion rotation, out Vector3 scale)
         {
             position = new Vector3(model.v03, model.v13, model.v23);
 
@@ -177,7 +293,7 @@ namespace Engine.BaseAssets.Components
             scale = new Vector3(rot.v00, rot.v11, rot.v22);
         }
 
-        private Matrix4x4 createModel(in Vector3 position, in Quaternion rotation, in Vector3 scale)
+        private Matrix4x4 CreateModel(in Vector3 position, in Quaternion rotation, in Vector3 scale)
         {
             // Model * vec => Move * Rotate * Scale * vec
             Matrix4x4 res = Matrix4x4.FromQuaternion(rotation);
@@ -199,7 +315,7 @@ namespace Engine.BaseAssets.Components
             return res;
         }
 
-        private Matrix4x4 createView(in Vector3 position, in Quaternion rotation, in Vector3 scale)
+        private Matrix4x4 CreateView(in Vector3 position, in Quaternion rotation, in Vector3 scale)
         {
             // View * vec => Scale^(-1) * Rotate^(-1) * Move^(-1) * vec
             Matrix4x4 res = Matrix4x4.FromQuaternion(rotation);
@@ -225,59 +341,7 @@ namespace Engine.BaseAssets.Components
             return res;
         }
 
-        private void recalculateCachedData()
-        {
-            localModel = createModel(localPosition, localRotation, localScale);
-            model = Parent == null ? localModel : Parent.Model * localModel;
+        #endregion TransformData
 
-            localView = createView(localPosition, localRotation, localScale);
-            view = Parent == null ? localView : localView * Parent.View;
-
-            decomposeModel(model, out position, out rotation, out scale);
-
-            requiresCachedDataRecalculation = false;
-        }
-
-        public Transform()
-        {
-            localPosition = Vector3.Zero;
-            localRotation = Quaternion.Identity;
-            localScale = new Vector3(1.0, 1.0, 1.0);
-
-            recalculateCachedData();
-        }
-
-        public void SetParent(Transform transform, bool keepRelative = true)
-        {
-            if (Parent != null)
-                Parent.Invalidated -= invalidateCachedData;
-
-            Transform tmp = transform;
-            while (tmp != null)
-            {
-                if (tmp == this)
-                    throw new ArgumentException("Object can't be ancestor of itself in transform hierarchy.");
-                tmp = tmp.Parent;
-            }
-
-            if (keepRelative)
-            {
-                Matrix4x4 model = transform == null ? Model : transform.View * Model;
-                Parent = transform;
-                decomposeModel(model, out localPosition, out localRotation, out localScale);
-            }
-            else
-                Parent = transform;
-
-            invalidateCachedData();
-
-            if (Parent != null)
-                Parent.Invalidated += invalidateCachedData;
-        }
-
-        public void OnFieldChanged(FieldInfo fieldInfo)
-        {
-            invalidateCachedData();
-        }
     }
 }

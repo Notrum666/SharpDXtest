@@ -15,7 +15,7 @@ namespace Engine.BaseAssets.Components
         Z = 4
     }
 
-    public sealed class Rigidbody : Component
+    public sealed class Rigidbody : BehaviourComponent
     {
         private double mass = 1.0;
         public double Mass

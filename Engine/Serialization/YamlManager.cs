@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization;
+using Engine.BaseAssets.Components;
 using Engine.Serialization;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
@@ -25,7 +27,7 @@ namespace Engine
             ObjectFactory = new CustomObjectFactory(new DefaultObjectFactory());
 
             SerializedObjectConverter = new SerializedObjectConverter();
-            TypeConverter.RegisterTypeConverter<SerializedObject, SerializedObjectPromiseConverter>();
+            TypeConverter.RegisterTypeConverter<SerializableObject, SerializedObjectPromiseConverter>();
 
             Serializer = BuildSerializer();
             Deserializer = BuildDeserializer();
@@ -154,6 +156,9 @@ namespace Engine
                     ClearObjectInstance(type);
                     return instance;
                 }
+                
+                if (type == typeof(GameObject) || type == typeof(Transform))
+                    return FormatterServices.GetUninitializedObject(type);
 
                 return fallback.Create(type);
             }
