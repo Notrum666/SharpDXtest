@@ -19,8 +19,8 @@ namespace Editor.AssetsImport
 
         public class ModelImportSettings : BaseImportSettings
         {
-            public string SkeletonOverride = null;
-            public Dictionary<string, string> MeshMaterialsOverride = new Dictionary<string, string>();
+            public Guid? SkeletonOverride = null;
+            public Dictionary<string, Guid?> MeshMaterialsOverride = new Dictionary<string, Guid?>();
         }
 
         protected override void OnImportAsset(AssetImportContext importContext)
@@ -82,7 +82,7 @@ namespace Editor.AssetsImport
                     throw new NotImplementedException();
                 }
 
-                string subGuid = currentImportContext.AddSubAsset(textureName, textureData);
+                Guid subGuid = currentImportContext.AddSubAsset(textureName, textureData);
                 currentModelData.AddEmbeddedTexture(textureName, subGuid);
             }
         }
@@ -101,7 +101,7 @@ namespace Editor.AssetsImport
             }
         }
 
-        private string ProcessMaterial(Assimp.Material material, string sourceAssetFolder)
+        private Guid ProcessMaterial(Assimp.Material material, string sourceAssetFolder)
         {
             MaterialData materialData = new MaterialData();
 
@@ -125,16 +125,17 @@ namespace Editor.AssetsImport
                         relativeFilePath = relativeFilePath.Substring(2);
                     }
                     string filePath = Path.Combine(sourceAssetFolder, relativeFilePath);
-                    string guid = AssetsRegistry.ImportAsset(filePath);
-                    materialData.AddTexture(materialTextureType, guid);
+                    Guid? guid = AssetsRegistry.ImportAsset(filePath);
+                    if (guid.HasValue)
+                        materialData.AddTexture(materialTextureType, guid.Value);
                 }
             }
 
             if (materialData.IsDefault())
-                return null;
+                return Guid.Empty;
 
             string materialId = material.Name ?? $"mat_{currentScene.Materials.IndexOf(material)}";
-            string subGuid = currentImportContext.AddSubAsset(materialId, materialData);
+            Guid subGuid = currentImportContext.AddSubAsset(materialId, materialData);
 
             return subGuid;
         }
@@ -168,10 +169,10 @@ namespace Editor.AssetsImport
         {
             SkeletonData skeleton = new SkeletonData();
             ProcessNodeAsBone(currentScene.RootNode, -1, skeleton);
-            string subGuid = currentImportContext.AddSubAsset("Skeleton", skeleton);
+            Guid subGuid = currentImportContext.AddSubAsset("Skeleton", skeleton);
 
             currentImportSettings.SkeletonOverride ??= subGuid;
-            currentModelData.SkeletonGuid = currentImportSettings.SkeletonOverride;
+            currentModelData.SkeletonGuid = currentImportSettings.SkeletonOverride ?? Guid.Empty;
         }
 
         private int ProcessNodeAsBone(Node currentNode, int parentBoneIndex, SkeletonData skeleton)
@@ -221,7 +222,7 @@ namespace Editor.AssetsImport
             if (!currentImportSettings.MeshMaterialsOverride.ContainsKey(meshData.Name))
                 currentImportSettings.MeshMaterialsOverride[meshData.Name] = null;
             currentImportSettings.MeshMaterialsOverride[meshData.Name] ??= currentModelData.MaterialsGuids.ElementAtOrDefault(mesh.MaterialIndex);
-            meshData.Material = currentModelData.MaterialsGuids.ElementAtOrDefault(mesh.MaterialIndex);
+            meshData.Material = currentImportSettings.MeshMaterialsOverride[meshData.Name] ?? Guid.Empty;
 
             int vertexCount = mesh.VertexCount;
             List<VertexData> vertices = meshData.Vertices;

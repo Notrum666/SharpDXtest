@@ -13,7 +13,7 @@ namespace Engine.AssetsData
             return null;
         }
 
-        public BaseAsset ToRealAsset(Type assetType, string guid)
+        public BaseAsset ToRealAsset(Type assetType, Guid guid)
         {
             return ToRealAsset(assetType)?.WithGuid(guid);
         }

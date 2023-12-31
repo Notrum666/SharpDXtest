@@ -7,6 +7,13 @@ namespace Engine.Serialization
 {
     public class BaseAssetConverter : IYamlTypeConverter
     {
+        private readonly GuidConverter guidConverter;
+
+        public BaseAssetConverter(GuidConverter guidConverter)
+        {
+            this.guidConverter = guidConverter;
+        }
+
         public bool Accepts(Type type)
         {
             return type == typeof(BaseAsset) || type.IsSubclassOf(typeof(BaseAsset));
@@ -14,15 +21,24 @@ namespace Engine.Serialization
 
         public object ReadYaml(IParser parser, Type type)
         {
-            string guid = parser.Consume<Scalar>().Value;
-            return string.IsNullOrEmpty(guid) ? null : AssetsManager.LoadAssetByGuid(guid, type);
+            string guidValue = parser.Consume<Scalar>().Value;
+
+            if (string.IsNullOrEmpty(guidValue))
+                return null;
+
+            Guid guid = guidConverter.Parse(guidValue);
+            return AssetsManager.LoadAssetByGuid(guid, type);
         }
 
         public void WriteYaml(IEmitter emitter, object value, Type type)
         {
-            BaseAsset asset = value as BaseAsset;
-            Scalar guidScalar = new Scalar(asset?.Guid ?? string.Empty);
-            emitter.Emit(guidScalar);
+            if (value is BaseAsset asset)
+            {
+                guidConverter.WriteYaml(emitter, asset.Guid, typeof(Guid));
+                return;
+            }
+
+            emitter.Emit(new Scalar(string.Empty));
         }
     }
 }

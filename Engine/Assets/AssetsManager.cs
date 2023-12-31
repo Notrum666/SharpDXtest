@@ -16,7 +16,7 @@ namespace Engine
 
         private const string ArtifactDatabaseName = "GuidDB.db";
         private static string ArtifactDatabasePath { get; set; }
-        private static Dictionary<string, Dictionary<string, Type>> artifactDatabase = new Dictionary<string, Dictionary<string, Type>>();
+        private static Dictionary<string, Dictionary<Guid, Type>> artifactDatabase = new Dictionary<string, Dictionary<Guid, Type>>();
 
         public static void InitializeInFolder(string parentFolderPath)
         {
@@ -36,16 +36,16 @@ namespace Engine
 
         private static void LoadArtifactDatabase()
         {
-            artifactDatabase = YamlManager.LoadFromFile<Dictionary<string, Dictionary<string, Type>>>(ArtifactDatabasePath)
-                               ?? new Dictionary<string, Dictionary<string, Type>>();
+            artifactDatabase = YamlManager.LoadFromFile<Dictionary<string, Dictionary<Guid, Type>>>(ArtifactDatabasePath)
+                               ?? new Dictionary<string, Dictionary<Guid, Type>>();
         }
 
-        private static string GetArtifactPathFromGuid(string guid)
+        private static string GetArtifactPathFromGuid(Guid guid)
         {
-            return Path.Combine(ArtifactFolderPath, $"{guid}.dat");
+            return Path.Combine(ArtifactFolderPath, $"{guid:N}.dat");
         }
 
-        private static void SaveArtifact(string guid, AssetData assetData)
+        private static void SaveArtifact(Guid guid, AssetData assetData)
         {
             string artifactPath = GetArtifactPathFromGuid(guid);
 
@@ -56,7 +56,7 @@ namespace Engine
         }
 
         [return: MaybeNull]
-        private static AssetData LoadArtifact(string guid, Type type)
+        private static AssetData LoadArtifact(Guid guid, Type type)
         {
             string artifactPath = GetArtifactPathFromGuid(guid);
             if (!Path.Exists(artifactPath))
@@ -70,20 +70,20 @@ namespace Engine
             return assetData;
         }
 
-        public static void SaveAsset(string contentAssetPath, string guid, AssetData assetData)
+        public static void SaveAsset(string contentAssetPath, Guid guid, AssetData assetData)
         {
             SaveArtifact(guid, assetData);
 
             if (!artifactDatabase.ContainsKey(contentAssetPath))
-                artifactDatabase[contentAssetPath] = new Dictionary<string, Type>();
+                artifactDatabase[contentAssetPath] = new Dictionary<Guid, Type>();
             artifactDatabase[contentAssetPath][guid] = assetData.GetType();
             SaveArtifactDatabase();
         }
         
-        public static object LoadAssetByGuid(string guid, Type assetType)
+        public static object LoadAssetByGuid(Guid guid, Type assetType)
         {
             Type artifactType = null;
-            foreach (Dictionary<string, Type> artifact in artifactDatabase.Values)
+            foreach (Dictionary<Guid, Type> artifact in artifactDatabase.Values)
             {
                 if (artifact.TryGetValue(guid, out artifactType))
                     break;
@@ -95,20 +95,20 @@ namespace Engine
             return LoadAssetByGuid(guid, artifactType, assetType);
         }
 
-        public static object LoadAssetByGuid(string guid, Type artifactType, Type assetType)
+        public static object LoadAssetByGuid(Guid guid, Type artifactType, Type assetType)
         {
             AssetData artifact = LoadArtifact(guid, artifactType);
             return artifact?.ToRealAsset(assetType, guid);
         }
 
-        public static T LoadAssetByGuid<T>(string guid, Type artifactType) where T : BaseAsset
+        public static T LoadAssetByGuid<T>(Guid guid, Type artifactType) where T : BaseAsset
         {
             return (T)LoadAssetByGuid(guid, artifactType, typeof(T));
         }
 
         public static object LoadAssetAtPath(string contentAssetPath, Type assetType)
         {
-            if (!artifactDatabase.TryGetValue(contentAssetPath, out Dictionary<string, Type> savedArtifacts))
+            if (!artifactDatabase.TryGetValue(contentAssetPath, out Dictionary<Guid, Type> savedArtifacts))
                 return null;
 
             if (savedArtifacts.Count != 1)
@@ -117,7 +117,7 @@ namespace Engine
                 return null;
             }
 
-            KeyValuePair<string, Type> firstArtifact = savedArtifacts.FirstOrDefault();
+            KeyValuePair<Guid, Type> firstArtifact = savedArtifacts.FirstOrDefault();
             return LoadAssetByGuid(firstArtifact.Key, firstArtifact.Value, assetType);
         }
 
@@ -153,13 +153,13 @@ namespace Engine
 
         public static DateTime? GetAssetImportDate(string contentAssetPath)
         {
-            if (!artifactDatabase.TryGetValue(contentAssetPath, out Dictionary<string, Type> savedArtifacts))
+            if (!artifactDatabase.TryGetValue(contentAssetPath, out Dictionary<Guid, Type> savedArtifacts))
                 return null;
 
             if (savedArtifacts.Count == 0)
                 return null;
 
-            string firstGuid = savedArtifacts.First().Key;
+            Guid firstGuid = savedArtifacts.First().Key;
             string artifactPath = GetArtifactPathFromGuid(firstGuid);
             return File.GetLastWriteTimeUtc(artifactPath);
         }

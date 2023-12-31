@@ -63,7 +63,7 @@ namespace Editor
 
         #region AssetOperations //Import, Copy, Move, Rename, Delete
 
-        public static string ImportAsset(string assetPath)
+        public static Guid? ImportAsset(string assetPath)
         {
             if (!Path.Exists(assetPath))
                 return null;

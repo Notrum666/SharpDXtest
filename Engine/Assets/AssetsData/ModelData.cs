@@ -8,20 +8,20 @@ namespace Engine.AssetsData
 {
     public class ModelData : AssetData
     {
-        public string SkeletonGuid = null;
+        public Guid SkeletonGuid = Guid.Empty;
 
-        public Dictionary<string, string> EmbeddedTexturesGuids = new Dictionary<string, string>();
+        public Dictionary<string, Guid> EmbeddedTexturesGuids = new Dictionary<string, Guid>();
 
-        public List<string> MaterialsGuids = new List<string>();
+        public List<Guid> MaterialsGuids = new List<Guid>();
 
         public List<MeshData> Meshes = new List<MeshData>();
 
-        public void AddEmbeddedTexture(string fileName, string guid)
+        public void AddEmbeddedTexture(string fileName, Guid guid)
         {
             EmbeddedTexturesGuids[fileName] = guid;
         }
 
-        public string GetEmbeddedTexture(string fileName)
+        public Guid GetEmbeddedTexture(string fileName)
         {
             return EmbeddedTexturesGuids[fileName];
         }
@@ -71,7 +71,7 @@ namespace Engine.AssetsData
     public class MeshData
     {
         public string Name;
-        public string Material;
+        public Guid Material;
 
         public List<VertexData> Vertices = new List<VertexData>();
         public List<int> Indices = new List<int>();

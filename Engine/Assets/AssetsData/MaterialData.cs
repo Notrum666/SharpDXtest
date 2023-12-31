@@ -6,11 +6,11 @@ namespace Engine.AssetsData
 {
     public class MaterialData : AssetData
     {
-        public Dictionary<MaterialTextureType, string> TexturesGuids = new Dictionary<MaterialTextureType, string>();
+        public Dictionary<MaterialTextureType, Guid> TexturesGuids = new Dictionary<MaterialTextureType, Guid>();
 
-        public void AddTexture(MaterialTextureType textureType, string guid)
+        public void AddTexture(MaterialTextureType textureType, Guid guid)
         {
-            if (!string.IsNullOrEmpty(guid))
+            if (guid != Guid.Empty)
                 TexturesGuids[textureType] = guid;
         }
 
@@ -41,7 +41,7 @@ namespace Engine.AssetsData
 
             Material material = new Material();
 
-            foreach (KeyValuePair<MaterialTextureType, string> texturePair in TexturesGuids)
+            foreach (KeyValuePair<MaterialTextureType, Guid> texturePair in TexturesGuids)
             {
                 LoadTextureToMaterial(material, texturePair.Key, texturePair.Value);
             }
@@ -49,27 +49,28 @@ namespace Engine.AssetsData
             return material;
         }
 
-        private void LoadTextureToMaterial(Material material, MaterialTextureType textureType, string guid)
+        private void LoadTextureToMaterial(Material material, MaterialTextureType textureType, Guid guid)
         {
+            Texture texture = AssetsManager.LoadAssetByGuid<Texture>(guid, typeof(TextureData));
             switch (textureType)
             {
                 case MaterialTextureType.BaseColor:
-                    material.Albedo = AssetsManager.LoadAssetByGuid<Texture>(guid, typeof(TextureData));
+                    material.Albedo = texture;
                     break;
                 case MaterialTextureType.Normals:
-                    material.Normal = AssetsManager.LoadAssetByGuid<Texture>(guid, typeof(TextureData));
+                    material.Normal = texture;
                     break;
                 case MaterialTextureType.Emissive:
-                    material.Emissive = AssetsManager.LoadAssetByGuid<Texture>(guid, typeof(TextureData));
+                    material.Emissive = texture;
                     break;
                 case MaterialTextureType.Metallic:
-                    material.Metallic = AssetsManager.LoadAssetByGuid<Texture>(guid, typeof(TextureData));
+                    material.Metallic = texture;
                     break;
                 case MaterialTextureType.Roughness:
-                    material.Roughness = AssetsManager.LoadAssetByGuid<Texture>(guid, typeof(TextureData));
+                    material.Roughness = texture;
                     break;
                 case MaterialTextureType.AmbientOcclusion:
-                    material.AmbientOcclusion = AssetsManager.LoadAssetByGuid<Texture>(guid, typeof(TextureData));
+                    material.AmbientOcclusion = texture;
                     break;
             }
         }
