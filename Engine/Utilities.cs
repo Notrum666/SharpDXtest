@@ -2,8 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Enumeration;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+
+using Engine.AssetsData;
+
+using YamlDotNet.Core.Tokens;
 
 namespace Engine
 {
@@ -80,5 +86,50 @@ namespace Engine
 
         [GeneratedRegex("\\s\\d+$", RegexOptions.RightToLeft)]
         private static partial Regex FileNameIndexRegex();
+    }
+
+    public ref struct Ranged<T> where T : struct, INumber<T>
+    {
+        private readonly ref T value;
+
+        private readonly T? min;
+        private readonly T? max;
+
+        private readonly Action onSet;
+        private readonly string propertyName;
+
+        public Ranged(ref T value, T? min = null, T? max = null, Action onSet = null, [CallerMemberName] string propertyName = "")
+        {
+            this.value = ref value;
+            this.min = min;
+            this.max = max;
+            this.onSet = onSet;
+            this.propertyName = propertyName;
+        }
+
+        public void Set(T newValue)
+        {
+            if (newValue < min)
+            {
+                Logger.Log(LogType.Error, $"{propertyName} can't be less than {min}, but tried to set = {newValue}");
+                return;
+            }
+
+            if (newValue > max)
+            {
+                Logger.Log(LogType.Error, $"{propertyName} can't be greater than {max}, but tried to set = {newValue}");
+                return;
+            }
+
+            value = newValue;
+            onSet?.Invoke();
+        }
+
+        public static implicit operator T(Ranged<T> r) => r.value;
+
+        public override string ToString()
+        {
+            return value.ToString();
+        }
     }
 }

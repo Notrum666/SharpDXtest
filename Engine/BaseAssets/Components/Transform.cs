@@ -7,7 +7,7 @@ using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {
-    public class Transform : Component, INotifyFieldChanged
+    public class Transform : Component
     {
 
         #region ComponentLogic
@@ -55,6 +55,11 @@ namespace Engine.BaseAssets.Components
                 Parent.Invalidated += InvalidateCachedData;
         }
 
+        public override void OnFieldChanged(FieldInfo fieldInfo)
+        {
+            InvalidateCachedData();
+        }
+
         public void SetParent(Transform transform, bool keepRelative = true)
         {
             if (Parent != null)
@@ -82,11 +87,6 @@ namespace Engine.BaseAssets.Components
                 Parent.Invalidated += InvalidateCachedData;
                 Parent.children.Add(this);
             }
-        }
-
-        public void OnFieldChanged(FieldInfo fieldInfo)
-        {
-            InvalidateCachedData();
         }
 
         private void InvalidateCachedData()

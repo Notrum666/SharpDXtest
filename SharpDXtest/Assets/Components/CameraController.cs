@@ -9,21 +9,28 @@ namespace SharpDXtest.Assets.Components
 {
     public class CameraController : BehaviourComponent
     {
-        public float speed;
+        [SerializedField]
+        private float speed;
+
+        public float Speed
+        {
+            get => speed;
+            set => speed = value;
+        }
 
         public override void Update()
         {
-            float curSpeed = speed * (float)Time.DeltaTime;
+            float curSpeed = Speed * (float)Time.DeltaTime;
 
             if (InputManager.IsKeyPressed(Key.E))
             {
                 Time.TimeScale *= 2;
-                speed /= 2;
+                Speed /= 2;
             }
             if (InputManager.IsKeyPressed(Key.Q))
             {
                 Time.TimeScale /= 2;
-                speed *= 2;
+                Speed *= 2;
             }
 
             if (InputManager.IsKeyDown(Key.LeftControl))

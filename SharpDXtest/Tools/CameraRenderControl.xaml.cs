@@ -132,7 +132,7 @@ namespace Editor
                 controlledGameObject = new GameObject();
                 controlledGameObject.Transform.Position = new Vector3(0, -10, 5);
                 EditorCameraController controller = controlledGameObject.AddComponent<EditorCameraController>();
-                controller.speed = 5;
+                controller.Speed = 5;
                 camera = controlledGameObject.AddComponent<Camera>();
                 camera.Near = 0.001;
                 camera.Far = 500;

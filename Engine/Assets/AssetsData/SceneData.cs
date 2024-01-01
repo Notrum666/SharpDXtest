@@ -27,6 +27,7 @@ namespace Engine.AssetsData
 
             foreach (SerializableObject serializableObject in SerializableObjects)
             {
+                serializableObject.OnDeserialized();
                 if (serializableObject is GameObject gameObject)
                     scene.AddObject(gameObject);
             }

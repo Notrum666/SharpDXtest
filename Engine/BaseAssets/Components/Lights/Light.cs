@@ -1,22 +1,17 @@
 ﻿using System;
 
+using Engine.AssetsData;
+
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {
     public abstract class Light : BehaviourComponent
     {
-        public Vector3f color = new Vector3f(1f, 1f, 1f);
-        protected float brightness = 1.0f;
-        public float Brightness
-        {
-            get => brightness;
-            set
-            {
-                if (value < 0.0f)
-                    throw new ArgumentOutOfRangeException("Brightness", "Brightness can't be negative");
-                brightness = value;
-            }
-        }
+        [SerializedField]
+        private float brightness = 1.0f;
+        public Vector3f Color = new Vector3f(1f, 1f, 1f);
+
+        public Ranged<float> Brightness => new Ranged<float>(ref brightness, 0.0f);
     }
 }

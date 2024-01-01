@@ -1,11 +1,12 @@
 using System;
+using System.Reflection;
 using Engine.Serialization;
 using YamlDotNet.Serialization.Callbacks;
 
 namespace Engine
 {
     [YamlTagMapped]
-    public class SerializableObject
+    public class SerializableObject : INotifyFieldChanged
     {
         [SerializedField]
         private readonly Guid instanceId;
@@ -48,6 +49,8 @@ namespace Engine
         }
 
         internal virtual void OnDeserialized() { }
+
+        public virtual void OnFieldChanged(FieldInfo fieldInfo) { }
 
         #region Runtime
 

@@ -14,31 +14,12 @@ namespace Engine.BaseAssets.Components.Postprocessing
     public class PostProcessEffect_Bloom : PostProcessEffect
     {
         public const int MaxIterationsCount = 16;
-
-        public int Iterations
-        {
-            get => iterations;
-            set
-            {
-                if (value < 1 || value > MaxIterationsCount)
-                    throw new ArgumentOutOfRangeException("Iterations", "Iterations must be greater than 1 and less or equal than MaxIterationsCount");
-                iterations = value;
-            }
-        }
+        
         private int iterations = 5;
+        public Ranged<int> Iterations => new Ranged<int>(ref iterations, 1, MaxIterationsCount);
 
-        public float Treshold
-        {
-            get => treshold;
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException("Treshold", "Treshold can't be negative");
-
-                treshold = value;
-            }
-        }
         private float treshold = 1.0f;
+        public Ranged<float> Treshold => new Ranged<float>(ref treshold, 0.0f);
 
         private static Device device => GraphicsCore.CurrentDevice;
 

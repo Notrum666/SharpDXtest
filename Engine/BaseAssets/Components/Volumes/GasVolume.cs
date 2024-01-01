@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Reflection;
 
 using LinearAlgebra;
 
@@ -10,6 +11,7 @@ namespace Engine.BaseAssets.Components
 {
     public sealed class GasVolume : BehaviourComponent
     {
+        [SerializedField]
         private Vector3f size = new Vector3f(1.0f, 1.0f, 1.0f);
         public Vector3f Size
         {
@@ -17,7 +19,7 @@ namespace Engine.BaseAssets.Components
             set
             {
                 size = value;
-                GenerateVertexes();
+                GenerateVertices();
             }
         }
         public double AbsorptionCoef { get; set; } = 0.0;
@@ -30,6 +32,11 @@ namespace Engine.BaseAssets.Components
         {
             Size = new Vector3f(1.0f, 1.0f, 1.0f);
         }
+        
+        public override void OnFieldChanged(FieldInfo fieldInfo)
+        {
+            GenerateVertices();
+        }
 
         public void Render()
         {
@@ -38,7 +45,7 @@ namespace Engine.BaseAssets.Components
             GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(36, 0, 0);
         }
 
-        private void GenerateVertexes()
+        private void GenerateVertices()
         {
             Vector3f[] vertexes = new Vector3f[8];
             for (int i = 0; i < 8; i++)
