@@ -8,16 +8,8 @@ namespace Engine.BaseAssets.Components.Particles
     {
         public Vector3f Point { get; set; } = Vector3f.Zero;
         private int rate = 20;
-        public int Rate
-        {
-            get => rate;
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(Rate), "Particles per second can't be negative.");
-                rate = value;
-            }
-        }
+        public Ranged<int> Rate => new Ranged<int>(ref rate, 0);
+
         public bool Global { get; set; } = false;
         private double toEmitAccumulator = 0.0;
 

@@ -12,18 +12,10 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private int shadowSize = 2048;
 
-        private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.1f, 0.3f, 1.0f };
+        public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 0);
         public static float[] CascadeFrustumDistances => cascadeFrustumDistances;
-        public int ShadowSize
-        {
-            get => shadowSize;
-            set
-            {
-                if (value <= 0)
-                    throw new ArgumentOutOfRangeException("ShadowSize", "Shadow size must be a positive value.");
-                shadowSize = value;
-            }
-        }
+
+        private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.1f, 0.3f, 1.0f };
 
         private Matrix4x4f getLightSpaceForFrustumSlice(Matrix4x4f frustumToView, float fromZ, float toZ, float lightSpaceDepthScale)
         {

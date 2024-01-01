@@ -8,38 +8,24 @@ namespace Engine.BaseAssets.Components.Particles
     {
         public Vector3f Point { get; set; } = Vector3f.Zero;
         private int rate = 20;
-        public int Rate
-        {
-            get => rate;
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(Rate), "Particles per second can't be negative.");
-                rate = value;
-            }
-        }
+        public Ranged<int> Rate => new Ranged<int>(ref rate, 0);
+
         private float radius = 1;
-        public float Radius
+
+        public Ranged<float> Radius => new Ranged<float>(ref radius, 0, onSet: () =>
         {
-            get => radius;
-            set
-            {
-                if (value < 0.0f || innerRadius > value)
-                    throw new ArgumentOutOfRangeException(nameof(Radius), "Radius can't be negative or less than inner radius.");
-                radius = value;
-            }
-        }
+            if (radius < innerRadius)
+                radius = innerRadius;
+        });
+
         private float innerRadius = 0;
-        public float InnerRadius
+
+        public Ranged<float> InnerRadius => new Ranged<float>(ref innerRadius, 0, onSet: () =>
         {
-            get => innerRadius;
-            set
-            {
-                if (value < 0.0f || value > Radius)
-                    throw new ArgumentOutOfRangeException(nameof(InnerRadius), "Inner radius can't be negative or greater than radius.");
-                innerRadius = value;
-            }
-        }
+            if (innerRadius > radius)
+                innerRadius = radius;
+        });
+
         public bool Global { get; set; } = false;
         private double toEmitAccumulator = 0.0;
 

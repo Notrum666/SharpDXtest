@@ -18,64 +18,15 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private float angularIntensity = 0.4f;
         [SerializedField]
-        private float angle = (float)Math.PI / 3.0f;
+        private float angle = MathF.PI / 3.0f;
         [SerializedField]
         private int shadowSize = 1024;
 
-        public float Radius
-        {
-            get => radius;
-            set
-            {
-                if (value < 0.0f)
-                    throw new ArgumentOutOfRangeException("Radius", "Radius can't be negative");
-                radius = value;
-            }
-        }
-
-        public float Intensity
-        {
-            get => intensity;
-            set
-            {
-                if (value < 0.0f || value > 1.0f)
-                    throw new ArgumentOutOfRangeException("Intensity", "Intensity can't be negative or more than 1");
-                intensity = value;
-            }
-        }
-
-        public float AngularIntensity
-        {
-            get => angularIntensity;
-            set
-            {
-                if (value < 0.0f || value > 1.0f)
-                    throw new ArgumentOutOfRangeException("AngularIntensity", "Angular intensity can't be negative or more than 1");
-                angularIntensity = value;
-            }
-        }
-
-        public float Angle
-        {
-            get => angle;
-            set
-            {
-                if (value < 0.0f || value > Math.PI)
-                    throw new ArgumentOutOfRangeException("Angle", "Angle can't be negative or more than PI");
-                angle = value;
-            }
-        }
-
-        public int ShadowSize
-        {
-            get => shadowSize;
-            set
-            {
-                if (value <= 0)
-                    throw new ArgumentOutOfRangeException("ShadowSize", "Shadow size must be a positive value.");
-                shadowSize = value;
-            }
-        }
+        public Ranged<float> Radius => new Ranged<float>(ref radius, 0.0f);
+        public Ranged<float> Intensity => new Ranged<float>(ref intensity, 0.0f, 1.0f);
+        public Ranged<float> AngularIntensity => new Ranged<float>(ref angularIntensity, 0.0f, 1.0f);
+        public Ranged<float> Angle => new Ranged<float>(ref angle, 0.0f, MathF.PI);
+        public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 0);
 
         public Matrix4x4f LightSpace
         {
