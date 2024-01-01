@@ -39,6 +39,17 @@ namespace Engine
             ambientOcclusion = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
             emission = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
         }
+
+        internal void Dispose()
+        {
+            worldPos?.Dispose();
+            albedo?.Dispose();
+            normal?.Dispose();
+            metallic?.Dispose();
+            roughness?.Dispose();
+            ambientOcclusion?.Dispose();
+            emission?.Dispose();
+        }
     }
 
     public static class GraphicsCore
