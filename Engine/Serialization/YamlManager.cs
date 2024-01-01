@@ -65,6 +65,8 @@ namespace Engine
             builder.WithTypeInspector(_ => new SerializedFieldsTypeInspector());
             builder.WithNodeTypeResolver(new SerializedObjectNodeTypeResolver());
             builder.WithTypeConverter(SerializedObjectConverter);
+            
+            builder.IgnoreUnmatchedProperties();
 
             return builder.Build();
         }
