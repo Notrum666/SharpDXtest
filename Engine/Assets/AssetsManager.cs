@@ -18,6 +18,7 @@ namespace Engine
         /// <summary> BaseAsset subtype to AssetData subtype </summary>
         private static readonly Dictionary<Type, Type> typeToDataTypeMap = new Dictionary<Type, Type>();
 
+        private static readonly Dictionary<Guid, WeakReference<BaseAsset>> assetsCache = new Dictionary<Guid, WeakReference<BaseAsset>>();
         private static ArtifactDatabase artifactDatabase;
 
         static AssetsManager()
@@ -76,6 +77,20 @@ namespace Engine
             return false;
         }
 
+        private static void CacheAsset(BaseAsset asset)
+        {
+            assetsCache[asset.Guid] = new WeakReference<BaseAsset>(asset);
+        }
+
+        private static bool TryGetCachedAsset(Guid guid, out BaseAsset asset)
+        {
+            if (assetsCache.TryGetValue(guid, out WeakReference<BaseAsset> weakRef))
+                return weakRef.TryGetTarget(out asset);
+
+            asset = null;
+            return false;
+        }
+
         private static void SaveArtifact(Guid guid, AssetData assetData)
         {
             string artifactPath = GetArtifactFullPath(guid);
@@ -103,8 +118,14 @@ namespace Engine
 
         private static BaseAsset LoadAsset(Guid guid, Type assetDataType)
         {
+            if (TryGetCachedAsset(guid, out BaseAsset asset))
+                return asset;
+
             AssetData artifact = LoadArtifact(guid, assetDataType);
-            return artifact?.ToRealAsset(guid);
+            asset = artifact?.ToRealAsset(guid);
+            CacheAsset(asset);
+
+            return asset;
         }
 
         public static void SaveAssetData(string contentAssetPath, Guid guid, AssetData assetData)
