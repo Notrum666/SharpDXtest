@@ -6,6 +6,7 @@ using Buffer = SharpDX.Direct3D11.Buffer;
 
 namespace Engine.AssetsData
 {
+    [AssetData<Shader>]
     public class ShaderData : AssetData
     {
         public ShaderType ShaderType;
@@ -25,13 +26,10 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Shader ToRealAsset(Type assetType)
+        public override Shader ToRealAsset()
         {
-            if (assetType != typeof(Shader))
-                return null;
-
             Shader shader = Shader.Create(ShaderType, Bytecode);
-            
+
             foreach (KeyValuePair<string, int> location in Locations)
             {
                 shader.Locations[location.Key] = location.Value;

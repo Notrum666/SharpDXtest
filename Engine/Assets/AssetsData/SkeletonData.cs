@@ -1,15 +1,15 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using LinearAlgebra;
 
 namespace Engine.AssetsData
 {
+    [AssetData<BaseAsset>]
     public class SkeletonData : AssetData
     {
         //TODO: InverseRootTransform
         public List<BoneData> Bones = new List<BoneData>();
-        
+
         public override void Serialize(BinaryWriter writer)
         {
             YamlManager.SaveToStream(writer.BaseStream, this);
@@ -20,13 +20,10 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override BaseAsset ToRealAsset(Type assetType)
+        public override BaseAsset ToRealAsset()
         {
-            if (assetType != typeof(BaseAsset))
-                return null;
-
             BaseAsset skeleton = new BaseAsset();
-            
+
             return skeleton;
         }
     }

@@ -6,6 +6,7 @@ using YamlDotNet.Serialization;
 
 namespace Engine.AssetsData
 {
+    [AssetData<Model>]
     public class ModelData : AssetData
     {
         public Guid SkeletonGuid = Guid.Empty;
@@ -36,17 +37,14 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Model ToRealAsset(Type assetType)
+        public override Model ToRealAsset()
         {
-            if (assetType != typeof(Model))
-                return null;
-
             Model model = new Model();
 
             foreach (MeshData meshData in Meshes)
             {
                 Mesh mesh = new Mesh();
-                mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material, typeof(MaterialData));
+                mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material);
 
                 mesh.vertices = new List<Mesh.PrimitiveVertex>();
                 foreach (VertexData vertexData in meshData.Vertices)

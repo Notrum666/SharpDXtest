@@ -42,7 +42,7 @@ namespace Editor.AssetsImport
         {
             Guid guid = assetMetaData.Guid;
 
-            AssetsManager.SaveAsset(AssetContentPath, guid, mainAsset);
+            AssetsManager.SaveAssetData(AssetContentPath, guid, mainAsset);
             return guid;
         }
 
@@ -53,7 +53,7 @@ namespace Editor.AssetsImport
             Guid subGuid = assetMetaData.SubAssets.GetValueOrDefault(subAssetKey, Guid.NewGuid());
             assetMetaData.SubAssets[subAssetKey] = subGuid;
 
-            AssetsManager.SaveAsset(AssetContentPath, subGuid, subAsset);
+            AssetsManager.SaveAssetData(AssetContentPath, subGuid, subAsset);
             return subGuid;
         }
 

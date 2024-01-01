@@ -4,6 +4,7 @@ using System.IO;
 
 namespace Engine.AssetsData
 {
+    [AssetData<Material>]
     public class MaterialData : AssetData
     {
         public Dictionary<MaterialTextureType, Guid> TexturesGuids = new Dictionary<MaterialTextureType, Guid>();
@@ -34,11 +35,8 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Material ToRealAsset(Type assetType)
+        public override Material ToRealAsset()
         {
-            if (assetType != typeof(Material))
-                return null;
-
             Material material = new Material();
 
             foreach (KeyValuePair<MaterialTextureType, Guid> texturePair in TexturesGuids)
@@ -51,7 +49,7 @@ namespace Engine.AssetsData
 
         private void LoadTextureToMaterial(Material material, MaterialTextureType textureType, Guid guid)
         {
-            Texture texture = AssetsManager.LoadAssetByGuid<Texture>(guid, typeof(TextureData));
+            Texture texture = AssetsManager.LoadAssetByGuid<Texture>(guid);
             switch (textureType)
             {
                 case MaterialTextureType.BaseColor:
