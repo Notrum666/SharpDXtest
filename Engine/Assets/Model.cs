@@ -43,8 +43,8 @@ namespace Engine
         // material assigned on mesh load
         public Material DefaultMaterial { get; set; } = null;
 
-        public List<PrimitiveVertex> vertices = null;
-        public List<int> indices = null;
+        public readonly List<PrimitiveVertex> Vertices = new List<PrimitiveVertex>();
+        public readonly List<int> Indices = new List<int>();
 
         private Buffer vertexBuffer;
         private VertexBufferBinding vertexBufferBinding;
@@ -54,32 +54,32 @@ namespace Engine
 
         public void GenerateGPUData()
         {
-            if (vertices == null || indices == null)
+            if (Vertices.Count == 0 || Indices.Count == 0)
                 throw new Exception("Geometry data can't be empty.");
 
-            for (int i = 0; i < indices.Count / 3; i++)
+            for (int i = 0; i < Indices.Count / 3; i++)
             {
-                Vector3f edge1 = vertices[i * 3 + 1].v - vertices[i * 3 + 0].v;
-                Vector3f edge2 = vertices[i * 3 + 2].v - vertices[i * 3 + 0].v;
-                Vector2f UVedge1 = vertices[i * 3 + 1].t - vertices[i * 3 + 0].t;
-                Vector2f UVedge2 = vertices[i * 3 + 2].t - vertices[i * 3 + 0].t;
+                Vector3f edge1 = Vertices[i * 3 + 1].v - Vertices[i * 3 + 0].v;
+                Vector3f edge2 = Vertices[i * 3 + 2].v - Vertices[i * 3 + 0].v;
+                Vector2f UVedge1 = Vertices[i * 3 + 1].t - Vertices[i * 3 + 0].t;
+                Vector2f UVedge2 = Vertices[i * 3 + 2].t - Vertices[i * 3 + 0].t;
                 Vector3f tx = ((edge1 * UVedge2.y - edge2 * UVedge1.y) / (UVedge1.x * UVedge2.y - UVedge1.y * UVedge2.x)).normalized();
-                PrimitiveVertex vertex0 = vertices[i * 3 + 0];
-                PrimitiveVertex vertex1 = vertices[i * 3 + 1];
-                PrimitiveVertex vertex2 = vertices[i * 3 + 2];
+                PrimitiveVertex vertex0 = Vertices[i * 3 + 0];
+                PrimitiveVertex vertex1 = Vertices[i * 3 + 1];
+                PrimitiveVertex vertex2 = Vertices[i * 3 + 2];
 
                 vertex0.tx = new Vector3f(tx.x, tx.y, tx.z);
                 vertex1.tx = new Vector3f(tx.x, tx.y, tx.z);
                 vertex2.tx = new Vector3f(tx.x, tx.y, tx.z);
 
-                vertices[i * 3 + 0] = vertex0;
-                vertices[i * 3 + 1] = vertex1;
-                vertices[i * 3 + 2] = vertex2;
+                Vertices[i * 3 + 0] = vertex0;
+                Vertices[i * 3 + 1] = vertex1;
+                Vertices[i * 3 + 2] = vertex2;
             }
 
-            vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, vertices.ToArray());
+            vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, Vertices.ToArray());
             vertexBufferBinding = new VertexBufferBinding(vertexBuffer, Utilities.SizeOf<PrimitiveVertex>(), 0);
-            indexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.IndexBuffer, indices.ToArray());
+            indexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.IndexBuffer, Indices.ToArray());
         }
 
         public void Render()
@@ -89,7 +89,7 @@ namespace Engine
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetVertexBuffers(0, vertexBufferBinding);
             GraphicsCore.CurrentDevice.ImmediateContext.InputAssembler.SetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
-            GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(indices.Count, 0, 0);
+            GraphicsCore.CurrentDevice.ImmediateContext.DrawIndexed(Indices.Count, 0, 0);
         }
 
         public void Dispose()
@@ -105,8 +105,8 @@ namespace Engine
 
             if (disposing)
             {
-                vertices = null;
-                indices = null;
+                Vertices.Clear();
+                Indices.Clear();
 
                 if (vertexBuffer != null)
                     vertexBuffer.Dispose();

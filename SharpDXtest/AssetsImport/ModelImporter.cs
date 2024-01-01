@@ -9,7 +9,7 @@ using LinearAlgebra;
 
 namespace Editor.AssetsImport
 {
-    [AssetImporter("fbx", "dae")]
+    [AssetImporter("fbx", "dae", "obj")]
     public class ModelImporter : AssetImporter
     {
         private Scene currentScene;
