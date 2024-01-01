@@ -1,26 +1,43 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace Engine.BaseAssets.Components
 {
     public class MeshComponent : BehaviourComponent
     {
-        public Model Mesh { get => Model; set => Model = value; }
+        [SerializedField]
         private Model model = null;
+        [SerializedField]
+        private Material[] materials = Array.Empty<Material>();
+
         public Model Model
         {
             get => model;
             set
             {
                 model = value;
-                if (model is null)
-                    Materials = new Material[0];
-                else
-                    Materials = value.Meshes.Select(p => p.DefaultMaterial).ToArray();
+                RefreshMaterialsSlots();
             }
         }
-        public Material[] Materials { get; private set; } = new Material[0];
+
+        public Material[] Materials => materials;
+
+        public override void OnInspectorFieldChanged(FieldInfo fieldInfo)
+        {
+            if (fieldInfo.Name == nameof(model))
+            {
+                RefreshMaterialsSlots();
+            }
+        }
+
+        private void RefreshMaterialsSlots()
+        {
+            if (model is null)
+                materials = Array.Empty<Material>();
+            else
+                materials = model.Meshes.Select(p => p.DefaultMaterial).ToArray();
+        }
 
         public void Render()
         {
