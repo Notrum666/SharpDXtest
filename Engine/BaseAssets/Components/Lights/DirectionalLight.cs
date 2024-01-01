@@ -9,9 +9,11 @@ namespace Engine.BaseAssets.Components
 {
     public class DirectionalLight : Light
     {
+        [SerializedField]
+        private int shadowSize = 2048;
+
         private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.1f, 0.3f, 1.0f };
         public static float[] CascadeFrustumDistances => cascadeFrustumDistances;
-        private int shadowSize = 2048;
         public int ShadowSize
         {
             get => shadowSize;

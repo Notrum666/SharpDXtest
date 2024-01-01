@@ -213,6 +213,7 @@ namespace Engine
                 RenderScene(CurrentCamera);
         }
 
+        //TODO: Separate into light classes
         private static void RenderShadows()
         {
             if (Scene.CurrentScene == null)
@@ -254,7 +255,7 @@ namespace Engine
                     CurrentDevice.ImmediateContext.OutputMerger.SetTargets(curLight.ShadowTexture.GetView<DepthStencilView>(), renderTargetView: null);
                     CurrentDevice.ImmediateContext.ClearDepthStencilView(curLight.ShadowTexture.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
 
-                    pipeline.UpdateUniform("view", curLight.lightSpace);
+                    pipeline.UpdateUniform("view", curLight.LightSpace);
 
                     renderObjects();
                 }
@@ -429,7 +430,7 @@ namespace Engine
 
                     pipeline.UpdateUniform("directionalLight.direction", (Vector3f)curLight.GameObject.Transform.Forward);
                     pipeline.UpdateUniform("directionalLight.brightness", curLight.Brightness);
-                    pipeline.UpdateUniform("directionalLight.color", curLight.color);
+                    pipeline.UpdateUniform("directionalLight.color", curLight.Color);
 
                     Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(camera);
                     for (int i = 0; i < lightSpaces.Length; i++)
@@ -459,7 +460,7 @@ namespace Engine
                     pipeline.UpdateUniform("pointLight.radius", curLight.Radius);
                     pipeline.UpdateUniform("pointLight.brightness", curLight.Brightness);
                     pipeline.UpdateUniform("pointLight.intensity", curLight.Intensity);
-                    pipeline.UpdateUniform("pointLight.color", curLight.color);
+                    pipeline.UpdateUniform("pointLight.color", curLight.Color);
 
                     pipeline.UploadUpdatedUniforms();
                 }

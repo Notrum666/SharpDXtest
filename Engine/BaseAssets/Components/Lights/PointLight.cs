@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Engine.BaseAssets.Components
 {
     public class PointLight : Light
     {
+        [SerializedField]
         private float radius = 1.0f;
+        [SerializedField]
+        private float intensity = 0.4f;
+
         public float Radius
         {
             get => radius;
@@ -15,7 +20,6 @@ namespace Engine.BaseAssets.Components
                 radius = value;
             }
         }
-        private float intensity = 0.4f;
         public float Intensity
         {
             get => intensity;

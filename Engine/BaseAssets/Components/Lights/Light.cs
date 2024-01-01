@@ -6,8 +6,10 @@ namespace Engine.BaseAssets.Components
 {
     public abstract class Light : BehaviourComponent
     {
-        public Vector3f color = new Vector3f(1f, 1f, 1f);
-        protected float brightness = 1.0f;
+        [SerializedField]
+        private float brightness = 1.0f;
+        public Vector3f Color = new Vector3f(1f, 1f, 1f);
+
         public float Brightness
         {
             get => brightness;

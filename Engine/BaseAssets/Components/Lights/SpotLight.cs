@@ -9,7 +9,19 @@ namespace Engine.BaseAssets.Components
 {
     public class SpotLight : Light
     {
+        private const float Near = 0.001f;
+
+        [SerializedField]
         private float radius = 1.0f;
+        [SerializedField]
+        private float intensity = 0.4f;
+        [SerializedField]
+        private float angularIntensity = 0.4f;
+        [SerializedField]
+        private float angle = (float)Math.PI / 3.0f;
+        [SerializedField]
+        private int shadowSize = 1024;
+
         public float Radius
         {
             get => radius;
@@ -20,7 +32,7 @@ namespace Engine.BaseAssets.Components
                 radius = value;
             }
         }
-        private float intensity = 0.4f;
+
         public float Intensity
         {
             get => intensity;
@@ -31,7 +43,7 @@ namespace Engine.BaseAssets.Components
                 intensity = value;
             }
         }
-        private float angularIntensity = 0.4f;
+
         public float AngularIntensity
         {
             get => angularIntensity;
@@ -42,7 +54,7 @@ namespace Engine.BaseAssets.Components
                 angularIntensity = value;
             }
         }
-        private float angle = (float)Math.PI / 3.0f;
+
         public float Angle
         {
             get => angle;
@@ -53,8 +65,7 @@ namespace Engine.BaseAssets.Components
                 angle = value;
             }
         }
-        public static readonly float NEAR = 0.001f;
-        private int shadowSize = 1024;
+
         public int ShadowSize
         {
             get => shadowSize;
@@ -65,7 +76,8 @@ namespace Engine.BaseAssets.Components
                 shadowSize = value;
             }
         }
-        public Matrix4x4f lightSpace
+
+        public Matrix4x4f LightSpace
         {
             get
             {
@@ -73,12 +85,13 @@ namespace Engine.BaseAssets.Components
 
                 Matrix4x4f proj = new Matrix4x4f(ctg, 0, 0, 0,
                                                  0, 0, ctg, 0,
-                                                 0, radius / (radius - NEAR), 0, -radius * NEAR / (radius - NEAR),
+                                                 0, radius / (radius - Near), 0, -radius * Near / (radius - Near),
                                                  0, 1, 0, 0);
 
                 return proj * (Matrix4x4f)GameObject.Transform.View;
             }
         }
+
         public Texture ShadowTexture { get; private set; }
 
         public SpotLight()
