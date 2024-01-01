@@ -48,6 +48,8 @@ namespace Engine
             builder.WithTypeResolver(new SerializedObjectTypeResolver());
             builder.WithTypeInspector(_ => new SerializedFieldsTypeInspector());
             builder.WithTypeConverter(SerializedObjectConverter);
+            
+            builder.ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull | DefaultValuesHandling.OmitDefaults | DefaultValuesHandling.OmitEmptyCollections);
 
             return builder.Build();
         }
