@@ -8,11 +8,10 @@ namespace Editor.AssetsImport
     {
         public const string MetaExtension = ".meta";
 
-        public string Guid = System.Guid.NewGuid().ToString("N");
+        public Guid Guid = Guid.NewGuid();
         public DateTime ImportDate = DateTime.MinValue;
         
-        [YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitEmptyCollections)]
-        public Dictionary<(Type, string), string> SubAssets = new Dictionary<(Type, string), string>();
+        public Dictionary<(Type, string), Guid> SubAssets = new Dictionary<(Type, string), Guid>();
 
         public object ImportSettings = null;
     }

@@ -8,6 +8,7 @@ using SharpDX.DXGI;
 
 namespace Engine.AssetsData
 {
+    [AssetData<Texture>]
     public class TextureData : AssetData
     {
         public int PixelWidth;
@@ -58,11 +59,8 @@ namespace Engine.AssetsData
             PixelBuffer = reader.ReadBytes(bufferLength);
         }
 
-        public override Texture ToRealAsset(Type assetType)
+        public override Texture ToRealAsset()
         {
-            if (assetType != typeof(Texture))
-                return null;
-
             Texture2DDescription description = new Texture2DDescription()
             {
                 Width = PixelWidth,

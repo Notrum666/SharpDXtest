@@ -8,14 +8,17 @@ namespace Engine.AssetsData
         public virtual void Serialize(BinaryWriter writer) { }
         public virtual void Deserialize(BinaryReader reader) { }
 
-        public virtual BaseAsset ToRealAsset(Type assetType)
+        public virtual BaseAsset ToRealAsset()
         {
             return null;
         }
 
-        public BaseAsset ToRealAsset(Type assetType, string guid)
+        public BaseAsset ToRealAsset(Guid guid)
         {
-            return ToRealAsset(assetType)?.WithGuid(guid);
+            return ToRealAsset()?.WithGuid(guid);
         }
     }
+
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public class AssetDataAttribute<T> : Attribute where T : BaseAsset { }
 }

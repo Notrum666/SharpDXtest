@@ -38,22 +38,22 @@ namespace Editor.AssetsImport
             YamlManager.SaveToFile(assetMetaPath, assetMetaData);
         }
 
-        public string AddMainAsset<T>(T mainAsset) where T : AssetData
+        public Guid AddMainAsset<T>(T mainAsset) where T : AssetData
         {
-            string guid = assetMetaData.Guid;
+            Guid guid = assetMetaData.Guid;
 
-            AssetsManager.SaveAsset(AssetContentPath, guid, mainAsset);
+            AssetsManager.SaveAssetData(AssetContentPath, guid, mainAsset);
             return guid;
         }
 
-        public string AddSubAsset<T>(string identifier, T subAsset) where T : AssetData
+        public Guid AddSubAsset<T>(string identifier, T subAsset) where T : AssetData
         {
             (Type, string) subAssetKey = (typeof(T), identifier);
 
-            string subGuid = assetMetaData.SubAssets.GetValueOrDefault(subAssetKey, Guid.NewGuid().ToString("N"));
+            Guid subGuid = assetMetaData.SubAssets.GetValueOrDefault(subAssetKey, Guid.NewGuid());
             assetMetaData.SubAssets[subAssetKey] = subGuid;
 
-            AssetsManager.SaveAsset(AssetContentPath, subGuid, subAsset);
+            AssetsManager.SaveAssetData(AssetContentPath, subGuid, subAsset);
             return subGuid;
         }
 

@@ -9,6 +9,7 @@ using Engine.Serialization;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
 using YamlDotNet.Serialization.Utilities;
+using YamlGuidConverter = YamlDotNet.Serialization.Converters.GuidConverter;
 
 namespace Engine
 {
@@ -18,12 +19,14 @@ namespace Engine
         private static IDeserializer Deserializer { get; }
 
         private static CustomObjectFactory ObjectFactory { get; }
+        private static GuidConverter GuidConverter { get; }
         private static BaseAssetConverter BaseAssetConverter { get; }
         private static SerializedObjectConverter SerializedObjectConverter { get; }
 
         static YamlManager()
         {
-            BaseAssetConverter = new BaseAssetConverter();
+            GuidConverter = new GuidConverter();
+            BaseAssetConverter = new BaseAssetConverter(GuidConverter);
             ObjectFactory = new CustomObjectFactory(new DefaultObjectFactory());
 
             SerializedObjectConverter = new SerializedObjectConverter();
@@ -39,11 +42,14 @@ namespace Engine
             builder.EnsureRoundtrip();
 
             builder.RegisterTagMappedClasses();
+            builder.WithTypeConverter(GuidConverter, s => s.InsteadOf<YamlGuidConverter>());
             builder.WithTypeConverter(BaseAssetConverter);
 
             builder.WithTypeResolver(new SerializedObjectTypeResolver());
             builder.WithTypeInspector(_ => new SerializedFieldsTypeInspector());
             builder.WithTypeConverter(SerializedObjectConverter);
+            
+            builder.ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull | DefaultValuesHandling.OmitDefaults | DefaultValuesHandling.OmitEmptyCollections);
 
             return builder.Build();
         }
@@ -54,12 +60,15 @@ namespace Engine
 
             builder.RegisterTagMappedClasses();
             builder.WithObjectFactory(ObjectFactory);
+            builder.WithTypeConverter(GuidConverter, s => s.InsteadOf<YamlGuidConverter>());
             builder.WithTypeConverter(BaseAssetConverter);
 
             builder.WithTypeResolver(new SerializedObjectTypeResolver());
             builder.WithTypeInspector(_ => new SerializedFieldsTypeInspector());
             builder.WithNodeTypeResolver(new SerializedObjectNodeTypeResolver());
             builder.WithTypeConverter(SerializedObjectConverter);
+            
+            builder.IgnoreUnmatchedProperties();
 
             return builder.Build();
         }
@@ -156,7 +165,7 @@ namespace Engine
                     ClearObjectInstance(type);
                     return instance;
                 }
-                
+
                 if (type == typeof(GameObject) || type == typeof(Transform))
                     return FormatterServices.GetUninitializedObject(type);
 

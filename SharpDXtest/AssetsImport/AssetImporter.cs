@@ -14,7 +14,7 @@ namespace Editor.AssetsImport
 
         protected abstract void OnImportAsset(AssetImportContext importContext);
 
-        public string ImportAsset(string assetSourcePath)
+        public Guid ImportAsset(string assetSourcePath)
         {
             ValidateExtension(assetSourcePath);
             AssetImportContext importContext = new AssetImportContext(assetSourcePath);

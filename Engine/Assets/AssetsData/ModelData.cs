@@ -6,22 +6,23 @@ using YamlDotNet.Serialization;
 
 namespace Engine.AssetsData
 {
+    [AssetData<Model>]
     public class ModelData : AssetData
     {
-        public string SkeletonGuid = null;
+        public Guid SkeletonGuid = Guid.Empty;
 
-        public Dictionary<string, string> EmbeddedTexturesGuids = new Dictionary<string, string>();
+        public Dictionary<string, Guid> EmbeddedTexturesGuids = new Dictionary<string, Guid>();
 
-        public List<string> MaterialsGuids = new List<string>();
+        public List<Guid> MaterialsGuids = new List<Guid>();
 
         public List<MeshData> Meshes = new List<MeshData>();
 
-        public void AddEmbeddedTexture(string fileName, string guid)
+        public void AddEmbeddedTexture(string fileName, Guid guid)
         {
             EmbeddedTexturesGuids[fileName] = guid;
         }
 
-        public string GetEmbeddedTexture(string fileName)
+        public Guid GetEmbeddedTexture(string fileName)
         {
             return EmbeddedTexturesGuids[fileName];
         }
@@ -36,17 +37,14 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Model ToRealAsset(Type assetType)
+        public override Model ToRealAsset()
         {
-            if (assetType != typeof(Model))
-                return null;
-
             Model model = new Model();
 
             foreach (MeshData meshData in Meshes)
             {
                 Mesh mesh = new Mesh();
-                mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material, typeof(MaterialData));
+                mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material);
 
                 mesh.vertices = new List<Mesh.PrimitiveVertex>();
                 foreach (VertexData vertexData in meshData.Vertices)
@@ -71,7 +69,7 @@ namespace Engine.AssetsData
     public class MeshData
     {
         public string Name;
-        public string Material;
+        public Guid Material;
 
         public List<VertexData> Vertices = new List<VertexData>();
         public List<int> Indices = new List<int>();

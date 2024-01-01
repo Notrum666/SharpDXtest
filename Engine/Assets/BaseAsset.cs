@@ -4,11 +4,11 @@ namespace Engine
 {
     public class BaseAsset : IDisposable
     {
-        public string Guid { get; private set; }
+        public Guid Guid { get; private set; }
 
         private bool disposed = false;
 
-        internal BaseAsset WithGuid(string guid)
+        internal BaseAsset WithGuid(Guid guid)
         {
             Guid = guid;
             return this;

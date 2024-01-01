@@ -6,6 +6,7 @@ using YamlDotNet.Serialization.Callbacks;
 
 namespace Engine.AssetsData
 {
+    [AssetData<Scene>]
     public class SceneData : AssetData
     {
         public List<SerializableObject> SerializableObjects = new List<SerializableObject>();
@@ -20,11 +21,8 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Scene ToRealAsset(Type assetType)
+        public override Scene ToRealAsset()
         {
-            if (assetType != typeof(Scene))
-                return null;
-
             Scene scene = new Scene();
 
             foreach (SerializableObject serializableObject in SerializableObjects)
@@ -32,7 +30,7 @@ namespace Engine.AssetsData
                 if (serializableObject is GameObject gameObject)
                     scene.AddObject(gameObject);
             }
-            
+
             scene.ProcessNewObjects();
 
             return scene;

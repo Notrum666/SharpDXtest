@@ -1,13 +1,13 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-
 using SharpDX;
 using SharpDX.Multimedia;
 using SharpDX.XAudio2;
 
 namespace Engine.AssetsData
 {
+    [AssetData<Sound>]
     public class SoundData : AssetData
     {
         private const int PcmNativeSizeInBytes = 16;
@@ -65,11 +65,8 @@ namespace Engine.AssetsData
             DecodedPacketsInfo = reader.ReadBytes(packetsLength);
         }
 
-        public override Sound ToRealAsset(Type assetType)
+        public override Sound ToRealAsset()
         {
-            if (assetType != typeof(Sound))
-                return null;
-
             using DataStream dataStream = DataStream.Create(AudioDataBuffer, true, false);
             AudioBuffer audioBuffer = new AudioBuffer(dataStream);
             WaveFormat waveFormat = WaveFormat.MarshalFrom(FormatBuffer);
