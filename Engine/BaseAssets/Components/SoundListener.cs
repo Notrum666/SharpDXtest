@@ -1,5 +1,4 @@
 ﻿using LinearAlgebra;
-
 using SharpDX.X3DAudio;
 
 namespace Engine.BaseAssets.Components
@@ -13,18 +12,23 @@ namespace Engine.BaseAssets.Components
             set
             {
                 if (value)
-                    makeCurrent();
+                    MakeCurrent();
                 else
                 {
                     if (IsCurrent)
-                        SoundCore.CurrentListener = this;
+                        SoundCore.CurrentListener = null;
                 }
             }
         }
 
-        public SoundListener()
+        protected override void OnInitialized()
         {
             Listener = new Listener();
+
+            if (SoundCore.CurrentListener == null) //TODO: Unity allows only 1 AudioListener in the scene. Otherwise throws warning
+            {
+                IsCurrent = true;
+            }
         }
 
         public override void Update()
@@ -33,14 +37,17 @@ namespace Engine.BaseAssets.Components
             Listener.Position.X = -(float)pos.x;
             Listener.Position.Y = (float)pos.y;
             Listener.Position.Z = (float)pos.z;
+
             Vector3 forward = GameObject.Transform.Forward;
             Listener.OrientFront.X = -(float)forward.x;
             Listener.OrientFront.Y = (float)forward.y;
             Listener.OrientFront.Z = (float)forward.z;
+
             Vector3 up = GameObject.Transform.Up;
             Listener.OrientTop.X = -(float)up.x;
             Listener.OrientTop.Y = (float)up.y;
             Listener.OrientTop.Z = (float)up.z;
+
             Rigidbody rb = GameObject.GetComponent<Rigidbody>();
             if (rb != null)
             {
@@ -51,7 +58,7 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        public void makeCurrent()
+        public void MakeCurrent()
         {
             SoundCore.CurrentListener = this;
         }
