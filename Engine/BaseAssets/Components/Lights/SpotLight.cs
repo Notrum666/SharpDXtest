@@ -26,7 +26,7 @@ namespace Engine.BaseAssets.Components
         public Ranged<float> Intensity => new Ranged<float>(ref intensity, 0.0f, 1.0f);
         public Ranged<float> AngularIntensity => new Ranged<float>(ref angularIntensity, 0.0f, 1.0f);
         public Ranged<float> Angle => new Ranged<float>(ref angle, 0.0f, MathF.PI);
-        public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 0);
+        public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 1);
 
         public Matrix4x4f LightSpace
         {

@@ -12,7 +12,7 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private int shadowSize = 2048;
 
-        public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 0);
+        public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 1);
         public static float[] CascadeFrustumDistances => cascadeFrustumDistances;
 
         private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.1f, 0.3f, 1.0f };

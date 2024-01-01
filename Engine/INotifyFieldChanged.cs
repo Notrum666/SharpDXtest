@@ -4,6 +4,6 @@ namespace Engine
 {
     public interface INotifyFieldChanged
     {
-        public void OnInspectorFieldChanged(FieldInfo fieldInfo);
+        public void OnFieldChanged(FieldInfo fieldInfo);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using LinearAlgebra;
+
 using SharpDX.X3DAudio;
 
 namespace Engine.BaseAssets.Components
@@ -25,10 +26,8 @@ namespace Engine.BaseAssets.Components
         {
             Listener = new Listener();
 
-            if (SoundCore.CurrentListener == null) //TODO: Unity allows only 1 AudioListener in the scene. Otherwise throws warning
-            {
+            if (SoundCore.CurrentListener == null)
                 IsCurrent = true;
-            }
         }
 
         public override void Update()

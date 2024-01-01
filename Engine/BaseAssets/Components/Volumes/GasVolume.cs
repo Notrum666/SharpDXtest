@@ -33,7 +33,7 @@ namespace Engine.BaseAssets.Components
             Size = new Vector3f(1.0f, 1.0f, 1.0f);
         }
         
-        public override void OnInspectorFieldChanged(FieldInfo fieldInfo)
+        public override void OnFieldChanged(FieldInfo fieldInfo)
         {
             GenerateVertices();
         }

@@ -23,12 +23,10 @@ namespace Engine.BaseAssets.Components
 
         public Material[] Materials => materials;
 
-        public override void OnInspectorFieldChanged(FieldInfo fieldInfo)
+        public override void OnFieldChanged(FieldInfo fieldInfo)
         {
             if (fieldInfo.Name == nameof(model))
-            {
                 RefreshMaterialsSlots();
-            }
         }
 
         private void RefreshMaterialsSlots()

@@ -50,7 +50,7 @@ namespace Engine
 
         internal virtual void OnDeserialized() { }
 
-        public virtual void OnInspectorFieldChanged(FieldInfo fieldInfo) { }
+        public virtual void OnFieldChanged(FieldInfo fieldInfo) { }
 
         #region Runtime
 

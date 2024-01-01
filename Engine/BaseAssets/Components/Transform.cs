@@ -55,7 +55,7 @@ namespace Engine.BaseAssets.Components
                 Parent.Invalidated += InvalidateCachedData;
         }
 
-        public override void OnInspectorFieldChanged(FieldInfo fieldInfo)
+        public override void OnFieldChanged(FieldInfo fieldInfo)
         {
             InvalidateCachedData();
         }

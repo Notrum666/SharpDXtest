@@ -83,7 +83,7 @@ namespace Engine.BaseAssets.Components
             InvalidateMatrices();
         }
 
-        public override void OnInspectorFieldChanged(FieldInfo fieldInfo)
+        public override void OnFieldChanged(FieldInfo fieldInfo)
         {
             InvalidateMatrices();
         }
