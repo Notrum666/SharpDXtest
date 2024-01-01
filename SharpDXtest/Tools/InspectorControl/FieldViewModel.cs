@@ -28,7 +28,7 @@ namespace Editor
                 {
                     targetField.SetValue(parentObject, value);
                     if (parentObject is INotifyFieldChanged notifyFieldChanged)
-                        notifyFieldChanged.OnFieldChanged(targetField);
+                        notifyFieldChanged.OnInspectorFieldChanged(targetField);
                 }
                 else
                 {
