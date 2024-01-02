@@ -24,5 +24,20 @@ namespace Editor.GameProject
         {
             InitializeComponent();
         }
+
+        private void OnCreateButtonClick(object sender, RoutedEventArgs e)
+        {
+            CreateProjectViewModel vm = DataContext as CreateProjectViewModel;
+            string projectPath = vm.CreateProject(templateListBox.SelectedItem as ProjectTemplate);
+
+            bool dialogResult = false;
+            var win = Window.GetWindow(this);
+            if (!string.IsNullOrEmpty(projectPath))
+            {
+                dialogResult = true;
+            }
+            win.DialogResult = dialogResult;
+            win.Close();
+        }
     }
 }

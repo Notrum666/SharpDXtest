@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -32,8 +33,8 @@ namespace Editor.GameProject
     internal class CreateProjectViewModel : ViewModelBase
     {
         //TODO: get the path from the installation location
-        private const string TemplatePath = @"..\..\..\..\..\SharpDxTest\ProjectTemplates";
-        private const string ProjectRootFolder = "SharpDxProject";
+        private const string TemplatePath = @"..\..\..\..\..\SharpDxTest\ProjectTemplates\";
+        private const string ProjectRootFolder = "SharpDxProjects";
 
         private string projectName = "NewProject";
         public string ProjectName
@@ -44,6 +45,7 @@ namespace Editor.GameProject
                 if (value != projectName)
                 {
                     projectName = value;
+                    ValidateProjectPath();
                     OnPropertyChanged();
                 }
             }
@@ -59,6 +61,35 @@ namespace Editor.GameProject
                 if (value != projectPath)
                 {
                     projectPath = value;
+                    ValidateProjectPath();
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool isValid;
+        public bool IsValid
+        {
+            get => isValid;
+            set
+            {
+                if (value != isValid)
+                {
+                    isValid = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private string errorMsg;
+        public string ErrorMsg
+        {
+            get => errorMsg;
+            set
+            {
+                if (value != errorMsg)
+                {
+                    errorMsg = value;
                     OnPropertyChanged();
                 }
             }
@@ -99,11 +130,91 @@ namespace Editor.GameProject
                     projectTemplates.Add(template);
                 }
 
+                ValidateProjectPath();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
             }
+        }
+
+        public string CreateProject(ProjectTemplate template)
+        {
+            ValidateProjectPath();
+            if (!IsValid)
+                return string.Empty;
+
+            if (!Path.EndsInDirectorySeparator(ProjectPath))
+                ProjectPath += @"\";
+            string path = $@"{ProjectPath}{ProjectName}\";
+
+            try
+            {
+                Directory.CreateDirectory(path);
+                foreach (string folder in template.Folders)
+                {
+                    //string folderPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), folder));
+                    string folderPath = Path.Combine(path, folder);
+                    Directory.CreateDirectory(folderPath);
+                }
+                DirectoryInfo dirInfo = new DirectoryInfo(path + @".SharpDX\");
+                dirInfo.Attributes |= FileAttributes.Hidden;
+                File.Copy(template.IconFilePath, Path.GetFullPath(Path.Combine(dirInfo.FullName, "Icon.png")));
+                File.Copy(template.ScreenshotFilePath, Path.GetFullPath(Path.Combine(dirInfo.FullName, "Screenshot.png")));
+
+                var projectXml = File.ReadAllText(template.ProjectFilePath);
+                projectXml = string.Format(projectXml, ProjectName, ProjectPath);
+
+                string projectPath = Path.GetFullPath(Path.Combine(path, $"{ProjectName}{ProjectViewModel.Extension}"));
+                File.WriteAllText(projectPath, projectXml);
+
+                return path;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                //TODO: log error
+                return string.Empty;
+            }
+        }
+
+        private bool ValidateProjectPath()
+        {
+            string path = ProjectPath;
+
+            if (!Path.EndsInDirectorySeparator(path))
+                path += @"\";
+
+            path += $@"{ProjectName}\";
+
+            IsValid = false;
+            if (string.IsNullOrEmpty(ProjectName.Trim()))
+            {
+                ErrorMsg = "Type in a project name.";
+            }
+            else if (ProjectName.IndexOfAny(Path.GetInvalidFileNameChars()) != -1)
+            {
+                ErrorMsg = "Invalid character(s) used in project name.";
+            }
+            else if (string.IsNullOrEmpty(ProjectPath.Trim()))
+            {
+                ErrorMsg = "Select a valid project folder.";
+            }
+            else if (ProjectPath.IndexOfAny(Path.GetInvalidPathChars()) != -1)
+            {
+                ErrorMsg = "Invalid character(s) used in project path.";
+            }
+            else if(Directory.Exists(path) && Directory.EnumerateFileSystemEntries(path).Any())
+            {
+                ErrorMsg = "Selected project folder already exists and is not empty.";
+            }
+            else
+            {
+                ErrorMsg = string.Empty;
+                IsValid = true;
+            }
+
+            return IsValid;
         }
     }
 }
