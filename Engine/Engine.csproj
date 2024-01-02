@@ -8,19 +8,20 @@
 		<ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
 		<AssemblyTitle>Engine</AssemblyTitle>
 		<Product>Engine</Product>
-		<Copyright>Copyright ©  2022</Copyright>
+		<Copyright>Copyright © 2022</Copyright>
 		<AssemblyVersion>1.0.0.0</AssemblyVersion>
 		<FileVersion>1.0.0.0</FileVersion>
 		<Nullable>warnings</Nullable>
 		<Configurations>Debug;Release;GraphicsDebug</Configurations>
+		<Platforms>x64</Platforms>
 	</PropertyGroup>
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
 		<UseVSHostingProcess>true</UseVSHostingProcess>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='GraphicsDebug|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='GraphicsDebug|x64'">
 		<UseVSHostingProcess>true</UseVSHostingProcess>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'GraphicsDebug|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='GraphicsDebug|x64'">
 		<DebugSymbols>true</DebugSymbols>
 		<OutputPath>bin\GraphicsDebug\</OutputPath>
 		<DefineConstants>TRACE;DEBUG;GraphicsDebugging</DefineConstants>
@@ -116,10 +117,10 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="BaseAssets\Textures\" />
+		<Folder Include="BaseAssets\Textures\"/>
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\LinearAlgebra\LinearAlgebra.csproj" />
+		<ProjectReference Include="..\LinearAlgebra\LinearAlgebra.csproj"/>
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="BaseAssets\Shaders\DeferredRender\deferred_geometry.vsh">
@@ -127,18 +128,18 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Lib.Harmony" Version="2.2.2" />
-		<PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
-		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="SharpDX" Version="4.2.0" />
-		<PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
-		<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
-		<PackageReference Include="SharpDX.Direct3D9" Version="4.2.0" />
-		<PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
-		<PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
-		<PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
-		<PackageReference Include="SharpDX.XAudio2" Version="4.2.0" />
-		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-		<PackageReference Include="YamlDotNet" Version="13.7.1" />
+		<PackageReference Include="Lib.Harmony" Version="2.2.2"/>
+		<PackageReference Include="AssimpNet" Version="5.0.0-beta1"/>
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0"/>
+		<PackageReference Include="SharpDX" Version="4.2.0"/>
+		<PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0"/>
+		<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0"/>
+		<PackageReference Include="SharpDX.Direct3D9" Version="4.2.0"/>
+		<PackageReference Include="SharpDX.DirectInput" Version="4.2.0"/>
+		<PackageReference Include="SharpDX.DXGI" Version="4.2.0"/>
+		<PackageReference Include="SharpDX.Mathematics" Version="4.2.0"/>
+		<PackageReference Include="SharpDX.XAudio2" Version="4.2.0"/>
+		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0"/>
+		<PackageReference Include="YamlDotNet" Version="13.7.1"/>
 	</ItemGroup>
 </Project>
