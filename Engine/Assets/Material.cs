@@ -78,7 +78,7 @@ namespace Engine
 
         #region Legacy
 
-        public static Material Default => new Material()
+        public static readonly Material Default = new Material()
         {
             albedo = new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource),
             normal = new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource),

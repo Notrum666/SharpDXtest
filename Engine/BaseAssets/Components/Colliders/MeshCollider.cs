@@ -84,19 +84,19 @@ namespace Engine.BaseAssets.Components.Colliders
             polygons = new List<int[]>();
             foreach (Mesh mesh in model.Meshes)
             {
-                for (int i = 0; i < mesh.indices.Count;)
+                for (int i = 0; i < mesh.Indices.Count;)
                 {
-                    if (mesh.indices[i] == -1) // restart index
+                    if (mesh.Indices[i] == -1) // restart index
                     {
                         ++i; continue;
                     }
-                    int[] polygonIndices = { mesh.indices[i] + vertices.Count,
-                                             mesh.indices[i + 1] + vertices.Count,
-                                             mesh.indices[i + 2] + vertices.Count };
+                    int[] polygonIndices = { mesh.Indices[i] + vertices.Count,
+                                             mesh.Indices[i + 1] + vertices.Count,
+                                             mesh.Indices[i + 2] + vertices.Count };
                     polygons.Add(polygonIndices);
                     i += 3;
                 }
-                foreach (Mesh.PrimitiveVertex vertex in mesh.vertices)
+                foreach (Mesh.PrimitiveVertex vertex in mesh.Vertices)
                     vertices.Add(vertex.v);
             }
 

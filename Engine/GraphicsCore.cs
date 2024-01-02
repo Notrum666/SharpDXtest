@@ -360,8 +360,8 @@ namespace Engine
                     continue;
 
                 Transform transform = meshComponent.GameObject.Transform;
-                pipeline.UpdateUniform("model", transform.Model);
-                pipeline.UpdateUniform("modelNorm", transform.Model.inverse().transposed());
+                pipeline.UpdateUniform("model", (Matrix4x4f)transform.Model);
+                pipeline.UpdateUniform("modelNorm", (Matrix4x4f)transform.Model.inverse().transposed());
 
                 pipeline.UploadUpdatedUniforms();
                 meshComponent.Render();

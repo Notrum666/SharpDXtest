@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+
 using LinearAlgebra;
+
 using YamlDotNet.Serialization;
 
 namespace Engine.AssetsData
@@ -46,7 +48,6 @@ namespace Engine.AssetsData
                 Mesh mesh = new Mesh();
                 mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material);
 
-                mesh.vertices = new List<Mesh.PrimitiveVertex>();
                 foreach (VertexData vertexData in meshData.Vertices)
                 {
                     Mesh.PrimitiveVertex vertex = new Mesh.PrimitiveVertex
@@ -55,10 +56,11 @@ namespace Engine.AssetsData
                         n = vertexData.Normal,
                         t = vertexData.Texture
                     };
-                    mesh.vertices.Add(vertex);
+                    mesh.Vertices.Add(vertex);
                 }
-                mesh.indices.AddRange(meshData.Indices);
+                mesh.Indices.AddRange(meshData.Indices);
 
+                mesh.GenerateGPUData();
                 model.Meshes.Add(mesh);
             }
 
