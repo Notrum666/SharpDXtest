@@ -209,7 +209,7 @@ namespace Editor.AssetsImport
         {
             foreach (int meshIndex in currentNode.MeshIndices)
             {
-                ProcessMesh(currentScene.Meshes[meshIndex], currentNode.Name);
+                ProcessMesh(currentScene.Meshes[meshIndex], currentNode.Name, meshIndex);
             }
 
             foreach (Node childNode in currentNode.Children)
@@ -218,11 +218,11 @@ namespace Editor.AssetsImport
             }
         }
 
-        private void ProcessMesh(Mesh mesh, string nodeName)
+        private void ProcessMesh(Mesh mesh, string nodeName, int meshIndex)
         {
             MeshData meshData = new MeshData
             {
-                Name = $"{nodeName}_{mesh.Name}"
+                Name = $"{nodeName}_{mesh.Name}_{meshIndex}"
             };
 
             if (!currentImportSettings.MeshMaterialsOverride.ContainsKey(meshData.Name))
