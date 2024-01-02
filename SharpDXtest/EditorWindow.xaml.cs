@@ -6,7 +6,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
-
+using Editor.GameProject;
 using Engine;
 using Engine.BaseAssets.Components;
 using LinearAlgebra;
@@ -40,6 +40,8 @@ namespace Editor
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            OpenProjectBrowserDialog();
+
             var mainPath = Directory.GetCurrentDirectory();
             var solutionPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
             AssetsManager.InitializeInFolder(solutionPath);
@@ -62,6 +64,13 @@ namespace Editor
         private void EditorWindowInst_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Keyboard.ClearFocus();
+        }
+
+        private void OpenProjectBrowserDialog()
+        {
+            var projectBrowser = new ProjectBrowserDialog();
+            if (projectBrowser.ShowDialog() == false)
+                Application.Current.Shutdown();
         }
 
         private void CreateBaseScene()
