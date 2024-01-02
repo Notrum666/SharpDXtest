@@ -59,6 +59,8 @@ namespace Editor
         {
             if (EngineCore.IsAlive)
                 EngineCore.Stop();
+
+            ProjectViewModel.Current?.Unload();
         }
 
         private void EditorWindowInst_MouseDown(object sender, MouseButtonEventArgs e)
@@ -69,8 +71,13 @@ namespace Editor
         private void OpenProjectBrowserDialog()
         {
             var projectBrowser = new ProjectBrowserDialog();
-            if (projectBrowser.ShowDialog() == false)
+            if (projectBrowser.ShowDialog() == false || projectBrowser.DataContext == null)
                 Application.Current.Shutdown();
+            else
+            {
+                ProjectViewModel.Current?.Unload();
+                DataContext = projectBrowser.DataContext;
+            }
         }
 
         private void CreateBaseScene()

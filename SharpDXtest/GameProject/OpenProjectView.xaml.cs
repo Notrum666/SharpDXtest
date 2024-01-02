@@ -24,5 +24,31 @@ namespace Editor.GameProject
         {
             InitializeComponent();
         }
+
+        private void OnOpenButtonClick(object sender, RoutedEventArgs e)
+        {
+            OpenProject();
+        }
+
+        private void OnProjectListItemDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            OpenProject();
+        }
+
+        private void OpenProject()
+        {
+            var project = OpenProjectViewModel.Open(projectsListBox.SelectedItem as ProjectData);
+
+            bool dialogResult = false;
+            var win = Window.GetWindow(this);
+            if(project != null)
+            {
+                dialogResult = true;
+                win.DataContext = project;
+            }
+
+            win.DialogResult = dialogResult;
+            win.Close();
+        }
     }
 }

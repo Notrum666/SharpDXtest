@@ -28,6 +28,21 @@ namespace Editor.GameProject
         [DataMember]
         public ProjectViewModel Project { get; private set; }
 
+        private bool isActive;
+        [DataMember]
+        public bool IsActive
+        {
+            get => isActive;
+            set
+            {
+                if (value != isActive)
+                {
+                    isActive = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public SceneViewModel(ProjectViewModel project, string name)
         {
             Debug.Assert(project != null);
