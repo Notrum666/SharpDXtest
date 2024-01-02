@@ -342,5 +342,5 @@ healthchecksdb
 !SharpDXtest/Assets/**
 !SharpDXtest/BaseAssets/**
 
-![Cc]ontent/**/*.meta
+![Cc]ontent/**
 [Aa]rtifact/

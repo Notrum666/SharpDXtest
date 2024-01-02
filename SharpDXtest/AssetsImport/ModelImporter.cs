@@ -9,7 +9,7 @@ using LinearAlgebra;
 
 namespace Editor.AssetsImport
 {
-    [AssetImporter("fbx", "dae")]
+    [AssetImporter("fbx", "dae", "obj")]
     public class ModelImporter : AssetImporter
     {
         private Scene currentScene;
@@ -31,7 +31,7 @@ namespace Editor.AssetsImport
 
             PostProcessSteps postProcessSteps = PostProcessSteps.FlipUVs
                                                 | PostProcessSteps.FlipWindingOrder
-                                                // | PostProcessSteps.MakeLeftHanded
+                                                | PostProcessSteps.MakeLeftHanded
                                                 | PostProcessSteps.Triangulate
                                                 // | PostProcessSteps.PreTransformVertices
                                                 | PostProcessSteps.GenerateNormals
@@ -105,6 +105,12 @@ namespace Editor.AssetsImport
         {
             MaterialData materialData = new MaterialData();
 
+            if (material.HasColorDiffuse)
+            {
+                Color4D color = material.ColorDiffuse;
+                materialData.BaseColor = new Vector4f(color.R, color.G, color.B, color.A);
+            }
+            
             foreach (TextureType textureType in Enum.GetValues<TextureType>())
             {
                 MaterialTextureType materialTextureType = ConvertTextureType(textureType);
@@ -203,7 +209,7 @@ namespace Editor.AssetsImport
         {
             foreach (int meshIndex in currentNode.MeshIndices)
             {
-                ProcessMesh(currentScene.Meshes[meshIndex], currentNode.Name);
+                ProcessMesh(currentScene.Meshes[meshIndex], currentNode.Name, meshIndex);
             }
 
             foreach (Node childNode in currentNode.Children)
@@ -212,11 +218,11 @@ namespace Editor.AssetsImport
             }
         }
 
-        private void ProcessMesh(Mesh mesh, string nodeName)
+        private void ProcessMesh(Mesh mesh, string nodeName, int meshIndex)
         {
             MeshData meshData = new MeshData
             {
-                Name = $"{nodeName}_{mesh.Name}"
+                Name = $"{nodeName}_{mesh.Name}_{meshIndex}"
             };
 
             if (!currentImportSettings.MeshMaterialsOverride.ContainsKey(meshData.Name))
