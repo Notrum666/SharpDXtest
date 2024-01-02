@@ -7,7 +7,7 @@ using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
 {
-    public abstract class Collider : Component
+    public abstract class Collider : BehaviourComponent
     {
         private class PolygonDistanceComparer : IComparer<double>
         {

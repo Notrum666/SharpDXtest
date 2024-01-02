@@ -1,8 +1,4 @@
-using System.IO;
-
-using Engine;
 using Engine.AssetsData;
-
 using SharpDX.Multimedia;
 
 namespace Editor.AssetsImport
@@ -15,22 +11,18 @@ namespace Editor.AssetsImport
             public string Name = "SoundShit";
         }
 
-        protected override SoundImportSettings GetDefaultSettings()
+        protected override void OnImportAsset(AssetImportContext importContext)
         {
-            return new SoundImportSettings();
-        }
-
-        protected override SoundData OnImportAsset(string assetPath, AssetMeta assetMeta)
-        {
-            using SoundStream stream = new SoundStream(File.OpenRead(assetPath));
+            SoundImportSettings soundSettings = importContext.GetImportSettings<SoundImportSettings>();
+            using SoundStream soundStream = new SoundStream(importContext.DataStream);
 
             SoundData soundData = new SoundData();
 
-            soundData.SetDataBuffer(stream.ToDataStream());
-            soundData.SetWaveFormat(stream.Format);
-            soundData.SetDecodedPacketsInfo(stream.DecodedPacketsInfo);
+            soundData.SetDataBuffer(soundStream.ToDataStream());
+            soundData.SetWaveFormat(soundStream.Format);
+            soundData.SetDecodedPacketsInfo(soundStream.DecodedPacketsInfo);
 
-            return soundData;
+            importContext.AddMainAsset(soundData);
         }
     }
 }

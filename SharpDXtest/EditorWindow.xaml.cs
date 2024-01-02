@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
@@ -36,9 +37,14 @@ namespace Editor
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            var mainPath = Directory.GetCurrentDirectory();
+            var solutionPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
+            AssetsManager.InitializeInFolder(solutionPath);
+            AssetsRegistry.InitializeInFolder(solutionPath);
+            
             EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
 
-            EngineCore.CurrentScene = AssetsManager_Old.LoadScene("Assets\\Scenes\\Scene5.xml");
+            CreateBaseScene();
 
             EngineCore.IsPaused = true;
             EngineCore.Run();
@@ -55,5 +61,11 @@ namespace Editor
             Keyboard.ClearFocus();
         }
 
+        private void CreateBaseScene()
+        {
+            Scene.CurrentScene = new Scene();
+            GameObject obj1 = GameObject.Instantiate("TestObject_1");
+            GameObject obj2 = GameObject.Instantiate("TestObject_2", obj1.Transform);
+        }
     }
 }

@@ -10,7 +10,7 @@ using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
 {
-    class BallController : Component
+    class BallController : BehaviourComponent
     {
         public GameObject CameraObject;
         public double Force;
@@ -31,7 +31,7 @@ namespace SharpDXtest.Assets.Components
                     obj.AddComponent<CubeCollider>();
                     obj.AddComponent<GravityForce>();
                     MeshComponent mesh = obj.AddComponent<MeshComponent>();
-                    mesh.Mesh = AssetsManager_Old.Meshes["Cube"];
+                    mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Cube");
                     // mesh.Material.Albedo = AssetsManager.Textures["Prototype_Light"];
                     double angle = rng.NextDouble() * 2 * Math.PI;
                     double distance = 5 + (1.0 - rng.NextDouble() * rng.NextDouble()) * 35;
@@ -41,8 +41,6 @@ namespace SharpDXtest.Assets.Components
 
                     //PointLight light = obj.addComponent<PointLight>();
                     //light.Radius = 10;
-
-                    EngineCore.AddObject(obj);
                 }
             }
         }
@@ -87,8 +85,8 @@ namespace SharpDXtest.Assets.Components
             other.GameObject.Transform.SetParent(GameObject.Transform);
             //other.gameObject.transform.Position = pos;
             //other.gameObject.transform.Rotation = quat;
-            other.GameObject.GetComponent<Rigidbody>().Enabled = false;
-            other.GameObject.GetComponent<Collider>().Enabled = false;
+            other.GameObject.GetComponent<Rigidbody>().LocalEnabled = false;
+            other.GameObject.GetComponent<Collider>().LocalEnabled = false;
 
             //other.gameObject.Destroy();
             //gameObject.transform.LocalScale = gameObject.transform.LocalScale + new Vector3(0.2, 0.2, 0.2);

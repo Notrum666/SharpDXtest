@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Enumeration;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Xml;
-using System.Xml.Linq;
-using System.Windows.Media.Imaging;
-using System.Windows;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using Engine.BaseAssets.Components;
+using Engine.AssetsData;
+
+
+#if false
+
+// TODO move this code
 
 using LinearAlgebra;
 
@@ -2258,6 +2254,13 @@ namespace Engine
         }
     }
     
+
+#endif
+
+using YamlDotNet.Core.Tokens;
+
+namespace Engine
+{
     public static partial class FileSystemHelper
     {
         private static readonly EnumerationOptions defaultEnumerator = new EnumerationOptions() { IgnoreInaccessible = true };
@@ -2331,5 +2334,50 @@ namespace Engine
 
         [GeneratedRegex("\\s\\d+$", RegexOptions.RightToLeft)]
         private static partial Regex FileNameIndexRegex();
+    }
+
+    public ref struct Ranged<T> where T : struct, INumber<T>
+    {
+        private readonly ref T value;
+
+        private readonly T? min;
+        private readonly T? max;
+
+        private readonly Action onSet;
+        private readonly string propertyName;
+
+        public Ranged(ref T value, T? min = null, T? max = null, Action onSet = null, [CallerMemberName] string propertyName = "")
+        {
+            this.value = ref value;
+            this.min = min;
+            this.max = max;
+            this.onSet = onSet;
+            this.propertyName = propertyName;
+        }
+
+        public void Set(T newValue)
+        {
+            if (newValue < min)
+            {
+                Logger.Log(LogType.Error, $"{propertyName} can't be less than {min}, but tried to set = {newValue}");
+                return;
+            }
+
+            if (newValue > max)
+            {
+                Logger.Log(LogType.Error, $"{propertyName} can't be greater than {max}, but tried to set = {newValue}");
+                return;
+            }
+
+            value = newValue;
+            onSet?.Invoke();
+        }
+
+        public static implicit operator T(Ranged<T> r) => r.value;
+
+        public override string ToString()
+        {
+            return value.ToString();
+        }
     }
 }

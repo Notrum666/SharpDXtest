@@ -9,7 +9,8 @@ namespace Engine.BaseAssets.Components.Colliders
 {
     public class MeshCollider : Collider
     {
-        public Mesh Mesh
+        public Model Mesh { set => Model = value; }
+        public Model Model
         {
             set => FromMesh(value);
         }
@@ -77,25 +78,25 @@ namespace Engine.BaseAssets.Components.Colliders
 
         public MeshCollider() { }
 
-        public void FromMesh(Mesh mesh)
+        public void FromMesh(Model model)
         {
             vertices = new List<Vector3>();
             polygons = new List<int[]>();
-            foreach (Primitive primitive in mesh.Primitives)
+            foreach (Mesh mesh in model.Meshes)
             {
-                for (int i = 0; i < primitive.indices.Count;)
+                for (int i = 0; i < mesh.indices.Count;)
                 {
-                    if (primitive.indices[i] == -1) // restart index
+                    if (mesh.indices[i] == -1) // restart index
                     {
                         ++i; continue;
                     }
-                    int[] polygonIndices = { primitive.indices[i] + vertices.Count,
-                                             primitive.indices[i + 1] + vertices.Count,
-                                             primitive.indices[i + 2] + vertices.Count };
+                    int[] polygonIndices = { mesh.indices[i] + vertices.Count,
+                                             mesh.indices[i + 1] + vertices.Count,
+                                             mesh.indices[i + 2] + vertices.Count };
                     polygons.Add(polygonIndices);
                     i += 3;
                 }
-                foreach (Primitive.PrimitiveVertex vertex in primitive.vertices)
+                foreach (Mesh.PrimitiveVertex vertex in mesh.vertices)
                     vertices.Add(vertex.v);
             }
 

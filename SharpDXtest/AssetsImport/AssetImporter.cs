@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
 using Engine;
-using Engine.AssetsData;
 
 namespace Editor.AssetsImport
 {
@@ -14,62 +12,34 @@ namespace Editor.AssetsImport
         [YamlTagMapped]
         public class BaseImportSettings { }
 
-        protected abstract BaseImportSettings GetDefaultSettings();
+        protected abstract void OnImportAsset(AssetImportContext importContext);
 
-        protected abstract AssetData OnImportAsset(string assetPath, AssetMeta assetMeta);
-
-        public AssetMeta ImportAsset(string assetSourcePath)
+        public Guid ImportAsset(string assetSourcePath)
         {
             ValidateExtension(assetSourcePath);
-            string metaPath = GetMetaPath(assetSourcePath);
-            string contentRelativePath = AssetsRegistry.GetContentAssetPath(assetSourcePath);
+            AssetImportContext importContext = new AssetImportContext(assetSourcePath);
 
-            AssetMeta assetMeta = LoadMetaFile(metaPath);
-            DateTime? artifactImportDate = AssetsManager.GetAssetImportDate(contentRelativePath);
+            AssetMeta assetMeta = importContext.LoadAssetMeta();
+            DateTime? artifactImportDate = AssetsManager.GetAssetImportDate(importContext.AssetContentPath);
 
-            bool metaOutOfDate = assetMeta.ImportDate < File.GetLastWriteTimeUtc(assetSourcePath);
+            bool metaOutOfDate = assetMeta.ImportDate < File.GetLastWriteTimeUtc(importContext.AssetSourcePath);
             bool artifactOutOfDate = artifactImportDate == null || artifactImportDate < assetMeta.ImportDate;
 
             if (metaOutOfDate || artifactOutOfDate)
             {
-                AssetData importedAsset = OnImportAsset(assetSourcePath, assetMeta);
-                if (importedAsset == null)
-                    return null;
+                using FileStream fileStream = File.OpenRead(assetSourcePath);
+                importContext.DataStream = fileStream;
+
+                OnImportAsset(importContext);
 
                 if (metaOutOfDate)
-                    SaveMetaFile(metaPath, assetMeta);
-
-                AssetsManager.SaveAsset(contentRelativePath, assetMeta.Guid, importedAsset);
+                {
+                    assetMeta.ImportDate = AssetsManager.GetAssetImportDate(importContext.AssetContentPath).GetValueOrDefault();
+                }
+                importContext.SaveAssetMeta();
             }
 
-            return assetMeta;
-        }
-
-        protected bool TryGetTypedImportSettings<T>(AssetMeta assetMeta, out T importSettings) where T : class
-        {
-            importSettings = assetMeta.ImportSettings as T;
-            return importSettings != null;
-        }
-
-        private AssetMeta LoadMetaFile(string metaPath)
-        {
-            AssetMeta savedMeta = YamlManager.LoadFromFile<AssetMeta>(metaPath);
-            return savedMeta ?? new AssetMeta()
-            {
-                ImportSettings = GetDefaultSettings()
-            };
-        }
-
-        private void SaveMetaFile(string metaPath, AssetMeta assetMeta)
-        {
-            assetMeta.ImportDate = DateTime.UtcNow;
-            YamlManager.SaveToFile(metaPath, assetMeta);
-        }
-
-        private string GetMetaPath(string assetSourcePath)
-        {
-            string assetExtension = Path.GetExtension(assetSourcePath);
-            return Path.ChangeExtension(assetSourcePath, $"{assetExtension}{AssetMeta.MetaExtension}");
+            return assetMeta.Guid;
         }
 
         private void ValidateExtension(string assetSourcePath)

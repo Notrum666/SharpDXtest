@@ -9,7 +9,7 @@ using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
 {
-    public class RacketController : Component
+    public class RacketController : BehaviourComponent
     {
         public float speed;
         public GameObject leftRacket, rightRacket;
