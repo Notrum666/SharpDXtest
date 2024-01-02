@@ -105,6 +105,12 @@ namespace Editor.AssetsImport
         {
             MaterialData materialData = new MaterialData();
 
+            if (material.HasColorDiffuse)
+            {
+                Color4D color = material.ColorDiffuse;
+                materialData.BaseColor = new Vector4f(color.R, color.G, color.B, color.A);
+            }
+            
             foreach (TextureType textureType in Enum.GetValues<TextureType>())
             {
                 MaterialTextureType materialTextureType = ConvertTextureType(textureType);

@@ -2,11 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using LinearAlgebra;
+
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+
 namespace Engine.AssetsData
 {
     [AssetData<Material>]
     public class MaterialData : AssetData
     {
+        public Vector4f? BaseColor = null;
         public Dictionary<MaterialTextureType, Guid> TexturesGuids = new Dictionary<MaterialTextureType, Guid>();
 
         public void AddTexture(MaterialTextureType textureType, Guid guid)
@@ -22,7 +28,7 @@ namespace Engine.AssetsData
 
         public bool IsDefault()
         {
-            return TexturesGuids.Count == 0;
+            return TexturesGuids.Count == 0 && BaseColor == null;
         }
 
         public override void Serialize(BinaryWriter writer)
@@ -39,9 +45,21 @@ namespace Engine.AssetsData
         {
             Material material = new Material();
 
-            foreach (KeyValuePair<MaterialTextureType, Guid> texturePair in TexturesGuids)
+            if (TexturesGuids.Count != 0)
             {
-                LoadTextureToMaterial(material, texturePair.Key, texturePair.Value);
+                foreach (KeyValuePair<MaterialTextureType, Guid> texturePair in TexturesGuids)
+                {
+                    LoadTextureToMaterial(material, texturePair.Key, texturePair.Value);
+                }
+            }
+            else if (BaseColor != null)
+            {
+                material.Albedo = new Texture(64, 64, BaseColor?.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource);
+                material.Normal = Material.Default.Normal;
+                material.Metallic = Material.Default.Metallic;
+                material.Roughness = Material.Default.Roughness;
+                material.AmbientOcclusion = Material.Default.AmbientOcclusion;
+                material.Emissive = Material.Default.Emissive;
             }
 
             return material;
