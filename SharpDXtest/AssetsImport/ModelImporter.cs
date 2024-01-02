@@ -31,7 +31,7 @@ namespace Editor.AssetsImport
 
             PostProcessSteps postProcessSteps = PostProcessSteps.FlipUVs
                                                 | PostProcessSteps.FlipWindingOrder
-                                                // | PostProcessSteps.MakeLeftHanded
+                                                | PostProcessSteps.MakeLeftHanded
                                                 | PostProcessSteps.Triangulate
                                                 // | PostProcessSteps.PreTransformVertices
                                                 | PostProcessSteps.GenerateNormals
