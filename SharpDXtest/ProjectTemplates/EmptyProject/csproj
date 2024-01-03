@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	
+	<PropertyGroup>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<EnableWindowsTargeting>true</EnableWindowsTargeting>
+		<UseWindowsForms>true</UseWindowsForms>
+		<UseWPF>true</UseWPF>
+	</PropertyGroup>
+	<PropertyGroup>
+		<Platforms>x64</Platforms>
+		<Configurations>Debug</Configurations>
+		<Nullable>warnings</Nullable>
+	</PropertyGroup>
+	<PropertyGroup>
+		<ProjectGuid>{0}</ProjectGuid>
+		<ProjectTypeGuids>{{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}}</ProjectTypeGuids>
+		<AssemblyName>{1}</AssemblyName>
+	</PropertyGroup>
+	<PropertyGroup>
+		<BaseDirectory>.</BaseDirectory>
+		<OutputType>Library</OutputType>
+		<OutputPath>Temp\{1}\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	</PropertyGroup>
+
+<!--	<ItemGroup>-->
+<!--		<Compile Include="Content\**\*.cs" />-->
+<!--	</ItemGroup>-->
+	
+	<PropertyGroup Label="UserMacros">
+		<Engine_IncludePath>{2}</Engine_IncludePath>
+	</PropertyGroup>
+	<ItemGroup>
+		<Reference Include="SharpDX.LinearAlgebra">
+			<HintPath>$(Engine_IncludePath)\SharpDX\LinearAlgebra.dll</HintPath>
+		</Reference>
+		<Reference Include="SharpDX.Engine">
+			<HintPath>$(Engine_IncludePath)\SharpDX\Engine.dll</HintPath>
+		</Reference>
+		<Reference Include="SharpDX.Editor">
+			<HintPath>{$(Engine_IncludePath)\SharpDX\Editor.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+	
+</Project>
