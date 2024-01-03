@@ -15,7 +15,7 @@ namespace Engine
         public Matrix4x4f InverseRootTransform = Matrix4x4f.Identity;
         public List<BoneData> Bones = new List<BoneData>();
         public List<Guid> Animations = new List<Guid>();
-        public int AnimationIndex = 1; // -1
+        public int AnimationIndex = -1;
         private List<Matrix4x4f> BonesTransformations = new List<Matrix4x4f>();
 
         private int BonesTransformationsCount = 0;
@@ -200,6 +200,9 @@ namespace Engine
 
                 UpdateTransform(curAnimation, AnimationTime, Bones[0], Matrix4x4f.Identity);
             }
+            else
+                foreach (BoneData boneData in Bones)
+                    boneData.Transform = Matrix4x4f.Identity;
 
             UpdateBoneTransformMatrices();
         }

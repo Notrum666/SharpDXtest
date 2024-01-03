@@ -56,26 +56,41 @@ namespace Engine.AssetsData
                         n = vertexData.Normal,
                         t = vertexData.Texture
                     };
+                    float weightsSum = 0;
                     if (vertexData.BoneWeights.Count > 0)
                     {
                         vertex.bones.x = vertexData.BoneIndices[0];
                         vertex.weights.x = vertexData.BoneWeights[0];
+                        weightsSum += vertex.weights.x;
                     }
                     if (vertexData.BoneWeights.Count > 1)
                     {
                         vertex.bones.y = vertexData.BoneIndices[1];
                         vertex.weights.y = vertexData.BoneWeights[1];
+                        weightsSum += vertex.weights.y;
                     }
                     if (vertexData.BoneWeights.Count > 2)
                     {
                         vertex.bones.z = vertexData.BoneIndices[2];
                         vertex.weights.z = vertexData.BoneWeights[2];
+                        weightsSum += vertex.weights.z;
                     }
                     if (vertexData.BoneWeights.Count > 3)
                     {
                         vertex.bones.w = vertexData.BoneIndices[3];
                         vertex.weights.w = vertexData.BoneWeights[3];
+                        weightsSum += vertex.weights.w;
                     }
+
+                    // normalize weights
+                    if (weightsSum > 0)
+                    {
+                        vertex.weights.x /= weightsSum;
+                        vertex.weights.y /= weightsSum;
+                        vertex.weights.z /= weightsSum;
+                        vertex.weights.w /= weightsSum;
+                    }
+
                     mesh.Vertices.Add(vertex);
                 }
                 mesh.Indices.AddRange(meshData.Indices);

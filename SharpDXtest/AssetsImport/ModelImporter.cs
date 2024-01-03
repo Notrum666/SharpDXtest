@@ -49,6 +49,13 @@ namespace Editor.AssetsImport
 
             ProcessScene();
 
+            if (currentSkeletonData is not null) {
+                Guid subGuid = currentImportContext.AddSubAsset("skeleton", currentSkeletonData);
+                currentModelData.SkeletonGuid = subGuid;
+
+                currentImportSettings.SkeletonOverride ??= subGuid;
+                currentModelData.SkeletonGuid = currentImportSettings.SkeletonOverride ?? Guid.Empty;
+            }
             importContext.AddMainAsset(currentModelData);
         }
 
@@ -174,45 +181,8 @@ namespace Editor.AssetsImport
                 currentSkeletonData.InverseRootTransform = ConvertMatrix(aiCurrentScene.RootNode.Transform);
                 ProcessNodeAsBone(aiCurrentScene.RootNode, -1);
                 ProcessAnimations();
-                Guid subGuid = currentImportContext.AddSubAsset("skeleton", currentSkeletonData);
-                currentModelData.SkeletonGuid = subGuid;
-
-                currentImportSettings.SkeletonOverride ??= subGuid;
-                currentModelData.SkeletonGuid = currentImportSettings.SkeletonOverride ?? Guid.Empty;
             }
         }
-
-        // private int ProcessNodeAsBone(Node currentNode, int parentBoneIndex)
-        // {
-        //     int currentBoneIndex = currentSkeletonData.Bones.Count;
-
-        //     Bone aiCurrentBone = null;
-
-        //     foreach (Mesh mesh in aiCurrentScene.Meshes)
-        //         foreach (Bone bone in mesh.Bones)
-        //             if (bone.Name == currentNode.Name)
-        //                 aiCurrentBone = bone;
-
-        //     if (aiCurrentBone == null)
-        //         return -1;
-
-        //     BoneData currentBoneData = new BoneData
-        //     {
-        //         Name = aiCurrentBone.Name,
-        //         Transform = Matrix4x4f.Identity,
-        //         Offset = ConvertMatrix(aiCurrentBone.OffsetMatrix),
-
-        //         Index = currentBoneIndex,
-        //         ParentIndex = parentBoneIndex
-        //     };
-
-        //     currentSkeletonData.Bones.Add(currentBoneData);
-
-        //     foreach (Node childNode in currentNode.Children)
-        //         currentBoneData.ChildIndices.Add(ProcessNodeAsBone(childNode, currentBoneIndex));
-
-        //     return currentBoneIndex;
-        // }
 
         private int ProcessNodeAsBone(Node currentNode, int parentBoneIndex)
         {
@@ -345,6 +315,8 @@ namespace Editor.AssetsImport
                     for (int boneIndex = 0; boneIndex < currentSkeletonData.Bones.Count; ++boneIndex)
                         if (bone.Name == currentSkeletonData.Bones[boneIndex].Name)
                         {
+                            currentSkeletonData.Bones[boneIndex].Offset = ConvertMatrix(bone.OffsetMatrix);
+
                             foreach (VertexWeight vertexWeight in bone.VertexWeights)
                             {
                                 VertexData vertex = meshData.Vertices[vertexWeight.VertexID];
@@ -373,7 +345,6 @@ namespace Editor.AssetsImport
             Matrix4x4f matrix = Marshal.PtrToStructure<Matrix4x4f>(ptr);
             Marshal.FreeHGlobal(ptr);
 
-            matrix.transpose();
             return matrix;
         }
     }
