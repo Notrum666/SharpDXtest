@@ -113,7 +113,7 @@ namespace Editor
             cesiumManTransform2.Rotation = Quaternion.FromEuler(new Vector3(-90 * (3.14 / 180), 0, 0));
             SkeletalMeshComponent cesiumManMesh2 = cesiumMan2.AddComponent<SkeletalMeshComponent>();
             cesiumManMesh2.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cesium_man.fbx");
-            cesiumManMesh2.AnimationIndex = 3;
+            //cesiumManMesh2.AnimationIndex = 14;
 
             GameObject light1 = GameObject.Instantiate("Light1");
             light1.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);

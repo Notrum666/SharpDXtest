@@ -15,7 +15,7 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private Skeleton[] skeletons = Array.Empty<Skeleton>();
         [SerializedField]
-        private int animationIndex = 0;
+        private int animationIndex = -1;
         [SerializedField]
         private float animationTime = 0;
 
@@ -248,12 +248,12 @@ namespace Engine.BaseAssets.Components
         {
             // calculate transform matrices
             foreach (Skeleton skeleton in skeletons) {
+                BonesTransformations.Clear();
+                InverseTransposeBonesTransformations.Clear();
+                BonesTransformations.AddRange(skeleton.Bones.Select(_ => Matrix4x4f.Identity)); // fill BonesTransformations and InverseTransposeBonesTransformations somehow just to resize list to skeleton.Bones.Count
+                InverseTransposeBonesTransformations.AddRange(skeleton.Bones.Select(_ => Matrix4x4f.Identity));
                 if (animationIndex >= 0 && skeleton.Bones.Count > 0)
                 {
-                    BonesTransformations.Clear();
-                    InverseTransposeBonesTransformations.Clear();
-                    BonesTransformations.AddRange(skeleton.Bones.Select(b => b.Offset)); // fill BonesTransformations and InverseTransposeBonesTransformations somehow just to resize list to skeleton.Bones.Count
-                    InverseTransposeBonesTransformations.AddRange(skeleton.Bones.Select(b => b.Offset));
                     animationTime += (float)Time.DeltaTime;
                     Animation curAnimation = AssetsManager.LoadAssetByGuid<Animation>(skeleton.Animations[animationIndex]);
                     float TicksPerSecond = (float)(curAnimation.TickPerSecond != 0 ? curAnimation.TickPerSecond : 25.0f);
