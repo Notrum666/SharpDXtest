@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using LinearAlgebra;
 
 using YamlDotNet.Serialization;
@@ -47,6 +46,7 @@ namespace Engine.AssetsData
             {
                 Mesh mesh = new Mesh();
                 mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material);
+                mesh.Skeleton = AssetsManager.LoadAssetByGuid<Skeleton>(meshData.Skeleton);
 
                 foreach (VertexData vertexData in meshData.Vertices)
                 {
@@ -56,6 +56,26 @@ namespace Engine.AssetsData
                         n = vertexData.Normal,
                         t = vertexData.Texture
                     };
+                    if (vertexData.BoneWeights.Count > 0)
+                    {
+                        vertex.bones.x = vertexData.BoneIndices[0];
+                        vertex.weights.x = vertexData.BoneWeights[0];
+                    }
+                    if (vertexData.BoneWeights.Count > 1)
+                    {
+                        vertex.bones.y = vertexData.BoneIndices[1];
+                        vertex.weights.y = vertexData.BoneWeights[1];
+                    }
+                    if (vertexData.BoneWeights.Count > 2)
+                    {
+                        vertex.bones.z = vertexData.BoneIndices[2];
+                        vertex.weights.z = vertexData.BoneWeights[2];
+                    }
+                    if (vertexData.BoneWeights.Count > 3)
+                    {
+                        vertex.bones.w = vertexData.BoneIndices[3];
+                        vertex.weights.w = vertexData.BoneWeights[3];
+                    }
                     mesh.Vertices.Add(vertex);
                 }
                 mesh.Indices.AddRange(meshData.Indices);
@@ -72,18 +92,10 @@ namespace Engine.AssetsData
     {
         public string Name;
         public Guid Material;
+        public Guid Skeleton;
 
         public List<VertexData> Vertices = new List<VertexData>();
         public List<int> Indices = new List<int>();
-
-        [YamlMember(DefaultValuesHandling = DefaultValuesHandling.OmitEmptyCollections)]
-        public List<SkinnedBoneData> SkinnedBones = new List<SkinnedBoneData>();
-    }
-
-    public class SkinnedBoneData
-    {
-        public string Name;
-        public Matrix4x4f Offset;
     }
 
     public class VertexData

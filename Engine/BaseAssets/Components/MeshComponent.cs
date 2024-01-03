@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assimp;
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -10,6 +11,8 @@ namespace Engine.BaseAssets.Components
         private Model model = null;
         [SerializedField]
         private Material[] materials = Array.Empty<Material>();
+        [SerializedField]
+        private Animation animation = null;
 
         public Model Model
         {
@@ -53,6 +56,9 @@ namespace Engine.BaseAssets.Components
                 if (curMaterial is null)
                     curMaterial = Material.Default;
                 curMaterial.Use();
+                if (model.Meshes[i].Skeleton is not null)
+                    model.Meshes[i].Skeleton.Use();
+                
                 model.Meshes[i].Render();
             }
         }

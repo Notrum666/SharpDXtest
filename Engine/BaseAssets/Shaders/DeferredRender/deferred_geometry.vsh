@@ -36,20 +36,20 @@ vert_out main(vert_in vert)
 {
 	vert_out res = (vert_out) 0;
 
-	float4x4 boneTransform = float4x4(1, 0, 0, 0,
-									  0, 1, 0, 0,
-									  0, 0, 1, 0,
-									  0, 0, 0, 1);
-	if (vert.weights.x) {
-		boneTransform = gBones[vert.bones.x] * vert.weights.x;
-		boneTransform += gBones[vert.bones.y] * vert.weights.y;
-		boneTransform += gBones[vert.bones.z] * vert.weights.z;
-		boneTransform += gBones[vert.bones.w] * vert.weights.w;
-	}
+	float3 boneTransform = (0).xxx;
 
-	float4 skinned_pos = mul(float4(vert.v, 1.0f), boneTransform);
+	if (vert.weights.x > 0)
+		boneTransform += mul(float4(boneTransform, 1.f), gBones[vert.bones.x]).xyz * vert.weights.x;
+	if (vert.weights.y > 0)
+		boneTransform += mul(float4(boneTransform, 1.f), gBones[vert.bones.y]).xyz * vert.weights.y;
+	if (vert.weights.z > 0)
+		boneTransform += mul(float4(boneTransform, 1.f), gBones[vert.bones.z]).xyz * vert.weights.z;
+	if (vert.weights.w > 0)
+		boneTransform += mul(float4(boneTransform, 1.f), gBones[vert.bones.w]).xyz * vert.weights.w;
 
-	float4 v_world = mul(skinned_pos, model);
+	//	float4 skinned_pos = mul(float4(vert.v, 1.0f), boneTransform);
+
+	float4 v_world = mul(float4(vert.v + boneTransform, 1.f), model);
 
 	res.sv_pos = mul(mul(v_world, view), proj);
 	res.v = v_world;
