@@ -41,7 +41,7 @@ namespace Editor
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             var mainPath = Directory.GetCurrentDirectory();
-            var solutionPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
+            var solutionPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.FullName;
             AssetsManager.InitializeInFolder(solutionPath);
             AssetsRegistry.InitializeInFolder(solutionPath);
             

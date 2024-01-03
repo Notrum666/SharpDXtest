@@ -58,7 +58,7 @@ namespace Editor.AssetsImport
                 ShaderType.HullShader => ShaderBytecode.Compile(data, "main", "hs_5_0", shaderFlags),
                 ShaderType.DomainShader => ShaderBytecode.Compile(data, "main", "ds_5_0", shaderFlags),
                 ShaderType.GeometryShader => ShaderBytecode.Compile(data, "main", "gs_5_0", shaderFlags),
-                ShaderType.FragmentShader => ShaderBytecode.Compile(data, "main", "ps_5_0", shaderFlags),
+                ShaderType.FragmentShader => ShaderBytecode.Compile(data, "main", "ps_5_0", shaderFlags | ShaderFlags.SkipOptimization),
                 ShaderType.ComputeShader => ShaderBytecode.Compile(data, "main", "cs_5_0", shaderFlags),
                 _ => throw new ArgumentException($"Unsupported ShaderType = {currentShaderData.ShaderType}")
             };
