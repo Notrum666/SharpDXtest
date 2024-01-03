@@ -14,30 +14,38 @@ namespace Engine.BaseAssets.Components
 
         [SerializedField]
         private Skeleton[] skeletons = Array.Empty<Skeleton>();
-        [SerializedField]
-        private int animationIndex = -1;
+        [SerializeField]
+        private Animation animation = null;
         [SerializedField]
         private float animationTime = 0;
 
         public Skeleton[] Skeletons => skeletons;
 
-        public int AnimationIndex
+        // private List<Matrix4x4f> BonesTransformations = new List<Matrix4x4f>();
+        // private List<Matrix4x4f> InverseTransposeBonesTransformations = new List<Matrix4x4f>();
+
+        private int BonesTransformationsCount = 0;
+        private SharpDX.Direct3D11.Buffer bonesBuffer = null;
+        private ShaderResourceView bonesResourceView = null;
+        private SharpDX.Direct3D11.Buffer inverseTransposeBonesBuffer = null;
+        private ShaderResourceView inverseTransposeBonesResourceView = null;
+
+        public Animation Animation
         {
-            get => animationIndex;
+            get => Animation;
             set
             {
-                animationIndex = value;
+                animation = value;
                 animationTime = 0;
             }
         }
 
-        public new Model Model
+        public override Model Model
         {
             get => Model;
             set
             {
-                model = value;
-                RefreshMaterialsSlots();
+                base.Model = value;
                 RefreshSkeletonSlots();
             }
         }
@@ -50,14 +58,24 @@ namespace Engine.BaseAssets.Components
                 skeletons = model.Meshes.Select(p => p.Skeleton).ToArray();
         }
 
-        private List<Matrix4x4f> BonesTransformations = new List<Matrix4x4f>();
-        private List<Matrix4x4f> InverseTransposeBonesTransformations = new List<Matrix4x4f>();
+        public override void Render()
+        {
+            List<Matrix4x4f> BonesTransform;
+            List<Matrix4x4f> InvTrspsBonesTransform;
+            UpdateAnimation(out BonesTransform, out InvTrspsBonesTransform);
+            EnsureGPUBuffer(BonesTransform, InvTrspsBonesTransform);
+            Use(BonesTransform, InvTrspsBonesTransform);
+            base.Render();
+        }
 
-        private int BonesTransformationsCount = 0;
-        private SharpDX.Direct3D11.Buffer bonesBuffer = null;
-        private ShaderResourceView bonesResourceView = null;
-        private SharpDX.Direct3D11.Buffer inverseTransposeBonesBuffer = null;
-        private ShaderResourceView inverseTransposeBonesResourceView = null;
+        public override void OnFieldChanged(FieldInfo fieldInfo)
+        {
+            base.OnFieldChanged(fieldInfo);
+            if (fieldInfo.Name == nameof(model))
+            {
+                RefreshSkeletonSlots();
+            }
+        }
 
         protected override void OnDestroy()
         {
@@ -73,9 +91,9 @@ namespace Engine.BaseAssets.Components
             destroyed = true;
         }
 
-        public void EnsureGPUBuffer()
+        private void EnsureGPUBuffer(List<Matrix4x4f> BonesTransformations, List<Matrix4x4f> InverseTransposeBonesTransformations)
         {
-            CheckBonesTransformationsCount();
+            CheckBonesTransformationsCount(BonesTransformations);
             if (BonesTransformations.Count > 0)
             {
                 BonesTransformationsCount = BonesTransformations.Count;
@@ -111,7 +129,7 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        public void Use()
+        private void Use(List<Matrix4x4f> BonesTransformations, List<Matrix4x4f> InverseTransposeBonesTransformations)
         {
             if (destroyed)
                 throw new ObjectDisposedException(nameof(Skeleton));
@@ -136,7 +154,7 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        private void CheckBonesTransformationsCount()
+        private void CheckBonesTransformationsCount(List<Matrix4x4f> BonesTransformations)
         {
             if (BonesTransformationsCount != BonesTransformations.Count) // recreate gpu buffers with new size
             {
@@ -151,7 +169,7 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        private void UpdateTransform(Skeleton skeleton, Animation animation, float AnimationTime, Bone boneData, Matrix4x4f parentTransform)
+        private void UpdateTransform(Skeleton skeleton, float AnimationTime, Bone boneData, Matrix4x4f parentTransform, List<Matrix4x4f> BonesTransform, List<Matrix4x4f> InvTrspsBonesTransform)
         {
             AnimationChannel curAnimation = null;
             foreach (AnimationChannel animationChannel in animation.Channels)
@@ -237,50 +255,35 @@ namespace Engine.BaseAssets.Components
             }
 
             Matrix4x4f globalTransform = parentTransform * nodeTransform;
-            BonesTransformations[boneData.Index] = skeleton.InverseRootTransform * globalTransform * boneData.Offset;
-            InverseTransposeBonesTransformations[boneData.Index] = BonesTransformations[boneData.Index].inverse().transposed();
+            BonesTransform[boneData.Index] = skeleton.InverseRootTransform * globalTransform * boneData.Offset;
+            InvTrspsBonesTransform[boneData.Index] = BonesTransform[boneData.Index].inverse().transposed();
 
             foreach (int childIndex in boneData.ChildIndices)
-                UpdateTransform(skeleton, animation, AnimationTime, skeleton.Bones[childIndex], globalTransform);
+                UpdateTransform(skeleton, AnimationTime, skeleton.Bones[childIndex], globalTransform, BonesTransform, InvTrspsBonesTransform);
         }
 
-        public void UpdateAnimation()
+        private void UpdateAnimation(out List<Matrix4x4f> BonesTransformations, out List<Matrix4x4f> InverseTransposeBonesTransformations)
         {
+            BonesTransformations = new List<Matrix4x4f>();
+            InverseTransposeBonesTransformations = new List<Matrix4x4f>();
             // calculate transform matrices
             foreach (Skeleton skeleton in skeletons) {
-                BonesTransformations.Clear();
-                InverseTransposeBonesTransformations.Clear();
-                BonesTransformations.AddRange(skeleton.Bones.Select(_ => Matrix4x4f.Identity)); // fill BonesTransformations and InverseTransposeBonesTransformations somehow just to resize list to skeleton.Bones.Count
-                InverseTransposeBonesTransformations.AddRange(skeleton.Bones.Select(_ => Matrix4x4f.Identity));
-                if (animationIndex >= 0 && skeleton.Bones.Count > 0)
+                if (skeleton.Bones.Count > 0)
                 {
-                    animationTime += (float)Time.DeltaTime;
-                    Animation curAnimation = AssetsManager.LoadAssetByGuid<Animation>(skeleton.Animations[animationIndex]);
-                    float TicksPerSecond = (float)(curAnimation.TickPerSecond != 0 ? curAnimation.TickPerSecond : 25.0f);
-                    float TimeInTicks = animationTime * TicksPerSecond;
-                    float AnimationTime = TimeInTicks % curAnimation.DurationInTicks;
+                    BonesTransformations = skeleton.Bones.Select(_ => Matrix4x4f.Identity).ToList();
+                    InverseTransposeBonesTransformations = new List<Matrix4x4f>(BonesTransformations);
+                    if (animation is not null) {
+                        animationTime += (float)Time.DeltaTime;
+                        float TicksPerSecond = (float)(animation.TickPerSecond != 0 ? animation.TickPerSecond : 25.0f);
+                        float TimeInTicks = animationTime * TicksPerSecond;
+                        float AnimationTime = TimeInTicks % animation.DurationInTicks;
 
-                    UpdateTransform(skeleton,curAnimation, AnimationTime, skeleton.Bones[0], Matrix4x4f.Identity);
+                        UpdateTransform(skeleton, AnimationTime, skeleton.Bones[0], Matrix4x4f.Identity, BonesTransformations, InverseTransposeBonesTransformations);
+                    }
                 }
             }
 
-            CheckBonesTransformationsCount();
-        }
-
-        public override void Render()
-        {
-            UpdateAnimation();
-            EnsureGPUBuffer();
-            Use();
-            base.Render();
-        }
-
-        public override void OnFieldChanged(FieldInfo fieldInfo)
-        {
-            if (fieldInfo.Name == nameof(model)) {
-                RefreshMaterialsSlots();
-                RefreshSkeletonSlots();
-            }
+            CheckBonesTransformationsCount(BonesTransformations);
         }
     }
 }

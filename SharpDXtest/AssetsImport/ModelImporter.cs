@@ -245,8 +245,7 @@ namespace Editor.AssetsImport
                     animationData.Channels.Add(animationChannel);
                 }
 
-                Guid subGuid = currentImportContext.AddSubAsset(animationData.Name, animationData);
-                currentSkeletonData.AnimationData.Add(subGuid);
+                currentImportContext.AddSubAsset(animationData.Name, animationData);
             }
         }
 

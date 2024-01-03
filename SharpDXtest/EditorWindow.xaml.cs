@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
@@ -105,7 +106,7 @@ namespace Editor
             cesiumManTransform.Rotation = Quaternion.FromEuler(new Vector3(-90 * (3.14 / 180), 0, 0));
             SkeletalMeshComponent cesiumManMesh = cesiumMan.AddComponent<SkeletalMeshComponent>();
             cesiumManMesh.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cesium_man.fbx");
-            cesiumManMesh.AnimationIndex = 7;
+            cesiumManMesh.Animation = AssetsManager.LoadAssetByGuid<Animation>(new Guid("32c68bd7597e4c1f9c1037607098c766"));
 
             GameObject cesiumMan2 = GameObject.Instantiate("CesiumMan2");
             Transform cesiumManTransform2 = cesiumMan2.GetComponent<Transform>();

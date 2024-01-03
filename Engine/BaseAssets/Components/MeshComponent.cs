@@ -11,7 +11,7 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private Material[] materials = Array.Empty<Material>();
 
-        public Model Model
+        public virtual Model Model
         {
             get => model;
             set

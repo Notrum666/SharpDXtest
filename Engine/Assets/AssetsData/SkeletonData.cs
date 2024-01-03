@@ -8,7 +8,6 @@ namespace Engine.AssetsData
     [AssetData<Skeleton>]
     public class SkeletonData : AssetData
     {
-        public List<Guid> AnimationData = new List<Guid>();
         public Matrix4x4f InverseRootTransform = Matrix4x4f.Identity;
         public List<Bone> Bones = new List<Bone>();
 
@@ -26,7 +25,6 @@ namespace Engine.AssetsData
         {
             Skeleton skeleton = new Skeleton();
 
-            skeleton.Animations = AnimationData;
             skeleton.Bones = Bones;
             skeleton.InverseRootTransform = InverseRootTransform;
 

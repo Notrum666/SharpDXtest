@@ -12,13 +12,11 @@ namespace Engine
     {
         public Matrix4x4f InverseRootTransform = Matrix4x4f.Identity;
         public List<Bone> Bones = new List<Bone>();
-        public List<Guid> Animations = new List<Guid>();
     }
 
     public class Bone
     {
         public string Name;
-        //public Matrix4x4f Transform = Matrix4x4f.Identity;
         public Matrix4x4f Offset = Matrix4x4f.Identity;
 
         public int Index;
