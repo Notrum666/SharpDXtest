@@ -267,13 +267,15 @@ namespace Editor.AssetsImport
             MeshData meshData = null;
             string meshName = $"{nodeName}_{mesh.Name}_{meshIndex}";
             foreach (MeshData loadedMeshData in currentModelData.Meshes)
-                if (loadedMeshData.Name == meshName)
+                if (loadedMeshData.Name == meshName) {
                     meshData = loadedMeshData;
-                else
-                    meshData = new MeshData
-                    {
-                        Name = meshName
-                    };
+                    break;
+                }
+            if (meshData is null)
+                meshData = new MeshData
+                {
+                    Name = meshName
+                };
 
             if (!currentImportSettings.MeshMaterialsOverride.ContainsKey(meshData.Name))
                 currentImportSettings.MeshMaterialsOverride[meshData.Name] = null;

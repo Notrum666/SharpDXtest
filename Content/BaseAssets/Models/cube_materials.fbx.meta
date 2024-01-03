@@ -13,6 +13,9 @@ SubAssets:
   ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     Item2: Material.003
   : 8bfef4b6cdc242a39a4634a2c2fe9cc4
+  ? Item1: Engine.AssetsData.SkeletonData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: skeleton
+  : b21e1b8db24147d093c65dea4800587f
 ImportSettings: !ModelImportSettings
   SkeletonOverride: 1f60e330026f443cb0cc3ec8c595987e
   MeshMaterialsOverride:
