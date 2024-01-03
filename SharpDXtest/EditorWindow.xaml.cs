@@ -103,8 +103,17 @@ namespace Editor
             Transform cesiumManTransform = cesiumMan.GetComponent<Transform>();
             cesiumManTransform.Position = new Vector3(0, 0, 5);
             cesiumManTransform.Rotation = Quaternion.FromEuler(new Vector3(-90 * (3.14 / 180), 0, 0));
-            MeshComponent cesiumManMesh = cesiumMan.AddComponent<MeshComponent>();
+            SkeletalMeshComponent cesiumManMesh = cesiumMan.AddComponent<SkeletalMeshComponent>();
             cesiumManMesh.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cesium_man.fbx");
+            cesiumManMesh.AnimationIndex = 7;
+
+            GameObject cesiumMan2 = GameObject.Instantiate("CesiumMan2");
+            Transform cesiumManTransform2 = cesiumMan2.GetComponent<Transform>();
+            cesiumManTransform2.Position = new Vector3(0, 2, 5);
+            cesiumManTransform2.Rotation = Quaternion.FromEuler(new Vector3(-90 * (3.14 / 180), 0, 0));
+            SkeletalMeshComponent cesiumManMesh2 = cesiumMan2.AddComponent<SkeletalMeshComponent>();
+            cesiumManMesh2.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cesium_man.fbx");
+            cesiumManMesh2.AnimationIndex = 3;
 
             GameObject light1 = GameObject.Instantiate("Light1");
             light1.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);

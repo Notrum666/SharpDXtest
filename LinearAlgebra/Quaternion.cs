@@ -275,7 +275,7 @@ namespace LinearAlgebra
                 num5 = factor;
             }
 
-            Quaternion result = default(Quaternion);
+            Quaternion result = Quaternion.Identity;
             result.x = num4 * start.x + num5 * end.x;
             result.y = num4 * start.y + num5 * end.y;
             result.z = num4 * start.z + num5 * end.z;

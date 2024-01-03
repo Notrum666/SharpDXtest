@@ -31,6 +31,7 @@ cbuffer mat
 };
 
 StructuredBuffer<float4x4> gBones : register(t0);
+StructuredBuffer<float4x4> gInverseTransposeBones : register(t1);
 
 vert_out main(vert_in vert)
 {
@@ -52,20 +53,29 @@ vert_out main(vert_in vert)
 	// float4 v_world = mul(skinned_pos, model);
 
 	float3 boneTransform = (0).xxx;
-	if (vert.weights.x > 0)
+	float3 normalTransform = vert.n;
+	if (vert.weights.x > 0) {
 		boneTransform += mul(float4(vert.v, 1.f), gBones[vert.bones.x]).xyz * vert.weights.x;
-	if (vert.weights.y > 0)
+		normalTransform += mul(float4(vert.n, 0.f), gInverseTransposeBones[vert.bones.x]).xyz * vert.weights.x;
+	}
+	if (vert.weights.y > 0) {
 		boneTransform += mul(float4(vert.v, 1.f), gBones[vert.bones.y]).xyz * vert.weights.y;
-	if (vert.weights.z > 0)
+		normalTransform += mul(float4(vert.n, 0.f), gInverseTransposeBones[vert.bones.y]).xyz * vert.weights.y;
+	}
+	if (vert.weights.z > 0) {
 		boneTransform += mul(float4(vert.v, 1.f), gBones[vert.bones.z]).xyz * vert.weights.z;
-	if (vert.weights.w > 0)
+		normalTransform += mul(float4(vert.n, 0.f), gInverseTransposeBones[vert.bones.z]).xyz * vert.weights.z;
+	}
+	if (vert.weights.w > 0) {
 		boneTransform += mul(float4(vert.v, 1.f), gBones[vert.bones.w]).xyz * vert.weights.w;
+		normalTransform += mul(float4(vert.n, 0.f), gInverseTransposeBones[vert.bones.w]).xyz * vert.weights.w;
+	}
 	float4 v_world = mul(float4(vert.v + boneTransform, 1.f), model);
 
 	res.sv_pos = mul(mul(v_world, view), proj);
 	res.v = v_world;
 	res.t = vert.t;
-	res.n = normalize(mul(float4(vert.n, 0.0f), modelNorm).xyz);
+	res.n = normalize(mul(float4(vert.n + normalTransform, 0.0f), modelNorm).xyz);
 
 	float3 tangent = normalize(mul(float4(vert.tx, 0.0f), modelNorm).xyz);
 	float3 bitangent = cross(res.n, tangent);

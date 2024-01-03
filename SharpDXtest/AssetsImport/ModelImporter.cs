@@ -179,6 +179,7 @@ namespace Editor.AssetsImport
             if (aiCurrentScene.HasMeshes && aiCurrentScene.Meshes[0].HasBones) {
                 currentSkeletonData = new SkeletonData();
                 currentSkeletonData.InverseRootTransform = ConvertMatrix(aiCurrentScene.RootNode.Transform);
+                currentSkeletonData.InverseRootTransform.invert();
                 ProcessNodeAsBone(aiCurrentScene.RootNode, -1);
                 ProcessAnimations();
             }
@@ -188,10 +189,10 @@ namespace Editor.AssetsImport
         {
             int currentBoneIndex = currentSkeletonData.Bones.Count;
 
-            BoneData currentBone = new BoneData
+            Engine.Bone currentBone = new Engine.Bone
             {
                 Name = currentNode.Name,
-                Transform = ConvertMatrix(currentNode.Transform),
+                // Transform = ConvertMatrix(currentNode.Transform),
 
                 Index = currentBoneIndex,
                 ParentIndex = parentBoneIndex
@@ -218,24 +219,24 @@ namespace Editor.AssetsImport
                 animationData.TickPerSecond = (float)aiAnimation.TicksPerSecond;
                 foreach (NodeAnimationChannel aiAnimChannel in aiAnimation.NodeAnimationChannels)
                 {
-                    AnimationChannel animationChannel = new AnimationChannel();
+                    Engine.AnimationChannel animationChannel = new Engine.AnimationChannel();
                     foreach (VectorKey aiScalingKey in aiAnimChannel.ScalingKeys)
                     {
-                        AnimationChannel.ScalingKey scalingKey = new AnimationChannel.ScalingKey();
+                        Engine.AnimationChannel.ScalingKey scalingKey = new Engine.AnimationChannel.ScalingKey();
                         scalingKey.Time = (float)aiScalingKey.Time;
                         scalingKey.Scaling = new Vector3f(aiScalingKey.Value.X, aiScalingKey.Value.Y, aiScalingKey.Value.Z);
                         animationChannel.ScalingKeys.Add(scalingKey);
                     }
                     foreach (VectorKey aiPositionKey in aiAnimChannel.PositionKeys)
                     {
-                        AnimationChannel.PositionKey positionKey = new AnimationChannel.PositionKey();
+                        Engine.AnimationChannel.PositionKey positionKey = new Engine.AnimationChannel.PositionKey();
                         positionKey.Time = (float)aiPositionKey.Time;
                         positionKey.Position = new Vector3f(aiPositionKey.Value.X, aiPositionKey.Value.Y, aiPositionKey.Value.Z);
                         animationChannel.PositionKeys.Add(positionKey);
                     }
                     foreach (QuaternionKey aiRotationKey in aiAnimChannel.RotationKeys)
                     {
-                        AnimationChannel.RotationKey rotationKey = new AnimationChannel.RotationKey();
+                        Engine.AnimationChannel.RotationKey rotationKey = new Engine.AnimationChannel.RotationKey();
                         rotationKey.Time = (float)aiRotationKey.Time;
                         rotationKey.Rotation = new LinearAlgebra.Quaternion(aiRotationKey.Value.W, aiRotationKey.Value.X, aiRotationKey.Value.Y, aiRotationKey.Value.Z);
                         animationChannel.RotationKeys.Add(rotationKey);
@@ -311,7 +312,7 @@ namespace Editor.AssetsImport
                     throw new Exception("mesh face was not triangulated");
 
             if (currentSkeletonData is not null)
-                foreach (Bone bone in mesh.Bones)
+                foreach (Assimp.Bone bone in mesh.Bones)
                     for (int boneIndex = 0; boneIndex < currentSkeletonData.Bones.Count; ++boneIndex)
                         if (bone.Name == currentSkeletonData.Bones[boneIndex].Name)
                         {

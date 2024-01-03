@@ -1,5 +1,4 @@
-﻿using Assimp;
-using System;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 
@@ -8,7 +7,7 @@ namespace Engine.BaseAssets.Components
     public class MeshComponent : BehaviourComponent
     {
         [SerializedField]
-        private Model model = null;
+        protected Model model = null;
         [SerializedField]
         private Material[] materials = Array.Empty<Material>();
 
@@ -30,7 +29,7 @@ namespace Engine.BaseAssets.Components
                 RefreshMaterialsSlots();
         }
 
-        private void RefreshMaterialsSlots()
+        protected void RefreshMaterialsSlots()
         {
             if (model is null)
                 materials = Array.Empty<Material>();
@@ -38,7 +37,7 @@ namespace Engine.BaseAssets.Components
                 materials = model.Meshes.Select(p => p.DefaultMaterial).ToArray();
         }
 
-        public void Render()
+        public virtual void Render()
         {
             if (model is null)
             {
@@ -54,10 +53,6 @@ namespace Engine.BaseAssets.Components
                 if (curMaterial is null)
                     curMaterial = Material.Default;
                 curMaterial.Use();
-                if (model.Meshes[i].Skeleton is not null) {
-                    model.Meshes[i].Skeleton.UpdateAnimation();
-                    model.Meshes[i].Skeleton.Use();
-                }
 
                 model.Meshes[i].Render();
             }

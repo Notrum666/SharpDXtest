@@ -10,7 +10,7 @@ namespace Engine.AssetsData
     {
         public List<Guid> AnimationData = new List<Guid>();
         public Matrix4x4f InverseRootTransform = Matrix4x4f.Identity;
-        public List<BoneData> Bones = new List<BoneData>();
+        public List<Bone> Bones = new List<Bone>();
 
         public override void Serialize(BinaryWriter writer)
         {
@@ -29,20 +29,8 @@ namespace Engine.AssetsData
             skeleton.Animations = AnimationData;
             skeleton.Bones = Bones;
             skeleton.InverseRootTransform = InverseRootTransform;
-            skeleton.GenerateGPUBuffer();
 
             return skeleton;
         }
-    }
-
-    public class BoneData
-    {
-        public string Name;
-        public Matrix4x4f Transform = Matrix4x4f.Identity;
-        public Matrix4x4f Offset = Matrix4x4f.Identity;
-
-        public int Index;
-        public int ParentIndex;
-        public List<int> ChildIndices = new List<int>();
     }
 }
