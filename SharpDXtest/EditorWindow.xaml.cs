@@ -94,10 +94,17 @@ namespace Editor
             GameObject cubeObj2 = GameObject.Instantiate("Cube");
             Transform cubeObj2Transform = cubeObj2.GetComponent<Transform>();
             cubeObj2Transform.Position = new Vector3(0, 0, 2);
-            cubeObj2Transform.LocalRotation = Quaternion.FromEuler(new Vector3(45, 45, 0));
+            cubeObj2Transform.LocalRotation = Quaternion.FromEuler(new Vector3(45 * (3.14 / 180), 45 * (3.14 / 180), 0));
             cubeObj2Transform.LocalScale = new Vector3(1, 1, 2);
             MeshComponent cubeObj2Mesh = cubeObj2.AddComponent<MeshComponent>();
             cubeObj2Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cube_materials.fbx");
+
+            GameObject cesiumMan = GameObject.Instantiate("CesiumMan");
+            Transform cesiumManTransform = cesiumMan.GetComponent<Transform>();
+            cesiumManTransform.Position = new Vector3(0, 0, 5);
+            cesiumManTransform.Rotation = Quaternion.FromEuler(new Vector3(-90 * (3.14 / 180), 0, 0));
+            MeshComponent cesiumManMesh = cesiumMan.AddComponent<MeshComponent>();
+            cesiumManMesh.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cesium_man.fbx");
 
             GameObject light1 = GameObject.Instantiate("Light1");
             light1.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);

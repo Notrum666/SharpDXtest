@@ -169,45 +169,71 @@ namespace Editor.AssetsImport
 
         private void BuildSkeleton()
         {
-            currentSkeletonData = new SkeletonData();
-            currentSkeletonData.InverseRootTransform = ConvertMatrix(aiCurrentScene.RootNode.Transform);
-            ProcessNodeAsBone(aiCurrentScene.RootNode, -1);
-            ProcessAnimations();
-            Guid subGuid = currentImportContext.AddSubAsset("skeleton", currentSkeletonData);
-            currentModelData.SkeletonGuid = subGuid;
+            if (aiCurrentScene.HasMeshes && aiCurrentScene.Meshes[0].HasBones) {
+                currentSkeletonData = new SkeletonData();
+                currentSkeletonData.InverseRootTransform = ConvertMatrix(aiCurrentScene.RootNode.Transform);
+                ProcessNodeAsBone(aiCurrentScene.RootNode, -1);
+                ProcessAnimations();
+                Guid subGuid = currentImportContext.AddSubAsset("skeleton", currentSkeletonData);
+                currentModelData.SkeletonGuid = subGuid;
 
-            currentImportSettings.SkeletonOverride ??= subGuid;
-            currentModelData.SkeletonGuid = currentImportSettings.SkeletonOverride ?? Guid.Empty;
+                currentImportSettings.SkeletonOverride ??= subGuid;
+                currentModelData.SkeletonGuid = currentImportSettings.SkeletonOverride ?? Guid.Empty;
+            }
         }
+
+        // private int ProcessNodeAsBone(Node currentNode, int parentBoneIndex)
+        // {
+        //     int currentBoneIndex = currentSkeletonData.Bones.Count;
+
+        //     Bone aiCurrentBone = null;
+
+        //     foreach (Mesh mesh in aiCurrentScene.Meshes)
+        //         foreach (Bone bone in mesh.Bones)
+        //             if (bone.Name == currentNode.Name)
+        //                 aiCurrentBone = bone;
+
+        //     if (aiCurrentBone == null)
+        //         return -1;
+
+        //     BoneData currentBoneData = new BoneData
+        //     {
+        //         Name = aiCurrentBone.Name,
+        //         Transform = Matrix4x4f.Identity,
+        //         Offset = ConvertMatrix(aiCurrentBone.OffsetMatrix),
+
+        //         Index = currentBoneIndex,
+        //         ParentIndex = parentBoneIndex
+        //     };
+
+        //     currentSkeletonData.Bones.Add(currentBoneData);
+
+        //     foreach (Node childNode in currentNode.Children)
+        //         currentBoneData.ChildIndices.Add(ProcessNodeAsBone(childNode, currentBoneIndex));
+
+        //     return currentBoneIndex;
+        // }
 
         private int ProcessNodeAsBone(Node currentNode, int parentBoneIndex)
         {
             int currentBoneIndex = currentSkeletonData.Bones.Count;
 
-            Bone aiCurrentBone = null;
-
-            foreach (Mesh mesh in aiCurrentScene.Meshes)
-                foreach (Bone bone in mesh.Bones)
-                    if (bone.Name == currentNode.Name)
-                        aiCurrentBone = bone;
-
-            if (aiCurrentBone == null)
-                return -1;
-
-            BoneData currentBoneData = new BoneData
+            BoneData currentBone = new BoneData
             {
-                Name = aiCurrentBone.Name,
-                Transform = Matrix4x4f.Identity,
-                Offset = ConvertMatrix(aiCurrentBone.OffsetMatrix),
+                Name = currentNode.Name,
+                Transform = ConvertMatrix(currentNode.Transform),
 
                 Index = currentBoneIndex,
                 ParentIndex = parentBoneIndex
             };
 
-            currentSkeletonData.Bones.Add(currentBoneData);
+            currentSkeletonData.Bones.Add(currentBone);
 
             foreach (Node childNode in currentNode.Children)
-                currentBoneData.ChildIndices.Add(ProcessNodeAsBone(childNode, currentBoneIndex));
+            {
+                int childBoneIndex = ProcessNodeAsBone(childNode, currentBoneIndex);
+                currentBone.ChildIndices.Add(childBoneIndex);
+            }
 
             return currentBoneIndex;
         }
@@ -329,7 +355,7 @@ namespace Editor.AssetsImport
                                     vertex.BoneWeights.Add(vertexWeight.Weight);
                                 }
 
-                                if (vertex.BoneIndices.Count >= 4) //TODO: Extract to settings?
+                                if (vertex.BoneIndices.Count > 4) //TODO: Extract to settings?
                                     throw new Exception("vertex bone indices count is greater than 4");
                             }
                             break;

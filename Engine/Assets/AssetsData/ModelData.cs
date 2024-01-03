@@ -46,7 +46,7 @@ namespace Engine.AssetsData
             {
                 Mesh mesh = new Mesh();
                 mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material);
-                mesh.Skeleton = AssetsManager.LoadAssetByGuid<Skeleton>(meshData.Skeleton);
+                mesh.Skeleton = AssetsManager.LoadAssetByGuid<Skeleton>(SkeletonGuid);
 
                 foreach (VertexData vertexData in meshData.Vertices)
                 {
@@ -92,7 +92,6 @@ namespace Engine.AssetsData
     {
         public string Name;
         public Guid Material;
-        public Guid Skeleton;
 
         public List<VertexData> Vertices = new List<VertexData>();
         public List<int> Indices = new List<int>();

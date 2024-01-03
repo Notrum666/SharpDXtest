@@ -15,7 +15,7 @@ namespace Engine
         public Matrix4x4f InverseRootTransform = Matrix4x4f.Identity;
         public List<BoneData> Bones = new List<BoneData>();
         public List<Guid> Animations = new List<Guid>();
-        public int AnimationIndex = 0; // -1
+        public int AnimationIndex = 1; // -1
         private List<Matrix4x4f> BonesTransformations = new List<Matrix4x4f>();
 
         private int BonesTransformationsCount = 0;
@@ -89,10 +89,10 @@ namespace Engine
             }
             if (BonesTransformationsCount != BonesTransformations.Count) // recreate gpu buffers with new size
             {
-                bonesResourceView.Dispose();
-                bonesBuffer.Dispose();
-
-                GenerateGPUBuffer();
+                if (bonesResourceView is not null)
+                    bonesResourceView.Dispose();
+                if (bonesBuffer is not null)
+                    bonesBuffer.Dispose();
             }
         }
 

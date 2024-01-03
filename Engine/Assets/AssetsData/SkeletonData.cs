@@ -38,8 +38,8 @@ namespace Engine.AssetsData
     public class BoneData
     {
         public string Name;
-        public Matrix4x4f Transform;
-        public Matrix4x4f Offset;
+        public Matrix4x4f Transform = Matrix4x4f.Identity;
+        public Matrix4x4f Offset = Matrix4x4f.Identity;
 
         public int Index;
         public int ParentIndex;
