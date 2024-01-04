@@ -14,23 +14,17 @@ namespace Editor.GameProject
 
         private void CreateProjectButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (CreateProjectButton.IsChecked == true)
-                return;
-
             OpenProjectButton.IsChecked = false;
-
             CreateProjectButton.IsChecked = true;
+
             BrowserContent.Margin = new Thickness(-800, 0, 0, 0);
         }
 
         private void OpenProjectButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (OpenProjectButton.IsChecked == true)
-                return;
-
             CreateProjectButton.IsChecked = false;
-
             OpenProjectButton.IsChecked = true;
+
             BrowserContent.Margin = new Thickness(0, 0, 0, 0);
         }
     }

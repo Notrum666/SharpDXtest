@@ -39,10 +39,6 @@
         </StackPanel>
     </this:EditorWindowBase.Header>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
         <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
             <this:DockableHost Orientation="Horizontal" SplitLocation="0.8">
                 <this:DockableHost Orientation="Vertical" SplitLocation="0.8">
