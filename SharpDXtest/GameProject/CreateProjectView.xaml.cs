@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace Editor.GameProject
 {
@@ -23,22 +11,33 @@ namespace Editor.GameProject
         public CreateProjectView()
         {
             InitializeComponent();
+
+            DataContext = new CreateProjectViewModel();
         }
 
-        private void OnCreateButtonClick(object sender, RoutedEventArgs e)
+        private void CreateButton_OnClick(object sender, RoutedEventArgs e)
         {
-            CreateProjectViewModel vm = DataContext as CreateProjectViewModel;
-            string projectPath = vm.CreateProject(templateListBox.SelectedItem as ProjectTemplate);
+            if (DataContext is not CreateProjectViewModel createProjectViewModel)
+                return;
 
-            bool dialogResult = false;
-            var win = Window.GetWindow(this);
+            if (TemplateListBox.SelectedItem is not ProjectTemplate selectedTemplate)
+                return;
+
+            string projectPath = createProjectViewModel.CreateProject(selectedTemplate);
+            Window win = Window.GetWindow(this)!;
+
             if (!string.IsNullOrEmpty(projectPath))
             {
-                dialogResult = true;
-                var project = OpenProjectViewModel.Open(new ProjectData() { ProjectName = vm.ProjectName, ProjectPath = projectPath });
-                win.DataContext = project;
+                ProjectData projectData = new ProjectData() { ProjectName = createProjectViewModel.ProjectName, ProjectPath = projectPath };
+                ProjectViewModel project = OpenProjectViewModel.Open(projectData);
+
+                if (project != null)
+                {
+                    win.DataContext = project;
+                    win.DialogResult = true;
+                }
             }
-            win.DialogResult = dialogResult;
+
             win.Close();
         }
     }

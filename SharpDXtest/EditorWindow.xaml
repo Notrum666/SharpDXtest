@@ -30,7 +30,7 @@
                     <MenuItem Header="Test3"/>
                     <MenuItem Header="Test4"/>
                 </MenuItem>
-                <MenuItem Header="View">
+                <MenuItem Header="View" DataContext="{Binding RelativeSource={RelativeSource AncestorType=this:EditorWindow}}">
                     <MenuItem Header="Camera" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:CameraRenderControl}"/>
                     <MenuItem Header="Output" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
                     <MenuItem Header="Inspector" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:InspectorControl}"/>
@@ -39,6 +39,10 @@
         </StackPanel>
     </this:EditorWindowBase.Header>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
         <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
             <this:DockableHost Orientation="Horizontal" SplitLocation="0.8">
                 <this:DockableHost Orientation="Vertical" SplitLocation="0.8">

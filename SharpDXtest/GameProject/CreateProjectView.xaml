@@ -1,11 +1,10 @@
 ﻿<UserControl x:Class="Editor.GameProject.CreateProjectView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Editor.GameProject"
-             mc:Ignorable="d" 
-             Width="800"
+             mc:Ignorable="d" Width="800"
              d:DataContext="{d:DesignInstance Type=local:CreateProjectViewModel, IsDesignTimeCreatable=True}"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.DataContext>
@@ -13,7 +12,7 @@
     </UserControl.DataContext>
     <StackPanel Background="White">
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-            <ListBox x:Name="templateListBox" Width="195" Height="250" ItemsSource="{Binding ProjectTemplates}" SelectedIndex="0">
+            <ListBox x:Name="TemplateListBox" Width="195" Height="250" ItemsSource="{Binding ProjectTemplates}" SelectedIndex="0">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -25,7 +24,7 @@
             </ListBox>
             <Border Width="400" Height="250" Margin="5,0,0,0">
                 <Border.Background>
-                    <ImageBrush ImageSource="{Binding ElementName=templateListBox, Path=SelectedItem.Screenshot}"/>
+                    <ImageBrush ImageSource="{Binding ElementName=TemplateListBox, Path=SelectedItem.Screenshot}"/>
                 </Border.Background>
             </Border>
         </StackPanel>
@@ -39,7 +38,7 @@
             <Button Content="Browse" Width="45" Margin="5,0,0,0"/>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,30,0,0">
-            <Button Content="Create" Click="OnCreateButtonClick" IsDefault="True" IsEnabled="{Binding IsValid}" Width="96"/>
+            <Button Content="Create" Click="CreateButton_OnClick" IsDefault="True" IsEnabled="{Binding IsValid}" Width="96"/>
             <Button Content="Exit" IsCancel="True" Width="96" Margin="30,0,0,0"/>
         </StackPanel>
         <TextBlock Text="{Binding ErrorMsg}" Margin="0,20,0,0" HorizontalAlignment="Center"/>
