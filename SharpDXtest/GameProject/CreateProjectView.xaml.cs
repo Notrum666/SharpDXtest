@@ -11,8 +11,6 @@ namespace Editor.GameProject
         public CreateProjectView()
         {
             InitializeComponent();
-
-            DataContext = new CreateProjectViewModel();
         }
 
         private void CreateButton_OnClick(object sender, RoutedEventArgs e)
@@ -23,21 +21,12 @@ namespace Editor.GameProject
             if (TemplateListBox.SelectedItem is not ProjectTemplate selectedTemplate)
                 return;
 
-            string projectPath = createProjectViewModel.CreateProject(selectedTemplate);
+            ProjectData projectData = createProjectViewModel.CreateProject(selectedTemplate);
+            if (projectData == null)
+                return;
+
             Window win = Window.GetWindow(this)!;
-
-            if (!string.IsNullOrEmpty(projectPath))
-            {
-                ProjectData projectData = new ProjectData() { ProjectName = createProjectViewModel.ProjectName, ProjectPath = projectPath };
-                ProjectViewModel project = OpenProjectViewModel.Open(projectData);
-
-                if (project != null)
-                {
-                    win.DataContext = project;
-                    win.DialogResult = true;
-                }
-            }
-
+            win.DialogResult = ProjectViewModel.Load(projectData);
             win.Close();
         }
     }

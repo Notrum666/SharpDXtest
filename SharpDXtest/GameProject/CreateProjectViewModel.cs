@@ -1,40 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
+
+using Engine;
 
 namespace Editor.GameProject
 {
-    [DataContract]
-    public class ProjectTemplate
-    {
-        [DataMember]
-        public string ProjectType { get; set; }
-        [DataMember]
-        public string ProjectFile { get; set; }
-        [DataMember]
-        public List<string> Folders { get; set; }
-
-        public string IconFilePath { get; set; }
-        public byte[] Icon { get; set; }
-
-        public string ScreenshotFilePath { get; set; }
-        public byte[] Screenshot { get; set; }
-
-        public string ProjectFilePath { get; set; }
-    }
-
     internal class CreateProjectViewModel : ViewModelBase
     {
         //TODO: get the path from the installation location
-        private const string TemplatePath = @"..\..\..\..\..\SharpDxTest\ProjectTemplates\";
-        private const string ProjectRootFolder = "SharpDxProjects";
+        private const string TemplatesFolderName = "ProjectTemplates";
 
         private string projectName = "NewProject";
         public string ProjectName
@@ -51,16 +27,15 @@ namespace Editor.GameProject
             }
         }
 
-        //private string path = $@"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\SharpDxProject\";
-        private string projectPath = Path.Combine($"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}", ProjectRootFolder);
-        public string ProjectPath
+        private string parentFolderPath = Path.Combine($"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}", "SharpDxProjects");
+        public string ParentFolderPath
         {
-            get => projectPath;
+            get => parentFolderPath;
             set
             {
-                if (value != projectPath)
+                if (value != parentFolderPath)
                 {
-                    projectPath = value;
+                    parentFolderPath = value;
                     ValidateProjectPath();
                     OnPropertyChanged();
                 }
@@ -71,7 +46,7 @@ namespace Editor.GameProject
         public bool IsValid
         {
             get => isValid;
-            set
+            private set
             {
                 if (value != isValid)
                 {
@@ -85,7 +60,7 @@ namespace Editor.GameProject
         public string ErrorMsg
         {
             get => errorMsg;
-            set
+            private set
             {
                 if (value != errorMsg)
                 {
@@ -95,99 +70,53 @@ namespace Editor.GameProject
             }
         }
 
-        private ObservableCollection<ProjectTemplate> projectTemplates = new ObservableCollection<ProjectTemplate>();
+        private readonly ObservableCollection<ProjectTemplate> projectTemplates = new ObservableCollection<ProjectTemplate>();
         public ReadOnlyObservableCollection<ProjectTemplate> ProjectTemplates { get; }
 
         public CreateProjectViewModel()
         {
             ProjectTemplates = new ReadOnlyObservableCollection<ProjectTemplate>(projectTemplates);
 
-            try
+            string templatesFolderPath = Path.Combine(@"..\..\..\..\..\SharpDxTest", TemplatesFolderName);//TODO: get engine path
+            string[] templateFiles = Directory.GetFiles(templatesFolderPath, "template.asset", SearchOption.AllDirectories);
+            foreach (string file in templateFiles)
             {
-                string[] templateFiles = Directory.GetFiles(TemplatePath, "template.xml", SearchOption.AllDirectories);
-                Debug.Assert(templateFiles.Any());
-                foreach (string file in templateFiles)
-                {
-                    //ProjectTemplate template = new ProjectTemplate()
-                    //{
-                    //    ProjectType = "Empty Project",
-                    //    ProjectFile = "project.sharpdx",
-                    //    Folders = new List<string>() { ".SharpDX", "Content", "GameCode" }
-                    //};
+                //ProjectTemplate template = new ProjectTemplate()
+                //{
+                //    ProjectType = "Empty Project",
+                //    ProjectFile = "project.sharpdx",
+                //    Folders = new List<string>() { ".SharpDX", "Content", "GameCode" }
+                //};
 
-                    //ContractSerializer.ToFile(template, file);
+                //ContractSerializer.ToFile(template, file);
 
-                    ProjectTemplate template = ContractSerializer.FromFile<ProjectTemplate>(file);
+                ProjectTemplate template = YamlManager.LoadFromFile<ProjectTemplate>(file);
 
-                    template.IconFilePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(file), "Icon.png"));
-                    template.Icon = File.ReadAllBytes(template.IconFilePath);
+                template.TemplateFolderPath = Path.GetDirectoryName(file);
+                template.Icon = File.ReadAllBytes(template.IconPath);
+                template.Screenshot = File.ReadAllBytes(template.ScreenshotPath);
 
-                    template.ScreenshotFilePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(file), "Screenshot.png"));
-                    template.Screenshot = File.ReadAllBytes(template.ScreenshotFilePath);
-
-                    template.ProjectFilePath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(file), template.ProjectFile));
-
-                    projectTemplates.Add(template);
-                }
-
-                ValidateProjectPath();
+                projectTemplates.Add(template);
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
+
+            ValidateProjectPath();
         }
 
-        public string CreateProject(ProjectTemplate template)
+        public ProjectData CreateProject(ProjectTemplate template)
         {
             ValidateProjectPath();
             if (!IsValid)
-                return string.Empty;
+                return null;
 
-            if (!Path.EndsInDirectorySeparator(ProjectPath))
-                ProjectPath += @"\";
-            string path = $@"{ProjectPath}{ProjectName}\";
-
-            try
-            {
-                Directory.CreateDirectory(path);
-                foreach (string folder in template.Folders)
-                {
-                    //string folderPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), folder));
-                    string folderPath = Path.Combine(path, folder);
-                    Directory.CreateDirectory(folderPath);
-                }
-                DirectoryInfo dirInfo = new DirectoryInfo(path + @".SharpDX\");
-                dirInfo.Attributes |= FileAttributes.Hidden;
-                File.Copy(template.IconFilePath, Path.GetFullPath(Path.Combine(dirInfo.FullName, "Icon.png")));
-                File.Copy(template.ScreenshotFilePath, Path.GetFullPath(Path.Combine(dirInfo.FullName, "Screenshot.png")));
-
-                var projectXml = File.ReadAllText(template.ProjectFilePath);
-                projectXml = string.Format(projectXml, ProjectName, ProjectPath);
-
-                string projectPath = Path.GetFullPath(Path.Combine(path, $"{ProjectName}{ProjectViewModel.Extension}"));
-                File.WriteAllText(projectPath, projectXml);
-
-                return path;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                //TODO: log error
-                return string.Empty;
-            }
+            return ProjectsManager.CreateProject(ParentFolderPath, ProjectName, template);
         }
 
-        private bool ValidateProjectPath()
+        private void ValidateProjectPath()
         {
-            string path = ProjectPath;
-
-            if (!Path.EndsInDirectorySeparator(path))
-                path += @"\";
-
-            path += $@"{ProjectName}\";
+            string projectFolderPath = Path.Combine(ParentFolderPath, ProjectName);
 
             IsValid = false;
+
             if (string.IsNullOrEmpty(ProjectName.Trim()))
             {
                 ErrorMsg = "Type in a project name.";
@@ -196,15 +125,15 @@ namespace Editor.GameProject
             {
                 ErrorMsg = "Invalid character(s) used in project name.";
             }
-            else if (string.IsNullOrEmpty(ProjectPath.Trim()))
+            else if (string.IsNullOrEmpty(ParentFolderPath.Trim()))
             {
                 ErrorMsg = "Select a valid project folder.";
             }
-            else if (ProjectPath.IndexOfAny(Path.GetInvalidPathChars()) != -1)
+            else if (ParentFolderPath.IndexOfAny(Path.GetInvalidPathChars()) != -1)
             {
                 ErrorMsg = "Invalid character(s) used in project path.";
             }
-            else if(Directory.Exists(path) && Directory.EnumerateFileSystemEntries(path).Any())
+            else if (Directory.Exists(projectFolderPath) && Directory.EnumerateFileSystemEntries(projectFolderPath).Any())
             {
                 ErrorMsg = "Selected project folder already exists and is not empty.";
             }
@@ -213,8 +142,6 @@ namespace Editor.GameProject
                 ErrorMsg = string.Empty;
                 IsValid = true;
             }
-
-            return IsValid;
         }
     }
 }

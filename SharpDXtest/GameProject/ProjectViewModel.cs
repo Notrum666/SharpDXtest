@@ -1,36 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+
+using Engine;
 
 namespace Editor.GameProject
 {
-    [DataContract(Name = "Game")]
     class ProjectViewModel : ViewModelBase
     {
-        public static string Extension { get; } = ".sharpdx";
+        public static ProjectViewModel Current { get; private set; }
 
-        public static ProjectViewModel Current => Application.Current.MainWindow.DataContext as ProjectViewModel;
-
-        [DataMember]
-        public string Name { get; private set; } = "New Project";
-        [DataMember]
-        public string Path { get; private set; }
-
-        public string FullPath => $"{Path}{Name}{Extension}";
-
-        [DataMember(Name = "Scenes")]
-        private ObservableCollection<SceneViewModel> scenes = new ObservableCollection<SceneViewModel>();
-        public ReadOnlyObservableCollection<SceneViewModel> Scenes { get; private set; }
-
-        private SceneViewModel activeScene;
-        public SceneViewModel ActiveScene
+        public string Name { get; }
+        public string FolderPath { get; }
+        public ReadOnlyObservableCollection<string> Scenes { get; }
+        public string ActiveScene
         {
             get => activeScene;
             set
@@ -43,39 +25,41 @@ namespace Editor.GameProject
             }
         }
 
-        public ProjectViewModel(string name, string path)
+        private string activeScene;
+        private readonly ObservableCollection<string> scenes = new ObservableCollection<string>();
+
+        private ProjectViewModel(string name, string folderPath)
         {
             Name = name;
-            Path = path;
+            FolderPath = folderPath;
 
-            OnDeserialized(new StreamingContext());
+            Scenes = new ReadOnlyObservableCollection<string>(scenes);
         }
 
-        public static ProjectViewModel Load(string file)
+        public static bool Load(ProjectData projectData)
         {
-            Debug.Assert(File.Exists(file));
-            return ContractSerializer.FromFile<ProjectViewModel>(file);
+            ProjectViewModel project = new ProjectViewModel(projectData.ProjectName, projectData.ProjectFolderPath);
+
+            // var mainPath = Directory.GetCurrentDirectory();
+            // var projectFolderPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
+            string projectFolderPath = project.FolderPath;
+            AssetsManager.InitializeInFolder(projectFolderPath);
+            AssetsRegistry.InitializeInFolder(projectFolderPath);
+
+            Current?.Save();
+            Current?.Unload();
+            Current = project;
+            return true;
         }
 
-        public static void Save(ProjectViewModel project)
+        public void Save()
         {
-            ContractSerializer.ToFile(project, project.FullPath);
-        }
-
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            if (scenes != null)
-            {
-                Scenes = new ReadOnlyObservableCollection<SceneViewModel>(scenes);
-                OnPropertyChanged(nameof(Scenes));
-            }
-            ActiveScene = Scenes.FirstOrDefault(x => x.IsActive);
+            throw new NotImplementedException();
         }
 
         public void Unload()
         {
-
+            throw new NotImplementedException();
         }
     }
 }

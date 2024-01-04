@@ -6,10 +6,14 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+
 using Editor.GameProject;
+
 using Engine;
 using Engine.BaseAssets.Components;
+
 using LinearAlgebra;
+
 using SharpDXtest.Assets.Components;
 
 namespace Editor
@@ -40,16 +44,13 @@ namespace Editor
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            OpenProjectBrowserDialog();
-
             var mainPath = Directory.GetCurrentDirectory();
             var solutionPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
-            AssetsManager.InitializeInFolder(solutionPath);
-            AssetsRegistry.InitializeInFolder(solutionPath);
-            
+            ProjectsManager.InitializeInFolder(solutionPath);
+
             EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
 
-            CreateBaseScene();
+            OpenProjectBrowserDialog();
 
             EngineCore.IsPaused = true;
             EngineCore.Run();
@@ -70,13 +71,13 @@ namespace Editor
 
         private void OpenProjectBrowserDialog()
         {
-            var projectBrowser = new ProjectBrowserDialog();
-            if (projectBrowser.ShowDialog() == false || projectBrowser.DataContext == null)
-                Application.Current.Shutdown();
+            ProjectBrowserDialog projectBrowser = new ProjectBrowserDialog();
+            if (projectBrowser.ShowDialog() == false || ProjectViewModel.Current == null)
+                Close();
             else
             {
-                ProjectViewModel.Current?.Unload();
-                DataContext = projectBrowser.DataContext;
+                //SceneManager.Load(ProjectViewModel.Current.ActiveScene)
+                CreateBaseScene();
             }
         }
 
