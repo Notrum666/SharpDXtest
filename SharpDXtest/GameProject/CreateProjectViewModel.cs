@@ -77,7 +77,7 @@ namespace Editor.GameProject
         {
             ProjectTemplates = new ReadOnlyObservableCollection<ProjectTemplate>(projectTemplates);
 
-            string templatesFolderPath = Path.Combine(@"..\..\..\..\..\SharpDxTest", TemplatesFolderName);//TODO: get engine path
+            string templatesFolderPath = Path.Combine(@"..\..\..\..\..\SharpDxTest", TemplatesFolderName); //TODO: get engine path
             string[] templateFiles = Directory.GetFiles(templatesFolderPath, "template.asset", SearchOption.AllDirectories);
             foreach (string file in templateFiles)
             {
@@ -85,10 +85,10 @@ namespace Editor.GameProject
                 //{
                 //    ProjectType = "Empty Project",
                 //    ProjectFile = "project.sharpdx",
-                //    Folders = new List<string>() { ".SharpDX", "Content", "GameCode" }
+                //    CsprojFile = "csproj",
+                //    SolutionFile = "sln",
                 //};
-
-                //ContractSerializer.ToFile(template, file);
+                //YamlManager.SaveToFile(file, template);
 
                 ProjectTemplate template = YamlManager.LoadFromFile<ProjectTemplate>(file);
 

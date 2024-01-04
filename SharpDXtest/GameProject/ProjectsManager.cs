@@ -128,7 +128,8 @@ namespace Editor.GameProject
 
         private void Save()
         {
-            YamlManager.SaveToFile(filePath, this);
+            if (ProjectsList.Count != 0)
+                YamlManager.SaveToFile(filePath, this);
         }
 
         internal bool AddProjectData(ProjectData newProjectData)
@@ -200,7 +201,7 @@ namespace Editor.GameProject
 
     public class ProjectTemplate
     {
-        public static readonly IReadOnlyList<string> DefaultFolders = new ImmutableArray<string>()
+        public static readonly IReadOnlyList<string> DefaultFolders = new List<string>()
         {
             ProjectsManager.MetaFolderName,
             AssetsManager.ArtifactFolderName,

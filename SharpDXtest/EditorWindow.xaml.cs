@@ -48,12 +48,7 @@ namespace Editor
             var solutionPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
             ProjectsManager.InitializeInFolder(solutionPath);
 
-            EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
-
             OpenProjectBrowserDialog();
-
-            EngineCore.IsPaused = true;
-            EngineCore.Run();
         }
 
         private void EditorWindowInst_Closing(object sender, CancelEventArgs e)
@@ -73,11 +68,16 @@ namespace Editor
         {
             ProjectBrowserDialog projectBrowser = new ProjectBrowserDialog();
             if (projectBrowser.ShowDialog() == false || ProjectViewModel.Current == null)
-                Close();
+                Application.Current.Shutdown();
             else
             {
                 //SceneManager.Load(ProjectViewModel.Current.ActiveScene)
+                EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
+
                 CreateBaseScene();
+
+                EngineCore.IsPaused = true;
+                EngineCore.Run();
             }
         }
 
