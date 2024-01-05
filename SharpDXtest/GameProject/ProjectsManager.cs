@@ -214,6 +214,8 @@ namespace Editor.GameProject
         public byte[] Icon { get; set; }
         public byte[] Screenshot { get; set; }
 
+        public ProjectData() { }
+
         public ProjectData(string name, string folderPath)
         {
             projectName = name;
@@ -240,7 +242,7 @@ namespace Editor.GameProject
             "Temp"
         };
 
-        [SerializedField]
+        [SerializedField("ProjectType")]
         private readonly string projectType;
         public readonly string ProjectFile;
         public readonly string CsprojFile;
