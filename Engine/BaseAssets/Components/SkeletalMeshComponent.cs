@@ -5,13 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+
+using Buffer = SharpDX.Direct3D11.Buffer;
 
 namespace Engine.BaseAssets.Components
 {
-    public class SkeletalMeshComponent : MeshComponent
+    public class SkeletalMeshComponent : MeshComponent, IDisposable
     {
-        bool destroyed = false;
-
         [SerializedField]
         private Skeleton[] skeletons = Array.Empty<Skeleton>();
         [SerializeField]
@@ -24,11 +25,12 @@ namespace Engine.BaseAssets.Components
         // private List<Matrix4x4f> BonesTransformations = new List<Matrix4x4f>();
         // private List<Matrix4x4f> InverseTransposeBonesTransformations = new List<Matrix4x4f>();
 
-        private int BonesTransformationsCount = 0;
-        private SharpDX.Direct3D11.Buffer bonesBuffer = null;
+        private int currentBufferElementsCount = 0;
+        private Buffer bonesBuffer = null;
         private ShaderResourceView bonesResourceView = null;
-        private SharpDX.Direct3D11.Buffer inverseTransposeBonesBuffer = null;
+        private Buffer inverseTransposeBonesBuffer = null;
         private ShaderResourceView inverseTransposeBonesResourceView = null;
+        private bool disposed = false;
 
         public SkeletalAnimation Animation
         {
@@ -60,8 +62,8 @@ namespace Engine.BaseAssets.Components
 
         public override void Render()
         {
-            if (destroyed)
-                throw new ObjectDisposedException(nameof(Skeleton));
+            if (disposed)
+                throw new ObjectDisposedException(nameof(SkeletalMeshComponent));
 
             List<Matrix4x4f> BonesTransform;
             List<Matrix4x4f> InvTrspsBonesTransform;
@@ -78,33 +80,16 @@ namespace Engine.BaseAssets.Components
                 RefreshSkeletonSlots();
         }
 
-        protected override void OnDestroy()
-        {
-            if (bonesBuffer is not null)
-                bonesBuffer.Dispose();
-            bonesBuffer = null;
-            if (bonesResourceView is not null)
-                bonesResourceView.Dispose();
-            bonesResourceView = null;
-            if (inverseTransposeBonesBuffer is not null)
-                inverseTransposeBonesBuffer.Dispose();
-            inverseTransposeBonesBuffer = null;
-            if (inverseTransposeBonesResourceView is not null)
-                inverseTransposeBonesResourceView.Dispose();
-            inverseTransposeBonesResourceView = null;
-
-            destroyed = true;
-        }
-
         private void EnsureGPUBuffer(List<Matrix4x4f> BonesTransformations, List<Matrix4x4f> InverseTransposeBonesTransformations)
         {
-            CheckBonesTransformationsCount(BonesTransformations);
-            if (BonesTransformations.Count > 0 && bonesBuffer is null)
+            if (BonesTransformations.Count > 0 && (bonesBuffer is null || BonesTransformations.Count != currentBufferElementsCount))
             {
-                BonesTransformationsCount = BonesTransformations.Count;
-                int matrixSize = Utilities.SizeOf<Matrix4x4f>();
-                bonesBuffer = SharpDX.Direct3D11.Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.ShaderResource,
-                                            BonesTransformations.ToArray(), matrixSize * BonesTransformationsCount,
+                ClearBuffers();
+                currentBufferElementsCount = BonesTransformations.Count;
+                int matrixSize = Marshal.SizeOf<Matrix4x4f>();
+
+                bonesBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.ShaderResource,
+                                            BonesTransformations.ToArray(), matrixSize * currentBufferElementsCount,
                                             ResourceUsage.Dynamic, CpuAccessFlags.Write,
                                             ResourceOptionFlags.BufferStructured, matrixSize);
                 bonesResourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, bonesBuffer, new ShaderResourceViewDescription()
@@ -114,11 +99,12 @@ namespace Engine.BaseAssets.Components
                     Buffer = new ShaderResourceViewDescription.BufferResource()
                     {
                         FirstElement = 0,
-                        ElementCount = BonesTransformationsCount
+                        ElementCount = currentBufferElementsCount
                     }
                 });
-                inverseTransposeBonesBuffer = SharpDX.Direct3D11.Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.ShaderResource,
-                                            InverseTransposeBonesTransformations.ToArray(), matrixSize * BonesTransformationsCount,
+
+                inverseTransposeBonesBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.ShaderResource,
+                                            InverseTransposeBonesTransformations.ToArray(), matrixSize * currentBufferElementsCount,
                                             ResourceUsage.Dynamic, CpuAccessFlags.Write,
                                             ResourceOptionFlags.BufferStructured, matrixSize);
                 inverseTransposeBonesResourceView = new ShaderResourceView(GraphicsCore.CurrentDevice, inverseTransposeBonesBuffer, new ShaderResourceViewDescription()
@@ -128,7 +114,7 @@ namespace Engine.BaseAssets.Components
                     Buffer = new ShaderResourceViewDescription.BufferResource()
                     {
                         FirstElement = 0,
-                        ElementCount = BonesTransformationsCount
+                        ElementCount = currentBufferElementsCount
                     }
                 });
             }
@@ -140,7 +126,7 @@ namespace Engine.BaseAssets.Components
             {
                 DataStream dataStream;
                 GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(bonesBuffer, MapMode.WriteDiscard, MapFlags.None, out dataStream);
-                for (int i = 0; i < BonesTransformationsCount; i++)
+                for (int i = 0; i < currentBufferElementsCount; i++)
                     dataStream.Write(BonesTransformations[i]);
                 GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(bonesBuffer, 0);
                 GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(0, bonesResourceView);
@@ -149,30 +135,26 @@ namespace Engine.BaseAssets.Components
             {
                 DataStream dataStream;
                 GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(inverseTransposeBonesBuffer, MapMode.WriteDiscard, MapFlags.None, out dataStream);
-                for (int i = 0; i < BonesTransformationsCount; i++)
+                for (int i = 0; i < currentBufferElementsCount; i++)
                     dataStream.Write(InverseTransposeBonesTransformations[i]);
                 GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(inverseTransposeBonesBuffer, 0);
                 GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(1, inverseTransposeBonesResourceView);
             }
         }
 
-        private void CheckBonesTransformationsCount(List<Matrix4x4f> BonesTransformations)
+        private void ClearBuffers()
         {
-            if (BonesTransformationsCount != BonesTransformations.Count) // recreate gpu buffers with new size
-            {
-                if (bonesBuffer is not null)
-                    bonesBuffer.Dispose();
-                bonesBuffer = null;
-                if (bonesResourceView is not null)
-                    bonesResourceView.Dispose();
-                bonesResourceView = null;
-                if (inverseTransposeBonesBuffer is not null)
-                    inverseTransposeBonesBuffer.Dispose();
-                inverseTransposeBonesBuffer = null;
-                if (inverseTransposeBonesResourceView is not null)
-                    inverseTransposeBonesResourceView.Dispose();
-                inverseTransposeBonesResourceView = null;
-            }
+            if (bonesBuffer is null)
+                return;
+
+            bonesBuffer.Dispose();
+            bonesResourceView.Dispose();
+            inverseTransposeBonesBuffer.Dispose();
+            inverseTransposeBonesResourceView.Dispose();
+            bonesBuffer = null;
+            bonesResourceView = null;
+            inverseTransposeBonesBuffer = null;
+            inverseTransposeBonesResourceView = null;
         }
 
         private void UpdateTransform(Skeleton skeleton, float AnimationTime, Bone boneData, Matrix4x4f parentTransform, List<Matrix4x4f> BonesTransform, List<Matrix4x4f> InvTrspsBonesTransform)
@@ -286,10 +268,30 @@ namespace Engine.BaseAssets.Components
 
                         UpdateTransform(skeleton, AnimationTime, skeleton.Bones[0], Matrix4x4f.Identity, BonesTransformations, InverseTransposeBonesTransformations);
                     }
+                    return;
                 }
             }
+        }
 
-            CheckBonesTransformationsCount(BonesTransformations);
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                ClearBuffers();
+
+                disposed = true;
+            }
+        }
+
+        ~SkeletalMeshComponent()
+        {
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

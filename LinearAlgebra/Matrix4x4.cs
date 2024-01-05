@@ -325,7 +325,7 @@ namespace LinearAlgebra
         }
 
         /// <summary>
-        /// Creates scale matrix from scale vector
+        /// Creates scale matrix from scale vector that represents transformation from local to global space, where local space is scaled by the given vector
         /// </summary>
         public static Matrix4x4 FromScale(in Vector3 scale)
         {
@@ -336,7 +336,7 @@ namespace LinearAlgebra
         }
 
         /// <summary>
-        /// Creates translation matrix from translation vector
+        /// Creates scale matrix from scale vector that represents transformation from local to global space, where local space is translated by the given vector
         /// </summary>
         public static Matrix4x4 FromTranslation(in Vector3 translation)
         {

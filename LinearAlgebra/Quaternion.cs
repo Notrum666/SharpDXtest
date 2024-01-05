@@ -248,7 +248,7 @@ namespace LinearAlgebra
         }
 
         /// <summary>
-        /// spherical interpolation between two quaternions
+        /// Spherical linear interpolation between two given quaternions
         /// </summary>
         public static Quaternion Slerp(Quaternion start, Quaternion end, double factor)
         {
