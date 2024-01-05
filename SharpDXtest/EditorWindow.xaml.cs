@@ -20,6 +20,13 @@ namespace Editor
 {
     public partial class EditorWindow : EditorWindowBase
     {
+        private const string DataFolderName = "SharpDxEditor";
+        private const string ResourcesFolderName = "Resources";
+        
+        public static string DataFolderPath { get; private set; }
+        public static string EditorFolderPath { get; private set; }
+        public static string ResourcesFolderPath { get; private set; }
+
         private RelayCommand spawnFlyingControl;
 
         public RelayCommand SpawnFlyingControl => spawnFlyingControl ?? (spawnFlyingControl = new RelayCommand(
@@ -35,6 +42,11 @@ namespace Editor
 
         public EditorWindow()
         {
+            DataFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DataFolderName);
+
+            EditorFolderPath = Directory.GetCurrentDirectory();
+            ResourcesFolderPath = Path.Combine(EditorFolderPath, ResourcesFolderName);
+
             InitializeComponent();
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
@@ -46,7 +58,7 @@ namespace Editor
         {
             var mainPath = Directory.GetCurrentDirectory();
             var solutionPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
-            ProjectsManager.InitializeInFolder(solutionPath);
+            ProjectsManager.InitializeInFolder(DataFolderPath);
 
             OpenProjectBrowserDialog();
         }

@@ -7,9 +7,8 @@ using Engine;
 
 namespace Editor.GameProject
 {
-    internal class CreateProjectViewModel : ViewModelBase
+    public class CreateProjectViewModel : ViewModelBase
     {
-        //TODO: get the path from the installation location
         private const string TemplatesFolderName = "ProjectTemplates";
 
         private string projectName = "NewProject";
@@ -77,7 +76,7 @@ namespace Editor.GameProject
         {
             ProjectTemplates = new ReadOnlyObservableCollection<ProjectTemplate>(projectTemplates);
 
-            string templatesFolderPath = Path.Combine(@"..\..\..\..\..\SharpDxTest", TemplatesFolderName); //TODO: get engine path
+            string templatesFolderPath = Path.Combine(EditorWindow.ResourcesFolderPath, TemplatesFolderName);
             string[] templateFiles = Directory.GetFiles(templatesFolderPath, "template.asset", SearchOption.AllDirectories);
             foreach (string file in templateFiles)
             {

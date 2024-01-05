@@ -5,7 +5,7 @@ using Engine;
 
 namespace Editor.GameProject
 {
-    class ProjectViewModel : ViewModelBase
+    public class ProjectViewModel : ViewModelBase
     {
         public static ProjectViewModel Current { get; private set; }
 

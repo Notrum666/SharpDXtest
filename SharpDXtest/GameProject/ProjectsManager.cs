@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -10,23 +9,24 @@ using Engine;
 
 using YamlDotNet.Serialization.Callbacks;
 
+using static Engine.FileSystemHelper;
+
 namespace Editor.GameProject
 {
     public static class ProjectsManager
     {
         public const string Extension = ".sharpdx";
         public const string MetaFolderName = ".SharpDX";
+        private const string BaseAssetsFolderName = "BaseAssets";
 
-        public static string EngineFolderPath { get; private set; }
         public static ReadOnlyObservableCollection<ProjectData> Projects { get; private set; }
 
         private static ProjectsDatabase projectsDatabase;
 
-        public static void InitializeInFolder(string engineFolderPath)
+        public static void InitializeInFolder(string dataFolderPath)
         {
-            Logger.Log(LogType.Info, $"Initialize ProjectsManager in folder = {engineFolderPath}");
-            EngineFolderPath = engineFolderPath;
-            projectsDatabase = ProjectsDatabase.Load(EngineFolderPath);
+            Logger.Log(LogType.Info, $"Initialize ProjectsManager in folder = {dataFolderPath}");
+            projectsDatabase = ProjectsDatabase.Load(dataFolderPath);
             Projects = new ReadOnlyObservableCollection<ProjectData>(projectsDatabase.ProjectsList);
         }
 
@@ -49,7 +49,7 @@ namespace Editor.GameProject
             File.Copy(template.ScreenshotPath, projectData.ScreenshotPath);
 
             //Project file
-            var templateProjectData = File.ReadAllText(template.ProjectTemplatePath);
+            string templateProjectData = File.ReadAllText(template.ProjectTemplatePath);
             templateProjectData = string.Format(templateProjectData, projectName, projectFolderPath);
             File.WriteAllText(projectData.ProjectFilePath, templateProjectData);
 
@@ -57,15 +57,20 @@ namespace Editor.GameProject
             string projectGuid = Guid.NewGuid().ToString("B");
             string assemblyName = Regex.Replace(projectName, "[^a-zA-Z0-9]", "_");
 
-            var templateCsprojData = File.ReadAllText(template.CsprojTemplatePath);
-            templateCsprojData = string.Format(templateCsprojData, projectGuid, assemblyName, EngineFolderPath);
+            string templateCsprojData = File.ReadAllText(template.CsprojTemplatePath);
+            templateCsprojData = string.Format(templateCsprojData, projectGuid, assemblyName, EditorWindow.EditorFolderPath);
             string csprojFilePath = Path.Combine(projectData.ProjectFolderPath, $"{assemblyName}.csproj");
             File.WriteAllText(csprojFilePath, templateCsprojData);
 
-            var templateSolutionData = File.ReadAllText(template.SolutionTemplatePath);
+            string templateSolutionData = File.ReadAllText(template.SolutionTemplatePath);
             templateSolutionData = string.Format(templateSolutionData, projectGuid, assemblyName);
             string solutionFilePath = Path.Combine(projectData.ProjectFolderPath, $"{assemblyName}.sln");
             File.WriteAllText(solutionFilePath, templateSolutionData);
+
+            //Content
+            string baseAssetsPath = Path.Combine(EditorWindow.ResourcesFolderPath, BaseAssetsFolderName);
+            string projectContentPath = Path.Combine(projectData.ProjectFolderPath, AssetsRegistry.ContentFolderName);
+            CopyFolder(baseAssetsPath, Path.Combine(projectContentPath, BaseAssetsFolderName));
 
             projectsDatabase.AddProjectData(projectData);
             return projectData;
@@ -92,6 +97,32 @@ namespace Editor.GameProject
 
             newProjectData = new ProjectData(projectName, projectFolder);
             return projectsDatabase.AddProjectData(newProjectData);
+        }
+
+        private static bool CopyFolder(string folderPath, string newFolderPath)
+        {
+            if (!Path.Exists(folderPath))
+                return false;
+
+            Directory.CreateDirectory(newFolderPath);
+
+            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
+            {
+                if (!pathInfo.IsDirectory)
+                    continue;
+                string relativePath = Path.GetRelativePath(folderPath, pathInfo.FullPath);
+                Directory.CreateDirectory(Path.Combine(newFolderPath, relativePath));
+            }
+
+            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
+            {
+                if (pathInfo.IsDirectory)
+                    continue;
+                string relativePath = Path.GetRelativePath(folderPath, pathInfo.FullPath);
+                File.Copy(pathInfo.FullPath, Path.Combine(newFolderPath, relativePath), true);
+            }
+
+            return true;
         }
     }
 

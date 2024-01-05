@@ -32,13 +32,13 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="SharpDX.LinearAlgebra">
-			<HintPath>$(Engine_IncludePath)\SharpDX\LinearAlgebra.dll</HintPath>
+			<HintPath>$(Engine_IncludePath)\LinearAlgebra.dll</HintPath>
 		</Reference>
 		<Reference Include="SharpDX.Engine">
-			<HintPath>$(Engine_IncludePath)\SharpDX\Engine.dll</HintPath>
+			<HintPath>$(Engine_IncludePath)\Engine.dll</HintPath>
 		</Reference>
 		<Reference Include="SharpDX.Editor">
-			<HintPath>{$(Engine_IncludePath)\SharpDX\Editor.dll</HintPath>
+			<HintPath>$(Engine_IncludePath)\Editor.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 	
