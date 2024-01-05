@@ -324,6 +324,28 @@ namespace LinearAlgebra
                                  0, 0, 0, 1);
         }
 
+        /// <summary>
+        /// Creates scale matrix from scale vector that represents transformation from local to global space, where local space is scaled by the given vector
+        /// </summary>
+        public static Matrix4x4 FromScale(in Vector3 scale)
+        {
+            return new Matrix4x4(scale.x, 0, 0, 0,
+                                 0, scale.y, 0, 0,
+                                 0, 0, scale.z, 0,
+                                 0, 0, 0, 1);
+        }
+
+        /// <summary>
+        /// Creates scale matrix from scale vector that represents transformation from local to global space, where local space is translated by the given vector
+        /// </summary>
+        public static Matrix4x4 FromTranslation(in Vector3 translation)
+        {
+            return new Matrix4x4(1, 0, 0, translation.x,
+                                 0, 1, 0, translation.y,
+                                 0, 0, 1, translation.z,
+                                 0, 0, 0, 1);
+        }
+
         public bool IsIdentity()
         {
             if (Math.Abs(v00 - 1.0) > Constants.Epsilon || Math.Abs(v01) > Constants.Epsilon || Math.Abs(v02) > Constants.Epsilon || Math.Abs(v03) > Constants.Epsilon ||

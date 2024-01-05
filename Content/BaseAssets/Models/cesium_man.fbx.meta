@@ -1,0 +1,252 @@
+Guid: 64ddb77335d74591bee18777a8a6e239
+ImportDate: 2024-01-05T21:42:23.1247344Z
+SubAssets:
+  ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: DefaultMaterial
+  : be9959381ac144359f3b8fb82d40d5ab
+  ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Cesium_Man-effect
+  : e52b002c793e475da3acb4268ad70fd4
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_0_Armature
+  : 56678ed7f38a4fc99ba5fb0203dd3d11
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_10_Armature
+  : c690b9a8115f4dafa710df3e2824bc09
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_11_Armature
+  : 0f207858dfb348b4bdc7460ee99e42a5
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_12_Armature
+  : 6052159c718a42a7b7a2e959bf58d65f
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_13_Armature
+  : dbb5e6b46832419988590f440cc911d2
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_14_Armature
+  : 62d9cf4ba4b54945af5d87d5a9107df2
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_15_Armature
+  : 5c4b81644fe34b92a2937a3bbe6457a9
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_16_Armature
+  : c592c473cd2a4765b85b37948ed48328
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_17_Armature
+  : e13721a6cf6f4bdcab6810747315bdeb
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_18_Armature
+  : c2022cc090224c828972dd996dbfcedc
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_1_Armature
+  : dda007da1b97431a8496f7ffbb1d0c71
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_2_Armature
+  : 5da31da29ec34d71ac48c546058e17f3
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_3_Armature
+  : ca9845ea4a164b4384ef3b3582ff1121
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_4_Armature
+  : 67a4a6ab6eec4c0fb66ae1cb8a675650
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_5_Armature
+  : e2737afa32e44fa4b22819319b1c56d1
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_6_Armature
+  : 9a927247813f46118a555b7dbfea3a3b
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_7_Armature
+  : da9fd0713b0449a9aca21653769efe24
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_8_Armature
+  : 6358372e8e224c23bf572ef89b9b95d9
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Anim_9_Armature
+  : 4e88e933a4134402b55219cee7d2dbd8
+  ? Item1: Engine.AssetsData.SkeletonData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: skeleton
+  : ee5ba6dfceb6435b91ade03167d6056c
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_0_Armature
+  : 214c6ffb0fdd4868b74a93d61b932c7c
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_10_Armature
+  : 30050d33782d43d79a40f4fcefbdc57d
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_11_Armature
+  : b80292bae7c0452c88beeb19aee4aa7e
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_12_Armature
+  : e99f4340896a44a4844b74d91f6bddca
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_13_Armature
+  : 174d9a4199344016a5678538ada3be84
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_14_Armature
+  : 46ee0ae165c442aba62ab3e12932697f
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_15_Armature
+  : 61c1337cf8a748ed9050ed8cd4f58dc6
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_16_Armature
+  : abb232247f8b48ec92fd238aa98e6162
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_17_Armature
+  : a8ee8486049e428998fc789b9e27c46a
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_18_Armature
+  : 4951e8a0ff494accb15e3839d99b1fe8
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_1_Armature
+  : 6cab6bec3a70402e95a4f12cb438d9f0
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_2_Armature
+  : 765b16dc48c54d88b1dcd69abfdc8dc6
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_3_Armature
+  : 2711e6e3d41647a4bd97b8454382a9c6
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_4_Armature
+  : 953f581e6ad34b85bcff830223ba50cb
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_5_Armature
+  : a9eab745e5884d619a9b986dd66cd16e
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_6_Armature
+  : db90db7c5c3442349342e159a016268b
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_7_Armature
+  : f00ba99eaed347c1b350fc809eb60f0d
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_8_Armature
+  : e9daeffb903447418016daf6e4553834
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature|Armature|Armature|Anim_9_Armature
+  : fb258a92671a462c93f1927a69bc9b69
+  ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Cesium_Man-effect.001
+  : 63cd27d1108343bcb0fb0db518df0486
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_0_Armature.001
+  : 0a44ed01e2304950963c35d5d04efd22
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_10_Armature.001
+  : 00fe44b5b03d4a6ca2b9f17981c195bf
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_11_Armature.001
+  : 55df27cc09f94e65925c4fae76e12665
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_12_Armature.001
+  : b297a22b780f418aaf7480e84f4f02fd
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_13_Armature.001
+  : f0703481aeae4d959e86466edfcf5afb
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_14_Armature.001
+  : 03f2715157de4672bac03ba2a3a8a32c
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_15_Armature.001
+  : c03f93a871064fe888dc1f1834a40820
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_16_Armature.001
+  : 43f9c665b0ef4efebdbc109d0cc44563
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_17_Armature.001
+  : e2714b16a29a412ebd8b0c8aad1e385f
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_18_Armature.001
+  : 3df4d55584534c1b983a157c4c8a2923
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_1_Armature.001
+  : 8aa5f5673ed24f3b9f029fc139ba3ac8
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_2_Armature.001
+  : 1d3a35ecc48d4156a245f843643daf7b
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_3_Armature.001
+  : 92d882779460499d9c9b2130b7c19ba5
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_4_Armature.001
+  : 8ee444dece7d4b73901e833a2cacacf9
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_5_Armature.001
+  : 02d127ce3c5241dca76df706c9e4fe28
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_6_Armature.001
+  : 363a14b4db6242e390cbd2966fd51421
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_7_Armature.001
+  : 1bf7222f3ebb41b2afe9b309b30726c9
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_8_Armature.001
+  : d76887a645ed47fcb38bf5fbe7f6b654
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Anim_9_Armature.001
+  : 9f6b915d92f04901b354fbc6cb0d9645
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_0_Armature
+  : 5a8b1758b6a343e088d08d7602e980de
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_10_Armature
+  : bf937f009aae45bf9039026d3d876253
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_11_Armature
+  : c38dfd67869b4547b5b804ccba208081
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_12_Armature
+  : 505bc275c84247a2aa99f44102668a02
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_13_Armature
+  : 938b82dba7c64744bb931a904d5ad0bf
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_14_Armature
+  : 58c2ffe5bba94076b3991ec78d04d20d
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_15_Armature
+  : 2ae04be9729546c5b61262a73ffbea85
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_16_Armature
+  : 3ddb2a40a5c04a51a2d9db831795f40e
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_17_Armature
+  : 18aefe1cabc64414a7fcf6fdd3b46e2a
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_18_Armature
+  : cdec0e2ae2d745d3b392e6d8d51c5bb9
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_1_Armature
+  : 1182600d19a74fc285ea193e4f009ffa
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_2_Armature
+  : 2a0c9b34f9a748059a44bc2db7ed687a
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_3_Armature
+  : cb54ebc470ae4fe792de1f51b8115cc3
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_4_Armature
+  : 290f096a714947da9e70f31f017aa4c2
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_5_Armature
+  : 595d011def944840b8f10a7696723971
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_6_Armature
+  : c46f1642abc7441ba832b6be1f2e88ff
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_7_Armature
+  : e1287a7dfb5f4fa39ec030916020a3c5
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_8_Armature
+  : 332201dfd42d43579d72b429dcc4a91d
+  ? Item1: Engine.AssetsData.AnimationData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Armature.001|Armature|Armature|Anim_9_Armature
+  : 32c68bd7597e4c1f9c1037607098c766
+ImportSettings: !ModelImportSettings
+  SkeletonOverride: ee5ba6dfceb6435b91ade03167d6056c
+  MeshMaterialsOverride:
+    Icosphere_Icosphere_0: be9959381ac144359f3b8fb82d40d5ab
+    Cesium_Man_Cesium_Man_1: e52b002c793e475da3acb4268ad70fd4
+    Cesium_Man_Cesium_Man_0: e52b002c793e475da3acb4268ad70fd4
+    Icosphere_Icosphere.001_0: be9959381ac144359f3b8fb82d40d5ab
+    Cesium_Man.001_Cesium_Man.001_1: 63cd27d1108343bcb0fb0db518df0486
+    Cesium_Man.001_Cesium_Man.001_0: 63cd27d1108343bcb0fb0db518df0486

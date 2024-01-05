@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using System.IO;
+using System;
 using LinearAlgebra;
 
 namespace Engine.AssetsData
 {
-    [AssetData<BaseAsset>]
+    [AssetData<Skeleton>]
     public class SkeletonData : AssetData
     {
-        //TODO: InverseRootTransform
-        public List<BoneData> Bones = new List<BoneData>();
+        public Matrix4x4f InverseRootTransform = Matrix4x4f.Identity;
+        public List<Bone> Bones = new List<Bone>();
 
         public override void Serialize(BinaryWriter writer)
         {
@@ -20,21 +21,14 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override BaseAsset ToRealAsset()
+        public override Skeleton ToRealAsset()
         {
-            BaseAsset skeleton = new BaseAsset();
+            Skeleton skeleton = new Skeleton();
+
+            skeleton.Bones = Bones;
+            skeleton.InverseRootTransform = InverseRootTransform;
 
             return skeleton;
         }
-    }
-
-    public class BoneData //Node
-    {
-        public string Name;
-        public Matrix4x4f Transform;
-
-        public int Index;
-        public int ParentIndex;
-        public List<int> ChildIndices = new List<int>();
     }
 }
