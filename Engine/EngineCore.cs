@@ -3,15 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Engine.BaseAssets.Components;
 using Engine.Layers;
 
 namespace Engine
 {
     public static class EngineCore
     {
-        public static Scene CurrentScene { get; set; }
         private static bool isAlive = false;
         public static bool IsAlive => isAlive;
         private static bool needsToBePaused = false;
@@ -32,7 +29,6 @@ namespace Engine
             }
         }
         private static Task loopTask;
-
         public static event Action OnPaused;
         public static event Action OnResumed;
         public static event Action OnFrameEnded;
@@ -42,7 +38,6 @@ namespace Engine
         public static void Init(nint HWND, int width, int height, IEnumerable<Layer> addedLayers = null)
         {
             Logger.Log(LogType.Info, "Engine initialization");
-
             // Order of initialization is important, same number means no difference
             ProfilerCore.Init();
             GraphicsCore.Init(HWND, width, height); // 1
@@ -53,18 +48,18 @@ namespace Engine
             layersStack = new List<Layer>
             {
                 new InputLayer(),
-                new ProfilerLayer(), 
+                new ProfilerLayer(),
                 new RenderSceneLayer(),
                 new SoundLayer(),
                 new UpdateSceneLayer()
             };
 
-            if(addedLayers != null)
+            if (addedLayers != null)
             {
                 layersStack.AddRange(addedLayers);
             }
 
-            foreach(Layer layer in layersStack.OrderBy(x => x.InitOrder))
+            foreach (Layer layer in layersStack.OrderBy(x => x.InitOrder))
             {
                 layer.Init();
             }
@@ -77,7 +72,7 @@ namespace Engine
         public static async void Run()
         {
             if (isAlive)
-                throw new Exception("EngineCore already ran");
+                return;
 
             isAlive = true;
 
@@ -85,7 +80,6 @@ namespace Engine
             {
                 while (isAlive)
                 {
-
                     if (needsToBePaused)
                     {
                         needsToBePaused = false;
@@ -100,7 +94,7 @@ namespace Engine
                         OnResumed?.Invoke();
                     }
 
-                    foreach(Layer layer in layersStack)
+                    foreach (Layer layer in layersStack)
                     {
                         layer.Update();
                     }
@@ -119,7 +113,7 @@ namespace Engine
         public static void Stop()
         {
             if (!isAlive)
-                throw new Exception("EngineCore already stopped");
+                return;
 
             isAlive = false;
             isPaused = false;

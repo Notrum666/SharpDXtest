@@ -1,126 +1,159 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
-
 using Engine.BaseAssets.Components;
 
 namespace Engine
 {
-    public sealed class GameObject
+    public sealed class GameObject : SerializableObject
     {
-        private bool enabled = true;
-        public bool Enabled { get => Transform.Parent == null ? enabled : enabled && Transform.Parent.GameObject.enabled; set => enabled = value; }
-        public Transform Transform { get; private set; }
-        private List<Component> components = new List<Component>();
+        [SerializedField]
+        private string name;
+        [SerializedField]
+        private bool localEnabled = true;
+        [SerializedField]
+        private Transform transform = null;
+        [SerializedField]
+        private readonly List<Component> components = new List<Component>();
+
+        public string Name { get => name; set => name = string.IsNullOrEmpty(value) ? name : value; }
+        public bool LocalEnabled { get => localEnabled; set => localEnabled = value; }
+        public Transform Transform { get => transform; private init => transform = value; }
         public ReadOnlyCollection<Component> Components => components.AsReadOnly();
-        internal bool PendingDestroy { get; private set; }
-        public bool Initialized { get; internal set; }
+
+        public bool Enabled => localEnabled && Transform != null && (Transform.Parent?.GameObject?.Enabled ?? true); //TODO: maybe better cache value
 
         public GameObject()
         {
-            Transform = new Transform();
-            Transform.GameObject = this;
-            components.Add(Transform);
+            Name = "NewObject";
+            Transform = AddComponent<Transform>();
+            if (Scene.CurrentScene != null)
+                Scene.CurrentScene.AddObject(this);
+        }
+
+        public static GameObject Instantiate(string objectName = null, Transform parent = null)
+        {
+            GameObject gameObject = Instantiate<GameObject>();
+
+            gameObject.Name = objectName;
+            gameObject.Transform.SetParent(parent);
+
+            return gameObject;
+        }
+
+        private protected override void InitializeInner()
+        {
+            foreach (Component component in components)
+                component.Initialize();
+        }
+
+        /// <summary>
+        /// Destroys all components, handling Transform as last one.
+        /// Ordering may be temporary
+        /// </summary>
+        private protected override void DestroyImmediateInternal()
+        {
+            foreach (Component component in components.ToImmutableArray())
+            {
+                if (component is not BaseAssets.Components.Transform)
+                {
+                    component.DestroyImmediate();
+                }
+            }
+
+            Transform.DestroyImmediate();
+            transform = null;
         }
 
         public T AddComponent<T>() where T : Component
         {
-            Component component = Activator.CreateInstance(typeof(T)) as Component;
-            component.GameObject = this;
-            components.Add(component);
-            if (Initialized)
-                component.Initialize();
-            return component as T;
+            return AddComponent(typeof(T)) as T;
         }
 
-        public Component AddComponent(Type t)
+        public Component AddComponent(Type type)
         {
-            if (!t.IsSubclassOf(typeof(Component)))
+            if (!type.IsSubclassOf(typeof(Component)))
                 throw new ArgumentException("Given type must be a component");
-            Component component = Activator.CreateInstance(t) as Component;
-            component.GameObject = this;
-            components.Add(component);
+
+            if (Instantiate(type) is not Component newComponent)
+                return null;
+
+            newComponent.GameObject = this;
+            components.Add(newComponent);
+
             if (Initialized)
-                component.Initialize();
-            return component;
+                newComponent.Initialize();
+            return newComponent;
         }
 
         public T GetComponent<T>() where T : Component
         {
+            return GetComponent(typeof(T)) as T;
+        }
+
+        public Component GetComponent(Type type)
+        {
+            if (!type.IsSubclassOf(typeof(Component)))
+                throw new ArgumentException("Given type must be a component");
+
             foreach (Component component in components)
             {
-                if (component is T)
-                    return component as T;
+                Type componentType = component.GetType();
+                if (componentType == type || componentType.IsSubclassOf(type))
+                    return component;
             }
+
             return null;
         }
 
         public T[] GetComponents<T>() where T : Component
         {
-            List<T> curComponents = new List<T>();
-            foreach (Component component in components)
-            {
-                if (component is T)
-                    curComponents.Add(component as T);
-            }
-            return curComponents.ToArray();
+            return Array.ConvertAll(GetComponents(typeof(T)), item => (T)item);
         }
 
-        public Component GetComponent(Type t)
+        public Component[] GetComponents(Type type)
         {
-            if (!t.IsSubclassOf(typeof(Component)))
+            if (!type.IsSubclassOf(typeof(Component)))
                 throw new ArgumentException("Given type must be a component");
+
+            List<Component> typedComponents = new List<Component>();
             foreach (Component component in components)
             {
-                if (component.GetType() == t || component.GetType().IsSubclassOf(t))
-                    return component;
+                Type componentType = component.GetType();
+                if (componentType == type || componentType.IsSubclassOf(type))
+                    typedComponents.Add(component);
             }
-            return null;
+            return typedComponents.ToArray();
         }
 
-        public Component[] GetComponents(Type t)
+        internal void RemoveComponent(Component component)
         {
-            if (!t.IsSubclassOf(typeof(Component)))
-                throw new ArgumentException("Given type must be a component");
-            List<Component> curComponents = new List<Component>();
-            foreach (Component component in components)
-            {
-                if (component.GetType() == t || component.GetType().IsSubclassOf(t))
-                    curComponents.Add(component);
-            }
-            return curComponents.ToArray();
-        }
-
-        public void Initialize()
-        {
-            if (Initialized)
-                return;
-            Initialized = true;
-            foreach (Component component in components)
-                component.Initialize();
+            components.Remove(component);
         }
 
         public void Update()
         {
+            if (!Enabled)
+                return;
+
             foreach (Component component in components)
             {
-                if (component.Enabled)
-                    component.Update();
+                if (component is BehaviourComponent { LocalEnabled: true } comp)
+                    comp.Update();
             }
         }
 
         public void FixedUpdate()
         {
+            if (!Enabled)
+                return;
+
             foreach (Component component in components)
             {
-                if (component.Enabled)
-                    component.FixedUpdate();
+                if (component is BehaviourComponent { LocalEnabled: true } comp)
+                    comp.FixedUpdate();
             }
-        }
-
-        public void Destroy()
-        {
-            PendingDestroy = true;
         }
     }
 }

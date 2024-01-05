@@ -1,13 +1,11 @@
-﻿using System;
-using System.Threading;
-
+﻿using System.Threading;
 using Engine.BaseAssets.Components;
-
-using LinearAlgebra;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
+using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using Device = SharpDX.Direct3D11.Device;
+using FillMode = SharpDX.Direct3D11.FillMode;
 using Format = SharpDX.DXGI.Format;
 using Query = SharpDX.Direct3D11.Query;
 using QueryType = SharpDX.Direct3D11.QueryType;
@@ -27,13 +25,24 @@ namespace Engine
 
         public GBuffer(int width, int height)
         {
-            worldPos =          new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            albedo =            new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            normal =            new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            metallic =          new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            roughness =         new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            ambientOcclusion =  new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            emission =          new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            worldPos = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            albedo = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            normal = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            metallic = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            roughness = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            ambientOcclusion = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+            emission = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
+        }
+
+        internal void Dispose()
+        {
+            worldPos?.Dispose();
+            albedo?.Dispose();
+            normal?.Dispose();
+            metallic?.Dispose();
+            roughness?.Dispose();
+            ambientOcclusion?.Dispose();
+            emission?.Dispose();
         }
     }
 
@@ -43,7 +52,14 @@ namespace Engine
         private static bool disposed = false;
         public static Device CurrentDevice { get; private set; }
         public static SharpDX.Direct3D9.Device D9Device { get; private set; }
+
+        public static RasterizerState BackCullingRasterizer;
+        public static RasterizerState FrontCullingRasterizer;
+
         public static Camera CurrentCamera { get; set; }
+
+        public static BlendState AdditiveBlendState;
+        public static BlendState BlendingBlendState;
 
         private static Query synchQuery;
 
@@ -55,48 +71,17 @@ namespace Engine
         {
             InitDirectX(HWND, width, height);
 
-            if (AssetsManager_Old.Textures.Count > 0)
-                throw new Exception("AssetsManager.Textures must be empty on GraphicsCore init stage");
-            AssetsManager_Old.Textures.Add("default_albedo", new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_normal", new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_metallic", new Texture(64, 64, 0.1f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_roughness", new Texture(64, 64, 0.5f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_ambientOcclusion", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager_Old.Textures.Add("default_emissive", new Texture(64, 64, 0.0f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource));
-            AssetsManager_Old.Materials.Add("default", new Material());
+            Shader.CreateStaticShader("particles_bitonic_sort_step", "BaseAssets\\Shaders\\Particles\\particles_bitonic_sort_step.csh");
+            Shader.CreateStaticShader("particles_emit_point", "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
+            Shader.CreateStaticShader("particles_emit_sphere", "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
+            Shader.CreateStaticShader("particles_force_constant", "BaseAssets\\Shaders\\Particles\\particles_force_constant.csh");
+            Shader.CreateStaticShader("particles_force_point", "BaseAssets\\Shaders\\Particles\\particles_force_point.csh");
+            Shader.CreateStaticShader("particles_init", "BaseAssets\\Shaders\\Particles\\particles_init.csh");
+            Shader.CreateStaticShader("particles_update_energy", "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
+            Shader.CreateStaticShader("particles_update_physics", "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
+            Shader.CreateStaticShader("screen_quad", "BaseAssets\\Shaders\\screen_quad.vsh");
 
-            //AssetsManager.LoadShaderPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"),
-            //                                            Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
-       
-
-            AssetsManager_Old.LoadShaderPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
-            
-
-            AssetsManager_Old.LoadShaderPipeline("deferred_geometry", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.vsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.fsh"));
-
-            AssetsManager_Old.LoadShaderPipeline("deferred_geometry_particles", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.vsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
-            AssetsManager_Old.LoadShader("particles_bitonic_sort_step", "BaseAssets\\Shaders\\Particles\\particles_bitonic_sort_step.csh");
-            AssetsManager_Old.LoadShader("particles_emit_point", "BaseAssets\\Shaders\\Particles\\particles_emit_point.csh");
-            AssetsManager_Old.LoadShader("particles_emit_sphere", "BaseAssets\\Shaders\\Particles\\particles_emit_sphere.csh");
-            AssetsManager_Old.LoadShader("particles_force_constant", "BaseAssets\\Shaders\\Particles\\particles_force_constant.csh");
-            AssetsManager_Old.LoadShader("particles_force_point", "BaseAssets\\Shaders\\Particles\\particles_force_point.csh");
-            AssetsManager_Old.LoadShader("particles_init", "BaseAssets\\Shaders\\Particles\\particles_init.csh");
-            AssetsManager_Old.LoadShader("particles_update_energy", "BaseAssets\\Shaders\\Particles\\particles_update_energy.csh");
-            AssetsManager_Old.LoadShader("particles_update_physics", "BaseAssets\\Shaders\\Particles\\particles_update_physics.csh");
-            AssetsManager_Old.LoadShader("screen_quad", "BaseAssets\\Shaders\\screen_quad.vsh");
-
-            AssetsManager_Old.LoadShaderPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
-                                             Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
-
-            Shader screenQuadShader = AssetsManager_Old.Shaders["screen_quad"];
-            AssetsManager_Old.LoadShaderPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
-            AssetsManager_Old.LoadShaderPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
-            AssetsManager_Old.LoadShaderPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
-            AssetsManager_Old.LoadShaderPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
+            ShaderPipeline.InitializeStaticPipelines();
         }
 
         private static void InitDirectX(nint HWND, int width, int height)
@@ -131,6 +116,61 @@ namespace Engine
                 }, out device, out swapChain);
             CurrentDevice = device;
 #endif
+
+            BackCullingRasterizer = new RasterizerState(CurrentDevice, new RasterizerStateDescription()
+            {
+                FillMode = FillMode.Solid,
+                CullMode = CullMode.Back,
+                IsFrontCounterClockwise = true,
+                IsScissorEnabled = false,
+                IsAntialiasedLineEnabled = true,
+                IsDepthClipEnabled = true,
+                IsMultisampleEnabled = true
+            });
+            FrontCullingRasterizer = new RasterizerState(CurrentDevice, new RasterizerStateDescription()
+            {
+                FillMode = FillMode.Solid,
+                CullMode = CullMode.Front,
+                IsFrontCounterClockwise = true,
+                IsScissorEnabled = false,
+                IsAntialiasedLineEnabled = true,
+                IsDepthClipEnabled = true,
+                IsMultisampleEnabled = true
+            });
+            CurrentDevice.ImmediateContext.Rasterizer.State = BackCullingRasterizer;
+
+            BlendStateDescription blendStateDesc = new BlendStateDescription()
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
+            blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.One, BlendOption.One, BlendOperation.Add,
+                                                                              BlendOption.Zero, BlendOption.One, BlendOperation.Add, ColorWriteMaskFlags.All);
+            AdditiveBlendState = new BlendState(CurrentDevice, blendStateDesc);
+
+            blendStateDesc = new BlendStateDescription()
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
+            blendStateDesc.RenderTarget[0] = new RenderTargetBlendDescription(true, BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, BlendOperation.Add,
+                                                                              BlendOption.SourceAlpha, BlendOption.InverseSourceAlpha, BlendOperation.Add, ColorWriteMaskFlags.All);
+            BlendingBlendState = new BlendState(CurrentDevice, blendStateDesc);
+
+            //depthState_checkDepth = new DepthStencilState(CurrentDevice, new DepthStencilStateDescription()
+            //{
+            //    DepthComparison =  Comparison.Less,
+            //    IsDepthEnabled = true,
+            //    IsStencilEnabled = false
+            //});
+            //depthState_skipDepth = new DepthStencilState(CurrentDevice, new DepthStencilStateDescription()
+            //{
+            //    DepthComparison = Comparison.Less,
+            //    IsDepthEnabled = false,
+            //    IsStencilEnabled = false
+            //});
+            //CurrentDevice.ImmediateContext.OutputMerger.DepthStencilState = depthState_checkDepth;
+
             CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
 
             Direct3DEx context = new Direct3DEx();

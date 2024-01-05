@@ -1,31 +1,17 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Engine.BaseAssets.Components
 {
     public class PointLight : Light
     {
+        [SerializedField]
         private float radius = 1.0f;
-        public float Radius
-        {
-            get => radius;
-            set
-            {
-                if (value < 0.0f)
-                    throw new ArgumentOutOfRangeException("Radius", "Radius can't be negative");
-                radius = value;
-            }
-        }
+        [SerializedField]
         private float intensity = 0.4f;
-        public float Intensity
-        {
-            get => intensity;
-            set
-            {
-                if (value < 0.0f || value > 1.0f)
-                    throw new ArgumentOutOfRangeException("Intensity", "Intensity can't be negative or more than 1");
-                intensity = value;
-            }
-        }
+        
+        public Ranged<float> Radius => new Ranged<float>(ref radius, 0.0f);
+        public Ranged<float> Intensity => new Ranged<float>(ref intensity, 0.0f, 1.0f);
 
         //public static readonly float NEAR = 0.001f;
         //public static readonly int SHADOW_SIZE = 1024;

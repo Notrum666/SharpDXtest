@@ -7,7 +7,7 @@ using LinearAlgebra;
 
 namespace SharpDXtest.Assets.Components
 {
-    class SelfRotation : Component
+    class SelfRotation : BehaviourComponent
     {
         public double periodInDays;
 

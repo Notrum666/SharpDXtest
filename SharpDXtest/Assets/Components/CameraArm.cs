@@ -7,7 +7,7 @@ using LinearAlgebra;
 
 namespace SharpDXtest.Assets.Components
 {
-    class CameraArm : Component
+    class CameraArm : BehaviourComponent
     {
         public GameObject TargetObject;
         public double ArmLength;
