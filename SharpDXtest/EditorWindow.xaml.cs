@@ -118,7 +118,7 @@ namespace Editor
             Transform cubeObj1Transform = cubeObj1.GetComponent<Transform>();
             cubeObj1Transform.LocalScale = new Vector3(50, 50, 0.5);
             MeshComponent cubeObj1Mesh = cubeObj1.AddComponent<MeshComponent>();
-            cubeObj1Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cube.obj");
+            cubeObj1Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cube.obj");
 
             GameObject cubeObj2 = GameObject.Instantiate("Cube");
             Transform cubeObj2Transform = cubeObj2.GetComponent<Transform>();
@@ -126,7 +126,7 @@ namespace Editor
             cubeObj2Transform.LocalRotation = Quaternion.FromEuler(new Vector3(45, 45, 0));
             cubeObj2Transform.LocalScale = new Vector3(1, 1, 2);
             MeshComponent cubeObj2Mesh = cubeObj2.AddComponent<MeshComponent>();
-            cubeObj2Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cube_materials.fbx");
+            cubeObj2Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cube_materials.fbx");
 
             GameObject light1 = GameObject.Instantiate("Light1");
             light1.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);
