@@ -46,7 +46,8 @@
                         <this:SceneOverviewControl/>
                         <this:CameraRenderControl/>
                     </this:DockableHost>
-                    <this:OutputControl/>
+                    <!--<this:OutputControl/>-->
+                    <this:ContentBrowserControl/>
                 </this:DockableHost>
                 <this:InspectorControl/>
             </this:DockableHost>
