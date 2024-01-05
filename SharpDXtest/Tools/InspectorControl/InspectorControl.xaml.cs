@@ -87,9 +87,9 @@ namespace Editor
                 return;
 
             objectIndex++;
-            if (objectIndex >= EngineCore.CurrentScene.objects.Count)
+            if (objectIndex >= EngineCore.CurrentScene.Objects.Count)
                 objectIndex = 0;
-            GameObjectViewModel.Target = EngineCore.CurrentScene.objects[objectIndex];
+            GameObjectViewModel.Target = EngineCore.CurrentScene.Objects[objectIndex];
         }
     }
 }

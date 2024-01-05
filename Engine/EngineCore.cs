@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Engine.BaseAssets.Components;
+using Engine.Layers;
 
 namespace Engine
 {
     public static class EngineCore
     {
         public static Scene CurrentScene { get; set; }
-        private static List<GameObject> newObjects = new List<GameObject>();
-        private static double accumulator = 0.0;
         private static bool isAlive = false;
         public static bool IsAlive => isAlive;
         private static bool needsToBePaused = false;
@@ -32,26 +32,52 @@ namespace Engine
             }
         }
         private static Task loopTask;
+
         public static event Action OnPaused;
         public static event Action OnResumed;
         public static event Action OnFrameEnded;
 
-        public static void Init(nint HWND, int width, int height)
+        private static List<Layer> layersStack;
+
+        public static void Init(nint HWND, int width, int height, IEnumerable<Layer> addedLayers = null)
         {
             Logger.Log(LogType.Info, "Engine initialization");
+
             // Order of initialization is important, same number means no difference
             ProfilerCore.Init();
             GraphicsCore.Init(HWND, width, height); // 1
             SoundCore.Init(); // 1
             Time.Init(); // 1
             InputManager.Init(); // 2
+
+            layersStack = new List<Layer>
+            {
+                new InputLayer(),
+                new ProfilerLayer(), 
+                new RenderSceneLayer(),
+                new SoundLayer(),
+                new UpdateSceneLayer()
+            };
+
+            if(addedLayers != null)
+            {
+                layersStack.AddRange(addedLayers);
+            }
+
+            foreach(Layer layer in layersStack.OrderBy(x => x.InitOrder))
+            {
+                layer.Init();
+            }
+
+            layersStack.Sort((a, b) => a.UpdateOrder.CompareTo(b.UpdateOrder));
+
             Logger.Log(LogType.Info, "Engine initialization finished");
         }
 
         public static async void Run()
         {
             if (isAlive)
-                return;
+                throw new Exception("EngineCore already ran");
 
             isAlive = true;
 
@@ -59,6 +85,7 @@ namespace Engine
             {
                 while (isAlive)
                 {
+
                     if (needsToBePaused)
                     {
                         needsToBePaused = false;
@@ -73,15 +100,12 @@ namespace Engine
                         OnResumed?.Invoke();
                     }
 
-                    InputManager.Update();
-                    Time.Update();
-                    if (!isPaused)
+                    foreach(Layer layer in layersStack)
                     {
-                        Update();
-                        SoundCore.Update();
+                        layer.Update();
                     }
-                    GraphicsCore.Update();
-                    ProfilerCore.Update();
+
+                    Time.Update();
 
                     OnFrameEnded?.Invoke();
 
@@ -95,7 +119,7 @@ namespace Engine
         public static void Stop()
         {
             if (!isAlive)
-                return;
+                throw new Exception("EngineCore already stopped");
 
             isAlive = false;
             isPaused = false;
@@ -103,88 +127,6 @@ namespace Engine
 
             GraphicsCore.Dispose();
             SoundCore.Dispose();
-        }
-
-        public static void AddObject(GameObject obj)
-        {
-            if (CurrentScene == null || CurrentScene.objects.Contains(obj) || newObjects.Contains(obj))
-                return;
-
-            newObjects.Add(obj);
-        }
-
-        public static void Update()
-        {
-            if (CurrentScene == null)
-                return;
-
-            CurrentScene.objects.RemoveAll(obj => obj.PendingDestroy);
-            CurrentScene.objects.AddRange(newObjects);
-            newObjects.Clear();
-
-            initialize();
-
-            accumulator += Time.DeltaTime;
-
-            if (accumulator >= Time.FixedDeltaTime)
-            {
-                Time.SwitchToFixed();
-                do
-                {
-                    fixedUpdate();
-                    accumulator -= Time.FixedDeltaTime;
-                } while (accumulator >= Time.FixedDeltaTime);
-                Time.SwitchToVariating();
-            }
-
-            update();
-        }
-
-        private static void initialize()
-        {
-            foreach (GameObject obj in CurrentScene.objects)
-                obj.Initialize();
-        }
-
-        private static void update()
-        {
-            foreach (GameObject obj in CurrentScene.objects)
-            {
-                if (obj.Enabled)
-                    obj.Update();
-            }
-        }
-
-        private static void fixedUpdate()
-        {
-            InputManager.FixedUpdate();
-
-            foreach (GameObject obj in CurrentScene.objects)
-            {
-                if (obj.Enabled)
-                    obj.FixedUpdate();
-            }
-
-            List<Rigidbody> rigidbodies = new List<Rigidbody>();
-            for (int i = 0; i < CurrentScene.objects.Count; i++)
-            {
-                if (!CurrentScene.objects[i].Enabled)
-                    continue;
-                Rigidbody rigidbody = CurrentScene.objects[i].GetComponent<Rigidbody>();
-                if (rigidbody != null)
-                {
-                    foreach (Collider collider in CurrentScene.objects[i].GetComponents<Collider>())
-                        collider.updateData();
-                    foreach (Rigidbody otherRigidbody in rigidbodies)
-                        rigidbody.solveCollisionWith(otherRigidbody);
-                    rigidbodies.Add(rigidbody);
-                }
-            }
-            foreach (Rigidbody rb in rigidbodies)
-                rb.updateCollidingPairs();
-
-            foreach (Rigidbody rigidbody in rigidbodies)
-                rigidbody.applyChanges();
         }
     }
 }

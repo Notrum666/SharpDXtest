@@ -1251,7 +1251,42 @@ namespace Engine
     }
     public class Scene
     {
-        public List<GameObject> objects { get; } = new List<GameObject>();
+        public IReadOnlyList<GameObject> Objects => objects;
+
+        private List<GameObject> objects = new List<GameObject>();
+        internal List<GameObject> newObjects = new List<GameObject>();
+
+        public void AddGameObject(GameObject go)
+        {
+            if (objects.Contains(go) || newObjects.Contains(go))
+                return;
+
+            newObjects.Add(go);
+        }
+
+        public void AddGameObjects(IEnumerable<GameObject> gos)
+        {
+            foreach(GameObject go in gos)
+            {
+                AddGameObject(go);
+            }
+        }
+
+        internal void ApplyNewObjects()
+        {
+            foreach(GameObject newObj in newObjects)
+            {
+                newObj.Initialize();
+                objects.Add(newObj);
+            }
+
+            newObjects.Clear();
+        }
+
+        internal void RemoveDestroyedObjects()
+        {
+            objects.RemoveAll(obj => obj.PendingDestroy);
+        }
     }
     
     [Obsolete]
@@ -1743,7 +1778,7 @@ namespace Engine
                             if (sceneObject != null && !(sceneObject is GameObject))
                                 throw new Exception("Scene can contain only GameObjects.");
                         }
-                        (curObj as Scene).objects.AddRange(gameObjects);
+                        (curObj as Scene).AddGameObjects(gameObjects);
                     }
                     else
                     {
