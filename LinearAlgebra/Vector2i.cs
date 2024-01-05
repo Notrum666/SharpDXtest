@@ -44,7 +44,7 @@ namespace LinearAlgebra
         }
 
         /// <summary>
-        /// Checks if vector small enough to be considered a zero vector
+        /// Checks if vector is zero
         /// </summary>
         public bool isZero()
         {
@@ -67,7 +67,7 @@ namespace LinearAlgebra
         }
 
         /// <summary>
-        /// Checks if vectors are equal enough to be considered equal
+        /// Checks if vectors are equal
         /// </summary>
         public bool equals(in Vector2i vec)
         {

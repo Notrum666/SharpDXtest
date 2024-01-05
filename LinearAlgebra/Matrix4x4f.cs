@@ -328,6 +328,9 @@ namespace LinearAlgebra
                                   0, 0, 0, 1);
         }
 
+        /// <summary>
+        /// Creates scale matrix from scale vector
+        /// </summary>
         public static Matrix4x4f FromScale(in Vector3f scale)
         {
             return new Matrix4x4f(scale.x, 0, 0, 0,
@@ -336,6 +339,9 @@ namespace LinearAlgebra
                                   0, 0, 0, 1);
         }
 
+        /// <summary>
+        /// Creates translation matrix from translation vector
+        /// </summary>
         public static Matrix4x4f FromTranslation(in Vector3f translation)
         {
             return new Matrix4x4f(1, 0, 0, translation.x,

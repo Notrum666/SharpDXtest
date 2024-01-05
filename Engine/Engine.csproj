@@ -27,104 +27,10 @@
 		<UseVSHostingProcess>true</UseVSHostingProcess>
 	</PropertyGroup>
 	<ItemGroup>
-		<Content Include="BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.gsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<None Update="BaseAssets\Shaders\Bloom\bloom_prefilter.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\Bloom\bloom_downsample_box.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\Bloom\bloom_upsample_box.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\DeferredRender\deffered_addLight.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\VolumetricRender\volume.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\VolumetricRender\volume.vsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.vsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<Content Include="BaseAssets\Shaders\Particles\particles_bitonic_sort_step.csh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BaseAssets\Shaders\Particles\particles_emit_sphere.csh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BaseAssets\Shaders\Particles\particles_force_point.csh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BaseAssets\Shaders\Particles\particles_init.csh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BaseAssets\Shaders\Particles\particles_emit_point.csh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BaseAssets\Shaders\Particles\particles_force_constant.csh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BaseAssets\Shaders\Particles\particles_update_physics.csh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<Content Include="BaseAssets\Shaders\Particles\particles_update_energy.csh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		<None Update="BaseAssets\Shaders\DeferredRender\deferred_gamma_correction.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\DeferredRender\deferred_light_directional.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\depth_only.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\DeferredRender\deferred_geometry.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\pbr_lighting.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\DeferredRender\deferred_light_point.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Update="BaseAssets\Shaders\tex_to_screen.fsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<None Update="BaseAssets\Shaders\depth_only.vsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<None Update="BaseAssets\Shaders\pbr_lighting.vsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<None Update="BaseAssets\Shaders\screen_quad.vsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
 		<Folder Include="BaseAssets\Textures\" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\LinearAlgebra\LinearAlgebra.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Update="BaseAssets\Shaders\DeferredRender\deferred_geometry.vsh">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Lib.Harmony" Version="2.2.2" />

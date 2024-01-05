@@ -52,7 +52,7 @@ vert_out main(vert_in vert)
 	// float4 skinned_pos = mul(float4(vert.v, 1.0f), boneTransform);
 	// float4 v_world = mul(skinned_pos, model);
 
-	float3 boneTransform = (0).xxx;
+	float3 boneTransform = (float3)0;
 	float3 normalTransform = vert.n;
 	if (vert.weights.x > 0) {
 		boneTransform += mul(float4(vert.v, 1.f), gBones[vert.bones.x]).xyz * vert.weights.x;

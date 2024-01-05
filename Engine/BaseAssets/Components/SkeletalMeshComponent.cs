@@ -15,7 +15,7 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private Skeleton[] skeletons = Array.Empty<Skeleton>();
         [SerializeField]
-        private Animation animation = null;
+        private SkeletalAnimation animation = null;
         [SerializedField]
         private float animationTime = 0;
 
@@ -30,7 +30,7 @@ namespace Engine.BaseAssets.Components
         private SharpDX.Direct3D11.Buffer inverseTransposeBonesBuffer = null;
         private ShaderResourceView inverseTransposeBonesResourceView = null;
 
-        public Animation Animation
+        public SkeletalAnimation Animation
         {
             get => Animation;
             set
@@ -60,6 +60,9 @@ namespace Engine.BaseAssets.Components
 
         public override void Render()
         {
+            if (destroyed)
+                throw new ObjectDisposedException(nameof(Skeleton));
+
             List<Matrix4x4f> BonesTransform;
             List<Matrix4x4f> InvTrspsBonesTransform;
             UpdateAnimation(out BonesTransform, out InvTrspsBonesTransform);
@@ -72,21 +75,23 @@ namespace Engine.BaseAssets.Components
         {
             base.OnFieldChanged(fieldInfo);
             if (fieldInfo.Name == nameof(model))
-            {
                 RefreshSkeletonSlots();
-            }
         }
 
         protected override void OnDestroy()
         {
             if (bonesBuffer is not null)
                 bonesBuffer.Dispose();
+            bonesBuffer = null;
             if (bonesResourceView is not null)
                 bonesResourceView.Dispose();
+            bonesResourceView = null;
             if (inverseTransposeBonesBuffer is not null)
                 inverseTransposeBonesBuffer.Dispose();
+            inverseTransposeBonesBuffer = null;
             if (inverseTransposeBonesResourceView is not null)
                 inverseTransposeBonesResourceView.Dispose();
+            inverseTransposeBonesResourceView = null;
 
             destroyed = true;
         }
@@ -94,7 +99,7 @@ namespace Engine.BaseAssets.Components
         private void EnsureGPUBuffer(List<Matrix4x4f> BonesTransformations, List<Matrix4x4f> InverseTransposeBonesTransformations)
         {
             CheckBonesTransformationsCount(BonesTransformations);
-            if (BonesTransformations.Count > 0)
+            if (BonesTransformations.Count > 0 && bonesBuffer is null)
             {
                 BonesTransformationsCount = BonesTransformations.Count;
                 int matrixSize = Utilities.SizeOf<Matrix4x4f>();
@@ -131,9 +136,6 @@ namespace Engine.BaseAssets.Components
 
         private void Use(List<Matrix4x4f> BonesTransformations, List<Matrix4x4f> InverseTransposeBonesTransformations)
         {
-            if (destroyed)
-                throw new ObjectDisposedException(nameof(Skeleton));
-
             if (bonesBuffer is not null && bonesResourceView is not null)
             {
                 DataStream dataStream;
@@ -158,14 +160,18 @@ namespace Engine.BaseAssets.Components
         {
             if (BonesTransformationsCount != BonesTransformations.Count) // recreate gpu buffers with new size
             {
-                if (bonesResourceView is not null)
-                    bonesResourceView.Dispose();
                 if (bonesBuffer is not null)
                     bonesBuffer.Dispose();
+                bonesBuffer = null;
+                if (bonesResourceView is not null)
+                    bonesResourceView.Dispose();
+                bonesResourceView = null;
                 if (inverseTransposeBonesBuffer is not null)
                     inverseTransposeBonesBuffer.Dispose();
+                inverseTransposeBonesBuffer = null;
                 if (inverseTransposeBonesResourceView is not null)
                     inverseTransposeBonesResourceView.Dispose();
+                inverseTransposeBonesResourceView = null;
             }
         }
 

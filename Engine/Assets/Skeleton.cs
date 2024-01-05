@@ -14,6 +14,7 @@ namespace Engine
         public List<Bone> Bones = new List<Bone>();
     }
 
+    // TODO: split to two classes for Skeleton and SkeletonData
     public class Bone
     {
         public string Name;

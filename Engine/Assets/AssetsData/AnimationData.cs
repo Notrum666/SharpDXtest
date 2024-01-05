@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Engine.AssetsData
 {
-    [AssetData<Animation>]
+    [AssetData<SkeletalAnimation>]
     public class AnimationData : AssetData
     {
         public string Name;
@@ -21,9 +21,9 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Animation ToRealAsset()
+        public override SkeletalAnimation ToRealAsset()
         {
-            Animation animation = new Animation();
+            SkeletalAnimation animation = new SkeletalAnimation();
 
             animation.Name = Name;
             animation.DurationInTicks = DurationInTicks;

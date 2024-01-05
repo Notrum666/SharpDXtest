@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Engine
 {
-    public class Animation : BaseAsset
+    public class SkeletalAnimation : BaseAsset
     {
         public string Name;
         public float DurationInTicks;
@@ -11,29 +11,28 @@ namespace Engine
         public List<AnimationChannel> Channels = new List<AnimationChannel>();
     }
 
+    // TODO: split to two classes for Animation and AnimationData
     public class AnimationChannel
     {
         public string BoneName;
+        public List<ScalingKey> ScalingKeys = new List<ScalingKey>();
+        public List<RotationKey> RotationKeys = new List<RotationKey>();
+        public List<PositionKey> PositionKeys = new List<PositionKey>();
 
-        public class ScalingKey
+        public struct ScalingKey
         {
             public float Time;
             public Vector3f Scaling;
         }
-        public List<ScalingKey> ScalingKeys = new List<ScalingKey>();
-
-        public class RotationKey
+        public struct RotationKey
         {
             public float Time;
             public Quaternion Rotation;
         }
-        public List<RotationKey> RotationKeys = new List<RotationKey>();
-
-        public class PositionKey
+        public struct PositionKey
         {
             public float Time;
             public Vector3f Position;
         }
-        public List<PositionKey> PositionKeys = new List<PositionKey>();
     }
 }

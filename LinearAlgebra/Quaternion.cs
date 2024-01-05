@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Numerics;
 
 namespace LinearAlgebra
 {
@@ -248,6 +247,9 @@ namespace LinearAlgebra
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// spherical interpolation between two quaternions
+        /// </summary>
         public static Quaternion Slerp(Quaternion start, Quaternion end, double factor)
         {
             double num = start.x * end.x + start.y * end.y + start.z * end.z + start.w * end.w;
@@ -275,7 +277,7 @@ namespace LinearAlgebra
                 num5 = factor;
             }
 
-            Quaternion result = Quaternion.Identity;
+            Quaternion result = Identity;
             result.x = num4 * start.x + num5 * end.x;
             result.y = num4 * start.y + num5 * end.y;
             result.z = num4 * start.z + num5 * end.z;
