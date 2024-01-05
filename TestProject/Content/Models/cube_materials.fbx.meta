@@ -1,0 +1,21 @@
+Guid: f364034f5ea94cda8eda4dff14ea8319
+ImportDate: 2024-01-05T23:03:55.7881393Z
+SubAssets:
+  ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Material.001
+  : 22bd31ef83034311b4887122a938ed19
+  ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Material.002
+  : 3513e7129586458f835f2f2c8ef1f752
+  ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Material.003
+  : bc7b007643ca4733a79ddb44bd8aeb0e
+  ? Item1: Engine.AssetsData.SkeletonData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Skeleton
+  : 4b3454b29ea44e4eb46c42262d2b0eac
+ImportSettings: !ModelImportSettings
+  SkeletonOverride: 4b3454b29ea44e4eb46c42262d2b0eac
+  MeshMaterialsOverride:
+    Cube_Cube.002_0: 22bd31ef83034311b4887122a938ed19
+    Cube_Cube.002_1: 3513e7129586458f835f2f2c8ef1f752
+    Cube_Cube.002_2: bc7b007643ca4733a79ddb44bd8aeb0e

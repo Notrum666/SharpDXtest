@@ -12,7 +12,7 @@
 		<Nullable>warnings</Nullable>
 	</PropertyGroup>
 	<PropertyGroup>
-		<ProjectGuid>{c7939c88-bb1e-45d1-959e-a7db258b8839}</ProjectGuid>
+		<ProjectGuid>{c1f848f1-9743-4a3d-959d-c7e6476a52ed}</ProjectGuid>
 		<ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
 		<AssemblyName>TestProject</AssemblyName>
 	</PropertyGroup>
@@ -28,7 +28,7 @@
 <!--	</ItemGroup>-->
 	
 	<PropertyGroup Label="UserMacros">
-		<Engine_IncludePath>C:\Users\yahima\Documents\SharpDXtest\Build\Debug</Engine_IncludePath>
+		<Engine_IncludePath>$(EnvVar_SharpDxEditor)</Engine_IncludePath>
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="SharpDX.LinearAlgebra">
