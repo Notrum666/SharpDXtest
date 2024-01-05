@@ -9,6 +9,7 @@
 			<Mesh path="Ball.obj"/>
 			<Mesh path="Cube.obj"/>
 			<Mesh path="cube_materials.fbx"/>
+			<Mesh path="cesium_man.fbx"/>
 		</Meshes>
 	</Assets>
 
@@ -57,6 +58,14 @@
 			<Transform.LocalRotation x="0" y="45" z="0"/>
 		</Transform>
 		<MeshComponent Mesh="{Mesh Cube.002}">
+		</MeshComponent>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position x="5" y="5" z="2"/>
+		</Transform>
+		<MeshComponent Mesh="{Mesh Cesium_Man}">
 		</MeshComponent>
 	</GameObject>
 
