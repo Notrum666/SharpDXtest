@@ -58,7 +58,7 @@ namespace Editor.GameProject
             string assemblyName = Regex.Replace(projectName, "[^a-zA-Z0-9]", "_");
 
             string templateCsprojData = File.ReadAllText(template.CsprojTemplatePath);
-            templateCsprojData = string.Format(templateCsprojData, projectGuid, assemblyName, EditorWindow.EditorFolderPath);
+            templateCsprojData = string.Format(templateCsprojData, projectGuid, assemblyName, $"$({EditorWindow.EditorPathVarName})");
             string csprojFilePath = Path.Combine(projectData.ProjectFolderPath, $"{assemblyName}.csproj");
             File.WriteAllText(csprojFilePath, templateCsprojData);
 

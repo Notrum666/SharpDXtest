@@ -20,6 +20,7 @@ namespace Editor
 {
     public partial class EditorWindow : EditorWindowBase
     {
+        public const string EditorPathVarName = "EnvVar_SharpDxEditor";
         private const string DataFolderName = "SharpDxEditor";
         private const string ResourcesFolderName = "Resources";
         
@@ -43,8 +44,9 @@ namespace Editor
         public EditorWindow()
         {
             DataFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DataFolderName);
-
             EditorFolderPath = Directory.GetCurrentDirectory();
+            Environment.SetEnvironmentVariable(EditorPathVarName, EditorFolderPath, EnvironmentVariableTarget.User);
+
             ResourcesFolderPath = Path.Combine(EditorFolderPath, ResourcesFolderName);
 
             InitializeComponent();
