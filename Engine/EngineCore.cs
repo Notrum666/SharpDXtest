@@ -83,7 +83,6 @@ namespace Engine
                             OnPaused?.Invoke();
                         else
                             OnResumed?.Invoke();
-                        OnPaused?.Invoke();
                     }
 
                     foreach (Layer layer in layersStack)
