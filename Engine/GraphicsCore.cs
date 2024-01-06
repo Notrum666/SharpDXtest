@@ -48,7 +48,6 @@ namespace Engine
 
     public static class GraphicsCore
     {
-
         private static bool disposed = false;
         public static Device CurrentDevice { get; private set; }
         public static SharpDX.Direct3D9.Device D9Device { get; private set; }
@@ -91,16 +90,16 @@ namespace Engine
 #else
             Device device;
             Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport,
-                new SwapChainDescription()
+                new SharpDX.DXGI.SwapChainDescription()
                 {
                     ModeDescription =
                     {
                         Width = 1,
                         Height = 1,
                         Format = Format.B8G8R8A8_UNorm,
-                        RefreshRate = new Rational(60, 1),
-                        Scaling = DisplayModeScaling.Unspecified,
-                        ScanlineOrdering = DisplayModeScanlineOrder.Unspecified
+                        RefreshRate = new SharpDX.DXGI.Rational(60, 1),
+                        Scaling = SharpDX.DXGI.DisplayModeScaling.Unspecified,
+                        ScanlineOrdering = SharpDX.DXGI.DisplayModeScanlineOrder.Unspecified
                     },
                     SampleDescription =
                     {

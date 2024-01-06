@@ -7,10 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using Engine.AssetsData;
-
-using YamlDotNet.Core.Tokens;
-
 namespace Engine
 {
     public static partial class FileSystemHelper

@@ -12,10 +12,12 @@ namespace Editor.AssetsImport
     [AssetImporter("fbx", "dae", "obj")]
     public class ModelImporter : AssetImporter
     {
-        private Scene currentScene;
+        private Scene aiCurrentScene; // external Assimp data -> ai* prefix
         private ModelData currentModelData;
         private AssetImportContext currentImportContext;
         private ModelImportSettings currentImportSettings;
+
+        private SkeletonData currentSkeletonData = null;
 
         public class ModelImportSettings : BaseImportSettings
         {
@@ -25,7 +27,7 @@ namespace Editor.AssetsImport
 
         protected override void OnImportAsset(AssetImportContext importContext)
         {
-            AssimpContext assimpContext = new AssimpContext();
+            AssimpContext aiAssimpContext = new AssimpContext();
             // assimpContext.SetConfig(new Assimp.Configs.MaxBoneCountConfig(72));
             // assimpContext.SetConfig(new Assimp.Configs.VertexBoneWeightLimitConfig(4));
 
@@ -39,7 +41,7 @@ namespace Editor.AssetsImport
                                                 // | PostProcessSteps.SplitByBoneCount
                                                 | PostProcessSteps.LimitBoneWeights;
 
-            currentScene = assimpContext.ImportFileFromStream(importContext.DataStream, postProcessSteps);
+            aiCurrentScene = aiAssimpContext.ImportFileFromStream(importContext.DataStream, postProcessSteps);
 
             currentModelData = new ModelData();
             currentImportContext = importContext;
@@ -47,6 +49,13 @@ namespace Editor.AssetsImport
 
             ProcessScene();
 
+            if (currentSkeletonData is not null) {
+                Guid subGuid = currentImportContext.AddSubAsset("skeleton", currentSkeletonData);
+                currentModelData.SkeletonGuid = subGuid;
+
+                currentImportSettings.SkeletonOverride ??= subGuid;
+                currentModelData.SkeletonGuid = currentImportSettings.SkeletonOverride ?? Guid.Empty;
+            }
             importContext.AddMainAsset(currentModelData);
         }
 
@@ -56,17 +65,17 @@ namespace Editor.AssetsImport
             ProcessMaterials();
 
             BuildSkeleton();
-            ProcessNodeAsMeshHolder(currentScene.RootNode);
+            ProcessNodeAsMeshHolder(aiCurrentScene.RootNode);
         }
 
         #region Appearance
 
         private void ProcessEmbeddedTextures()
         {
-            if (currentScene.Textures == null)
+            if (aiCurrentScene.Textures == null)
                 return;
 
-            foreach (EmbeddedTexture embeddedTexture in currentScene.Textures)
+            foreach (EmbeddedTexture embeddedTexture in aiCurrentScene.Textures)
             {
                 string textureName = embeddedTexture.Filename;
                 TextureData textureData;
@@ -78,9 +87,7 @@ namespace Editor.AssetsImport
                     textureData = TextureImporter.DecodeData(memoryStream, new TextureImporter.TextureImportSettings());
                 }
                 else
-                {
                     throw new NotImplementedException();
-                }
 
                 Guid subGuid = currentImportContext.AddSubAsset(textureName, textureData);
                 currentModelData.AddEmbeddedTexture(textureName, subGuid);
@@ -89,19 +96,17 @@ namespace Editor.AssetsImport
 
         private void ProcessMaterials()
         {
-            if (currentScene.Materials == null)
+            if (aiCurrentScene.Materials == null)
                 return;
 
             string sourceAssetPath = currentImportContext.AssetSourcePath;
             string sourceAssetFolder = Path.GetDirectoryName(sourceAssetPath);
 
-            foreach (Assimp.Material material in currentScene.Materials)
-            {
+            foreach (Material material in aiCurrentScene.Materials)
                 currentModelData.MaterialsGuids.Add(ProcessMaterial(material, sourceAssetFolder));
-            }
         }
 
-        private Guid ProcessMaterial(Assimp.Material material, string sourceAssetFolder)
+        private Guid ProcessMaterial(Material material, string sourceAssetFolder)
         {
             MaterialData materialData = new MaterialData();
 
@@ -122,14 +127,12 @@ namespace Editor.AssetsImport
 
                 string relativeFilePath = textureSlot.FilePath;
 
-                if (currentScene.GetEmbeddedTexture(relativeFilePath) != null)
+                if (aiCurrentScene.GetEmbeddedTexture(relativeFilePath) != null)
                     materialData.AddTexture(materialTextureType, currentModelData.GetEmbeddedTexture(relativeFilePath));
                 else
                 {
                     while (relativeFilePath.StartsWith(@".\") || relativeFilePath.StartsWith(@"./"))
-                    {
                         relativeFilePath = relativeFilePath.Substring(2);
-                    }
                     string filePath = Path.Combine(sourceAssetFolder, relativeFilePath);
                     Guid? guid = AssetsRegistry.ImportAsset(filePath);
                     if (guid.HasValue)
@@ -140,7 +143,7 @@ namespace Editor.AssetsImport
             if (materialData.IsDefault())
                 return Guid.Empty;
 
-            string materialId = material.Name ?? $"mat_{currentScene.Materials.IndexOf(material)}";
+            string materialId = material.Name ?? $"mat_{aiCurrentScene.Materials.IndexOf(material)}";
             Guid subGuid = currentImportContext.AddSubAsset(materialId, materialData);
 
             return subGuid;
@@ -173,57 +176,102 @@ namespace Editor.AssetsImport
 
         private void BuildSkeleton()
         {
-            SkeletonData skeleton = new SkeletonData();
-            ProcessNodeAsBone(currentScene.RootNode, -1, skeleton);
-            Guid subGuid = currentImportContext.AddSubAsset("Skeleton", skeleton);
-
-            currentImportSettings.SkeletonOverride ??= subGuid;
-            currentModelData.SkeletonGuid = currentImportSettings.SkeletonOverride ?? Guid.Empty;
+            if (aiCurrentScene.HasMeshes && aiCurrentScene.Meshes[0].HasBones) {
+                currentSkeletonData = new SkeletonData();
+                currentSkeletonData.InverseRootTransform = ConvertMatrix(aiCurrentScene.RootNode.Transform);
+                currentSkeletonData.InverseRootTransform.invert();
+                ProcessNodeAsBone(aiCurrentScene.RootNode, -1);
+                ProcessAnimations();
+            }
         }
 
-        private int ProcessNodeAsBone(Node currentNode, int parentBoneIndex, SkeletonData skeleton)
+        private int ProcessNodeAsBone(Node currentNode, int parentBoneIndex)
         {
-            int currentBoneIndex = skeleton.Bones.Count;
+            int currentBoneIndex = currentSkeletonData.Bones.Count;
 
-            BoneData currentBone = new BoneData
+            Engine.Bone currentBone = new Engine.Bone
             {
                 Name = currentNode.Name,
-                Transform = ConvertMatrix(currentNode.Transform),
+                // Transform = ConvertMatrix(currentNode.Transform),
 
                 Index = currentBoneIndex,
                 ParentIndex = parentBoneIndex
             };
 
-            skeleton.Bones.Add(currentBone);
+            currentSkeletonData.Bones.Add(currentBone);
 
             foreach (Node childNode in currentNode.Children)
             {
-                int childBoneIndex = ProcessNodeAsBone(childNode, currentBoneIndex, skeleton);
+                int childBoneIndex = ProcessNodeAsBone(childNode, currentBoneIndex);
                 currentBone.ChildIndices.Add(childBoneIndex);
             }
 
             return currentBoneIndex;
         }
 
+        private void ProcessAnimations()
+        {
+            foreach (Animation aiAnimation in aiCurrentScene.Animations)
+            {
+                AnimationData animationData = new AnimationData();
+                animationData.Name = aiAnimation.Name;
+                animationData.DurationInTicks = (float)aiAnimation.DurationInTicks;
+                animationData.TickPerSecond = (float)aiAnimation.TicksPerSecond;
+                foreach (NodeAnimationChannel aiAnimChannel in aiAnimation.NodeAnimationChannels)
+                {
+                    Engine.AnimationChannel animationChannel = new Engine.AnimationChannel();
+                    foreach (VectorKey aiScalingKey in aiAnimChannel.ScalingKeys)
+                    {
+                        Engine.AnimationChannel.ScalingKey scalingKey = new Engine.AnimationChannel.ScalingKey();
+                        scalingKey.Time = (float)aiScalingKey.Time;
+                        scalingKey.Scaling = new Vector3f(aiScalingKey.Value.X, aiScalingKey.Value.Y, aiScalingKey.Value.Z);
+                        animationChannel.ScalingKeys.Add(scalingKey);
+                    }
+                    foreach (VectorKey aiPositionKey in aiAnimChannel.PositionKeys)
+                    {
+                        Engine.AnimationChannel.PositionKey positionKey = new Engine.AnimationChannel.PositionKey();
+                        positionKey.Time = (float)aiPositionKey.Time;
+                        positionKey.Position = new Vector3f(aiPositionKey.Value.X, aiPositionKey.Value.Y, aiPositionKey.Value.Z);
+                        animationChannel.PositionKeys.Add(positionKey);
+                    }
+                    foreach (QuaternionKey aiRotationKey in aiAnimChannel.RotationKeys)
+                    {
+                        Engine.AnimationChannel.RotationKey rotationKey = new Engine.AnimationChannel.RotationKey();
+                        rotationKey.Time = (float)aiRotationKey.Time;
+                        rotationKey.Rotation = new LinearAlgebra.Quaternion(aiRotationKey.Value.W, aiRotationKey.Value.X, aiRotationKey.Value.Y, aiRotationKey.Value.Z);
+                        animationChannel.RotationKeys.Add(rotationKey);
+                    }
+                    animationChannel.BoneName = aiAnimChannel.NodeName;
+                    animationData.Channels.Add(animationChannel);
+                }
+
+                currentImportContext.AddSubAsset(animationData.Name, animationData);
+            }
+        }
+
         private void ProcessNodeAsMeshHolder(Node currentNode)
         {
             foreach (int meshIndex in currentNode.MeshIndices)
-            {
-                ProcessMesh(currentScene.Meshes[meshIndex], currentNode.Name, meshIndex);
-            }
+                ProcessMesh(aiCurrentScene.Meshes[meshIndex], currentNode.Name, meshIndex);
 
             foreach (Node childNode in currentNode.Children)
-            {
                 ProcessNodeAsMeshHolder(childNode);
-            }
         }
 
         private void ProcessMesh(Mesh mesh, string nodeName, int meshIndex)
         {
-            MeshData meshData = new MeshData
-            {
-                Name = $"{nodeName}_{mesh.Name}_{meshIndex}"
-            };
+            MeshData meshData = null;
+            string meshName = $"{nodeName}_{mesh.Name}_{meshIndex}";
+            foreach (MeshData loadedMeshData in currentModelData.Meshes)
+                if (loadedMeshData.Name == meshName) {
+                    meshData = loadedMeshData;
+                    break;
+                }
+            if (meshData is null)
+                meshData = new MeshData
+                {
+                    Name = meshName
+                };
 
             if (!currentImportSettings.MeshMaterialsOverride.ContainsKey(meshData.Name))
                 currentImportSettings.MeshMaterialsOverride[meshData.Name] = null;
@@ -240,13 +288,11 @@ namespace Editor.AssetsImport
             }
 
             if (mesh.HasNormals)
-            {
                 for (int i = 0; i < vertexCount; i++)
                 {
                     Vector3D aiNorm = mesh.Normals[i];
                     vertices[i].Normal = new Vector3f(aiNorm.X, aiNorm.Y, aiNorm.Z);
                 }
-            }
 
             if (mesh.HasTextureCoords(0))
             {
@@ -259,41 +305,35 @@ namespace Editor.AssetsImport
             }
 
             foreach (Face face in mesh.Faces)
-            {
                 if (face.IndexCount == 3)
                     meshData.Indices.AddRange(face.Indices);
-            }
+                else
+                    throw new Exception("mesh face was not triangulated");
 
-            foreach (Bone bone in mesh.Bones)
-            {
-                ProcessBone(meshData, bone);
-            }
+            if (currentSkeletonData is not null)
+                foreach (Assimp.Bone bone in mesh.Bones)
+                    for (int boneIndex = 0; boneIndex < currentSkeletonData.Bones.Count; ++boneIndex)
+                        if (bone.Name == currentSkeletonData.Bones[boneIndex].Name)
+                        {
+                            currentSkeletonData.Bones[boneIndex].Offset = ConvertMatrix(bone.OffsetMatrix);
+
+                            foreach (VertexWeight vertexWeight in bone.VertexWeights)
+                            {
+                                VertexData vertex = meshData.Vertices[vertexWeight.VertexID];
+
+                                if (vertexWeight.Weight != 0)
+                                {
+                                    vertex.BoneIndices.Add(boneIndex);
+                                    vertex.BoneWeights.Add(vertexWeight.Weight);
+                                }
+
+                                if (vertex.BoneIndices.Count > 4) //TODO: Extract to settings?
+                                    throw new Exception("vertex bone indices count is greater than 4");
+                            }
+                            break;
+                        }
 
             currentModelData.Meshes.Add(meshData);
-        }
-
-        private void ProcessBone(MeshData meshData, Bone bone)
-        {
-            SkinnedBoneData skinnedBone = new SkinnedBoneData
-            {
-                Name = bone.Name,
-                Offset = ConvertMatrix(bone.OffsetMatrix)
-            };
-            meshData.SkinnedBones.Add(skinnedBone);
-
-            int boneIndex = meshData.SkinnedBones.Count - 1;
-
-            foreach (VertexWeight vertexWeight in bone.VertexWeights)
-            {
-                int vertexIndex = vertexWeight.VertexID;
-                VertexData vertex = meshData.Vertices[vertexIndex];
-
-                if (vertex.BoneIndices.Count >= 4) //TODO: Extract to settings?
-                    continue;
-
-                vertex.BoneIndices.Add(boneIndex);
-                vertex.BoneWeights.Add(vertexWeight.Weight);
-            }
         }
 
         #endregion Geometry
@@ -305,7 +345,6 @@ namespace Editor.AssetsImport
             Matrix4x4f matrix = Marshal.PtrToStructure<Matrix4x4f>(ptr);
             Marshal.FreeHGlobal(ptr);
 
-            matrix.transpose();
             return matrix;
         }
     }

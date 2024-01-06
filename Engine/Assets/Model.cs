@@ -42,6 +42,7 @@ namespace Engine
     {
         // material assigned on mesh load
         public Material DefaultMaterial { get; set; } = null;
+        public Skeleton Skeleton { get; set; } = null;
 
         public readonly List<PrimitiveVertex> Vertices = new List<PrimitiveVertex>();
         public readonly List<int> Indices = new List<int>();
@@ -128,6 +129,8 @@ namespace Engine
             public Vector2f t;
             public Vector3f n;
             public Vector3f tx;
+            public Vector4i bones;
+            public Vector4f weights;
         }
     }
 }

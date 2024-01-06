@@ -7,15 +7,27 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 
+using Editor.GameProject;
+
 using Engine;
 using Engine.BaseAssets.Components;
+
 using LinearAlgebra;
+
 using SharpDXtest.Assets.Components;
 
 namespace Editor
 {
     public partial class EditorWindow : EditorWindowBase
     {
+        public const string EditorPathVarName = "EnvVar_SharpDxEditor";
+        private const string DataFolderName = "SharpDxEditor";
+        private const string ResourcesFolderName = "Resources";
+
+        public static string DataFolderPath { get; private set; }
+        public static string EditorFolderPath { get; private set; }
+        public static string ResourcesFolderPath { get; private set; }
+
         private RelayCommand spawnFlyingControl;
 
         public RelayCommand SpawnFlyingControl => spawnFlyingControl ?? (spawnFlyingControl = new RelayCommand(
@@ -31,6 +43,12 @@ namespace Editor
 
         public EditorWindow()
         {
+            DataFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DataFolderName);
+            EditorFolderPath = AppDomain.CurrentDomain.BaseDirectory;
+            Environment.SetEnvironmentVariable(EditorPathVarName, EditorFolderPath, EnvironmentVariableTarget.User);
+
+            ResourcesFolderPath = Path.Combine(EditorFolderPath, ResourcesFolderName);
+
             InitializeComponent();
 
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
@@ -40,28 +58,39 @@ namespace Editor
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            var mainPath = Directory.GetCurrentDirectory();
-            var solutionPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.FullName;
-            AssetsManager.InitializeInFolder(solutionPath);
-            AssetsRegistry.InitializeInFolder(solutionPath);
-            
-            EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
+            ProjectsManager.InitializeInFolder(DataFolderPath);
 
-            CreateBaseScene();
-
-            EngineCore.IsPaused = true;
-            EngineCore.Run();
+            OpenProjectBrowserDialog();
         }
 
         private void EditorWindowInst_Closing(object sender, CancelEventArgs e)
         {
             if (EngineCore.IsAlive)
                 EngineCore.Stop();
+
+            ProjectViewModel.Current?.Unload();
         }
 
         private void EditorWindowInst_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Keyboard.ClearFocus();
+        }
+
+        private void OpenProjectBrowserDialog()
+        {
+            ProjectBrowserDialogWindow projectBrowser = new ProjectBrowserDialogWindow();
+            if (projectBrowser.ShowDialog() == false || ProjectViewModel.Current == null)
+                Application.Current.Shutdown();
+            else
+            {
+                //SceneManager.Load(ProjectViewModel.Current.ActiveScene)
+                EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight);
+
+                CreateBaseScene();
+
+                EngineCore.IsPaused = true;
+                EngineCore.Run();
+            }
         }
 
         private void CreateBaseScene()
@@ -89,15 +118,31 @@ namespace Editor
             Transform cubeObj1Transform = cubeObj1.GetComponent<Transform>();
             cubeObj1Transform.LocalScale = new Vector3(50, 50, 0.5);
             MeshComponent cubeObj1Mesh = cubeObj1.AddComponent<MeshComponent>();
-            cubeObj1Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cube.obj");
+            cubeObj1Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cube.obj");
 
             GameObject cubeObj2 = GameObject.Instantiate("Cube");
             Transform cubeObj2Transform = cubeObj2.GetComponent<Transform>();
             cubeObj2Transform.Position = new Vector3(0, 0, 2);
-            cubeObj2Transform.LocalRotation = Quaternion.FromEuler(new Vector3(45, 45, 0));
+            cubeObj2Transform.LocalRotation = Quaternion.FromEuler(new Vector3(45 * (3.14 / 180), 45 * (3.14 / 180), 0));
             cubeObj2Transform.LocalScale = new Vector3(1, 1, 2);
             MeshComponent cubeObj2Mesh = cubeObj2.AddComponent<MeshComponent>();
-            cubeObj2Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("BaseAssets\\Models\\cube_materials.fbx");
+            cubeObj2Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cube_materials.fbx");
+
+            GameObject cesiumMan = GameObject.Instantiate("CesiumMan");
+            Transform cesiumManTransform = cesiumMan.GetComponent<Transform>();
+            cesiumManTransform.Position = new Vector3(0, 0, 5);
+            cesiumManTransform.Rotation = Quaternion.FromEuler(new Vector3(-90 * (3.14 / 180), 0, 0));
+            SkeletalMeshComponent cesiumManMesh = cesiumMan.AddComponent<SkeletalMeshComponent>();
+            cesiumManMesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cesium_man.fbx");
+            cesiumManMesh.Animation = AssetsManager.LoadAssetByGuid<SkeletalAnimation>(new Guid("32c68bd7597e4c1f9c1037607098c766"));
+
+            GameObject cesiumMan2 = GameObject.Instantiate("CesiumMan2");
+            Transform cesiumManTransform2 = cesiumMan2.GetComponent<Transform>();
+            cesiumManTransform2.Position = new Vector3(0, 2, 5);
+            cesiumManTransform2.Rotation = Quaternion.FromEuler(new Vector3(-90 * (3.14 / 180), 0, 0));
+            SkeletalMeshComponent cesiumManMesh2 = cesiumMan2.AddComponent<SkeletalMeshComponent>();
+            cesiumManMesh2.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cesium_man.fbx");
+            //cesiumManMesh2.AnimationIndex = 14;
 
             GameObject light1 = GameObject.Instantiate("Light1");
             light1.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);

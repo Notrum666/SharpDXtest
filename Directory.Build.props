@@ -1,5 +1,11 @@
 <Project>
-	<PropertyGroup>
-		<EnableWindowsTargeting>true</EnableWindowsTargeting>
-	</PropertyGroup>
+    <PropertyGroup>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <BaseDirectory>.</BaseDirectory>
+        <OutputPath>..\Build\$(Configuration)</OutputPath>
+    </PropertyGroup>
+    <PropertyGroup>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+        <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    </PropertyGroup>
 </Project>
