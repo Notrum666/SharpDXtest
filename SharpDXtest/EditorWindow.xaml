@@ -47,7 +47,7 @@
                         <this:CameraRenderControl/>
                     </this:DockableHost>
                     <!--<this:OutputControl/>-->
-                    <this:ContentBrowserControl/>
+                    <this:ContentBrowserControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
                 </this:DockableHost>
                 <this:InspectorControl/>
             </this:DockableHost>

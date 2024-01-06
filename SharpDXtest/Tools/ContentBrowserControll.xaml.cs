@@ -17,7 +17,7 @@ namespace Editor
     {
         public ObservableCollection<FileItem> Items { get; set; }
         public FileItem Item { get; set; }
-        private string currentFolderPath = "C:\\GamePS2"; // Путь к стартовой папке
+        private string currentFolderPath = "Content"; // Путь к стартовой папке
         private bool loaded = false;
         private List<LogMessage> newMessages = new ();
 

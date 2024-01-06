@@ -7,37 +7,36 @@
              mc:Ignorable="d" 
              Tag="ContentBrowser"
              d:DesignHeight="450" d:DesignWidth="800">
-    <UserControl.Resources>
-    </UserControl.Resources>
-    <Grid>
+    <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="50"/>
-            <ColumnDefinition Width="150"/>
-            <ColumnDefinition Width="300"/>
+            <!-- <ColumnDefinition Width="*"/> -->
+            <ColumnDefinition MinWidth="50" Width="1*"/>
+            <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Orientation="Horizontal" Grid.Column="0">
-            <Button Content="Назад" Margin="10" Click="BackButton_Click"/>
-        </StackPanel>
-        <TreeView x:Name="TreeView" Grid.Column="1" Margin="10" SelectedItemChanged="TreeView_SelectedItemChanged">
+        <!-- <StackPanel Orientation="Horizontal" Grid.Column="0"> -->
+        <!--     <Button Content="Назад" Margin="10" Click="BackButton_Click"/> -->
+        <!-- </StackPanel> -->
+        <TreeView Background="Transparent" x:Name="TreeView" Grid.Column="0" Margin="10" SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type local:FileItem}" ItemsSource="{Binding Children}">
-                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="{Binding Name}" />
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
-        <ScrollViewer Grid.Column="2" Margin="10">
+        <GridSplitter Background="Gray" Grid.Column="0" Width="5"/>
+        <ScrollViewer Grid.Column="1" Margin="10">
             <ItemsControl x:Name="ItemsControl">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid Columns="3" />
+                        <UniformGrid />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="5">
                             <StackPanel>
-                                <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
-                                <TextBlock Text="{Binding Type}" Foreground="Gray" FontSize="10"/>
+                                <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="{Binding Name}" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding Type}" Foreground="{StaticResource ForegroundBrush}" FontSize="10"/>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
