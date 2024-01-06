@@ -44,7 +44,7 @@ namespace Editor
         public EditorWindow()
         {
             DataFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DataFolderName);
-            EditorFolderPath = Directory.GetCurrentDirectory();
+            EditorFolderPath = AppDomain.CurrentDomain.BaseDirectory;
             Environment.SetEnvironmentVariable(EditorPathVarName, EditorFolderPath, EnvironmentVariableTarget.User);
 
             ResourcesFolderPath = Path.Combine(EditorFolderPath, ResourcesFolderName);

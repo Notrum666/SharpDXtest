@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace Editor
 {
-    public class ViewModelBase : INotifyPropertyChanged //TODO: Inherit other ViewModels (in InspectorControl) from this one
+    public class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
