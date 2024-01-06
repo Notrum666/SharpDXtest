@@ -5,9 +5,9 @@ namespace Editor.GameProject
     /// <summary>
     /// Interaction logic for ProjectBrowserDialog.xaml
     /// </summary>
-    public partial class ProjectBrowserDialog : Window
+    public partial class ProjectBrowserDialogWindow : Window
     {
-        public ProjectBrowserDialog()
+        public ProjectBrowserDialogWindow()
         {
             InitializeComponent();
         }

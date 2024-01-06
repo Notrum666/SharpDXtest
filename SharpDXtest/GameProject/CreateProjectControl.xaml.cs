@@ -7,9 +7,9 @@ namespace Editor.GameProject
     /// <summary>
     /// Interaction logic for CreateProjectView.xaml
     /// </summary>
-    public partial class CreateProjectView : UserControl
+    public partial class CreateProjectControl : UserControl
     {
-        public CreateProjectView()
+        public CreateProjectControl()
         {
             InitializeComponent();
         }

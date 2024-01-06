@@ -1,15 +1,12 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 using Engine;
 
 namespace Editor
 {
-    public class FieldViewModel : INotifyPropertyChanged
+    public class FieldViewModel : ViewModelBase
     {
-        public event PropertyChangedEventHandler PropertyChanged;
         private FieldInfo targetField;
         public FieldInfo TargetField => targetField;
         public string DisplayName { get; private set; }
@@ -74,11 +71,6 @@ namespace Editor
                     StructFieldViewModels.Add(new FieldViewModel(parentObject, subField, this));
                 }
             }
-        }
-
-        public void OnPropertyChanged([CallerMemberName] string prop = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
 
         public void Update()

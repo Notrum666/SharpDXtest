@@ -78,7 +78,7 @@ namespace Editor
 
         private void OpenProjectBrowserDialog()
         {
-            ProjectBrowserDialog projectBrowser = new ProjectBrowserDialog();
+            ProjectBrowserDialogWindow projectBrowser = new ProjectBrowserDialogWindow();
             if (projectBrowser.ShowDialog() == false || ProjectViewModel.Current == null)
                 Application.Current.Shutdown();
             else
