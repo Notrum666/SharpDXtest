@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Threading;
+
 using Engine.BaseAssets.Components;
 using Engine.BaseAssets.Components.Postprocessing;
+
 using LinearAlgebra;
+
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D9;
 using SharpDX.Mathematics.Interop;
+
 using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using Device = SharpDX.Direct3D11.Device;
 using FillMode = SharpDX.Direct3D11.FillMode;
@@ -63,7 +67,6 @@ namespace Engine
 
         private static Sampler sampler;
         private static Sampler shadowsSampler;
-        public static Camera CurrentCamera { get; set; }
 
         private static BlendState additiveBlendState;
         private static BlendState blendingBlendState;
@@ -205,15 +208,8 @@ namespace Engine
             synchQuery = new Query(CurrentDevice, new QueryDescription() { Type = QueryType.Event, Flags = QueryFlags.None });
         }
 
-        public static void Update()
-        {
-            if (CurrentCamera != null)
-                //RenderShadows();
-                RenderScene(CurrentCamera);
-        }
-
         //TODO: Separate into light classes
-        private static void RenderShadows()
+        public static void RenderShadows(Camera camera)
         {
             if (Scene.CurrentScene == null)
                 return;
@@ -223,7 +219,7 @@ namespace Engine
 
             // List<GameObject> objects = EngineCore.CurrentScene.Objects;
 
-            ShaderPipeline pipeline = null;
+            ShaderPipeline pipeline;
 
             void renderObjects()
             {
@@ -267,7 +263,7 @@ namespace Engine
 
                     CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, curLight.ShadowSize, curLight.ShadowSize, 0.0f, 1.0f));
 
-                    Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(CurrentCamera);
+                    Matrix4x4f[] lightSpaces = curLight.GetLightSpaces(camera);
                     for (int i = 0; i < lightSpaces.Length; i++)
                     {
                         DepthStencilView curDSV = curLight.ShadowTexture.GetView<DepthStencilView>(i);

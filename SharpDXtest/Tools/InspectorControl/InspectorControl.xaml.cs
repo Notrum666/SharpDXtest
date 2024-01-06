@@ -94,6 +94,7 @@ namespace Editor
             }
             
             objectIndex++;
+
             if (objectIndex >= currentScene.GameObjects.Count)
                 objectIndex = 0;
             GameObjectViewModel.Target = currentScene.GameObjects[objectIndex];

@@ -21,10 +21,11 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private double far;
 
+        private static Camera current = null;
         public static Camera Current
         {
-            get => GraphicsCore.CurrentCamera;
-            set => GraphicsCore.CurrentCamera = value;
+            get => current;
+            set => current = value;
         }
         public bool IsCurrent => Current == this;
 
@@ -58,12 +59,12 @@ namespace Engine.BaseAssets.Components
         {
             BackgroundColor = Color.FromRgba(0xFF010101);
             //BackgroundColor = Color.FromRgba(0xFFFFFFFF);
+            Resize(1280, 720);
         }
 
         public void MakeCurrent()
         {
             Current = this;
-            Resize(1280, 720);
         }
 
         public void Resize(int width, int height)
