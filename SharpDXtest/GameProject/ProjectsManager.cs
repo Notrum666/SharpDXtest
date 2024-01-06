@@ -26,6 +26,7 @@ namespace Editor.GameProject
         public static void InitializeInFolder(string dataFolderPath)
         {
             Logger.Log(LogType.Info, $"Initialize ProjectsManager in folder = {dataFolderPath}");
+            Directory.CreateDirectory(dataFolderPath);
             projectsDatabase = ProjectsDatabase.Load(dataFolderPath);
             Projects = new ReadOnlyObservableCollection<ProjectData>(projectsDatabase.ProjectsList);
         }
