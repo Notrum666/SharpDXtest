@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Engine.Layers
 {
-    internal class UpdateSceneLayer : Layer
+    internal class EngineLayer : Layer
     {
         public override float UpdateOrder => 1;
         public override float InitOrder => 1;
@@ -11,11 +11,9 @@ namespace Engine.Layers
         private Scene currentScene => Scene.CurrentScene;
         private static double accumulator = 0.0;
 
-        public override void Init() { }
-
         public override void Update()
         {
-            if (Scene.CurrentScene == null)
+            if (Scene.CurrentScene == null || EngineCore.IsPaused)
                 return;
 
             Scene.CurrentScene.ProcessNewObjects();

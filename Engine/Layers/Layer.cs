@@ -4,7 +4,7 @@
     {
         public abstract float UpdateOrder { get; }
         public abstract float InitOrder { get; }
-        public abstract void Init();
-        public abstract void Update();
+        public virtual void Init() { }
+        public virtual void Update() { }
     }
 }

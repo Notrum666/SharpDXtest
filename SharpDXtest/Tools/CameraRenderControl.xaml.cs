@@ -140,7 +140,6 @@ namespace Editor
 
                 ResizeCameraAndFramebuffer((int)ActualWidth, (int)ActualHeight);
             }
-            GraphicsCore.CurrentCamera = camera;
 
             EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
 
@@ -180,7 +179,7 @@ namespace Editor
             if (keyboardFocused)
                 controlledGameObject.Update();
 
-            //GraphicsCore.RenderScene(camera);
+            GraphicsCore.RenderScene(camera);
 
             FrameBuffer buffer = camera.GetNextFrontBuffer();
 

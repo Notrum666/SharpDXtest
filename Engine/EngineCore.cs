@@ -11,8 +11,7 @@ namespace Engine
     {
         private static bool isAlive = false;
         public static bool IsAlive => isAlive;
-        private static bool needsToBePaused = false;
-        private static bool needsToBeUnpaused = false;
+        private static bool desiredPauseState = false;
         private static bool isPaused = false;
         public static bool IsPaused
         {
@@ -22,10 +21,7 @@ namespace Engine
                 if (isPaused == value || !isAlive)
                     return;
 
-                if (value)
-                    needsToBePaused = true;
-                else
-                    needsToBeUnpaused = true;
+                desiredPauseState = value;
             }
         }
         private static Task loopTask;
@@ -35,7 +31,7 @@ namespace Engine
 
         private static List<Layer> layersStack;
 
-        public static void Init(nint HWND, int width, int height, IEnumerable<Layer> addedLayers = null)
+        public static void Init(nint HWND, int width, int height, params Layer[] addedLayers)
         {
             Logger.Log(LogType.Info, "Engine initialization");
             // Order of initialization is important, same number means no difference
@@ -49,9 +45,9 @@ namespace Engine
             {
                 new InputLayer(),
                 new ProfilerLayer(),
-                new RenderSceneLayer(),
+                new RenderLayer(),
                 new SoundLayer(),
-                new UpdateSceneLayer()
+                new EngineLayer()
             };
 
             if (addedLayers != null)
@@ -80,24 +76,18 @@ namespace Engine
             {
                 while (isAlive)
                 {
-                    if (needsToBePaused)
+                    if (desiredPauseState != isPaused)
                     {
-                        needsToBePaused = false;
-                        isPaused = true;
+                        isPaused = desiredPauseState;
+                        if (isPaused)
+                            OnPaused?.Invoke();
+                        else
+                            OnResumed?.Invoke();
                         OnPaused?.Invoke();
                     }
 
-                    if (needsToBeUnpaused)
-                    {
-                        needsToBeUnpaused = false;
-                        isPaused = false;
-                        OnResumed?.Invoke();
-                    }
-
                     foreach (Layer layer in layersStack)
-                    {
                         layer.Update();
-                    }
 
                     Time.Update();
 
