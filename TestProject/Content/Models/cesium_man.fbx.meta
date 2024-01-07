@@ -1,5 +1,5 @@
+ImporterVersion: 1
 Guid: 64ddb77335d74591bee18777a8a6e239
-ImportDate: 2024-01-05T21:42:23.1247344Z
 SubAssets:
   ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     Item2: DefaultMaterial

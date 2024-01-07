@@ -1,5 +1,5 @@
+ImporterVersion: 1
 Guid: fb30335d004f4cd29348efbfb3794681
-ImportDate: 2024-01-05T21:42:26.5634457Z
 SubAssets:
   ? Item1: Engine.AssetsData.SkeletonData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     Item2: Skeleton
