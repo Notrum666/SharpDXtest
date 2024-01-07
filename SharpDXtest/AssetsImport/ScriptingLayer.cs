@@ -77,6 +77,7 @@ namespace Editor.AssetsImport
 
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
             Solution solution = await workspace.OpenSolutionAsync(solutionPath);
+            workspace.WorkspaceChanged += WorkspaceOnWorkspaceChanged;
 
             Log($"Loaded solution = {solution} with {solution?.Projects?.Count()} projects at path {solutionPath}");
             AssemblyLoadContext assemblyContext = new AssemblyLoadContext(currentProject.Name, true);
@@ -118,6 +119,12 @@ namespace Editor.AssetsImport
             return true;
         }
 
+        private void WorkspaceOnWorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
+        {
+            // e.Kind ==
+            throw new NotImplementedException();
+        }
+
         private async Task<MemoryStream> CompileProject(Project csProject)
         {
             Compilation compilation = await csProject.GetCompilationAsync();
@@ -150,7 +157,7 @@ namespace Editor.AssetsImport
 
             unloadingContexts.RemoveAll(x => !x.Item2.IsAlive);
             Logger.Log(LogType.Info, $"Unloading contexts count = {unloadingContexts.Count}");
-            
+
             if (unloadingContexts.Count > SafeContextCount)
             {
                 string contextsNames = string.Join("; ", unloadingContexts.Select(x => x.Item1));
