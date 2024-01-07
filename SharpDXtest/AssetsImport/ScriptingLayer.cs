@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -20,12 +21,7 @@ namespace Editor.AssetsImport
 {
     internal class ScriptingLayer : Layer
     {
-        private RelayCommand recompileCommand;
-
-        public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
-            obj => { Recompile(); },
-            obj => true
-        );
+        private const int SafeContextCount = 10;
 
         private static ScriptingLayer current = null;
         public static ScriptingLayer Current => current ??= new ScriptingLayer();
@@ -33,7 +29,15 @@ namespace Editor.AssetsImport
         public override float UpdateOrder => 0;
         public override float InitOrder => 0;
 
-        private AssemblyLoadContext assemblyContext;
+        public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
+            obj => { Recompile(); },
+            obj => true
+        );
+
+        private RelayCommand recompileCommand;
+
+        private AssemblyLoadContext currentAssemblyContext;
+        private readonly List<(string, WeakReference)> unloadingContexts = new List<(string, WeakReference)>();
 
         public override void Init()
         {
@@ -44,38 +48,39 @@ namespace Editor.AssetsImport
 
         public void Recompile()
         {
-            if (assemblyContext != null)
-            {
-                WeakReference weakRef = new WeakReference(assemblyContext);
-                assemblyContext.Unload();
-                assemblyContext = null;
-                Task.Run(() => UnloadingWatcher(weakRef)).Wait();
-            }
+            AssemblyLoadContext oldContext = currentAssemblyContext;
 
-            Task.Run(RecompileAsync).Wait();
+            Task<bool> recompileTask = RecompileAsync();
+            recompileTask.Wait();
+
+            if (recompileTask.Result && currentAssemblyContext != oldContext)
+                oldContext?.Unload();
+
+            SanitizeUnloadingContexts();
         }
 
-        private async Task RecompileAsync()
+        private async Task<bool> RecompileAsync()
         {
             ProjectViewModel currentProject = ProjectViewModel.Current;
             if (currentProject == null)
             {
                 Log("Current project is null.", false);
-                return;
+                return false;
             }
 
             string solutionPath = Directory.GetFiles(currentProject.FolderPath, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
             if (solutionPath == default)
             {
                 Log($"Current project has no solution file in folder {currentProject.FolderPath}.", false);
-                return;
+                return false;
             }
 
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
             Solution solution = await workspace.OpenSolutionAsync(solutionPath);
 
             Log($"Loaded solution = {solution} with {solution?.Projects?.Count()} projects at path {solutionPath}");
-            assemblyContext = new AssemblyLoadContext(currentProject.Name, true);
+            AssemblyLoadContext assemblyContext = new AssemblyLoadContext(currentProject.Name, true);
+            assemblyContext.Unloading += OnAssemblyContextUnloading;
 
             ProjectDependencyGraph solutionGraph = solution.GetProjectDependencyGraph();
             foreach (ProjectId projectId in solutionGraph.GetTopologicallySortedProjects())
@@ -91,6 +96,7 @@ namespace Editor.AssetsImport
                     continue;
 
                 Assembly asm = assemblyContext.LoadFromStream(assemblyStream);
+                assemblyStream.Close();
                 Log($"Assembly loaded!");
 
                 Debug.WriteLine($"Assembly types:");
@@ -100,7 +106,16 @@ namespace Editor.AssetsImport
                 }
             }
 
+            if (!currentAssemblyContext.Assemblies.Any())
+            {
+                Log($"Loaded 0 assemblies for solution at {currentProject.FolderPath}.", false);
+                assemblyContext.Unload();
+                return false;
+            }
+
             Log("Recompile succeeded!");
+            currentAssemblyContext = assemblyContext;
+            return true;
         }
 
         private async Task<MemoryStream> CompileProject(Project csProject)
@@ -128,14 +143,27 @@ namespace Editor.AssetsImport
             return stream;
         }
 
-        private static void UnloadingWatcher(WeakReference weakRef)
+        private void SanitizeUnloadingContexts()
         {
-            while (weakRef.IsAlive)
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+
+            unloadingContexts.RemoveAll(x => !x.Item2.IsAlive);
+            Logger.Log(LogType.Info, $"Unloading contexts count = {unloadingContexts.Count}");
+            
+            if (unloadingContexts.Count > SafeContextCount)
             {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
+                string contextsNames = string.Join("; ", unloadingContexts.Select(x => x.Item1));
+                Logger.Log(LogType.Warning, $"Too many unloading contexts({unloadingContexts.Count}): {contextsNames}");
             }
-            Debug.WriteLine("Context unloaded");
+        }
+
+        private void OnAssemblyContextUnloading(AssemblyLoadContext context)
+        {
+            string contextName = context.Name;
+            WeakReference contextRef = new WeakReference(context);
+
+            unloadingContexts.Add((contextName, contextRef));
         }
 
         private void Log(string message, bool success = true)
