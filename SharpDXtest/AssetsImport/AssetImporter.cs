@@ -35,10 +35,10 @@ namespace Editor.AssetsImport
                 using FileStream fileStream = File.OpenRead(assetSourcePath);
                 importContext.DataStream = fileStream;
 
+                DateTime importTimeUtc = DateTime.UtcNow;
                 OnImportAsset(importContext);
 
-                assetMeta.ImporterVersion = LatestVersion;
-                importContext.SaveAssetMeta();
+                importContext.SaveAssetMeta(importTimeUtc, LatestVersion);
             }
 
             return assetMeta.Guid;
