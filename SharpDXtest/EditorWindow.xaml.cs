@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 
+using Editor.AssetsImport;
 using Editor.GameProject;
 
 using Engine;
@@ -84,7 +85,7 @@ namespace Editor
             else
             {
                 //SceneManager.Load(ProjectViewModel.Current.ActiveScene)
-                EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight, EditorLayer.Current);
+                EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight, EditorLayer.Current, ScriptingLayer.Current);
 
                 CreateBaseScene();
 
@@ -159,6 +160,11 @@ namespace Editor
             GameObject light4 = GameObject.Instantiate("Light4");
             light4.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);
             light4.AddComponent<PointLight>().Radius.Set(10);
+        }
+
+        private void MenuItem_OnClick(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
     }
 }

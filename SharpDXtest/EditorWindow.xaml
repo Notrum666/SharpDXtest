@@ -35,6 +35,9 @@
                     <MenuItem Header="Output" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
                     <MenuItem Header="Inspector" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:InspectorControl}"/>
                 </MenuItem>
+                <MenuItem Header="Scripting" DataContext="{Binding  Source={x:Static this:AssetsImport.ScriptingLayer.Current}}">
+                    <MenuItem Header="Recompile" Command="{Binding Path=RecompileCommand}"/>
+                </MenuItem>
             </Menu>
         </StackPanel>
     </this:EditorWindowBase.Header>
