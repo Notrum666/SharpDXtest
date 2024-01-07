@@ -38,7 +38,7 @@ namespace Editor.AssetsImport
 
         public void Recompile()
         {
-            RecompileAsync().Wait();
+            Task.Run(RecompileAsync).Wait();
         }
 
         private async Task RecompileAsync()
@@ -59,6 +59,9 @@ namespace Editor.AssetsImport
 
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
             Solution solution = await workspace.OpenSolutionAsync(solutionPath);
+
+            Log($"Loaded solution = {solution} with {solution?.Projects?.Count()} projects at path {solutionPath}");
+
             ProjectDependencyGraph solutionGraph = solution.GetProjectDependencyGraph();
 
             foreach (ProjectId projectId in solutionGraph.GetTopologicallySortedProjects())
