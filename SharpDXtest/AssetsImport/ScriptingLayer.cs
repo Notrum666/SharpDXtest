@@ -1,6 +1,9 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Threading.Tasks;
 
 using Editor.GameProject;
@@ -10,6 +13,7 @@ using Engine.Layers;
 
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
 
 namespace Editor.AssetsImport
@@ -63,6 +67,7 @@ namespace Editor.AssetsImport
             Log($"Loaded solution = {solution} with {solution?.Projects?.Count()} projects at path {solutionPath}");
 
             ProjectDependencyGraph solutionGraph = solution.GetProjectDependencyGraph();
+            // AssemblyLoadContext context = new AssemblyLoadContext(currentProject.Name, true);
 
             foreach (ProjectId projectId in solutionGraph.GetTopologicallySortedProjects())
             {
@@ -71,9 +76,47 @@ namespace Editor.AssetsImport
                 Log(" ----- Project detected! -----");
                 Log($"Project name: {csProject.Name}");
                 Log($"Assembly name: {csProject.AssemblyName}");
+
+                MemoryStream assemblyStream = await CompileProject(csProject);
+                if (assemblyStream == null)
+                    continue;
+
+                Assembly asm = Assembly.Load(assemblyStream.ToArray());
+                Log($"Assembly loaded!");
+                
+                Debug.WriteLine($"Assembly types:");
+                foreach (Type type in asm.GetTypes())
+                {
+                    Debug.WriteLine($"{type.FullName}");
+                }
             }
 
             Log("Recompile succeeded!");
+        }
+
+        private async Task<MemoryStream> CompileProject(Project csProject)
+        {
+            Compilation compilation = await csProject.GetCompilationAsync();
+            if (compilation == null)
+            {
+                Log($"Could not compile project {csProject.Name}. SupportsCompilation = {csProject.SupportsCompilation}", false);
+                return null;
+            }
+            Log($"Compiled to path: {csProject.OutputFilePath}");
+            
+            MemoryStream stream = new MemoryStream();
+            EmitResult result = compilation.Emit(stream);
+            stream.Position = 0;
+
+            if (!result.Success)
+            {
+                foreach (Diagnostic diagnostic in result.Diagnostics)
+                    if (diagnostic.Severity == DiagnosticSeverity.Error)
+                        Debug.WriteLine("Error: {0}", diagnostic.GetMessage());
+                return null;
+            }
+
+            return stream;
         }
 
         private void Log(string message, bool success = true)
