@@ -33,6 +33,8 @@ namespace Editor.AssetsImport
         public override float UpdateOrder => 0;
         public override float InitOrder => 0;
 
+        private AssemblyLoadContext assemblyContext;
+
         public override void Init()
         {
             MSBuildLocator.RegisterDefaults();
@@ -42,6 +44,14 @@ namespace Editor.AssetsImport
 
         public void Recompile()
         {
+            if (assemblyContext != null)
+            {
+                WeakReference weakRef = new WeakReference(assemblyContext);
+                assemblyContext.Unload();
+                assemblyContext = null;
+                Task.Run(() => UnloadingWatcher(weakRef)).Wait();
+            }
+
             Task.Run(RecompileAsync).Wait();
         }
 
@@ -65,10 +75,9 @@ namespace Editor.AssetsImport
             Solution solution = await workspace.OpenSolutionAsync(solutionPath);
 
             Log($"Loaded solution = {solution} with {solution?.Projects?.Count()} projects at path {solutionPath}");
+            assemblyContext = new AssemblyLoadContext(currentProject.Name, true);
 
             ProjectDependencyGraph solutionGraph = solution.GetProjectDependencyGraph();
-            // AssemblyLoadContext context = new AssemblyLoadContext(currentProject.Name, true);
-
             foreach (ProjectId projectId in solutionGraph.GetTopologicallySortedProjects())
             {
                 Project csProject = solution.GetProject(projectId)!;
@@ -81,9 +90,9 @@ namespace Editor.AssetsImport
                 if (assemblyStream == null)
                     continue;
 
-                Assembly asm = Assembly.Load(assemblyStream.ToArray());
+                Assembly asm = assemblyContext.LoadFromStream(assemblyStream);
                 Log($"Assembly loaded!");
-                
+
                 Debug.WriteLine($"Assembly types:");
                 foreach (Type type in asm.GetTypes())
                 {
@@ -103,7 +112,7 @@ namespace Editor.AssetsImport
                 return null;
             }
             Log($"Compiled to path: {csProject.OutputFilePath}");
-            
+
             MemoryStream stream = new MemoryStream();
             EmitResult result = compilation.Emit(stream);
             stream.Position = 0;
@@ -117,6 +126,16 @@ namespace Editor.AssetsImport
             }
 
             return stream;
+        }
+
+        private static void UnloadingWatcher(WeakReference weakRef)
+        {
+            while (weakRef.IsAlive)
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+            Debug.WriteLine("Context unloaded");
         }
 
         private void Log(string message, bool success = true)
