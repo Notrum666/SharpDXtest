@@ -10,6 +10,8 @@ namespace Editor.AssetsImport
     [AssetImporter("vsh", "hsh", "dsh", "gsh", "fsh", "csh")]
     public class ShaderImporter : AssetImporter
     {
+        public override int LatestVersion => 1;
+
         private ShaderData currentShaderData;
 
         protected override void OnImportAsset(AssetImportContext importContext)

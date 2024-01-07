@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+
 using Engine;
 using Engine.AssetsData;
 
@@ -28,8 +29,16 @@ namespace Editor.AssetsImport
             assetMetaPath = Path.ChangeExtension(AssetSourcePath, $"{assetExtension}{AssetMeta.MetaExtension}");
 
             AssetMeta savedMeta = YamlManager.LoadFromFile<AssetMeta>(assetMetaPath);
-            assetMetaData = savedMeta ?? new AssetMeta();
+            if (assetMetaPath != null && savedMeta != null)
+            {
+                savedMeta.LastWriteTimeUtc = File.GetLastWriteTimeUtc(assetMetaPath);
+            }
+            else
+            {
+                savedMeta = new AssetMeta() { LastWriteTimeUtc = DateTime.MaxValue };
+            }
 
+            assetMetaData = savedMeta;
             return assetMetaData;
         }
 

@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+
 using Engine;
 
 namespace Editor.AssetsImport
 {
     public abstract class AssetImporter
     {
+        public abstract int LatestVersion { get; }
+
         [YamlTagMapped]
         public class BaseImportSettings { }
 
@@ -22,8 +25,10 @@ namespace Editor.AssetsImport
             AssetMeta assetMeta = importContext.LoadAssetMeta();
             DateTime? artifactImportDate = AssetsManager.GetAssetImportDate(importContext.AssetContentPath);
 
-            bool metaOutOfDate = assetMeta.ImportDate < File.GetLastWriteTimeUtc(importContext.AssetSourcePath);
-            bool artifactOutOfDate = artifactImportDate == null || artifactImportDate < assetMeta.ImportDate;
+            bool metaOutOfDate = assetMeta.ImporterVersion != LatestVersion;
+            bool artifactOutOfDate = artifactImportDate == null
+                                     || artifactImportDate < assetMeta.LastWriteTimeUtc
+                                     || artifactImportDate < File.GetLastWriteTimeUtc(importContext.AssetSourcePath);
 
             if (metaOutOfDate || artifactOutOfDate)
             {
@@ -32,10 +37,7 @@ namespace Editor.AssetsImport
 
                 OnImportAsset(importContext);
 
-                if (metaOutOfDate)
-                {
-                    assetMeta.ImportDate = AssetsManager.GetAssetImportDate(importContext.AssetContentPath).GetValueOrDefault();
-                }
+                assetMeta.ImporterVersion = LatestVersion;
                 importContext.SaveAssetMeta();
             }
 

@@ -12,6 +12,8 @@ namespace Editor.AssetsImport
     [AssetImporter("fbx", "dae", "obj")]
     public class ModelImporter : AssetImporter
     {
+        public override int LatestVersion => 1;
+
         private Scene aiCurrentScene; // external Assimp data -> ai* prefix
         private ModelData currentModelData;
         private AssetImportContext currentImportContext;
