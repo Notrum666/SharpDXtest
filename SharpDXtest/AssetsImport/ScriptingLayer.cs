@@ -50,7 +50,7 @@ namespace Editor.AssetsImport
         {
             AssemblyLoadContext oldContext = currentAssemblyContext;
 
-            Task<bool> recompileTask = RecompileAsync();
+            Task<bool> recompileTask = Task.Run(RecompileAsync);
             recompileTask.Wait();
 
             if (recompileTask.Result && currentAssemblyContext != oldContext)
@@ -106,7 +106,7 @@ namespace Editor.AssetsImport
                 }
             }
 
-            if (!currentAssemblyContext.Assemblies.Any())
+            if (!assemblyContext.Assemblies.Any())
             {
                 Log($"Loaded 0 assemblies for solution at {currentProject.FolderPath}.", false);
                 assemblyContext.Unload();
