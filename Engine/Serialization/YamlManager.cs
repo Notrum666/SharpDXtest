@@ -93,6 +93,11 @@ namespace Engine
             return builder;
         }
 
+        public static string SaveToString<T>(T obj)
+        {
+            return Serializer.Serialize(obj);
+        }
+
         public static void SaveToStream<T>(Stream stream, T obj)
         {
             using StreamWriter writer = new StreamWriter(stream, leaveOpen: true);
