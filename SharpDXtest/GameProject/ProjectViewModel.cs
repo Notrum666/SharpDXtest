@@ -40,15 +40,16 @@ namespace Editor.GameProject
         {
             ProjectViewModel project = new ProjectViewModel(projectData.ProjectName, projectData.ProjectFolderPath);
 
+            Current?.Save();
+            Current?.Unload();
+            Current = project;
+
             // var mainPath = Directory.GetCurrentDirectory();
             // var projectFolderPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
             string projectFolderPath = project.FolderPath;
             AssetsManager.InitializeInFolder(projectFolderPath);
             AssetsRegistry.InitializeInFolder(projectFolderPath);
 
-            Current?.Save();
-            Current?.Unload();
-            Current = project;
             return true;
         }
 

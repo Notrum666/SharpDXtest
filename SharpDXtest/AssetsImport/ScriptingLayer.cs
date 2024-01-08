@@ -40,13 +40,15 @@ namespace Editor.AssetsImport
         private AssemblyLoadContext currentAssemblyContext;
         private readonly List<(string, WeakReference)> unloadingContexts = new List<(string, WeakReference)>();
 
-        public override void Init()
+        public ScriptingLayer()
         {
             MSBuildLocator.RegisterDefaults();
 
             IsCompilationRelevant = false;
             FilesToTypesMap = new ReadOnlyDictionary<string, List<Type>>(filesToTypesMap);
         }
+
+        public override void Init() { }
 
         public override void Update() { }
 
