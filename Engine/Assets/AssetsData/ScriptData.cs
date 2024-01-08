@@ -1,9 +1,16 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+
+using Engine.BaseAssets.Components;
 
 namespace Engine.AssetsData
 {
     public class ScriptData : AssetData
     {
+        public List<Type> ClassTypes = new List<Type>();
+
         public override void Serialize(BinaryWriter writer)
         {
             YamlManager.SaveToStream(writer.BaseStream, this);
@@ -16,7 +23,8 @@ namespace Engine.AssetsData
 
         public override ScriptAsset ToRealAsset()
         {
-            return null;
+            Type componentType = ClassTypes.FirstOrDefault(t => t.IsSubclassOf(typeof(Component)));
+            return new ScriptAsset(componentType);
         }
     }
 }

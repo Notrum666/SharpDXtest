@@ -42,6 +42,13 @@ namespace Editor
             obj => obj is Type && (obj as Type).IsSubclassOf(typeof(FrameworkElement))
         ));
 
+        private RelayCommand recompileCommand;
+
+        public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
+            _ => { ScriptingLayer.Current.Recompile(); },
+            _ => true
+        );
+
         public EditorWindow()
         {
             DataFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DataFolderName);

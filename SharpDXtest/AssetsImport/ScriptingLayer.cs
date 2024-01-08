@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -31,12 +32,10 @@ namespace Editor.AssetsImport
         public override float UpdateOrder => 0;
         public override float InitOrder => 0;
 
-        public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
-            obj => { Recompile(); },
-            obj => true
-        );
+        public bool IsCompilationRelevant;
+        public ReadOnlyDictionary<string, List<Type>> FilesToTypesMap { get; private set; }
 
-        private RelayCommand recompileCommand;
+        private readonly Dictionary<string, List<Type>> filesToTypesMap = new Dictionary<string, List<Type>>();
 
         private AssemblyLoadContext currentAssemblyContext;
         private readonly List<(string, WeakReference)> unloadingContexts = new List<(string, WeakReference)>();
@@ -44,6 +43,9 @@ namespace Editor.AssetsImport
         public override void Init()
         {
             MSBuildLocator.RegisterDefaults();
+
+            IsCompilationRelevant = false;
+            FilesToTypesMap = new ReadOnlyDictionary<string, List<Type>>(filesToTypesMap);
         }
 
         public override void Update() { }
@@ -59,6 +61,7 @@ namespace Editor.AssetsImport
                 oldContext?.Unload();
 
             SanitizeUnloadingContexts();
+            IsCompilationRelevant = true;
         }
 
         private async Task<bool> RecompileAsync()
@@ -83,6 +86,8 @@ namespace Editor.AssetsImport
 
             Log($"Loaded solution = {solution} with {solution?.Projects?.Count()} projects at path {solutionPath}");
             AssemblyLoadContext assemblyContext = new AssemblyLoadContext(currentProject.Name, true);
+            Dictionary<string, List<Type>> filesToTypes = new Dictionary<string, List<Type>>();
+
             assemblyContext.Unloading += OnAssemblyContextUnloading;
 
             ProjectDependencyGraph solutionGraph = solution.GetProjectDependencyGraph();
@@ -101,25 +106,25 @@ namespace Editor.AssetsImport
                 assemblyStream.Close();
                 Log($"Assembly loaded!");
 
-                Dictionary<string, List<Type>> filesToTypesMap = new Dictionary<string, List<Type>>();
                 foreach (string file in filesToTypeNamesMap.Keys)
                 {
-                    if (!filesToTypesMap.ContainsKey(file))
-                        filesToTypesMap[file] = new List<Type>();
-                    
+                    if (!filesToTypes.ContainsKey(file))
+                        filesToTypes[file] = new List<Type>();
+
                     List<string> typeNames = filesToTypeNamesMap[file];
                     foreach (string typeName in typeNames)
                     {
                         Type type = asm.GetType(typeName);
-                        filesToTypesMap[file].Add(type);
+                        if (type != null)
+                            filesToTypes[file].Add(type);
                     }
                 }
-                
+
                 Debug.WriteLine($"Assembly types:");
-                foreach (string file in filesToTypesMap.Keys)
+                foreach (string file in filesToTypes.Keys)
                 {
                     Debug.WriteLine($"{file}:");
-                    foreach (Type type in filesToTypesMap[file])
+                    foreach (Type type in filesToTypes[file])
                     {
                         Debug.WriteLine($" - {type}");
                     }
@@ -135,6 +140,8 @@ namespace Editor.AssetsImport
 
             Log("Recompile succeeded!");
             currentAssemblyContext = assemblyContext;
+            filesToTypesMap.Clear();
+            filesToTypesMap.AddRange(filesToTypes);
             return true;
         }
 
@@ -165,9 +172,10 @@ namespace Editor.AssetsImport
                         Debug.WriteLine("Error: {0}", diagnostic.GetMessage());
                 return (null, null);
             }
-            
+
             // string componentTypeName = typeof(Component).FullName;
             // INamedTypeSymbol componentTypeSymbol = compilation.GetTypeByMetadataName(componentTypeName!)!;
+            SymbolDisplayFormat displayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
             Dictionary<string, List<string>> filesToTypeNamesMap = new Dictionary<string, List<string>>();
             foreach (INamedTypeSymbol typeSymbol in GetNamedTypeSymbols(compilation))
             {
@@ -178,8 +186,9 @@ namespace Editor.AssetsImport
                 string filePath = typeLocation.SourceTree!.FilePath;
                 if (!filesToTypeNamesMap.ContainsKey(filePath))
                     filesToTypeNamesMap[filePath] = new List<string>();
-                
-                filesToTypeNamesMap[filePath].Add(typeSymbol.MetadataName);
+
+                // genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters
+                filesToTypeNamesMap[filePath].Add(typeSymbol.ToDisplayString(displayFormat));
                 // Debug.WriteLine($"found typeSymbol = {typeSymbol.ToString()}");
                 // Debug.WriteLine($"namespace = {typeSymbol.ContainingNamespace}");
                 // Debug.WriteLine($"namespace = {typeSymbol.ContainingNamespace?.ContainingNamespace}");
@@ -204,7 +213,7 @@ namespace Editor.AssetsImport
             while (stack.Count > 0)
             {
                 INamespaceSymbol @namespace = stack.Pop();
-                
+
                 foreach (INamespaceOrTypeSymbol member in @namespace.GetMembers())
                 {
                     switch (member)

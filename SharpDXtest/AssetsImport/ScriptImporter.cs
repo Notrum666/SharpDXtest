@@ -5,49 +5,44 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using Engine;
 using Engine.AssetsData;
-using Engine.BaseAssets.Components;
+
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Editor.AssetsImport
 {
-    //[AssetImporter("cs")]
+    [AssetImporter("cs")]
     public class ScriptImporter : AssetImporter
     {
         public override int LatestVersion => 1;
 
-        private readonly Type t = typeof(Component);
-
-        private string a = typeof(Component).Namespace;
-        private string b = typeof(Component).Name;
-
-
         protected override void OnImportAsset(AssetImportContext importContext)
         {
-            importContext.DataStream.Position = 0;
-            using StreamReader reader = new StreamReader(importContext.DataStream, Encoding.UTF8);
-            string scriptCode = reader.ReadToEnd();
+            ScriptingLayer scriptingLayer = ScriptingLayer.Current;
 
-            Debug.WriteLine(a);
-            Debug.WriteLine(b);
+            if (!scriptingLayer.IsCompilationRelevant)
+                scriptingLayer.Recompile();
 
-            ParseScriptCode(scriptCode);
+            // ParseScriptCode(importContext.DataStream);
 
-            throw new NotImplementedException();
-            
             ScriptData scriptData = new ScriptData();
+
+            if (scriptingLayer.FilesToTypesMap.TryGetValue(importContext.AssetSourcePath, out List<Type> fileTypes))
+                scriptData.ClassTypes.AddRange(fileTypes);
 
             importContext.AddMainAsset(scriptData);
         }
 
-        private void ParseScriptCode(string code)
+        private void ParseScriptCode(Stream codeStream)
         {
+            codeStream.Position = 0;
+            using StreamReader reader = new StreamReader(codeStream, Encoding.UTF8);
+            string code = reader.ReadToEnd();
+
             SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
             SyntaxNode root = tree.GetRoot();
-
 
             IEnumerable<ClassDeclarationSyntax> classDeclarations = root.DescendantNodes().OfType<ClassDeclarationSyntax>();
             Debug.WriteLine($"Found {classDeclarations.Count()} classes in file");
@@ -58,16 +53,6 @@ namespace Editor.AssetsImport
                     continue;
 
                 var baseType = baseTypes.Value[0];
-                //while (baseType != null)
-                //{
-                //    Debug.WriteLine($"baseType = {baseType}");
-                //    baseType = baseType.Base;
-                //}
-                //foreach (BaseTypeSyntax baseType in baseTypes)
-                //{
-                //    string baseName = baseType.Type.ToString();
-                //    Debug.WriteLine($"baseName = {baseName}");
-                //}
             }
         }
     }
