@@ -89,12 +89,11 @@ namespace Editor.AssetsImport
             foreach (ProjectId projectId in solutionGraph.GetTopologicallySortedProjects())
             {
                 Project csProject = solution.GetProject(projectId)!;
-
                 Log(" ----- Project detected! -----");
                 Log($"Project name: {csProject.Name}");
                 Log($"Assembly name: {csProject.AssemblyName}");
 
-                MemoryStream assemblyStream = await CompileProject(csProject);
+                (MemoryStream assemblyStream, Dictionary<string, List<string>> filesToTypeNamesMap) = await CompileProject(csProject);
                 if (assemblyStream == null)
                     continue;
 
@@ -102,10 +101,28 @@ namespace Editor.AssetsImport
                 assemblyStream.Close();
                 Log($"Assembly loaded!");
 
-                Debug.WriteLine($"Assembly types:");
-                foreach (Type type in asm.GetTypes())
+                Dictionary<string, List<Type>> filesToTypesMap = new Dictionary<string, List<Type>>();
+                foreach (string file in filesToTypeNamesMap.Keys)
                 {
-                    Debug.WriteLine($"{type.FullName}");
+                    if (!filesToTypesMap.ContainsKey(file))
+                        filesToTypesMap[file] = new List<Type>();
+                    
+                    List<string> typeNames = filesToTypeNamesMap[file];
+                    foreach (string typeName in typeNames)
+                    {
+                        Type type = asm.GetType(typeName);
+                        filesToTypesMap[file].Add(type);
+                    }
+                }
+                
+                Debug.WriteLine($"Assembly types:");
+                foreach (string file in filesToTypesMap.Keys)
+                {
+                    Debug.WriteLine($"{file}:");
+                    foreach (Type type in filesToTypesMap[file])
+                    {
+                        Debug.WriteLine($" - {type}");
+                    }
                 }
             }
 
@@ -127,60 +144,15 @@ namespace Editor.AssetsImport
             throw new NotImplementedException();
         }
 
-        private async Task<MemoryStream> CompileProject(Project csProject)
+        private async Task<(MemoryStream stream, Dictionary<string, List<string>> filesToTypeNamesMap)> CompileProject(Project csProject)
         {
             Compilation compilation = await csProject.GetCompilationAsync();
             if (compilation == null)
             {
                 Log($"Could not compile project {csProject.Name}. SupportsCompilation = {csProject.SupportsCompilation}", false);
-                return null;
+                return (null, null);
             }
             Log($"Compiled to path: {csProject.OutputFilePath}");
-
-            //foreach (Document doc in csProject.Documents)
-            //{
-            //    SemanticModel model = await doc.GetSemanticModelAsync();
-            //    if (model == null)
-            //        continue;
-
-            //    IEnumerable<ClassDeclarationSyntax> declarations = (await doc.GetSyntaxRootAsync())!.DescendantNodes().OfType<ClassDeclarationSyntax>();
-            //    if (declarations == null)
-            //        continue;
-
-            //    foreach (ClassDeclarationSyntax declaration in declarations)
-            //    {
-            //        var baseTypes = declaration.BaseList?.Types;
-            //        if (!baseTypes.HasValue || baseTypes.Value.Count == 0)
-            //            continue;
-
-            //        foreach (BaseTypeSyntax baseType in baseTypes)
-            //        {
-            //            string baseName = baseType.Type.ToString();
-            //            Debug.WriteLine($"baseName = {baseName}");
-            //        }
-            //        //var type = model.GetCla(declaration);
-            //        //Debug.WriteLine($"found typeinfo for {type.Type?.Name} with base = {type.Type?.BaseType?.Name}");
-            //    }
-            //}
-
-            string componentTypeName = typeof(Component).FullName;
-            INamedTypeSymbol componentTypeSymbol = compilation.GetTypeByMetadataName(componentTypeName!);
-            Debug.WriteLine($"{componentTypeSymbol.Name}");
-
-            foreach (INamedTypeSymbol typeSymbol in GetNamedTypeSymbols(compilation))
-            {
-                Debug.WriteLine($"found typeSymbol = {typeSymbol.Name}");
-                Debug.WriteLine($"namespace = {typeSymbol.ContainingNamespace}");
-                Debug.WriteLine($"namespace = {typeSymbol.ContainingNamespace?.ContainingNamespace}");
-                Debug.WriteLine($"path = {typeSymbol.Locations[0].SourceTree?.FilePath}");
-                var baseType = typeSymbol.BaseType;
-                while (baseType != null)
-                {
-                    Debug.WriteLine($"baseType = {baseType}");
-                    Debug.WriteLine($"equals = {SymbolEqualityComparer.Default.Equals(baseType, componentTypeSymbol)}");
-                    baseType = baseType.BaseType;
-                }
-            }
 
             MemoryStream stream = new MemoryStream();
             EmitResult result = compilation.Emit(stream);
@@ -191,32 +163,58 @@ namespace Editor.AssetsImport
                 foreach (Diagnostic diagnostic in result.Diagnostics)
                     if (diagnostic.Severity == DiagnosticSeverity.Error)
                         Debug.WriteLine("Error: {0}", diagnostic.GetMessage());
-                return null;
+                return (null, null);
+            }
+            
+            // string componentTypeName = typeof(Component).FullName;
+            // INamedTypeSymbol componentTypeSymbol = compilation.GetTypeByMetadataName(componentTypeName!)!;
+            Dictionary<string, List<string>> filesToTypeNamesMap = new Dictionary<string, List<string>>();
+            foreach (INamedTypeSymbol typeSymbol in GetNamedTypeSymbols(compilation))
+            {
+                Location typeLocation = typeSymbol.Locations.FirstOrDefault(x => x.Kind == LocationKind.SourceFile);
+                if (typeLocation == default)
+                    continue;
+
+                string filePath = typeLocation.SourceTree!.FilePath;
+                if (!filesToTypeNamesMap.ContainsKey(filePath))
+                    filesToTypeNamesMap[filePath] = new List<string>();
+                
+                filesToTypeNamesMap[filePath].Add(typeSymbol.MetadataName);
+                // Debug.WriteLine($"found typeSymbol = {typeSymbol.ToString()}");
+                // Debug.WriteLine($"namespace = {typeSymbol.ContainingNamespace}");
+                // Debug.WriteLine($"namespace = {typeSymbol.ContainingNamespace?.ContainingNamespace}");
+                // Debug.WriteLine($"path = {typeSymbol.Locations[0].SourceTree?.FilePath}");
+                // var baseType = typeSymbol.BaseType;
+                // while (baseType != null)
+                // {
+                //     Debug.WriteLine($"baseType = {baseType}");
+                //     Debug.WriteLine($"equals = {SymbolEqualityComparer.Default.Equals(baseType, componentTypeSymbol)}");
+                //     baseType = baseType.BaseType;
+                // }
             }
 
-            return stream;
+            return (stream, filesToTypeNamesMap);
         }
 
         private static IEnumerable<INamedTypeSymbol> GetNamedTypeSymbols(Compilation compilation)
         {
-            var stack = new Stack<INamespaceSymbol>();
+            Stack<INamespaceSymbol> stack = new Stack<INamespaceSymbol>();
             stack.Push(compilation.Assembly.GlobalNamespace);
 
             while (stack.Count > 0)
             {
-                var @namespace = stack.Pop();
-
-                Debug.WriteLine($"check namespace = {@namespace.Name}");
-
-                foreach (var member in @namespace.GetMembers())
+                INamespaceSymbol @namespace = stack.Pop();
+                
+                foreach (INamespaceOrTypeSymbol member in @namespace.GetMembers())
                 {
-                    if (member is INamespaceSymbol memberAsNamespace)
+                    switch (member)
                     {
-                        stack.Push(memberAsNamespace);
-                    }
-                    else if (member is INamedTypeSymbol memberAsNamedTypeSymbol)
-                    {
-                        yield return memberAsNamedTypeSymbol;
+                        case INamespaceSymbol memberAsNamespace:
+                            stack.Push(memberAsNamespace);
+                            break;
+                        case INamedTypeSymbol memberAsNamedTypeSymbol:
+                            yield return memberAsNamedTypeSymbol;
+                            break;
                     }
                 }
             }
