@@ -10,10 +10,12 @@ using System.Threading.Tasks;
 using Editor.GameProject;
 
 using Engine;
+using Engine.BaseAssets.Components;
 using Engine.Layers;
 
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
 
@@ -135,6 +137,51 @@ namespace Editor.AssetsImport
             }
             Log($"Compiled to path: {csProject.OutputFilePath}");
 
+            //foreach (Document doc in csProject.Documents)
+            //{
+            //    SemanticModel model = await doc.GetSemanticModelAsync();
+            //    if (model == null)
+            //        continue;
+
+            //    IEnumerable<ClassDeclarationSyntax> declarations = (await doc.GetSyntaxRootAsync())!.DescendantNodes().OfType<ClassDeclarationSyntax>();
+            //    if (declarations == null)
+            //        continue;
+
+            //    foreach (ClassDeclarationSyntax declaration in declarations)
+            //    {
+            //        var baseTypes = declaration.BaseList?.Types;
+            //        if (!baseTypes.HasValue || baseTypes.Value.Count == 0)
+            //            continue;
+
+            //        foreach (BaseTypeSyntax baseType in baseTypes)
+            //        {
+            //            string baseName = baseType.Type.ToString();
+            //            Debug.WriteLine($"baseName = {baseName}");
+            //        }
+            //        //var type = model.GetCla(declaration);
+            //        //Debug.WriteLine($"found typeinfo for {type.Type?.Name} with base = {type.Type?.BaseType?.Name}");
+            //    }
+            //}
+
+            string componentTypeName = typeof(Component).FullName;
+            INamedTypeSymbol componentTypeSymbol = compilation.GetTypeByMetadataName(componentTypeName!);
+            Debug.WriteLine($"{componentTypeSymbol.Name}");
+
+            foreach (INamedTypeSymbol typeSymbol in GetNamedTypeSymbols(compilation))
+            {
+                Debug.WriteLine($"found typeSymbol = {typeSymbol.Name}");
+                Debug.WriteLine($"namespace = {typeSymbol.ContainingNamespace}");
+                Debug.WriteLine($"namespace = {typeSymbol.ContainingNamespace?.ContainingNamespace}");
+                Debug.WriteLine($"path = {typeSymbol.Locations[0].SourceTree?.FilePath}");
+                var baseType = typeSymbol.BaseType;
+                while (baseType != null)
+                {
+                    Debug.WriteLine($"baseType = {baseType}");
+                    Debug.WriteLine($"equals = {SymbolEqualityComparer.Default.Equals(baseType, componentTypeSymbol)}");
+                    baseType = baseType.BaseType;
+                }
+            }
+
             MemoryStream stream = new MemoryStream();
             EmitResult result = compilation.Emit(stream);
             stream.Position = 0;
@@ -148,6 +195,31 @@ namespace Editor.AssetsImport
             }
 
             return stream;
+        }
+
+        private static IEnumerable<INamedTypeSymbol> GetNamedTypeSymbols(Compilation compilation)
+        {
+            var stack = new Stack<INamespaceSymbol>();
+            stack.Push(compilation.Assembly.GlobalNamespace);
+
+            while (stack.Count > 0)
+            {
+                var @namespace = stack.Pop();
+
+                Debug.WriteLine($"check namespace = {@namespace.Name}");
+
+                foreach (var member in @namespace.GetMembers())
+                {
+                    if (member is INamespaceSymbol memberAsNamespace)
+                    {
+                        stack.Push(memberAsNamespace);
+                    }
+                    else if (member is INamedTypeSymbol memberAsNamedTypeSymbol)
+                    {
+                        yield return memberAsNamedTypeSymbol;
+                    }
+                }
+            }
         }
 
         private void SanitizeUnloadingContexts()
