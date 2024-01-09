@@ -129,7 +129,7 @@ namespace Editor
                 Width = double.NaN;
                 Height = double.NaN;
 
-                controlledGameObject = new GameObject();
+                controlledGameObject = new GameObject(true);
                 controlledGameObject.Transform.Position = new Vector3(0, -10, 5);
                 EditorCameraController controller = controlledGameObject.AddComponent<EditorCameraController>();
                 controller.Speed = 5;

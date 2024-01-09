@@ -24,12 +24,17 @@ namespace Engine
 
         public bool Enabled => localEnabled && Transform != null && (Transform.Parent?.GameObject?.Enabled ?? true); //TODO: maybe better cache value
 
-        public GameObject()
+        public GameObject() : this(false) { }
+
+        public GameObject(bool editor)
         {
             Name = "NewObject";
             Transform = AddComponent<Transform>();
-            if (Scene.CurrentScene != null)
+
+            if (!editor && Scene.CurrentScene != null)
+            {
                 Scene.CurrentScene.AddObject(this);
+            }
         }
 
         public static GameObject Instantiate(string objectName = null, Transform parent = null)

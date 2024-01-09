@@ -72,6 +72,7 @@ namespace Editor.AssetsImport
             filesWatcher.EnableRaisingEvents = true;
 
             currentAssemblyContext.EnterContextualReflection();
+            SceneManager.LoadSceneByName(null);
 
             //Debug.WriteLine("==========");
             //Debug.WriteLine($"loaded type = {filesToTypesMap.Values.First().First().Name}");

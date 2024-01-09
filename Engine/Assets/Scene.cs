@@ -26,7 +26,7 @@ namespace Engine
 
             if (disposing)
             {
-                foreach (GameObject gameObject in gameObjects.Concat(newObjects))
+                foreach (GameObject gameObject in gameObjects.Concat(newObjects).ToList())
                 {
                     gameObject.DestroyImmediate();
                 }
