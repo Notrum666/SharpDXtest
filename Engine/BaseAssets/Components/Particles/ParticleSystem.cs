@@ -180,7 +180,7 @@ namespace Engine.BaseAssets.Components
 
         private void sortParticles()
         {
-            Shader sortShader = Shader.Create("particles_bitonic_sort_step");
+            Shader sortShader = Shader.Create(@"BaseAssets\Shaders\Particles\particles_bitonic_sort_step.csh");
             sortShader.Use();
             sortShader.UpdateUniform("maxParticles", maxParticles);
             for (int subArraySize = 2; subArraySize >> 1 < maxParticles; subArraySize <<= 1)
