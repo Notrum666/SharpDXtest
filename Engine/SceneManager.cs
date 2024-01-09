@@ -42,11 +42,11 @@ namespace Engine
         {
             if (nextScenePath != null && Scene.CurrentScene == null)
             {
-                Scene scene = nextScenePath == DefaultScenePath
-                    ? LoadDefaultScene()
-                    : AssetsManager.LoadAssetAtPath<Scene>(nextScenePath);
+                if (nextScenePath == DefaultScenePath)
+                    LoadDefaultScene();
+                else
+                    Scene.CurrentScene = AssetsManager.LoadAssetAtPath<Scene>(nextScenePath);
 
-                Scene.CurrentScene = scene;
                 nextScenePath = null;
             }
         }
@@ -61,9 +61,9 @@ namespace Engine
             }
         }
 
-        public static Scene LoadDefaultScene()
+        public static void LoadDefaultScene()
         {
-            Scene scene = new Scene();
+            Scene.CurrentScene = new Scene();
             GameObject cameraObj = GameObject.Instantiate("Camera");
             Transform cameraTransform = cameraObj.GetComponent<Transform>();
             cameraTransform.Position = new Vector3(0, -40, 90);
@@ -128,8 +128,6 @@ namespace Engine
 
             ScriptAsset scriptAsset = AssetsManager.LoadAssetAtPath<ScriptAsset>("TestProjectComponent.cs");
             cubeObj1.AddComponent(scriptAsset.ComponentType);
-
-            return scene;
         }
     }
 }

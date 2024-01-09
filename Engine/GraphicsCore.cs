@@ -359,8 +359,10 @@ namespace Engine
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.ColorBuffer.GetView<RenderTargetView>(), camera.BackgroundColor);
 
-            if (ShaderPipeline.TryGetPipeline("deferred_addLight", out ShaderPipeline pipeline))
-                pipeline.Use();
+            if (!ShaderPipeline.TryGetPipeline("deferred_addLight", out ShaderPipeline pipeline))
+                return;
+
+            pipeline.Use();
 
             camera.GBuffer.worldPos.Use("worldPosTex");
             camera.GBuffer.albedo.Use("albedoTex");

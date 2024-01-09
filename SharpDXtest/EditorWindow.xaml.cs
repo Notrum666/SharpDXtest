@@ -96,6 +96,7 @@ namespace Editor
                 EngineCore.IsPaused = true;
                 EngineCore.Run();
 
+                ProjectViewModel.Current.GraphicsSettings.Load();
                 SceneManager.LoadSceneByName(ProjectViewModel.Current.ScenesSettings.StartingSceneName);
             }
         }
