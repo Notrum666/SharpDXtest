@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -28,7 +27,9 @@ namespace Editor.AssetsImport
 
         private static readonly Dictionary<string, List<Type>> filesToTypesMap = new Dictionary<string, List<Type>>();
 
+        private static readonly FileSystemWatcher filesWatcher;
         private static readonly MSBuildWorkspace currentWorkspace;
+
         private static readonly List<(string, WeakReference)> unloadingContexts = new List<(string, WeakReference)>();
         private static AssemblyLoadContext currentAssemblyContext;
 
@@ -40,11 +41,22 @@ namespace Editor.AssetsImport
             FilesToTypesMap = new ReadOnlyDictionary<string, List<Type>>(filesToTypesMap);
 
             currentWorkspace = MSBuildWorkspace.Create();
-            currentWorkspace.WorkspaceChanged += WorkspaceOnWorkspaceChanged;
+
+            filesWatcher = new FileSystemWatcher();
+            filesWatcher.EnableRaisingEvents = false;
+            filesWatcher.IncludeSubdirectories = true;
+            filesWatcher.Filter = "*.cs";
+            filesWatcher.NotifyFilter = NotifyFilters.CreationTime
+                                        | NotifyFilters.DirectoryName
+                                        | NotifyFilters.FileName
+                                        | NotifyFilters.LastWrite;
+
+            filesWatcher.Changed += OnFilesChanged;
         }
 
         public static void Recompile()
         {
+            filesWatcher.EnableRaisingEvents = false;
             AssemblyLoadContext oldContext = currentAssemblyContext;
 
             Task<bool> recompileTask = Task.Run(RecompileAsync);
@@ -55,6 +67,8 @@ namespace Editor.AssetsImport
 
             SanitizeUnloadingContexts();
             IsCompilationRelevant = true;
+            filesWatcher.Path = AssetsRegistry.ContentFolderPath;
+            filesWatcher.EnableRaisingEvents = true;
         }
 
         private static async Task<bool> RecompileAsync()
@@ -225,7 +239,7 @@ namespace Editor.AssetsImport
             unloadingContexts.Add((contextName, contextRef));
         }
 
-        private static void WorkspaceOnWorkspaceChanged(object sender, WorkspaceChangeEventArgs e)
+        private static void OnFilesChanged(object sender, FileSystemEventArgs e)
         {
             IsCompilationRelevant = false;
         }
