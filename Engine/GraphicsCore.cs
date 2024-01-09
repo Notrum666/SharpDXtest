@@ -342,15 +342,16 @@ namespace Engine
                 if (!light.LocalEnabled)
                     continue;
 
-                light.DoLightPass();
-
-                camera.GBuffer.worldPos.Use("worldPosTex");
-                camera.GBuffer.albedo.Use("albedoTex");
-                camera.GBuffer.normal.Use("normalTex");
-                camera.GBuffer.metallic.Use("metallicTex");
-                camera.GBuffer.roughness.Use("roughnessTex");
-                sampler.use("texSampler");
-                CurrentDevice.ImmediateContext.Draw(6, 0);
+                if (light.DoLightPass(camera))
+                {
+                    camera.GBuffer.worldPos.Use("worldPosTex");
+                    camera.GBuffer.albedo.Use("albedoTex");
+                    camera.GBuffer.normal.Use("normalTex");
+                    camera.GBuffer.metallic.Use("metallicTex");
+                    camera.GBuffer.roughness.Use("roughnessTex");
+                    sampler.use("texSampler");
+                    CurrentDevice.ImmediateContext.Draw(6, 0);
+                }
             }
 
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
@@ -455,7 +456,7 @@ namespace Engine
 
             if (!ShaderPipeline.TryGetPipeline("tex_to_screen", out ShaderPipeline pipeline))
                 return;
-            
+
             pipeline.Use();
 
             tex.Use("tex");

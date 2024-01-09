@@ -67,7 +67,5 @@ namespace Engine.BaseAssets.Components
 
             RenderObjects(pipeline);
         }
-
-        public override void DoLightPass() { }
     }
 }

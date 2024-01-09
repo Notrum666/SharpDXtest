@@ -91,14 +91,13 @@ namespace Engine.BaseAssets.Components
             // TODO: IMPLEMENT POINT LIGHT SHADOWS
         }
 
-        public override void DoLightPass()
+        public override bool DoLightPass(Camera camera)
         {
             if (!ShaderPipeline.TryGetPipeline("deferred_light_point", out ShaderPipeline pipeline))
-                return;
+                return false;
 
             pipeline.Use();
 
-            Camera camera = Camera.Current;
             pipeline.UpdateUniform("camPos", (Vector3f)camera.GameObject.Transform.Position);
 
             pipeline.UpdateUniform("pointLight.position", (Vector3f)GameObject.Transform.Position);
@@ -108,6 +107,7 @@ namespace Engine.BaseAssets.Components
             pipeline.UpdateUniform("pointLight.color", Color);
 
             pipeline.UploadUpdatedUniforms();
+            return true;
         }
     }
 }

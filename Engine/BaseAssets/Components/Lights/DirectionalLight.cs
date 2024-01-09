@@ -115,14 +115,13 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        public override void DoLightPass()
+        public override bool DoLightPass(Camera camera)
         {
             if (!ShaderPipeline.TryGetPipeline("deferred_light_directional", out ShaderPipeline pipeline))
-                return;
+                return false;
 
             pipeline.Use();
 
-            Camera camera = Camera.Current;
             pipeline.UpdateUniform("camPos", (Vector3f)camera.GameObject.Transform.Position);
 
             pipeline.UpdateUniform("cam_NEAR", (float)camera.Near);
@@ -147,6 +146,8 @@ namespace Engine.BaseAssets.Components
             ShadowTexture.Use("directionalLight.shadowMaps");
             GraphicsCore.ShadowsSampler.use("shadowSampler");
             camera.DepthBuffer.Use("depthTex");
+
+            return true;
         }
     }
 }

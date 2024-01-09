@@ -15,8 +15,12 @@ namespace Engine.BaseAssets.Components
         public Ranged<float> Brightness => new Ranged<float>(ref brightness, 0.0f);
 
         public virtual void DoShadowPass() { }
-        public virtual void DoLightPass() { }
-        
+
+        public virtual bool DoLightPass(Camera camera)
+        {
+            return false;
+        }
+
         protected void RenderObjects(ShaderPipeline pipeline)
         {
             foreach (MeshComponent meshComponent in Scene.FindComponentsOfType<MeshComponent>())
