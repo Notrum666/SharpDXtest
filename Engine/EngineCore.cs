@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Engine.Layers;
 
 namespace Engine
@@ -31,15 +32,10 @@ namespace Engine
 
         private static List<Layer> layersStack;
 
-        public static void Init(nint HWND, int width, int height, params Layer[] addedLayers)
+        public static void Init(params Layer[] addedLayers)
         {
             Logger.Log(LogType.Info, "Engine initialization");
             // Order of initialization is important, same number means no difference
-            ProfilerCore.Init();
-            GraphicsCore.Init(HWND, width, height); // 1
-            SoundCore.Init(); // 1
-            Time.Init(); // 1
-            InputManager.Init(); // 2
 
             layersStack = new List<Layer>
             {

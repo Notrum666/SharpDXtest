@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading;
+using System.Windows;
+using System.Windows.Interop;
 
 using Engine.BaseAssets.Components;
 using Engine.BaseAssets.Components.Postprocessing;
@@ -79,9 +81,9 @@ namespace Engine
         private static SharpDX.DXGI.SwapChain swapChain;
 #endif
 
-        public static void Init(nint HWND, int width, int height)
+        public static void Init()
         {
-            InitDirectX(HWND, width, height);
+            InitDirectX();
 
             sampler = Sampler.Default;
             shadowsSampler = Sampler.DefaultShadows;
@@ -101,8 +103,10 @@ namespace Engine
             bloomEffect = new PostProcessEffect_Bloom();
         }
 
-        private static void InitDirectX(nint HWND, int width, int height)
+        private static void InitDirectX()
         {
+            nint HWND = new WindowInteropHelper(Application.Current.MainWindow!).Handle;
+            
 #if !GraphicsDebugging
             CurrentDevice = new Device(DriverType.Hardware, DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport, FeatureLevel.Level_11_0);
 #else

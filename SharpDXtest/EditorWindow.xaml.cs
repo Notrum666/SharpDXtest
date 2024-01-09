@@ -92,7 +92,7 @@ namespace Editor
             else
             {
                 //SceneManager.Load(ProjectViewModel.Current.ActiveScene)
-                EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight, EditorLayer.Current);
+                EngineCore.Init(EditorLayer.Current);
 
                 CreateBaseScene();
 

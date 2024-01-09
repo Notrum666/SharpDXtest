@@ -2,8 +2,13 @@
 {
     internal class ProfilerLayer : Layer
     {
-        public override float UpdateOrder => 4;
-        public override float InitOrder => 4;
+        public override float UpdateOrder => float.MaxValue;
+        public override float InitOrder => float.MinValue;
+
+        public override void Init()
+        {
+            ProfilerCore.Init();
+        }
 
         public override void Update()
         {

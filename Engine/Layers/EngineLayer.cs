@@ -1,4 +1,5 @@
 ﻿using Engine.BaseAssets.Components;
+
 using System.Collections.Generic;
 
 namespace Engine.Layers
@@ -10,6 +11,11 @@ namespace Engine.Layers
 
         private Scene currentScene => Scene.CurrentScene;
         private static double accumulator = 0.0;
+
+        public override void Init()
+        {
+            Time.Init(); // TODO: Move to EngineCore.Run, otherwise may accumulate too high DeltaTime value during other layers initialization
+        }
 
         public override void Update()
         {
