@@ -28,7 +28,7 @@ namespace Engine.Layers
 
             accumulator += Time.DeltaTime;
 
-            if (accumulator >= Time.FixedDeltaTime)
+            if (accumulator >= Time.FixedDeltaTime) //TODO: Move to EngineCore. Add FixedUpdate to layers...
             {
                 Time.SwitchToFixed();
                 do
@@ -44,7 +44,7 @@ namespace Engine.Layers
             Scene.CurrentScene.DestroyPendingObjects();
         }
 
-        private static void InitializeGameObjects()
+        private void InitializeGameObjects()
         {
             foreach (GameObject obj in Scene.CurrentScene.GameObjects)
                 obj.Initialize();
