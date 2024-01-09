@@ -17,22 +17,6 @@ namespace Engine
         public Dictionary<string, int> Locations { get; } = new Dictionary<string, int>();
         private readonly List<ShaderBuffer> buffers = new List<ShaderBuffer>();
 
-        private static readonly Dictionary<string, Shader> staticShaders = new Dictionary<string, Shader>();
-
-        public static Shader GetStaticShader(string name)
-        {
-            return staticShaders[name];
-        }
-
-        public static Shader CreateStaticShader(string shaderName, string path)
-        {
-            if (staticShaders.ContainsKey(shaderName))
-                throw new ArgumentException($"Shader with name {shaderName} is already loaded.");
-            
-            staticShaders[shaderName] = Create(path);
-            return GetStaticShader(shaderName);
-        }
-
         public static Shader Create(string path)
         {
             return AssetsManager.LoadAssetAtPath<Shader>(path);
