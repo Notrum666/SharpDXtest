@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Linq;
+
 using Engine.BaseAssets.Components;
 
 namespace Engine
@@ -10,7 +11,7 @@ namespace Engine
     public class Scene : BaseAsset
     {
         public static Scene CurrentScene { get; set; }
-        
+
         public ReadOnlyCollection<GameObject> GameObjects => gameObjects.AsReadOnly();
 
         private readonly List<GameObject> gameObjects = new List<GameObject>();
@@ -23,7 +24,15 @@ namespace Engine
             if (disposed)
                 return;
 
-            if (disposing) { }
+            if (disposing)
+            {
+                foreach (GameObject gameObject in gameObjects.Concat(newObjects))
+                {
+                    gameObject.DestroyImmediate();
+                }
+                gameObjects.Clear();
+                newObjects.Clear();
+            }
             disposed = true;
 
             base.Dispose(disposing);

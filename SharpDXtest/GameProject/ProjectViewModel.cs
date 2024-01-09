@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 using Engine;
 
@@ -11,47 +12,31 @@ namespace Editor.GameProject
 
         public string Name { get; }
         public string FolderPath { get; }
-        public ProjectGraphicsSettings GraphicsSettings { get; }
-        public ReadOnlyObservableCollection<string> Scenes { get; }
-        public string ActiveScene
-        {
-            get => activeScene;
-            set
-            {
-                if (value != activeScene)
-                {
-                    activeScene = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
 
-        private string activeScene;
-        private readonly ObservableCollection<string> scenes = new ObservableCollection<string>();
+        public ProjectGraphicsSettings GraphicsSettings { get; }
+        public ProjectScenesSettings ScenesSettings { get; }
 
         private ProjectViewModel(string name, string folderPath)
         {
             Name = name;
             FolderPath = folderPath;
-            
-            GraphicsSettings = ProjectGraphicsSettings.Default();
 
-            Scenes = new ReadOnlyObservableCollection<string>(scenes);
+            GraphicsSettings = ProjectGraphicsSettings.Default();
+            ScenesSettings = new ProjectScenesSettings();
         }
 
         public static bool Load(ProjectData projectData)
         {
-            ProjectViewModel project = new ProjectViewModel(projectData.ProjectName, projectData.ProjectFolderPath);
-
             Current?.Save();
             Current?.Unload();
-            Current = project;
+            Current = null;
 
-            // var mainPath = Directory.GetCurrentDirectory();
-            // var projectFolderPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
-            string projectFolderPath = project.FolderPath;
+            Current = new ProjectViewModel(projectData.ProjectName, projectData.ProjectFolderPath);
+
+            string projectFolderPath = Current.FolderPath;
             AssetsManager.InitializeInFolder(projectFolderPath);
             AssetsRegistry.InitializeInFolder(projectFolderPath);
+            SceneManager.UpdateScenesList(Current.ScenesSettings.Scenes);
 
             return true;
         }
