@@ -2,6 +2,7 @@
 
 using LinearAlgebra;
 
+using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 
@@ -89,6 +90,59 @@ namespace Engine.BaseAssets.Components
         public DirectionalLight()
         {
             ShadowTexture = new Texture(shadowSize, shadowSize, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil, cascadeFrustumDistances.Length - 1);
+        }
+
+        public override void DoShadowPass()
+        {
+            ShaderPipeline pipeline = ShaderPipeline.GetStaticPipeline("depth_only");
+            pipeline.Use();
+
+            DeviceContext context = GraphicsCore.CurrentDevice.ImmediateContext;
+            context.Rasterizer.SetViewport(new Viewport(0, 0, ShadowSize, ShadowSize, 0.0f, 1.0f));
+
+            Matrix4x4f[] lightSpaces = GetLightSpaces(Camera.Current);
+            for (int i = 0; i < lightSpaces.Length; i++)
+            {
+                DepthStencilView curDSV = ShadowTexture.GetView<DepthStencilView>(i);
+                context.OutputMerger.SetTargets(curDSV, renderTargetView: null);
+                context.ClearDepthStencilView(curDSV, DepthStencilClearFlags.Depth, 1.0f, 0);
+
+                pipeline.UpdateUniform("view", lightSpaces[i]);
+
+                RenderObjects(pipeline);
+            }
+        }
+
+        public override void DoLightPass()
+        {
+            ShaderPipeline pipeline = ShaderPipeline.GetStaticPipeline("deferred_light_directional");
+            pipeline.Use();
+
+            Camera camera = Camera.Current;
+            pipeline.UpdateUniform("camPos", (Vector3f)camera.GameObject.Transform.Position);
+
+            pipeline.UpdateUniform("cam_NEAR", (float)camera.Near);
+            pipeline.UpdateUniform("cam_FAR", (float)camera.Far);
+
+            pipeline.UpdateUniform("directionalLight.direction", (Vector3f)GameObject.Transform.Forward);
+            pipeline.UpdateUniform("directionalLight.brightness", Brightness);
+            pipeline.UpdateUniform("directionalLight.color", Color);
+
+            Matrix4x4f[] lightSpaces = GetLightSpaces(camera);
+            for (int i = 0; i < lightSpaces.Length; i++)
+                pipeline.UpdateUniform("directionalLight.lightSpaces[" + i.ToString() + "]", lightSpaces[i]);
+            float[] cascadeDepths = DirectionalLight.CascadeFrustumDistances;
+            for (int i = 0; i < cascadeDepths.Length; i++)
+                pipeline.UpdateUniform("directionalLight.cascadesDepths[" + i.ToString() + "]", cascadeDepths[i]);
+            pipeline.UpdateUniform("directionalLight.cascadesCount", lightSpaces.Length);
+
+            pipeline.UpdateUniform("directionalLight.shadowMapSize", new Vector2f(ShadowSize, ShadowSize));
+
+            pipeline.UploadUpdatedUniforms();
+
+            ShadowTexture.Use("directionalLight.shadowMaps");
+            GraphicsCore.ShadowsSampler.use("shadowSampler");
+            camera.DepthBuffer.Use("depthTex");
         }
     }
 }
