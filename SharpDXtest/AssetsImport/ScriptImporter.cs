@@ -20,16 +20,14 @@ namespace Editor.AssetsImport
 
         protected override void OnImportAsset(AssetImportContext importContext)
         {
-            ScriptingLayer scriptingLayer = ScriptingLayer.Current;
-
-            if (!scriptingLayer.IsCompilationRelevant)
-                scriptingLayer.Recompile();
+            if (!ScriptManager.IsCompilationRelevant)
+                ScriptManager.Recompile();
 
             // ParseScriptCode(importContext.DataStream);
 
             ScriptData scriptData = new ScriptData();
 
-            if (scriptingLayer.FilesToTypesMap.TryGetValue(importContext.AssetSourcePath, out List<Type> fileTypes))
+            if (ScriptManager.FilesToTypesMap.TryGetValue(importContext.AssetSourcePath, out List<Type> fileTypes))
                 scriptData.ClassTypes.AddRange(fileTypes);
 
             importContext.AddMainAsset(scriptData);

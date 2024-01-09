@@ -45,7 +45,7 @@ namespace Editor
         private RelayCommand recompileCommand;
 
         public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
-            _ => { ScriptingLayer.Current.Recompile(); },
+            _ => { ScriptManager.Recompile(); },
             _ => true
         );
 
@@ -92,7 +92,7 @@ namespace Editor
             else
             {
                 //SceneManager.Load(ProjectViewModel.Current.ActiveScene)
-                EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight, EditorLayer.Current, ScriptingLayer.Current);
+                EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight, EditorLayer.Current);
 
                 CreateBaseScene();
 
