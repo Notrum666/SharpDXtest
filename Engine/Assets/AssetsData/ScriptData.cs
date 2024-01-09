@@ -7,6 +7,7 @@ using Engine.BaseAssets.Components;
 
 namespace Engine.AssetsData
 {
+    [AssetData<ScriptAsset>]
     public class ScriptData : AssetData
     {
         public List<Type> ClassTypes = new List<Type>();

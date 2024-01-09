@@ -25,6 +25,8 @@ namespace Editor
 
         public override void Init()
         {
+            if (!ScriptManager.IsCompilationRelevant)
+                ScriptManager.Recompile();
         }
 
         public override void Update()

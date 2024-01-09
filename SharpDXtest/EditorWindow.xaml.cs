@@ -167,6 +167,9 @@ namespace Editor
             GameObject light4 = GameObject.Instantiate("Light4");
             light4.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);
             light4.AddComponent<PointLight>().Radius.Set(10);
+
+            ScriptAsset scriptAsset = AssetsManager.LoadAssetAtPath<ScriptAsset>("TestProjectComponent.cs");
+            cubeObj1.AddComponent(scriptAsset.ComponentType);
         }
 
         private void MenuItem_OnClick(object sender, RoutedEventArgs e)

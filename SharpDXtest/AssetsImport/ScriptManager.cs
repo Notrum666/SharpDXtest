@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -69,6 +70,18 @@ namespace Editor.AssetsImport
             IsCompilationRelevant = true;
             filesWatcher.Path = AssetsRegistry.ContentFolderPath;
             filesWatcher.EnableRaisingEvents = true;
+
+            currentAssemblyContext.EnterContextualReflection();
+
+            //Debug.WriteLine("==========");
+            //Debug.WriteLine($"loaded type = {filesToTypesMap.Values.First().First().Name}");
+            //Debug.WriteLine($"loaded type = {filesToTypesMap.Values.First().First().AssemblyQualifiedName}");
+            //Debug.WriteLine($"loaded type = {filesToTypesMap.Values.First().First().GetFields().Length}");
+
+            //Debug.WriteLine($"context = {AssemblyLoadContext.CurrentContextualReflectionContext?.Name}");
+            //Debug.WriteLine($"loaded GetType = {Type.GetType("TestProjectComponent")?.Name}");
+            //Debug.WriteLine($"loaded GetType = {Type.GetType("TestProject.TestProjectComponent,TestProject")?.Name}");
+            //Debug.WriteLine("==========");
         }
 
         private static async Task<bool> RecompileAsync()
