@@ -15,7 +15,7 @@ namespace Engine.BaseAssets.Components.Particles
 
         public ParticleEffect_PointEmitter()
         {
-            EffectShader = Shader.Create("particles_emit_point");
+            EffectShader = Shader.Create(@"BaseAssets\Shaders\Particles\particles_emit_point.csh");
         }
 
         public override void Update(ParticleSystem system)

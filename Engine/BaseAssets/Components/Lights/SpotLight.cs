@@ -53,7 +53,9 @@ namespace Engine.BaseAssets.Components
 
         public override void DoShadowPass()
         {
-            ShaderPipeline pipeline = ShaderPipeline.GetStaticPipeline("depth_only");
+            if (!ShaderPipeline.TryGetPipeline("depth_only", out ShaderPipeline pipeline))
+                return;
+
             pipeline.Use();
 
             DeviceContext context = GraphicsCore.CurrentDevice.ImmediateContext;

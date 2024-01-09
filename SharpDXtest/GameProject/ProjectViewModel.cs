@@ -11,6 +11,7 @@ namespace Editor.GameProject
 
         public string Name { get; }
         public string FolderPath { get; }
+        public ProjectGraphicsSettings GraphicsSettings { get; }
         public ReadOnlyObservableCollection<string> Scenes { get; }
         public string ActiveScene
         {
@@ -32,6 +33,8 @@ namespace Editor.GameProject
         {
             Name = name;
             FolderPath = folderPath;
+            
+            GraphicsSettings = ProjectGraphicsSettings.Default();
 
             Scenes = new ReadOnlyObservableCollection<string>(scenes);
         }
@@ -60,7 +63,7 @@ namespace Editor.GameProject
 
         public void Unload()
         {
-            throw new NotImplementedException();
+            GraphicsSettings.Unload();
         }
     }
 }

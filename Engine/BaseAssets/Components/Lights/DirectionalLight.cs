@@ -94,7 +94,9 @@ namespace Engine.BaseAssets.Components
 
         public override void DoShadowPass()
         {
-            ShaderPipeline pipeline = ShaderPipeline.GetStaticPipeline("depth_only");
+            if (!ShaderPipeline.TryGetPipeline("depth_only", out ShaderPipeline pipeline))
+                return;
+
             pipeline.Use();
 
             DeviceContext context = GraphicsCore.CurrentDevice.ImmediateContext;
@@ -115,7 +117,9 @@ namespace Engine.BaseAssets.Components
 
         public override void DoLightPass()
         {
-            ShaderPipeline pipeline = ShaderPipeline.GetStaticPipeline("deferred_light_directional");
+            if (!ShaderPipeline.TryGetPipeline("deferred_light_directional", out ShaderPipeline pipeline))
+                return;
+
             pipeline.Use();
 
             Camera camera = Camera.Current;

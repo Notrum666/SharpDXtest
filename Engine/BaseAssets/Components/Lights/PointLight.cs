@@ -93,7 +93,9 @@ namespace Engine.BaseAssets.Components
 
         public override void DoLightPass()
         {
-            ShaderPipeline pipeline = ShaderPipeline.GetStaticPipeline("deferred_light_point");
+            if (!ShaderPipeline.TryGetPipeline("deferred_light_point", out ShaderPipeline pipeline))
+                return;
+
             pipeline.Use();
 
             Camera camera = Camera.Current;
