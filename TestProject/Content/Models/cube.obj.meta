@@ -1,5 +1,5 @@
 Guid: d88264040dea43d48fbf829f466928b4
-ImportDate: 2024-01-05T23:03:55.7031399Z
+ImportDate: 2024-01-10T10:35:40.3495532Z
 SubAssets:
   ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     Item2: DefaultMaterial
@@ -7,6 +7,9 @@ SubAssets:
   ? Item1: Engine.AssetsData.SkeletonData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     Item2: Skeleton
   : e4ab59fe793a4439a154f7afb3cebefb
+  ? Item1: Engine.AssetsData.SkeletonData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: skeleton
+  : c8c3ce17e1d9423881d0fdfde03ee7b7
 ImportSettings: !ModelImportSettings
   SkeletonOverride: e4ab59fe793a4439a154f7afb3cebefb
   MeshMaterialsOverride:

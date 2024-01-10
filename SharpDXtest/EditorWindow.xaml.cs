@@ -7,8 +7,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 
-using Editor.GameProject;
-
 using Engine;
 using Engine.BaseAssets.Components;
 
@@ -18,18 +16,9 @@ using SharpDXtest.Assets.Components;
 
 namespace Editor
 {
-    public partial class EditorWindow : EditorWindowBase
+    public partial class EditorWindow : CustomWindowBase
     {
-        public const string EditorPathVarName = "EnvVar_SharpDxEditor";
-        private const string DataFolderName = "SharpDxEditor";
-        private const string ResourcesFolderName = "Resources";
-
-        public static string DataFolderPath { get; private set; }
-        public static string EditorFolderPath { get; private set; }
-        public static string ResourcesFolderPath { get; private set; }
-
         private RelayCommand spawnFlyingControl;
-
         public RelayCommand SpawnFlyingControl => spawnFlyingControl ?? (spawnFlyingControl = new RelayCommand(
             obj =>
             {
@@ -43,24 +32,24 @@ namespace Editor
 
         public EditorWindow()
         {
-            DataFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DataFolderName);
-            EditorFolderPath = AppDomain.CurrentDomain.BaseDirectory;
-            Environment.SetEnvironmentVariable(EditorPathVarName, EditorFolderPath, EnvironmentVariableTarget.User);
-
-            ResourcesFolderPath = Path.Combine(EditorFolderPath, ResourcesFolderName);
-
             InitializeComponent();
-
-            Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");
 
             DataContext = this;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            ProjectsManager.InitializeInFolder(DataFolderPath);
+            // should be not null because this windows opens only after successfull project selection,
+            // but kept this check just in case of some weird shit
+            if (ProjectViewModel.Current == null)
+                throw new Exception("ProjectViewModel is null on editor window load.");
 
-            OpenProjectBrowserDialog();
+            EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight, EditorLayer.Current);
+
+            CreateBaseScene();
+
+            EngineCore.IsPaused = true;
+            EngineCore.Run();
         }
 
         private void EditorWindowInst_Closing(object sender, CancelEventArgs e)
@@ -74,23 +63,6 @@ namespace Editor
         private void EditorWindowInst_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Keyboard.ClearFocus();
-        }
-
-        private void OpenProjectBrowserDialog()
-        {
-            ProjectBrowserDialogWindow projectBrowser = new ProjectBrowserDialogWindow();
-            if (projectBrowser.ShowDialog() == false || ProjectViewModel.Current == null)
-                Application.Current.Shutdown();
-            else
-            {
-                //SceneManager.Load(ProjectViewModel.Current.ActiveScene)
-                EngineCore.Init(new WindowInteropHelper(this).Handle, (int)ActualWidth, (int)ActualHeight, EditorLayer.Current);
-
-                CreateBaseScene();
-
-                EngineCore.IsPaused = true;
-                EngineCore.Run();
-            }
         }
 
         private void CreateBaseScene()

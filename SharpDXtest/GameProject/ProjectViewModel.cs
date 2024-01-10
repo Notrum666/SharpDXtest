@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 using Engine;
 
-namespace Editor.GameProject
+namespace Editor
 {
     public class ProjectViewModel : ViewModelBase
     {
@@ -40,8 +40,6 @@ namespace Editor.GameProject
         {
             ProjectViewModel project = new ProjectViewModel(projectData.ProjectName, projectData.ProjectFolderPath);
 
-            // var mainPath = Directory.GetCurrentDirectory();
-            // var projectFolderPath = Directory.GetParent(mainPath)?.Parent?.Parent?.Parent?.Parent?.FullName;
             string projectFolderPath = project.FolderPath;
             AssetsManager.InitializeInFolder(projectFolderPath);
             AssetsRegistry.InitializeInFolder(projectFolderPath);

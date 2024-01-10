@@ -1,0 +1,2 @@
+01.07.2024 10:03:11: Info: Initialize ProjectsManager in folder = 
+01.07.2024 10:03:11: Info: Initialize ProjectsManager in folder = 
