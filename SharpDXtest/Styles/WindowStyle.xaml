@@ -24,7 +24,7 @@
         </Setter>
     </Style>
 
-    <Style x:Key="CustomWindow" TargetType="this:EditorWindowBase">
+    <Style x:Key="CustomWindowStyle" TargetType="{x:Type this:CustomWindowBase}">
         <Setter Property="WindowStyle" Value="None"/>
         <Setter Property="ResizeMode" Value="CanResizeWithGrip"/>
         <Setter Property="ResizeMode" Value="CanResizeWithGrip"/>
@@ -38,14 +38,13 @@
         <EventSetter Event="Loaded" Handler="WindowLoaded"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="this:EditorWindowBase">
+                <ControlTemplate TargetType="{x:Type this:CustomWindowBase}">
                     <Border x:Name="WindowContainer" Padding="7" Background="{x:Null}">
                         <Border x:Name="WindowBorder" Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
                             <Grid TextOptions.TextRenderingMode="ClearType" TextOptions.TextFormattingMode="Display">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="32"/>
                                     <RowDefinition Height="*"/>
-                                    <RowDefinition Height="20"/>
                                 </Grid.RowDefinitions>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
@@ -72,7 +71,6 @@
                                     </StackPanel>
                                 </Grid>
                                 <ContentPresenter ContentSource="Content" Grid.Row="1" ClipToBounds="True"/>
-                                <ContentPresenter ContentSource="Footer" Grid.Row="2" ClipToBounds="True"/>
                             </Grid>
                         </Border>
                     </Border>

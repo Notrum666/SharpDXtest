@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 using Engine;
 
-namespace Editor.GameProject
+namespace Editor
 {
     public class ProjectViewModel : ViewModelBase
     {
