@@ -34,6 +34,7 @@
                     <MenuItem Header="Camera" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:CameraRenderControl}"/>
                     <MenuItem Header="Output" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
                     <MenuItem Header="Inspector" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:InspectorControl}"/>
+                    <MenuItem Header="Content" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:ContentBrowserControl}"/>
                 </MenuItem>
             </Menu>
         </StackPanel>
@@ -45,13 +46,16 @@
         </Grid.RowDefinitions>
         <Grid>
             <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
-                <this:DockableHost Orientation="Horizontal" SplitLocation="0.8">
+                <this:DockableHost Orientation="Horizontal" SplitLocation="0.7">
                     <this:DockableHost Orientation="Vertical" SplitLocation="0.8">
                         <this:DockableHost Orientation="Horizontal" SplitLocation="0.2">
                             <this:SceneOverviewControl/>
                             <this:CameraRenderControl/>
                         </this:DockableHost>
-                        <this:OutputControl/>
+                        <this:DockableHost Orientation="Horizontal" SplitLocation="0.6">
+                            <this:ContentBrowserControl/>
+                            <this:OutputControl/>
+                        </this:DockableHost>
                     </this:DockableHost>
                     <this:InspectorControl/>
                 </this:DockableHost>

@@ -24,17 +24,6 @@ namespace Editor
         public ContentBrowserControl()
         {
             InitializeComponent();
-            Items = new ObservableCollection<FileItem>();
-            TreeView.ItemsSource = Items;
-            FileItem item = new FileItem()
-            {
-                FullPath = currentFolderPath,
-                Name = "GamePS2",
-                Type = 0
-            };
-            LoadDirectories(currentFolderPath, item);
-            
-            Items.Add(item);
         }
         
         private void LoadDirectories(string rootPath, FileItem parent = null)
@@ -114,6 +103,18 @@ namespace Editor
             {
                 Width = double.NaN;
                 Height = double.NaN;
+
+                Items = new ObservableCollection<FileItem>();
+                TreeView.ItemsSource = Items;
+                FileItem item = new FileItem()
+                {
+                    FullPath = currentFolderPath,
+                    Name = "GamePS2",
+                    Type = 0
+                };
+                LoadDirectories(currentFolderPath, item);
+
+                Items.Add(item);
             }
 
             Logger.OnLog += Logger_OnLog;
@@ -133,6 +134,11 @@ namespace Editor
         private void Logger_OnLog(LogMessage message)
         {
             newMessages.Add(message);
+        }
+
+        private void UserControl_Loaded_1(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 
