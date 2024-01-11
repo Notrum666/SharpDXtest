@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Scene>
+	<Assets>
+		<Textures>
+			<Texture path="Sun.jpg"/>
+			<Texture path="Prototype.png"/>
+		</Textures>
+		
+		<Meshes>
+			<Mesh path="Ball.obj"/>
+			<Mesh path="Cube.obj"/>
+		</Meshes>
+	</Assets>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalRotation x="-45" z="45"/>
+		</Transform>
+		<DirectionalLight Brightness="0.5"/>
+	</GameObject>
+
+	<!--<GameObject>
+		<Transform>
+			<Transform.LocalRotation x="-45" z="135"/>
+		</Transform>
+		<DirectionalLight Brightness="0.5"/>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalRotation x="-45" z="-45"/>
+		</Transform>
+		<DirectionalLight Brightness="0.5"/>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalRotation x="-45" z="-135"/>
+		</Transform>
+		<DirectionalLight Brightness="0.5"/>
+	</GameObject>-->
+
+	<GameObject x.Name="Ball">
+		<Transform>
+			<Transform.Position z="3"/>
+		</Transform>
+		<MeshComponent mesh="{Mesh Ball}">
+			<MeshComponent.Material Albedo="{Texture 0}"/>
+		</MeshComponent>
+		<Rigidbody AngularDrag="0.8">
+			<Rigidbody.Material Friction="0.8" Bounciness="0.1"/>
+		</Rigidbody>
+		<SphereCollider Radius="0.5"/>
+		<BallController CameraObject="{Reference CameraObject}" Force="20"/>
+		<PointLight Radius="10"/>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalScale x="100" y="100" z="0.5"/>
+		</Transform>
+		<MeshComponent mesh="{Mesh Cube}">
+			<MeshComponent.Material Albedo="{Texture 1}"/>
+		</MeshComponent>
+		<Rigidbody IsStatic="true">
+			<Rigidbody.Material Friction="0.8" Bounciness="0.1"/>
+		</Rigidbody>
+		<CubeCollider/>
+	</GameObject>
+
+	<GameObject x.Name="CameraObject">
+		<Camera IsCurrent="true" Aspect="1.7777" Near="0.1" Far="100" FOV="1.7777"/>
+		<SoundListener IsCurrent="true"/>
+		<CameraArm TargetObject="{Reference Ball}" ArmLength="3" MinYaw="15" MaxYaw="75" CurYaw="45">
+			<CameraArm.MouseSensitivity x="0.1" y="0.1"/>
+		</CameraArm>
+	</GameObject>
+</Scene>

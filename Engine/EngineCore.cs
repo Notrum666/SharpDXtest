@@ -3,33 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Engine.BaseAssets.Components;
+using Engine.Layers;
 
 namespace Engine
 {
     public static class EngineCore
     {
-        public static Scene CurrentScene { get; set; }
-        private static List<GameObject> newObjects = new List<GameObject>();
-        private static double accumulator = 0.0;
         private static bool isAlive = false;
         public static bool IsAlive => isAlive;
-        private static bool needsToBePaused = false;
-        private static bool needsToBeUnpaused = false;
+        private static bool desiredPauseState = false;
         private static bool isPaused = false;
         public static bool IsPaused
         {
             get => isPaused;
             set
             {
-                if (isPaused == value || !isAlive)
+                if (isPaused == value)
                     return;
 
-                if (value)
-                    needsToBePaused = true;
-                else
-                    needsToBeUnpaused = true;
+                desiredPauseState = value;
             }
         }
         private static Task loopTask;
@@ -37,7 +29,9 @@ namespace Engine
         public static event Action OnResumed;
         public static event Action OnFrameEnded;
 
-        public static void Init(nint HWND, int width, int height)
+        private static List<Layer> layersStack;
+
+        public static void Init(nint HWND, int width, int height, params Layer[] addedLayers)
         {
             Logger.Log(LogType.Info, "Engine initialization");
             // Order of initialization is important, same number means no difference
@@ -46,6 +40,28 @@ namespace Engine
             SoundCore.Init(); // 1
             Time.Init(); // 1
             InputManager.Init(); // 2
+
+            layersStack = new List<Layer>
+            {
+                new InputLayer(),
+                new ProfilerLayer(),
+                new RenderLayer(),
+                new SoundLayer(),
+                new EngineLayer()
+            };
+
+            if (addedLayers != null)
+            {
+                layersStack.AddRange(addedLayers);
+            }
+
+            foreach (Layer layer in layersStack.OrderBy(x => x.InitOrder))
+            {
+                layer.Init();
+            }
+
+            layersStack.Sort((a, b) => a.UpdateOrder.CompareTo(b.UpdateOrder));
+
             Logger.Log(LogType.Info, "Engine initialization finished");
         }
 
@@ -60,29 +76,19 @@ namespace Engine
             {
                 while (isAlive)
                 {
-                    if (needsToBePaused)
+                    if (desiredPauseState != isPaused)
                     {
-                        needsToBePaused = false;
-                        isPaused = true;
-                        OnPaused?.Invoke();
+                        isPaused = desiredPauseState;
+                        if (isPaused)
+                            OnPaused?.Invoke();
+                        else
+                            OnResumed?.Invoke();
                     }
 
-                    if (needsToBeUnpaused)
-                    {
-                        needsToBeUnpaused = false;
-                        isPaused = false;
-                        OnResumed?.Invoke();
-                    }
+                    foreach (Layer layer in layersStack)
+                        layer.Update();
 
-                    InputManager.Update();
                     Time.Update();
-                    if (!isPaused)
-                    {
-                        Update();
-                        SoundCore.Update();
-                    }
-                    GraphicsCore.Update();
-                    ProfilerCore.Update();
 
                     OnFrameEnded?.Invoke();
 
@@ -104,87 +110,6 @@ namespace Engine
 
             GraphicsCore.Dispose();
             SoundCore.Dispose();
-        }
-
-        public static void AddObject(GameObject obj)
-        {
-            if (CurrentScene == null)
-                return;
-
-            newObjects.Add(obj);
-        }
-
-        public static void Update()
-        {
-            if (CurrentScene == null)
-                return;
-
-            IEnumerable<GameObject> objectsToDestroy = CurrentScene.Objects.Where(obj => obj.PendingDestroy);
-            foreach (GameObject obj in objectsToDestroy)
-                CurrentScene.RemoveObject(obj);
-            foreach (GameObject obj in newObjects)
-                CurrentScene.AddObject(obj);
-            newObjects.Clear();
-
-            initialize();
-
-            accumulator += Time.DeltaTime;
-
-            if (accumulator >= Time.FixedDeltaTime)
-            {
-                Time.SwitchToFixed();
-                do
-                {
-                    fixedUpdate();
-                    accumulator -= Time.FixedDeltaTime;
-                } while (accumulator >= Time.FixedDeltaTime);
-                Time.SwitchToVariating();
-            }
-
-            update();
-        }
-
-        private static void initialize()
-        {
-            foreach (GameObject obj in CurrentScene.Objects)
-                obj.Initialize();
-        }
-
-        private static void update()
-        {
-            foreach (GameObject obj in CurrentScene.Objects)
-                if (obj.Enabled)
-                    obj.Update();
-        }
-
-        private static void fixedUpdate()
-        {
-            InputManager.FixedUpdate();
-
-            foreach (GameObject obj in CurrentScene.Objects)
-                if (obj.Enabled)
-                    obj.FixedUpdate();
-
-            List<Rigidbody> rigidbodies = new List<Rigidbody>();
-            for (int i = 0; i < CurrentScene.Objects.Count; i++)
-            {
-                if (!CurrentScene.Objects[i].Enabled)
-                    continue;
-                Rigidbody rigidbody = CurrentScene.Objects[i].GetComponent<Rigidbody>();
-                if (rigidbody != null)
-                {
-                    foreach (Collider collider in CurrentScene.Objects[i].GetComponents<Collider>())
-                        collider.updateData();
-                    foreach (Rigidbody otherRigidbody in rigidbodies)
-                        rigidbody.solveCollisionWith(otherRigidbody);
-                    rigidbodies.Add(rigidbody);
-                }
-            }
-            foreach (Rigidbody rb in rigidbodies)
-                rb.updateCollidingPairs();
-
-            foreach (Rigidbody rigidbody in rigidbodies)
-                rigidbody.applyChanges();
         }
     }
 }

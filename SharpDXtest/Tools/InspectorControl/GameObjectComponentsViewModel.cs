@@ -1,16 +1,12 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 
 using Engine;
-
-using Component = Engine.BaseAssets.Components.Component;
+using Engine.BaseAssets.Components;
 
 namespace Editor
 {
-    public class GameObjectComponentsViewModel : INotifyPropertyChanged
+    public class GameObjectComponentsViewModel : ViewModelBase
     {
-        public event PropertyChangedEventHandler PropertyChanged;
         private GameObject target = null;
         public GameObject Target
         {
@@ -25,11 +21,6 @@ namespace Editor
         public ObservableCollection<ComponentViewModel> ComponentViewModels { get; private set; } = new ObservableCollection<ComponentViewModel>();
 
         public GameObjectComponentsViewModel() { }
-
-        public void OnPropertyChanged([CallerMemberName] string prop = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-        }
 
         public void Reload()
         {

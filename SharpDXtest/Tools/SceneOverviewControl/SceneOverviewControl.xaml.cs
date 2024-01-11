@@ -50,7 +50,7 @@ namespace Editor
                 Height = double.NaN;
             }
 
-            SceneViewModel.Scene = EngineCore.CurrentScene;
+            SceneViewModel.Scene = Scene.CurrentScene;
 
             loaded = true;
         }

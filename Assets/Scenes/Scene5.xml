@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Scene>
+	<Assets>
+		<Textures>
+			<Texture path="Prototype.png"/>
+		</Textures>
+
+		<Meshes>
+			<Mesh path="Ball.obj"/>
+			<Mesh path="Cube.obj"/>
+			<Mesh path="cube_materials.fbx"/>
+			<Mesh path="cesium_man.fbx"/>
+		</Meshes>
+	</Assets>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position y="-40" z="90"/>
+			<Transform.Rotation x="-45"/>
+		</Transform>
+		<Camera Aspect="1.7777" Near="0.001" Far="500" FOV="1.7777"/>
+		<SoundListener IsCurrent="true"/>
+		<CameraController speed="5"/>
+		<InspectorTestComponent/>
+	</GameObject>
+
+	<!--
+	<GameObject>
+		<Transform>
+			<Transform.Position z="5"/>
+		</Transform>
+		<ParticleSystem WorldSpaceParticles="true">
+			<ParticleSystem.ParticleEffects>
+				<ParticleEffect_SphereEmitter Rate="100"/>
+				<ParticleEffect_PointForce Force="-10" Global="true">
+					<ParticleEffect_PointForce.Point/>
+				</ParticleEffect_PointForce>
+				<ParticleEffect_UpdatePhysics/>
+			</ParticleSystem.ParticleEffects>
+		</ParticleSystem>
+		<ObjectController/>
+	</GameObject>
+	-->
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="60"/>
+		</Transform>
+		<GasVolume>
+			<GasVolume.Size x="200" y="200" z="50"/>
+		</GasVolume>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="2"/>
+			<Transform.LocalScale x="1" y="1" z="2"/>
+			<Transform.LocalRotation x="0" y="45" z="0"/>
+		</Transform>
+		<MeshComponent Mesh="{Mesh Cube.002}">
+		</MeshComponent>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position x="5" y="5" z="2"/>
+		</Transform>
+		<MeshComponent Mesh="{Mesh Cesium_Man}">
+		</MeshComponent>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalScale x="50" y="50" z="0.5"/>
+		</Transform>
+		<MeshComponent Mesh="{Mesh Cube}">
+		</MeshComponent>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalPosition x="5" z="3"/>
+		</Transform>
+		<PointLight Radius="10"/>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalPosition x="-5" z="3"/>
+		</Transform>
+		<PointLight Radius="10"/>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalPosition y="-5" z="3"/>
+		</Transform>
+		<PointLight Radius="10"/>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.LocalPosition y="5" z="3"/>
+		</Transform>
+		<PointLight Radius="10"/>
+	</GameObject>
+</Scene>

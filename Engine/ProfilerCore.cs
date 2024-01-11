@@ -35,7 +35,7 @@ namespace Engine
             PatchAll();
         }
 
-        public static void Update()
+        internal static void Update()
         {
             long currentTimeMilliseconds = Stopwatch.GetTimestamp() / Stopwatch.Frequency * 1000;
             while (results.Count > 0 && currentTimeMilliseconds - results[0].StartMilliseconds > MillisecondsToStore)

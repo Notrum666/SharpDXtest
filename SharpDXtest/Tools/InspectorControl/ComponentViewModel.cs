@@ -1,17 +1,13 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 using Engine;
-
-using Component = Engine.BaseAssets.Components.Component;
+using Engine.BaseAssets.Components;
 
 namespace Editor
 {
-    public class ComponentViewModel : INotifyPropertyChanged
+    public class ComponentViewModel : ViewModelBase
     {
-        public event PropertyChangedEventHandler PropertyChanged;
         private Component target = null;
         public Component Target => target;
         public ObservableCollection<FieldViewModel> FieldViewModels { get; private set; } = new ObservableCollection<FieldViewModel>();
@@ -23,17 +19,13 @@ namespace Editor
             Reload();
         }
 
-        public void OnPropertyChanged([CallerMemberName] string prop = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
-        }
-
         public void Reload()
         {
             FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (FieldInfo field in fields)
             {
-                if (field.IsPrivate && field.GetCustomAttribute<DisplayFieldAttribute>() is null)
+                if (field.IsPrivate && (field.GetCustomAttribute<SerializedFieldAttribute>() is null ||
+                    field.GetCustomAttribute<HideInInspectorAttribute>() is not null))
                     continue;
                 FieldViewModels.Add(new FieldViewModel(target, field));
             }

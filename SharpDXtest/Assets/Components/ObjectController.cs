@@ -7,7 +7,7 @@ using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
 {
-    class ObjectController : Component
+    class ObjectController : BehaviourComponent
     {
         public double Speed { get; set; } = 5.0;
 

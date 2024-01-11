@@ -16,7 +16,7 @@ using MapFlags = SharpDX.Direct3D11.MapFlags;
 
 namespace Engine.BaseAssets.Components
 {
-    public sealed class ParticleSystem : Component
+    public sealed class ParticleSystem : BehaviourComponent
     {
         public struct Particle
         {
@@ -25,7 +25,7 @@ namespace Engine.BaseAssets.Components
             public Vector3f velocity;
         }
 
-        private Material material = new Material();
+        private Material material = Material.Default;
         public Material Material
         {
             get => material;
@@ -94,7 +94,7 @@ namespace Engine.BaseAssets.Components
             return (int)amount;
         }
 
-        protected override void Initialized()
+        protected override void OnInitialized()
         {
             kernelsCount = (int)Math.Ceiling(maxParticles / 64.0);
 
@@ -144,11 +144,11 @@ namespace Engine.BaseAssets.Components
                 }
             });
 
-            Shader initShader = AssetsManager.Shaders["particles_init"];
+            Shader initShader = Shader.GetStaticShader("particles_init");
 
-            initShader.use();
-            initShader.updateUniform("maxParticles", maxParticles);
-            initShader.uploadUpdatedUniforms();
+            initShader.Use();
+            initShader.UpdateUniform("maxParticles", maxParticles);
+            initShader.UploadUpdatedUniforms();
 
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, particlesPoolView);
 
@@ -180,16 +180,16 @@ namespace Engine.BaseAssets.Components
 
         private void sortParticles()
         {
-            Shader sortShader = AssetsManager.Shaders["particles_bitonic_sort_step"];
-            sortShader.use();
-            sortShader.updateUniform("maxParticles", maxParticles);
+            Shader sortShader = Shader.GetStaticShader("particles_bitonic_sort_step");
+            sortShader.Use();
+            sortShader.UpdateUniform("maxParticles", maxParticles);
             for (int subArraySize = 2; subArraySize >> 1 < maxParticles; subArraySize <<= 1)
             {
                 for (int compareDistance = subArraySize >> 1; compareDistance > 0; compareDistance >>= 1)
                 {
-                    sortShader.updateUniform("subArraySize", subArraySize);
-                    sortShader.updateUniform("compareDist", compareDistance);
-                    sortShader.uploadUpdatedUniforms();
+                    sortShader.UpdateUniform("subArraySize", subArraySize);
+                    sortShader.UpdateUniform("compareDist", compareDistance);
+                    sortShader.UploadUpdatedUniforms();
                     GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(kernelsCount, 1, 1);
                 }
             }
@@ -198,9 +198,9 @@ namespace Engine.BaseAssets.Components
         private void applyEffect(ParticleEffect effect)
         {
             effect.Use(this);
-            effect.EffectShader.updateUniform("deltaTime", (float)Time.DeltaTime);
-            effect.EffectShader.updateUniform("maxParticles", maxParticles);
-            effect.EffectShader.uploadUpdatedUniforms();
+            effect.EffectShader.UpdateUniform("deltaTime", (float)Time.DeltaTime);
+            effect.EffectShader.UpdateUniform("maxParticles", maxParticles);
+            effect.EffectShader.UploadUpdatedUniforms();
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(kernelsCount, 1, 1);
         }
     }

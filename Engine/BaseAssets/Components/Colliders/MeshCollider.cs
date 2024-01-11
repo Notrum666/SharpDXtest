@@ -9,17 +9,18 @@ namespace Engine.BaseAssets.Components.Colliders
 {
     public class MeshCollider : Collider
     {
+        public Model Mesh { set => Model = value; }
         public Model Model
         {
-            set => FromModel(value);
+            set => FromMesh(value);
         }
 
-        protected List<Vector3> vertexes = new List<Vector3>();
+        protected List<Vector3> vertices = new List<Vector3>();
         protected List<Vector3> normals = new List<Vector3>();
         protected List<Vector3> nonCollinearNormals = new List<Vector3>();
         protected List<int[]> polygons = new List<int[]>();
         protected List<(int a, int b)> edges = new List<(int a, int b)>();
-        public IReadOnlyList<Vector3> Vertexes => vertexes.AsReadOnly();
+        public IReadOnlyList<Vector3> Vertices => vertices.AsReadOnly();
         public IReadOnlyList<Vector3> Normals => normals.AsReadOnly();
         public IReadOnlyList<Vector3> NonCollinearNormals => nonCollinearNormals.AsReadOnly();
         public IReadOnlyList<int[]> Polygons => polygons.Select(arr => (int[])arr.Clone()).ToList().AsReadOnly();
@@ -77,10 +78,27 @@ namespace Engine.BaseAssets.Components.Colliders
 
         public MeshCollider() { }
 
-        public void FromModel(Model model)
+        public void FromMesh(Model model)
         {
-            vertexes = new List<Vector3>(model.v);
-            polygons = new List<int[]>(model.v_i);
+            vertices = new List<Vector3>();
+            polygons = new List<int[]>();
+            foreach (Mesh mesh in model.Meshes)
+            {
+                for (int i = 0; i < mesh.Indices.Count;)
+                {
+                    if (mesh.Indices[i] == -1) // restart index
+                    {
+                        ++i; continue;
+                    }
+                    int[] polygonIndices = { mesh.Indices[i] + vertices.Count,
+                                             mesh.Indices[i + 1] + vertices.Count,
+                                             mesh.Indices[i + 2] + vertices.Count };
+                    polygons.Add(polygonIndices);
+                    i += 3;
+                }
+                foreach (Mesh.PrimitiveVertex vertex in mesh.Vertices)
+                    vertices.Add(vertex.v);
+            }
 
             normals = new List<Vector3>(polygons.Count);
             edges = new List<(int a, int b)>();
@@ -88,7 +106,7 @@ namespace Engine.BaseAssets.Components.Colliders
             bool exists;
             foreach (int[] poly in polygons)
             {
-                normals.Add((vertexes[poly[1]] - vertexes[poly[0]]).cross(vertexes[poly[2]] - vertexes[poly[0]]));
+                normals.Add((vertices[poly[1]] - vertices[poly[0]]).cross(vertices[poly[2]] - vertices[poly[0]]));
                 for (int i = 0; i < poly.Length; i++)
                 {
                     a = poly[i];
@@ -137,7 +155,7 @@ namespace Engine.BaseAssets.Components.Colliders
             globalNonCollinearNormals.Clear();
 
             Matrix4x4 model = GameObject.Transform.Model;
-            foreach (Vector3 vertex in vertexes)
+            foreach (Vector3 vertex in vertices)
                 globalVertexes.Add(model.TransformPoint(vertex + Offset));
             foreach (Vector3 normal in normals)
                 globalNormals.Add(model.TransformDirection(normal));
