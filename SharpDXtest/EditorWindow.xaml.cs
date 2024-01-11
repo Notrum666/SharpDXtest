@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 
+using Editor.AssetsImport;
+
 using Engine;
 
 namespace Editor
@@ -21,6 +23,13 @@ namespace Editor
             },
             obj => obj is Type && (obj as Type).IsSubclassOf(typeof(FrameworkElement))
         ));
+        
+        private RelayCommand recompileCommand;
+
+        public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
+            _ => { ScriptManager.Recompile(); },
+            _ => true
+        );
 
         public EditorWindow()
         {

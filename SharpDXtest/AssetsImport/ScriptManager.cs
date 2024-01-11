@@ -8,8 +8,6 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
 
-using Editor.GameProject;
-
 using Engine;
 
 using Microsoft.Build.Locator;

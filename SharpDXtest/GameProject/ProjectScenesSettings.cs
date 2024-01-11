@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Editor.GameProject
+namespace Editor
 {
     public class ProjectScenesSettings
     {

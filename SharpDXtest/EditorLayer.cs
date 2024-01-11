@@ -6,10 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+
 using Editor.AssetsImport;
-using Editor.GameProject;
 
 using Engine.Layers;
+
 using SharpDXtest;
 
 namespace Editor
@@ -45,6 +46,7 @@ namespace Editor
 
             ProjectsManager.InitializeInFolder(DataFolderPath);
         }
+
         public override void Init()
         {
             if (!ScriptManager.IsCompilationRelevant)

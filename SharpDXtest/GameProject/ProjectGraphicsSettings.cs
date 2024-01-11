@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 using Engine;
 
-namespace Editor.GameProject
+namespace Editor
 {
     public class ProjectGraphicsSettings
     {
