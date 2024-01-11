@@ -17,7 +17,7 @@ namespace Editor
     {
         public ObservableCollection<FileItem> Items { get; set; }
         public FileItem Item { get; set; }
-        private string currentFolderPath = "Content"; // Путь к стартовой папке
+        private string currentFolderPath = "C:\\GamePS2"; // Путь к стартовой папке
         private bool loaded = false;
         private List<LogMessage> newMessages = new ();
 
@@ -26,30 +26,58 @@ namespace Editor
             InitializeComponent();
             Items = new ObservableCollection<FileItem>();
             TreeView.ItemsSource = Items;
-
-            LoadDirectories(currentFolderPath, null);
+            FileItem item = new FileItem()
+            {
+                FullPath = currentFolderPath,
+                Name = "GamePS2",
+                Type = 0
+            };
+            LoadDirectories(currentFolderPath, item);
+            
+            Items.Add(item);
         }
-
-        private void LoadDirectories(string path, FileItem parent)
+        
+        private void LoadDirectories(string rootPath, FileItem parent = null)
         {
             try
             {
-                foreach (var directory in Directory.GetDirectories(path))
-                {
-                    var directoryItem = new FileItem { Name = Path.GetFileName(directory), Type = ItemType.Folder, FullPath = directory};
-                    parent?.Children.Add(directoryItem);
-                    Items.Add(directoryItem);
-                }
+                var directories = Directory.GetDirectories(rootPath);
 
-                foreach (var file in Directory.GetFiles(path))
+                foreach (var directory in directories)
                 {
-                    var fileItem = new FileItem { Name = Path.GetFileName(file), Type = ItemType.File };
-                    Items.Add(fileItem);
+                    var directoryItem = new FileItem { Name = Path.GetFileName(directory), FullPath = directory, Type = ItemType.Folder, Parent = parent };
+                    parent?.Children.Add(directoryItem);
+                    LoadDirectories(directory, directoryItem);
                 }
             }
-            catch (Exception e)
+            catch (UnauthorizedAccessException)
             {
-                Console.WriteLine(e);
+                // Обработка случаев, когда у пользователя нет доступа к папке
+            }
+        }
+        private void LoadDirectoriesAndFiles(string rootPath, FileItem parent = null)
+        {
+            try
+            {
+                var directories = Directory.GetDirectories(rootPath);
+
+                foreach (var directory in directories)
+                {
+                    var directoryItem = new FileItem { Name = Path.GetFileName(directory), FullPath = directory, Type = ItemType.Folder, Parent = parent };
+                    parent?.Children.Add(directoryItem);
+                }
+
+                var files = Directory.GetFiles(rootPath);
+
+                foreach (var file in files)
+                {
+                    var fileItem = new FileItem { Name = Path.GetFileName(file), FullPath = file, Type = ItemType.File, Parent = parent };
+                    parent?.Children.Add(fileItem);
+                }
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Обработка случаев, когда у пользователя нет доступа к папке
             }
         }
 
@@ -57,35 +85,25 @@ namespace Editor
         {
             
             var selectedFolderItem = e.NewValue as FileItem;
-
-            if (selectedFolderItem != null)
+            if (selectedFolderItem is {Type: ItemType.Folder})
             {
-                UpdateItemsControl(selectedFolderItem.FullPath);
-                Item = selectedFolderItem;
+                UpdateItemsControl(selectedFolderItem.FullPath, selectedFolderItem.Name);    
             }
+            
         }
 
-        private void UpdateItemsControl(string folderPath)
+        private void UpdateItemsControl(string folderPath, string nameFolder)
         {
-            Items.Clear();
-            LoadDirectories(folderPath, null);
-            ItemsControl.ItemsSource = Items;
-        }
-        
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (Item != null)
+            FileItem item = new FileItem()
             {
-                var parentDirectory = Directory.GetParent(Item.FullPath);
-
-                if (parentDirectory != null)
-                {
-                    currentFolderPath = parentDirectory.FullName;
-                    UpdateItemsControl(currentFolderPath);
-                }   
-            }
+                FullPath = folderPath,
+                Name = nameFolder,
+                Type = 0
+            };
+            LoadDirectoriesAndFiles(folderPath, item);
+            ItemsControl.ItemsSource = item.Children;
         }
-        
+
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             // to prevent errors during xaml designer loading in visual studio

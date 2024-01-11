@@ -9,13 +9,9 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.ColumnDefinitions>
-            <!-- <ColumnDefinition Width="*"/> -->
             <ColumnDefinition MinWidth="50" Width="1*"/>
             <ColumnDefinition Width="4*"/>
         </Grid.ColumnDefinitions>
-        <!-- <StackPanel Orientation="Horizontal" Grid.Column="0"> -->
-        <!--     <Button Content="Назад" Margin="10" Click="BackButton_Click"/> -->
-        <!-- </StackPanel> -->
         <TreeView Background="Transparent" x:Name="TreeView" Grid.Column="0" Margin="10" SelectedItemChanged="TreeView_SelectedItemChanged">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type local:FileItem}" ItemsSource="{Binding Children}">
@@ -28,15 +24,16 @@
             <ItemsControl x:Name="ItemsControl">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <UniformGrid />
+                        <UniformGrid Columns="5"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="5">
+                        <Border BorderBrush="Gray" BorderThickness="1" Margin="5" Padding="5" Width="150" Height="100">
                             <StackPanel>
-                                <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="{Binding Name}" TextWrapping="Wrap"/>
-                                <TextBlock Text="{Binding Type}" Foreground="{StaticResource ForegroundBrush}" FontSize="10"/>
+                                <Image Source="file.png" Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="{Binding Name}" VerticalAlignment="Center" HorizontalAlignment="Center" TextWrapping="Wrap"/>
+                                <TextBlock Text="{Binding Type}" Foreground="{StaticResource ForegroundBrush}" FontSize="10" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
