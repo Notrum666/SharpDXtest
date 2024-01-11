@@ -4,17 +4,12 @@ using System.Collections.Generic;
 
 namespace Engine.Layers
 {
-    internal class EngineLayer : Layer
+    internal class EngineRuntimeLayer : Layer
     {
         public override float UpdateOrder => 1;
         public override float InitOrder => 1;
 
         private Scene CurrentScene => Scene.CurrentScene;
-
-        public override void Init()
-        {
-            Time.Init(); // TODO: Move to EngineCore.Run, otherwise may accumulate too high DeltaTime value during other layers initialization
-        }
 
         public override void Prepare()
         {
