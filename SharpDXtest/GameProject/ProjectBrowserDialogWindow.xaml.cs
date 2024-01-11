@@ -24,6 +24,7 @@ namespace Editor
         public RelayCommand OpenProjectCommand => openProjectCommand ?? 
             (openProjectCommand = new RelayCommand(obj =>
             {
+                IsEnabled = false;
                 DialogResult = ProjectViewModel.Load((ProjectData)obj);
                 Close();
             },
@@ -74,6 +75,7 @@ namespace Editor
                     Close();
                 }
 
+                IsEnabled = false;
                 DialogResult = ProjectViewModel.Load(data);
                 Close();
             },
