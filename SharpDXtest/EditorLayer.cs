@@ -59,7 +59,7 @@ namespace Editor
             ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(null);
         }
 
-        public override void Update()
+        public override void Prepare()
         {
             if (ProjectViewModel.Current != null && RecompileOnFocus)
             {

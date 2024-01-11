@@ -32,6 +32,8 @@ namespace Engine
 
         private static List<Layer> layersStack;
 
+        private static double accumulator = 0.0;
+
         public static void Init(params Layer[] addedLayers)
         {
             Logger.Log(LogType.Info, "Engine initialization");
@@ -39,11 +41,11 @@ namespace Engine
 
             layersStack = new List<Layer>
             {
-                new InputLayer(),
                 new ProfilerLayer(),
-                new RenderLayer(),
+                new InputLayer(),
+                new EngineLayer(),
                 new SoundLayer(),
-                new EngineLayer()
+                new RenderLayer(),
             };
 
             if (addedLayers != null)
@@ -66,6 +68,7 @@ namespace Engine
             if (isAlive)
                 return;
 
+            Time.Init();
             isAlive = true;
 
             loopTask = Task.Run(() =>
@@ -79,6 +82,23 @@ namespace Engine
                             OnPaused?.Invoke();
                         else
                             OnResumed?.Invoke();
+                    }
+
+                    foreach (Layer layer in layersStack)
+                        layer.Prepare();
+
+                    accumulator += Time.DeltaTime;
+
+                    if (accumulator >= Time.FixedDeltaTime)
+                    {
+                        Time.SwitchToFixed();
+                        do
+                        {
+                            foreach (Layer layer in layersStack)
+                                layer.FixedUpdate();
+                            accumulator -= Time.FixedDeltaTime;
+                        } while (accumulator >= Time.FixedDeltaTime);
+                        Time.SwitchToVariating();
                     }
 
                     foreach (Layer layer in layersStack)

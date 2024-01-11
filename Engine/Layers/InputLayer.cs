@@ -10,6 +10,11 @@
             InputManager.Init();
         }
 
+        public override void FixedUpdate()
+        {
+            InputManager.FixedUpdate();
+        }
+
         public override void Update()
         {
             InputManager.Update();
