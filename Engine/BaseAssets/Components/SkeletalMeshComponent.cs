@@ -15,7 +15,7 @@ namespace Engine.BaseAssets.Components
     {
         [SerializedField]
         private Skeleton[] skeletons = Array.Empty<Skeleton>();
-        [SerializeField]
+        [SerializedField]
         private SkeletalAnimation animation = null;
         [SerializedField]
         private float animationTime = 0;
@@ -261,7 +261,7 @@ namespace Engine.BaseAssets.Components
                     BonesTransformations = skeleton.Bones.Select(_ => Matrix4x4f.Identity).ToList();
                     InverseTransposeBonesTransformations = new List<Matrix4x4f>(BonesTransformations);
                     if (animation is not null) {
-                        animationTime += (float)Time.DeltaTime;
+                        animationTime += EngineCore.IsPaused ? 0 : (float)Time.DeltaTime;
                         float TicksPerSecond = (float)(animation.TickPerSecond != 0 ? animation.TickPerSecond : 25.0f);
                         float TimeInTicks = animationTime * TicksPerSecond;
                         float AnimationTime = TimeInTicks % animation.DurationInTicks;

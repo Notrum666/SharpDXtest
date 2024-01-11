@@ -13,7 +13,7 @@ namespace Engine.Layers
 
         public override void Update()
         {
-            if (Scene.CurrentScene == null || EngineCore.IsPaused)
+            if (Scene.CurrentScene == null)
                 return;
 
             Scene.CurrentScene.ProcessNewObjects();
@@ -46,6 +46,9 @@ namespace Engine.Layers
 
         private void UpdateGameObjects()
         {
+            if (EngineCore.IsPaused)
+                return;
+
             foreach (GameObject obj in currentScene.GameObjects)
             {
                 if (obj.Enabled)
@@ -55,6 +58,9 @@ namespace Engine.Layers
 
         private void FixedUpdate()
         {
+            if (EngineCore.IsPaused)
+                return;
+
             InputManager.FixedUpdate();
 
             foreach (GameObject obj in currentScene.GameObjects)

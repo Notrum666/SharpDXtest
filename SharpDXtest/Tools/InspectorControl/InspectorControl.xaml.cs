@@ -18,9 +18,9 @@ namespace Editor
     /// </summary>
     public partial class InspectorControl : UserControl, INotifyPropertyChanged
     {
-        internal static List<FieldDataTemplate> FieldDataTemplates { get; private set; } = new List<FieldDataTemplate>();
+        internal static List<FieldDataTemplate> FieldDataTemplates { get; } = new List<FieldDataTemplate>();
         public event PropertyChangedEventHandler PropertyChanged;
-        public GameObjectViewModel GameObjectViewModel { get; private set; }
+        public GameObjectComponentsViewModel GameObjectViewModel { get; }
         private bool loaded = false;
         private int objectIndex = -1;
 
@@ -51,7 +51,7 @@ namespace Editor
         {
             InitializeComponent();
 
-            GameObjectViewModel = new GameObjectViewModel();
+            GameObjectViewModel = new GameObjectComponentsViewModel();
 
             DataContext = this;
         }

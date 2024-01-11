@@ -18,7 +18,7 @@ namespace Engine
             get => isPaused;
             set
             {
-                if (isPaused == value || !isAlive)
+                if (isPaused == value)
                     return;
 
                 desiredPauseState = value;

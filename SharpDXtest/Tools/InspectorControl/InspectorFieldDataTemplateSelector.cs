@@ -8,10 +8,14 @@ namespace Editor
     {
         private static DataTemplate notImplementedDataTemplate = null;
         public static DataTemplate NotImplementedDataTemplate => notImplementedDataTemplate ?? (notImplementedDataTemplate = (DataTemplate)Application.Current.FindResource("FieldNotImplementedTemplate"));
-
+        private static DataTemplate nullDataTemplate = null;
+        public static DataTemplate NullDataTemplate => nullDataTemplate ?? (nullDataTemplate = (DataTemplate)Application.Current.FindResource("FieldTypeNullTemplate"));
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
-            Type fieldType = ((FieldViewModel)item).TargetField.FieldType;
+            Type fieldType = ((FieldViewModel)item).TargetType;
+            if (fieldType == null)
+                return NullDataTemplate;
+
             int closestDistance = int.MaxValue;
             FieldDataTemplate fieldDataTemplate = null;
             foreach (FieldDataTemplate template in InspectorControl.FieldDataTemplates)
