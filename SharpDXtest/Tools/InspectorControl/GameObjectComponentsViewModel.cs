@@ -5,7 +5,7 @@ using Engine.BaseAssets.Components;
 
 namespace Editor
 {
-    public class GameObjectViewModel : ViewModelBase
+    public class GameObjectComponentsViewModel : ViewModelBase
     {
         private GameObject target = null;
         public GameObject Target
@@ -20,7 +20,7 @@ namespace Editor
         }
         public ObservableCollection<ComponentViewModel> ComponentViewModels { get; private set; } = new ObservableCollection<ComponentViewModel>();
 
-        public GameObjectViewModel() { }
+        public GameObjectComponentsViewModel() { }
 
         public void Reload()
         {

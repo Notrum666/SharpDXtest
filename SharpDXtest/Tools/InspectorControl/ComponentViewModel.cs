@@ -24,7 +24,8 @@ namespace Editor
             FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (FieldInfo field in fields)
             {
-                if (field.IsPrivate && field.GetCustomAttribute<SerializeFieldAttribute>() is null)
+                if (field.IsPrivate && (field.GetCustomAttribute<SerializedFieldAttribute>() is null ||
+                    field.GetCustomAttribute<HideInInspectorAttribute>() is not null))
                     continue;
                 FieldViewModels.Add(new FieldViewModel(target, field));
             }

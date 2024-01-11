@@ -1,5 +1,4 @@
 ﻿using Engine.BaseAssets.Components;
-
 using System.Collections.Generic;
 
 namespace Engine.Layers
@@ -9,27 +8,21 @@ namespace Engine.Layers
         public override float UpdateOrder => 1;
         public override float InitOrder => 1;
 
-        private Scene CurrentScene => Scene.CurrentScene;
+        private Scene currentScene => Scene.CurrentScene;
         private static double accumulator = 0.0;
-
-        public override void Init()
-        {
-            Time.Init(); // TODO: Move to EngineCore.Run, otherwise may accumulate too high DeltaTime value during other layers initialization
-        }
 
         public override void Update()
         {
-            SceneManager.TryLoadNextScene();
-            if (Scene.CurrentScene == null || EngineCore.IsPaused)
+            if (Scene.CurrentScene == null)
                 return;
 
-            CurrentScene.ProcessNewObjects();
+            Scene.CurrentScene.ProcessNewObjects();
 
             InitializeGameObjects();
 
             accumulator += Time.DeltaTime;
 
-            if (accumulator >= Time.FixedDeltaTime) //TODO: Move to EngineCore. Add FixedUpdate to layers...
+            if (accumulator >= Time.FixedDeltaTime)
             {
                 Time.SwitchToFixed();
                 do
@@ -43,10 +36,9 @@ namespace Engine.Layers
             UpdateGameObjects();
 
             Scene.CurrentScene.DestroyPendingObjects();
-            SceneManager.TryUnloadCurrentScene();
         }
 
-        private void InitializeGameObjects()
+        private static void InitializeGameObjects()
         {
             foreach (GameObject obj in Scene.CurrentScene.GameObjects)
                 obj.Initialize();
@@ -54,7 +46,10 @@ namespace Engine.Layers
 
         private void UpdateGameObjects()
         {
-            foreach (GameObject obj in CurrentScene.GameObjects)
+            if (EngineCore.IsPaused)
+                return;
+
+            foreach (GameObject obj in currentScene.GameObjects)
             {
                 if (obj.Enabled)
                     obj.Update();
@@ -63,23 +58,26 @@ namespace Engine.Layers
 
         private void FixedUpdate()
         {
+            if (EngineCore.IsPaused)
+                return;
+
             InputManager.FixedUpdate();
 
-            foreach (GameObject obj in CurrentScene.GameObjects)
+            foreach (GameObject obj in currentScene.GameObjects)
             {
                 if (obj.Enabled)
                     obj.FixedUpdate();
             }
 
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
-            for (int i = 0; i < CurrentScene.GameObjects.Count; i++)
+            for (int i = 0; i < currentScene.GameObjects.Count; i++)
             {
-                if (!CurrentScene.GameObjects[i].Enabled)
+                if (!currentScene.GameObjects[i].Enabled)
                     continue;
-                Rigidbody rigidbody = CurrentScene.GameObjects[i].GetComponent<Rigidbody>();
+                Rigidbody rigidbody = currentScene.GameObjects[i].GetComponent<Rigidbody>();
                 if (rigidbody != null)
                 {
-                    foreach (Collider collider in CurrentScene.GameObjects[i].GetComponents<Collider>())
+                    foreach (Collider collider in currentScene.GameObjects[i].GetComponents<Collider>())
                         collider.updateData();
                     foreach (Rigidbody otherRigidbody in rigidbodies)
                         rigidbody.solveCollisionWith(otherRigidbody);

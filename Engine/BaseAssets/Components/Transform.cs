@@ -12,9 +12,11 @@ namespace Engine.BaseAssets.Components
 
         #region ComponentLogic
 
+        [HideInInspector]
         [SerializedField]
         private Transform parent = null;
 
+        [HideInInspector]
         [SerializedField]
         private readonly List<Transform> children = new List<Transform>();
 
@@ -99,11 +101,12 @@ namespace Engine.BaseAssets.Components
 
         #region TransformData
 
-        [SerializedField]
+        [SerializedField("Position")]
         private Vector3 localPosition;
-        [SerializedField]
+        [DisplayOverrides(typeof(QuaternionToEulerDegreesConverter), true)]
+        [SerializedField("Rotation")]
         private Quaternion localRotation;
-        [SerializedField]
+        [SerializedField("Scale")]
         private Vector3 localScale;
 
         public Vector3 LocalPosition

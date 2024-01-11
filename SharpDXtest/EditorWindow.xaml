@@ -50,7 +50,10 @@
             <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
                 <this:DockableHost Orientation="Horizontal" SplitLocation="0.8">
                     <this:DockableHost Orientation="Vertical" SplitLocation="0.8">
-                        <this:CameraRenderControl/>
+                        <this:DockableHost Orientation="Horizontal" SplitLocation="0.2">
+                            <this:SceneOverviewControl/>
+                            <this:CameraRenderControl/>
+                        </this:DockableHost>
                         <this:OutputControl/>
                     </this:DockableHost>
                     <this:InspectorControl/>

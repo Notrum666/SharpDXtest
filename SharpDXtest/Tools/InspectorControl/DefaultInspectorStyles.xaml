@@ -23,6 +23,10 @@
         </Grid>
     </DataTemplate>
 
+    <DataTemplate x:Key="FieldTypeNullTemplate">
+        <Grid/>
+    </DataTemplate>
+
     <Style x:Key="InspectorTextBox" TargetType="TextBox">
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
@@ -31,5 +35,7 @@
         <Setter Property="BorderBrush" Value="{StaticResource InspectorInputBorderBrush}"/>
         <EventSetter Event="KeyDown" Handler="InspectorTextBox_KeyDown"/>
         <EventSetter Event="LostFocus" Handler="InspectorTextBox_LostFocus"/>
+        <EventSetter Event="GotKeyboardFocus" Handler="InspectorTextBox_GotKeyboardFocus"/>
+        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="InspectorTextBox_PreviewMouseLeftButtonDown"/>
     </Style>
 </ResourceDictionary>
