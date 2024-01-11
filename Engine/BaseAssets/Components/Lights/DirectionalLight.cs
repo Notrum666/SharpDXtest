@@ -9,19 +9,13 @@ namespace Engine.BaseAssets.Components
 {
     public class DirectionalLight : Light
     {
-        private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.1f, 0.3f, 1.0f };
-        public static float[] CascadeFrustumDistances => cascadeFrustumDistances;
+        [SerializedField]
         private int shadowSize = 2048;
-        public int ShadowSize
-        {
-            get => shadowSize;
-            set
-            {
-                if (value <= 0)
-                    throw new ArgumentOutOfRangeException("ShadowSize", "Shadow size must be a positive value.");
-                shadowSize = value;
-            }
-        }
+
+        public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 1);
+        public static float[] CascadeFrustumDistances => cascadeFrustumDistances;
+
+        private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.1f, 0.3f, 1.0f };
 
         private Matrix4x4f getLightSpaceForFrustumSlice(Matrix4x4f frustumToView, float fromZ, float toZ, float lightSpaceDepthScale)
         {

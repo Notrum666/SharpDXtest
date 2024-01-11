@@ -9,7 +9,7 @@ using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
 {
-    class BallRestarter : Component
+    class BallRestarter : BehaviourComponent
     {
         private Random rng = new Random();
         private double speed = 15;

@@ -8,44 +8,30 @@ namespace Engine.BaseAssets.Components.Particles
     {
         public Vector3f Point { get; set; } = Vector3f.Zero;
         private int rate = 20;
-        public int Rate
-        {
-            get => rate;
-            set
-            {
-                if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(Rate), "Particles per second can't be negative.");
-                rate = value;
-            }
-        }
+        public Ranged<int> Rate => new Ranged<int>(ref rate, 0);
+
         private float radius = 1;
-        public float Radius
+
+        public Ranged<float> Radius => new Ranged<float>(ref radius, 0, onSet: () =>
         {
-            get => radius;
-            set
-            {
-                if (value < 0.0f || innerRadius > value)
-                    throw new ArgumentOutOfRangeException(nameof(Radius), "Radius can't be negative or less than inner radius.");
-                radius = value;
-            }
-        }
+            if (radius < innerRadius)
+                radius = innerRadius;
+        });
+
         private float innerRadius = 0;
-        public float InnerRadius
+
+        public Ranged<float> InnerRadius => new Ranged<float>(ref innerRadius, 0, onSet: () =>
         {
-            get => innerRadius;
-            set
-            {
-                if (value < 0.0f || value > Radius)
-                    throw new ArgumentOutOfRangeException(nameof(InnerRadius), "Inner radius can't be negative or greater than radius.");
-                innerRadius = value;
-            }
-        }
+            if (innerRadius > radius)
+                innerRadius = radius;
+        });
+
         public bool Global { get; set; } = false;
         private double toEmitAccumulator = 0.0;
 
         public ParticleEffect_SphereEmitter()
         {
-            EffectShader = AssetsManager.Shaders["particles_emit_sphere"];
+            EffectShader = Shader.GetStaticShader("particles_emit_sphere");
         }
 
         public override void Update(ParticleSystem system)
@@ -57,16 +43,16 @@ namespace Engine.BaseAssets.Components.Particles
         {
             int toEmit = (int)Math.Floor(toEmitAccumulator);
             toEmitAccumulator -= toEmit;
-            EffectShader.use();
+            EffectShader.Use();
             if (Global == system.WorldSpaceParticles)
-                EffectShader.updateUniform("location", Point);
+                EffectShader.UpdateUniform("location", Point);
             else if (Global)
-                EffectShader.updateUniform("location", (Vector3f)system.GameObject.Transform.View.TransformPoint(Point));
+                EffectShader.UpdateUniform("location", (Vector3f)system.GameObject.Transform.View.TransformPoint(Point));
             else
-                EffectShader.updateUniform("location", (Vector3f)system.GameObject.Transform.Model.TransformPoint(Point));
-            EffectShader.updateUniform("toEmit", toEmit);
-            EffectShader.updateUniform("radius", radius);
-            EffectShader.updateUniform("innerRadius", innerRadius);
+                EffectShader.UpdateUniform("location", (Vector3f)system.GameObject.Transform.Model.TransformPoint(Point));
+            EffectShader.UpdateUniform("toEmit", toEmit);
+            EffectShader.UpdateUniform("radius", radius);
+            EffectShader.UpdateUniform("innerRadius", innerRadius);
         }
     }
 }

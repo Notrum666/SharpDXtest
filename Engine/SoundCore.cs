@@ -143,7 +143,7 @@ namespace Engine
             return PlayFrom(sound, null);
         }
 
-        public static void Update()
+        internal static void Update()
         {
             for (int i = 0; i < playingSounds.Count; i++)
             {

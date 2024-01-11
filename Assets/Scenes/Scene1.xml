@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Scene>
+	<Assets>
+		<Textures>
+		</Textures>
+		<Meshes>
+			<Mesh path="Racket.obj"/>
+			<Mesh path="Ball.obj"/>
+			<Mesh path="Wall.obj"/>
+		</Meshes>
+</Assets>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position x="10"/>
+			<Transform.Rotation z="90"/>
+		</Transform>
+		<Camera IsCurrent="true" Aspect="1.7777" Near="0.001" Far="100" FOV="1.7777"/>
+		<SoundListener IsCurrent="true"/>
+		<RacketController speed="10" leftRacket="{Reference LeftRacket}" rightRacket="{Reference RightRacket}"/>
+		<!--<SpotLight Angle="2" Radius="100" Intensity="0.8" AngularIntensity="0.8"/>-->
+	</GameObject>
+
+	<GameObject x.Name="LeftRacket">
+		<Transform>
+			<Transform.Position y="-20"/>
+		</Transform>
+		<MeshComponent mesh="{Mesh Racket}"/>
+		<MeshCollider mesh="{Mesh Racket}"/>
+		<Rigidbody IsStatic="True">
+			<Rigidbody.Material Friction="0" Bounciness="1"/>
+		</Rigidbody>
+	</GameObject>
+
+	<GameObject x.Name="RightRacket">
+		<Transform>
+			<Transform.Position y="20"/>
+		</Transform>
+		<MeshComponent mesh="{Mesh Racket}"/>
+		<MeshCollider mesh="{Mesh Racket}"/>
+		<Rigidbody IsStatic="True">
+			<Rigidbody.Material Friction="0" Bounciness="1"/>
+		</Rigidbody>
+	</GameObject>
+
+	<GameObject x.Name="Ball">
+		<MeshComponent mesh="{Mesh Ball}"/>
+		<SphereCollider Radius="0.5"/>
+		<Rigidbody LinearDrag="0" AngularDrag="0" FreezeRotation="X,Y,Z">
+			<Rigidbody.Material Friction="0" Bounciness="1"/>
+		</Rigidbody>
+		<BallRestarter leftRacket="{Reference LeftRacket}" rightRacket="{Reference RightRacket}"/>
+		<PointLight Radius="10" Brightness="0.3"/>
+		<!--<AmbientLight Brightness="0.3"/>-->
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="15"/>
+		</Transform>
+		<MeshComponent mesh="{Mesh Wall}"/>
+		<MeshCollider mesh="{Mesh Wall}"/>
+		<Rigidbody IsStatic="True">
+			<Rigidbody.Material Friction="0" Bounciness="1"/>
+		</Rigidbody>
+	</GameObject>
+
+	<GameObject>
+		<Transform>
+			<Transform.Position z="-15"/>
+		</Transform>
+		<MeshComponent mesh="{Mesh Wall}"/>
+		<MeshCollider mesh="{Mesh Wall}"/>
+		<Rigidbody IsStatic="True">
+			<Rigidbody.Material Friction="0" Bounciness="1"/>
+		</Rigidbody>
+	</GameObject>
+</Scene>

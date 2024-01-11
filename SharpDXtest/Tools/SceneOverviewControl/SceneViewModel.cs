@@ -25,7 +25,7 @@ namespace Editor.Tools.SceneOverviewControl
                 scene = value;
                 OnPropertyChanged();
                 if (scene is not null)
-                    foreach (GameObject gameObject in scene.Objects)
+                    foreach (GameObject gameObject in scene.GameObjects)
                         if (gameObject.Transform.Parent is null)
                             GameObjectViewModels.Add(new GameObjectTreeViewModel(gameObject));
             }

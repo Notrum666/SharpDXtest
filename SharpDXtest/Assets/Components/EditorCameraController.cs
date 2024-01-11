@@ -9,7 +9,7 @@ using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
 {
-    public class EditorCameraController : Component
+    public class EditorCameraController : BehaviourComponent
     {
         private double accelerationCoef = 7;
         private double maxSpeed = 20;

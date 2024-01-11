@@ -10,7 +10,7 @@ using SharpDX.DirectInput;
 
 namespace SharpDXtest.Assets.Components
 {
-    class BallController : Component
+    class BallController : BehaviourComponent
     {
         public GameObject CameraObject;
         public double Force;
@@ -30,9 +30,9 @@ namespace SharpDXtest.Assets.Components
                     obj.AddComponent<Rigidbody>();
                     obj.AddComponent<CubeCollider>();
                     obj.AddComponent<GravityForce>();
-                    Mesh mesh = obj.AddComponent<Mesh>();
-                    mesh.model = AssetsManager.Models["Cube"];
-                    mesh.Material.Albedo = AssetsManager.Textures["Prototype_Light"];
+                    MeshComponent mesh = obj.AddComponent<MeshComponent>();
+                    mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Cube");
+                    // mesh.Material.Albedo = AssetsManager.Textures["Prototype_Light"];
                     double angle = rng.NextDouble() * 2 * Math.PI;
                     double distance = 5 + (1.0 - rng.NextDouble() * rng.NextDouble()) * 35;
                     obj.Transform.Position = new Vector3(Math.Cos(angle) * distance, Math.Sin(angle) * distance, 5);
@@ -41,8 +41,6 @@ namespace SharpDXtest.Assets.Components
 
                     //PointLight light = obj.addComponent<PointLight>();
                     //light.Radius = 10;
-
-                    EngineCore.AddObject(obj);
                 }
             }
         }
@@ -87,8 +85,8 @@ namespace SharpDXtest.Assets.Components
             other.GameObject.Transform.SetParent(GameObject.Transform);
             //other.gameObject.transform.Position = pos;
             //other.gameObject.transform.Rotation = quat;
-            other.GameObject.GetComponent<Rigidbody>().Enabled = false;
-            other.GameObject.GetComponent<Collider>().Enabled = false;
+            other.GameObject.GetComponent<Rigidbody>().LocalEnabled = false;
+            other.GameObject.GetComponent<Collider>().LocalEnabled = false;
 
             //other.gameObject.Destroy();
             //gameObject.transform.LocalScale = gameObject.transform.LocalScale + new Vector3(0.2, 0.2, 0.2);

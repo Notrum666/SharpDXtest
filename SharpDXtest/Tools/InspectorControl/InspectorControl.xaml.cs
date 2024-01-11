@@ -9,6 +9,8 @@ using System.Windows.Input;
 
 using Engine;
 
+using SharpDXtest;
+
 namespace Editor
 {
     /// <summary>
@@ -24,6 +26,10 @@ namespace Editor
 
         static InspectorControl()
         {
+            // protection against design-time class addressing
+            if (Application.Current is not App)
+                return;
+
             ResourceDictionary resourceDictionary = new ResourceDictionary();
             resourceDictionary.Source = new Uri("pack://application:,,,/Tools/InspectorControl/DefaultFieldTemplates.xaml", UriKind.RelativeOrAbsolute);
             foreach (object resource in resourceDictionary.Values)
@@ -86,10 +92,18 @@ namespace Editor
             if (e.RightButton != MouseButtonState.Pressed)
                 return;
 
+            Scene currentScene = Scene.CurrentScene;
+            if (currentScene == null || currentScene.GameObjects.Count == 0)
+            {
+                GameObjectViewModel.Target = null;
+                return;
+            }
+            
             objectIndex++;
-            if (objectIndex >= EngineCore.CurrentScene.Objects.Count)
+
+            if (objectIndex >= currentScene.GameObjects.Count)
                 objectIndex = 0;
-            GameObjectViewModel.Target = EngineCore.CurrentScene.Objects[objectIndex];
+            GameObjectViewModel.Target = currentScene.GameObjects[objectIndex];
         }
     }
 }

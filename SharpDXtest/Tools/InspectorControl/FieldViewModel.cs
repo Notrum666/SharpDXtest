@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 using Engine;
 
 namespace Editor
 {
-    public class FieldViewModel : INotifyPropertyChanged
+    public class FieldViewModel : ViewModelBase
     {
-        public event PropertyChangedEventHandler PropertyChanged;
         private FieldInfo targetField;
         public Type TargetType { get; }
         public string DisplayName { get; }
@@ -77,21 +74,25 @@ namespace Editor
             TargetType = targetField.FieldType;
             DisplayName = field.Name;
 
-            DisplayFieldAttribute attr;
-            if ((attr = field.GetCustomAttribute<DisplayFieldAttribute>()) is not null)
+            SerializedFieldAttribute attr = field.GetCustomAttribute<SerializedFieldAttribute>();
+            if (attr is not null)
             {
-                DisplayName = attr.DisplayName;
-                propagateUpdate = attr.PropagateStructUpdate;
-                if (attr.ConverterType is not null)
+                DisplayName = attr.NameOverride ?? field.Name;
+                DisplayOverridesAttribute overridesAttr = field.GetCustomAttribute<DisplayOverridesAttribute>();
+                if (overridesAttr is not null)
                 {
-                    converter = (FieldConverter)Activator.CreateInstance(attr.ConverterType);
-                    if (converter.SourceType != targetField.FieldType)
+                    propagateUpdate = overridesAttr.PropagateStructUpdate;
+                    if (overridesAttr.ConverterType is not null)
                     {
-                        Logger.Log(LogType.Error, "Incorrect converter input type: " + converter.SourceType.Name + ", while field type is: " + targetField.FieldType);
-                        TargetType = null;
-                        return;
+                        converter = (FieldConverter)Activator.CreateInstance(overridesAttr.ConverterType);
+                        if (converter.SourceType != targetField.FieldType)
+                        {
+                            Logger.Log(LogType.Error, "Incorrect converter input type: " + converter.SourceType.Name + ", while field type is: " + targetField.FieldType);
+                            TargetType = null;
+                            return;
+                        }
+                        TargetType = converter.TargetType;
                     }
-                    TargetType = converter.TargetType;
                 }
             }
 
@@ -101,16 +102,12 @@ namespace Editor
                 FieldInfo[] subFields = TargetType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
                 foreach (FieldInfo subField in subFields)
                 {
-                    if (subField.IsPrivate && subField.GetCustomAttribute<DisplayFieldAttribute>() is null)
+                    if (subField.IsPrivate && (subField.GetCustomAttribute<SerializedFieldAttribute>() is null ||
+                        subField.GetCustomAttribute<HideInInspectorAttribute>() is not null))
                         continue;
                     StructFieldViewModels.Add(new FieldViewModel(parentObject, subField, this));
                 }
             }
-        }
-
-        public void OnPropertyChanged([CallerMemberName] string prop = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
         }
 
         public void Update()
