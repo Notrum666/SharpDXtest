@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,7 +21,9 @@ namespace Editor.AssetsImport
         private const int SafeContextCount = 10;
 
         public static bool IsCompilationRelevant;
-        public static ReadOnlyDictionary<string, List<Type>> FilesToTypesMap { get; private set; }
+        public static Action OnCodeRecompiled;
+
+        internal static ReadOnlyDictionary<string, List<Type>> FilesToTypesMap { get; }
 
         private static readonly Dictionary<string, List<Type>> filesToTypesMap = new Dictionary<string, List<Type>>();
 
@@ -70,7 +71,7 @@ namespace Editor.AssetsImport
             filesWatcher.EnableRaisingEvents = true;
 
             currentAssemblyContext.EnterContextualReflection();
-            SceneManager.LoadSceneByName(null);
+            OnCodeRecompiled?.Invoke();
 
             //Debug.WriteLine("==========");
             //Debug.WriteLine($"loaded type = {filesToTypesMap.Values.First().First().Name}");

@@ -32,9 +32,7 @@ namespace Editor
             Current = new ProjectViewModel(projectData.ProjectName, projectData.ProjectFolderPath);
 
             string projectFolderPath = Current.FolderPath;
-            AssetsManager.InitializeInFolder(projectFolderPath);
-            AssetsRegistry.InitializeInFolder(projectFolderPath);
-            SceneManager.UpdateScenesList(Current.ScenesSettings.Scenes);
+            AssetsManager.InitializeInFolder(projectFolderPath); //TODO: Create Project/Game class?
 
             return true;
         }

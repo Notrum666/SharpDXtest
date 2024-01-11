@@ -9,6 +9,7 @@ using System.Windows.Input;
 
 using Editor.AssetsImport;
 
+using Engine;
 using Engine.Layers;
 
 using SharpDXtest;
@@ -51,6 +52,11 @@ namespace Editor
         {
             if (!ScriptManager.IsCompilationRelevant)
                 ScriptManager.Recompile();
+            
+            AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
+            SceneManager.UpdateScenesList(ProjectViewModel.Current.ScenesSettings.Scenes);
+
+            ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(null);
         }
 
         public override void Update()

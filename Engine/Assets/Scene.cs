@@ -12,6 +12,7 @@ namespace Engine
     {
         public static Scene CurrentScene { get; set; }
 
+        public string Name { get; internal set; }
         public ReadOnlyCollection<GameObject> GameObjects => gameObjects.AsReadOnly();
 
         private readonly List<GameObject> gameObjects = new List<GameObject>();
