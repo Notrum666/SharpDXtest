@@ -44,7 +44,7 @@ namespace Engine.BaseAssets.Components
 
         public override Model Model
         {
-            get => Model;
+            get => base.Model;
             set
             {
                 base.Model = value;
