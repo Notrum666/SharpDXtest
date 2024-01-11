@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 using Engine;
 
-namespace Editor.GameProject
+namespace Editor
 {
     public class ProjectViewModel : ViewModelBase
     {

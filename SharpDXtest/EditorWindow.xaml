@@ -1,4 +1,4 @@
-﻿<this:EditorWindowBase x:Name="EditorWindowInst" x:Class="Editor.EditorWindow"
+﻿<this:CustomWindowBase x:Name="EditorWindowInst" x:Class="Editor.EditorWindow"
                        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -8,8 +8,8 @@
                        Title="SharpDXtest" Loaded="Window_Loaded" Focusable="True"
                        WindowState="Maximized" Width="1920" Height="1080"
                        Closing="EditorWindowInst_Closing" MouseDown="EditorWindowInst_MouseDown"
-                       Style="{StaticResource CustomWindow}">
-    <this:EditorWindowBase.Header>
+                       Style="{StaticResource CustomWindowStyle}">
+    <this:CustomWindowBase.Header>
         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
             <Image Source="Images\big-gear.png" Height="30" Width="30" Margin="1"/>
             <Menu VerticalAlignment="Top" Margin="10,4,0,0">
@@ -40,21 +40,25 @@
                 </MenuItem>
             </Menu>
         </StackPanel>
-    </this:EditorWindowBase.Header>
+    </this:CustomWindowBase.Header>
     <Grid>
-        <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
-            <this:DockableHost Orientation="Horizontal" SplitLocation="0.8">
-                <this:DockableHost Orientation="Vertical" SplitLocation="0.8">
-                    <this:CameraRenderControl/>
-                    <this:OutputControl/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
+                <this:DockableHost Orientation="Horizontal" SplitLocation="0.8">
+                    <this:DockableHost Orientation="Vertical" SplitLocation="0.8">
+                        <this:CameraRenderControl/>
+                        <this:OutputControl/>
+                    </this:DockableHost>
+                    <this:InspectorControl/>
                 </this:DockableHost>
-                <this:InspectorControl/>
-            </this:DockableHost>
-        </this:DockingManager>
-    </Grid>
-    <this:EditorWindowBase.Footer>
-        <Grid Grid.Row="2">
+            </this:DockingManager>
+        </Grid>
+        <Grid Grid.Row="1">
             <Rectangle Fill="{StaticResource BorderBrush}"/>
         </Grid>
-    </this:EditorWindowBase.Footer>
-</this:EditorWindowBase>
+    </Grid>
+</this:CustomWindowBase>

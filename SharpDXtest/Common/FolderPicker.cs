@@ -28,14 +28,11 @@ namespace Editor
         protected virtual int SetOptions(int options)
         {
             if (ForceFileSystem)
-            {
                 options |= (int)FOS.FOS_FORCEFILESYSTEM;
-            }
 
             if (Multiselect)
-            {
                 options |= (int)FOS.FOS_ALLOWMULTISELECT;
-            }
+
             return options;
         }
 
@@ -49,59 +46,51 @@ namespace Editor
         // for all .NET
         public virtual bool? ShowDialog(IntPtr owner, bool throwOnError = false)
         {
-            var dialog = (IFileOpenDialog)new FileOpenDialog();
+            IFileOpenDialog dialog = (IFileOpenDialog)new FileOpenDialog();
             if (!string.IsNullOrEmpty(InputPath))
             {
-                if (CheckHr(SHCreateItemFromParsingName(InputPath, null, typeof(IShellItem).GUID, out var item), throwOnError) != 0)
+                if (CheckHr(SHCreateItemFromParsingName(InputPath, null, typeof(IShellItem).GUID, out IShellItem item), throwOnError) != 0)
                     return null;
 
                 dialog.SetFolder(item);
             }
 
-            var options = FOS.FOS_PICKFOLDERS;
+            FOS options = FOS.FOS_PICKFOLDERS;
             options = (FOS)SetOptions((int)options);
             dialog.SetOptions(options);
 
             if (Title != null)
-            {
                 dialog.SetTitle(Title);
-            }
 
             if (OkButtonLabel != null)
-            {
                 dialog.SetOkButtonLabel(OkButtonLabel);
-            }
 
             if (FileNameLabel != null)
-            {
                 dialog.SetFileName(FileNameLabel);
-            }
 
             if (owner == IntPtr.Zero)
             {
                 owner = Process.GetCurrentProcess().MainWindowHandle;
                 if (owner == IntPtr.Zero)
-                {
                     owner = GetDesktopWindow();
-                }
             }
 
-            var hr = dialog.Show(owner);
+            int hr = dialog.Show(owner);
             if (hr == ERROR_CANCELLED)
                 return null;
 
             if (CheckHr(hr, throwOnError) != 0)
                 return null;
 
-            if (CheckHr(dialog.GetResults(out var items), throwOnError) != 0)
+            if (CheckHr(dialog.GetResults(out IShellItemArray items), throwOnError) != 0)
                 return null;
 
-            items.GetCount(out var count);
-            for (var i = 0; i < count; i++)
+            items.GetCount(out int count);
+            for (int i = 0; i < count; i++)
             {
-                items.GetItemAt(i, out var item);
-                CheckHr(item.GetDisplayName(SIGDN.SIGDN_DESKTOPABSOLUTEPARSING, out var path), throwOnError);
-                CheckHr(item.GetDisplayName(SIGDN.SIGDN_DESKTOPABSOLUTEEDITING, out var name), throwOnError);
+                items.GetItemAt(i, out IShellItem item);
+                CheckHr(item.GetDisplayName(SIGDN.SIGDN_DESKTOPABSOLUTEPARSING, out string path), throwOnError);
+                CheckHr(item.GetDisplayName(SIGDN.SIGDN_DESKTOPABSOLUTEEDITING, out string name), throwOnError);
                 if (path != null || name != null)
                 {
                     resultPaths.Add(path);

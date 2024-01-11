@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,7 +12,7 @@ using YamlDotNet.Serialization.Callbacks;
 
 using static Engine.FileSystemHelper;
 
-namespace Editor.GameProject
+namespace Editor
 {
     public static class ProjectsManager
     {
@@ -22,7 +23,6 @@ namespace Editor.GameProject
         public static ReadOnlyObservableCollection<ProjectData> Projects { get; private set; }
 
         private static ProjectsDatabase projectsDatabase;
-
         public static void InitializeInFolder(string dataFolderPath)
         {
             Logger.Log(LogType.Info, $"Initialize ProjectsManager in folder = {dataFolderPath}");
@@ -59,7 +59,7 @@ namespace Editor.GameProject
             string assemblyName = Regex.Replace(projectName, "[^a-zA-Z0-9]", "_");
 
             string templateCsprojData = File.ReadAllText(template.CsprojTemplatePath);
-            templateCsprojData = string.Format(templateCsprojData, projectGuid, assemblyName, $"$({EditorWindow.EditorPathVarName})");
+            templateCsprojData = string.Format(templateCsprojData, projectGuid, assemblyName, $"$({EditorLayer.EditorPathVarName})");
             string csprojFilePath = Path.Combine(projectData.ProjectFolderPath, $"{assemblyName}.csproj");
             File.WriteAllText(csprojFilePath, templateCsprojData);
 
@@ -69,7 +69,7 @@ namespace Editor.GameProject
             File.WriteAllText(solutionFilePath, templateSolutionData);
 
             //Content
-            string baseAssetsPath = Path.Combine(EditorWindow.ResourcesFolderPath, BaseAssetsFolderName);
+            string baseAssetsPath = Path.Combine(EditorLayer.Current.ResourcesFolderPath, BaseAssetsFolderName);
             string projectContentPath = Path.Combine(projectData.ProjectFolderPath, AssetsRegistry.ContentFolderName);
             CopyFolder(baseAssetsPath, Path.Combine(projectContentPath, BaseAssetsFolderName));
 

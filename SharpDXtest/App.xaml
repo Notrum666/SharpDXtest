@@ -1,16 +1,16 @@
 ﻿<Application x:Class="SharpDXtest.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="EditorWindow.xaml"
+             Startup="Application_Startup"
              Activated="App_Activated" 
              Deactivated="App_Deactivated">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles\DarkTheme.xaml"/>
-                <ResourceDictionary Source="Styles\WindowStyle.xaml"/>
                 <ResourceDictionary Source="Styles\ToolStyle.xaml"/>
                 <ResourceDictionary Source="Styles\DefaultStyles.xaml"/>
+                <ResourceDictionary Source="Styles\WindowStyle.xaml"/>
                 <ResourceDictionary Source="Tools\InspectorControl\DefaultInspectorStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
