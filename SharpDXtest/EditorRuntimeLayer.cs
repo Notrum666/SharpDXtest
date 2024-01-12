@@ -36,6 +36,7 @@ namespace Editor
             gameObject.Name = objectName;
             gameObject.Transform.SetParent(parent);
 
+            AddObject(gameObject);
             return gameObject;
         }
 
