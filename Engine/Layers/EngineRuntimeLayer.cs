@@ -24,7 +24,7 @@ namespace Engine.Layers
 
         public override void FixedUpdate()
         {
-            if (EngineCore.IsPaused)
+            if (EngineCore.IsPaused || CurrentScene == null)
                 return;
 
             foreach (GameObject obj in CurrentScene.GameObjects)
@@ -57,6 +57,9 @@ namespace Engine.Layers
 
         public override void Update()
         {
+            if (CurrentScene == null)
+                return;
+
             UpdateGameObjects();
 
             CurrentScene.DestroyPendingObjects();

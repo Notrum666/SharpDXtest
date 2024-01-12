@@ -50,9 +50,6 @@ namespace Editor
 
         public override void Init()
         {
-            if (!ScriptManager.IsCompilationRelevant)
-                ScriptManager.Recompile();
-            
             AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
             SceneManager.UpdateScenesList(ProjectViewModel.Current.ScenesSettings.Scenes);
 
