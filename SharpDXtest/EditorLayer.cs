@@ -23,8 +23,8 @@ namespace Editor
         private static EditorLayer current = null;
         public static EditorLayer Current => current ??= new EditorLayer();
 
-        public override float InitOrder => 1;
-        public override float UpdateOrder => 1;
+        public override float InitOrder => 1000;
+        public override float UpdateOrder => 1000;
 
         public const string EditorPathVarName = "EnvVar_SharpDxEditor";
         private const string DataFolderName = "SharpDxEditor";
@@ -59,7 +59,7 @@ namespace Editor
             ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(null);
         }
 
-        public override void Prepare()
+        public override void Update()
         {
             if (ProjectViewModel.Current != null && RecompileOnFocus)
             {

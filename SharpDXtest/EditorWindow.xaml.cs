@@ -45,7 +45,7 @@ namespace Editor
             if (ProjectViewModel.Current == null)
                 throw new Exception("ProjectViewModel is null on editor window load.");
 
-            EngineCore.Init(EditorLayer.Current);
+            EngineCore.Init(EditorLayer.Current, new EditorRuntimeLayer());
             EngineCore.IsPaused = true;
             EngineCore.Run();
 

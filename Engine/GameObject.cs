@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+
 using Engine.BaseAssets.Components;
 
 namespace Engine
@@ -26,15 +27,13 @@ namespace Engine
 
         public GameObject() : this(false) { }
 
-        public GameObject(bool editor)
+        public GameObject(bool external)
         {
             Name = "NewObject";
             Transform = AddComponent<Transform>();
 
-            if (!editor && Scene.CurrentScene != null)
-            {
+            if (!external && Scene.CurrentScene != null)
                 Scene.CurrentScene.AddObject(this);
-            }
         }
 
         public static GameObject Instantiate(string objectName = null, Transform parent = null)
@@ -145,7 +144,7 @@ namespace Engine
             foreach (Component component in components)
             {
                 if (component is BehaviourComponent { LocalEnabled: true } comp)
-                    comp.Update();
+                    comp.Update(PendingDestroy);
             }
         }
 
