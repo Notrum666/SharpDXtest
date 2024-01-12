@@ -1,24 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
+using Editor.AssetsImport;
 using Engine;
 
 namespace Editor
 {
-    public partial class ContentBrowserControl : UserControl
+    public partial class ContentBrowserControl
     {
         public ObservableCollection<FileItem> Items { get; set; }
         public FileItem Item { get; set; }
-        private string currentFolderPath = "C:\\GamePS2"; // Путь к стартовой папке
-        private bool loaded = false;
+        private string currentFolderPath
+        {
+            get
+            {
+                return Directory.GetParent(Environment.CurrentDirectory).Parent.FullName + "\\TestProject\\Content";
+            }
+        } // Путь к стартовой папке
+        private bool loaded;
         private List<LogMessage> newMessages = new ();
 
         public ContentBrowserControl()
@@ -44,7 +47,7 @@ namespace Editor
                 // Обработка случаев, когда у пользователя нет доступа к папке
             }
         }
-        private void LoadDirectoriesAndFiles(string rootPath, FileItem parent = null)
+        private void LoadDirectoriesAndFiles(string rootPath, FileItem parent)
         {
             try
             {
@@ -57,11 +60,36 @@ namespace Editor
                 }
 
                 var files = Directory.GetFiles(rootPath);
-
+                AssetImportContext importContext2 = new AssetImportContext(rootPath);
+                importContext2.LoadAssetMeta();
+                
                 foreach (var file in files)
                 {
-                    var fileItem = new FileItem { Name = Path.GetFileName(file), FullPath = file, Type = ItemType.File, Parent = parent };
-                    parent?.Children.Add(fileItem);
+                    if (file.Contains(".meta"))
+                    {
+                        AssetMeta assetMeta = YamlManager.LoadFromFile<AssetMeta>(file);
+                        foreach (var subAsset in assetMeta.SubAssets)
+                        {
+                            var assetsItem = new FileItem { Name = subAsset.Key.Item2, FullPath = file, Type = ItemType.Assets, Parent = parent };
+                            parent?.Children.Add(assetsItem);
+                        }
+                        string text = file.Replace(".meta", String.Empty);
+                        var fileItem = new FileItem
+                        {
+                            Name = Path.GetFileName(text.Substring(0, text.Length - (text.Length - text.IndexOf('.')))), 
+                            FullPath = text, 
+                            Type = ItemType.File, 
+                            Parent = parent
+                        };
+                        parent?.Children.Add(fileItem);
+                        parent?.Children.Remove(parent.Children.FirstOrDefault(x => x.FullPath == text));
+                    }
+                    else
+                    {
+                        var fileItem = new FileItem { Name = Path.GetFileName(file), FullPath = file, Type = ItemType.File, Parent = parent };
+                        if(parent != null && parent.Children.Any(x => x.FullPath == file)) continue;
+                        parent.Children.Add(fileItem);   
+                    }
                 }
             }
             catch (UnauthorizedAccessException)
@@ -76,7 +104,8 @@ namespace Editor
             var selectedFolderItem = e.NewValue as FileItem;
             if (selectedFolderItem is {Type: ItemType.Folder})
             {
-                UpdateItemsControl(selectedFolderItem.FullPath, selectedFolderItem.Name);    
+                UpdateItemsControl(selectedFolderItem.FullPath, selectedFolderItem.Name);
+                Item = selectedFolderItem;
             }
             
         }
@@ -109,25 +138,32 @@ namespace Editor
                 FileItem item = new FileItem()
                 {
                     FullPath = currentFolderPath,
-                    Name = "GamePS2",
+                    Name = "Content",
                     Type = 0
                 };
                 LoadDirectories(currentFolderPath, item);
 
                 Items.Add(item);
+                Application.Current.Activated += ContentBrowserControl_Activated;
             }
 
             Logger.OnLog += Logger_OnLog;
 
             loaded = true;
         }
-
+        private void ContentBrowserControl_Activated(object sender, EventArgs e)
+        {
+            if (Item != null)
+            {
+                UpdateItemsControl(Item.FullPath, Item.Name);    
+            }
+        }
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
         {
             // to prevent errors during xaml designer loading in visual studio
             if (!EngineCore.IsAlive)
                 return;
-
+            Application.Current.Activated -= ContentBrowserControl_Activated;
             Logger.OnLog -= Logger_OnLog;
         }
         
@@ -136,16 +172,13 @@ namespace Editor
             newMessages.Add(message);
         }
 
-        private void UserControl_Loaded_1(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 
     public enum ItemType
     {
         Folder,
-        File
+        File,
+        Assets 
     }
 
     public class FileItem
