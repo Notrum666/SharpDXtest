@@ -10,73 +10,78 @@ namespace Engine
 {
     public static class SceneManager
     {
+        private const string DefaultScenePath = "|defaultScene.scene";
         private const string DefaultSceneName = "|defaultScene";
 
         public static Action<string> OnSceneUnloading;
         public static Action<string> OnSceneLoaded;
 
-        private static Dictionary<string, string> scenes = new Dictionary<string, string>();
+        private static IReadOnlyDictionary<string, string> Scenes => Game.Scenes;
 
-        private static string nextSceneName;
+        private static string nextScenePath;
 
-        public static void UpdateScenesList(Dictionary<string, string> newScenes)
+        public static void LoadSceneByPath(string path)
         {
-            scenes = newScenes;
+            if (!Scenes.ContainsKey(path))
+            {
+                Logger.Log(LogType.Error, $"Scene at path = \"{path}\" is not registered!");
+                return;
+            }
+
+            nextScenePath = path;
         }
 
         public static void LoadSceneByName(string sceneName)
         {
-            if (sceneName == null || !scenes.Any())
+            if (sceneName == null || !Scenes.Any())
             {
-                nextSceneName = DefaultSceneName;
+                nextScenePath = DefaultScenePath;
                 return;
             }
 
-            if (!scenes.ContainsKey(sceneName))
-            {
+            nextScenePath = Scenes.FirstOrDefault(x => x.Value == sceneName).Key;
+            if (nextScenePath == null)
                 Logger.Log(LogType.Error, $"Scene \"{sceneName}\" is not registered!");
-                return;
-            }
-
-            nextSceneName = sceneName;
         }
 
         internal static void TryLoadNextScene()
         {
-            if (nextSceneName == null || Scene.CurrentScene != null)
+            if (nextScenePath == null || Scene.CurrentScene != null)
                 return;
 
-            if (nextSceneName == DefaultSceneName)
+            if (nextScenePath == DefaultScenePath)
             {
                 LoadDefaultScene();
-                OnSceneLoaded?.Invoke(nextSceneName);
+                OnSceneLoaded?.Invoke(DefaultSceneName);
             }
-            else if (scenes.TryGetValue(nextSceneName, out string scenePath))
+            else if (Scenes.TryGetValue(nextScenePath, out string sceneName))
             {
-                Scene.CurrentScene = AssetsManager.LoadAssetAtPath<Scene>(scenePath);
-                Scene.CurrentScene.Name = nextSceneName;
-                OnSceneLoaded?.Invoke(nextSceneName);
+                Scene.CurrentScene = AssetsManager.LoadAssetAtPath<Scene>(nextScenePath);
+                Scene.CurrentScene.Name = sceneName;
+                OnSceneLoaded?.Invoke(sceneName);
             }
             else
-                Logger.Log(LogType.Error, $"Tried to load not registered scene \"{nextSceneName}\"!");
+                Logger.Log(LogType.Error, $"Tried to load not registered scene at \"{nextScenePath}\"!");
 
-            nextSceneName = null;
+            nextScenePath = null;
         }
 
         internal static void TryUnloadCurrentScene()
         {
-            // Scene currentScene = Scene.CurrentScene;
-            if (nextSceneName == null || Scene.CurrentScene is not { } currentScene)
+            Scene currentScene = Scene.CurrentScene;
+            if (nextScenePath == null || currentScene == null)
                 return;
 
-            Scene.CurrentScene = null;
             OnSceneUnloading?.Invoke(currentScene.Name);
+            Scene.CurrentScene = null;
             currentScene.Dispose();
         }
 
         private static void LoadDefaultScene()
         {
             Scene.CurrentScene = new Scene();
+            Scene.CurrentScene.Name = DefaultSceneName;
+
             GameObject cameraObj = GameObject.Instantiate("Camera");
             Transform cameraTransform = cameraObj.GetComponent<Transform>();
             cameraTransform.Position = new Vector3(0, -40, 90);

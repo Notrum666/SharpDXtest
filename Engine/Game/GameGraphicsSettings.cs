@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 
-using Engine;
-
-namespace Editor
+namespace Engine
 {
-    public class ProjectGraphicsSettings
+    public class GameGraphicsSettings
     {
         public readonly Dictionary<string, List<string>> Pipelines = new Dictionary<string, List<string>>();
 
@@ -24,9 +22,9 @@ namespace Editor
             }
         }
 
-        public static ProjectGraphicsSettings Default()
+        public static GameGraphicsSettings Default()
         {
-            return new ProjectGraphicsSettings()
+            return new GameGraphicsSettings()
             {
                 Pipelines =
                 {

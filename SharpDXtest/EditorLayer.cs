@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Input;
 
 using Editor.AssetsImport;
 
@@ -50,10 +44,13 @@ namespace Editor
 
         public override void Init()
         {
-            AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
-            SceneManager.UpdateScenesList(ProjectViewModel.Current.ScenesSettings.Scenes);
+            ProjectViewModel.Current.ApplyProjectSettings();
 
-            ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(null);
+            AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
+
+            ProjectViewModel.Current.UpdateGameScenes();
+
+            ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
         }
 
         public override void Update()

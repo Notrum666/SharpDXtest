@@ -23,7 +23,7 @@ namespace Editor
             },
             obj => obj is Type && (obj as Type).IsSubclassOf(typeof(FrameworkElement))
         ));
-        
+
         private RelayCommand recompileCommand;
 
         public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
@@ -48,9 +48,6 @@ namespace Editor
             EngineCore.Init(EditorLayer.Current, new EditorRuntimeLayer());
             EngineCore.IsPaused = true;
             EngineCore.Run();
-
-            ProjectViewModel.Current.GraphicsSettings.Load();
-            SceneManager.LoadSceneByName(ProjectViewModel.Current.ScenesSettings.StartingSceneName);
         }
 
         private void EditorWindowInst_Closing(object sender, CancelEventArgs e)

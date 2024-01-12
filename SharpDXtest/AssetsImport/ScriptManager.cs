@@ -7,12 +7,12 @@ using System.Reflection;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
 
-using Engine;
-
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
+
+using Engine;
 
 namespace Editor.AssetsImport
 {
