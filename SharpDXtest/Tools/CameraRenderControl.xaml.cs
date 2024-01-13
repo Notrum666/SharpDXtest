@@ -204,6 +204,8 @@ namespace Editor
 
             if (e.RightButton == MouseButtonState.Pressed)
                 CursorMode = CursorMode.HiddenAndLocked;
+
+            HandlePicking((int)e.GetPosition(this).X, (int)e.GetPosition(this).Y);
         }
 
         private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
@@ -268,6 +270,25 @@ namespace Editor
                 RenderControl.Width = RenderControlHost.ActualWidth;
                 RenderControl.Height = RenderControl.Width / SelectedAspectRatio.Ratio;
             }
+        }
+
+        private void HandlePicking(int mouseX, int mouseY)
+        {
+            HitResult hitResult;
+            Vector3 mouseWorldPos = camera.ScreenToWorldCoords(mouseX, mouseY);
+            Logger.Log(LogType.Info, $"Mouse screen pos {mouseX}, {mouseY} \nMouse world pos {mouseWorldPos}");
+
+            bool hasHit = Raycast.Hit(
+                new Ray
+                {
+                    Origin = mouseWorldPos,
+                    Direction = camera.GameObject.Transform.Forward
+                },
+                out hitResult
+            );
+
+            if(hasHit)
+                Logger.Log(LogType.Info, $"Has hit at {hitResult.Target.Name}");
         }
 
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)

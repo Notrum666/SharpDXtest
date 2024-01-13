@@ -89,6 +89,46 @@ namespace Engine.BaseAssets.Components
             InvalidateMatrices();
         }
 
+        public LinearAlgebra.Vector3 ScreenToWorldCoords(int x, int y)
+        {
+            Matrix4x4 viewMatrix = GameObject.Transform.View;
+            Matrix4x4 projectionMatrix = Proj;
+
+            LinearAlgebra.Vector2 mouse;
+            mouse.x = x;
+            mouse.y = y;
+
+            LinearAlgebra.Vector3 vector = 
+                UnProject(
+                    projectionMatrix,
+                    viewMatrix, 
+                    new LinearAlgebra.Vector2(Width, Height), 
+                    mouse
+            );
+            LinearAlgebra.Vector3 coords = new LinearAlgebra.Vector3(vector.x, vector.y, vector.z);
+            return coords;
+        }
+
+        LinearAlgebra.Vector3 UnProject(Matrix4x4 projection, Matrix4x4 view, LinearAlgebra.Vector2 viewport, LinearAlgebra.Vector2 mouse)
+        {
+            LinearAlgebra.Vector3 vec;
+
+            vec.x = (mouse.x / viewport.x) * 2 - 1;
+            vec.y = 1 - (mouse.y / viewport.y) * 2;
+            vec.z = 0;
+
+            Matrix4x4 viewInv = view;
+            Matrix4x4 projInv = projection;
+
+            viewInv.invert();
+            projInv.invert();
+
+            vec = projInv.TransformPoint(vec);
+            vec = viewInv.TransformPoint(vec);
+
+            return vec;
+        }
+
         #endregion ComponentLogic
 
         #region Matrices
