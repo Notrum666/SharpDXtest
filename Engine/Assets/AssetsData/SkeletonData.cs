@@ -1,24 +1,21 @@
 using System.Collections.Generic;
 using System.IO;
 using System;
+
 using LinearAlgebra;
 
 namespace Engine.AssetsData
 {
     [AssetData<Skeleton>]
-    public class SkeletonData : AssetData
+    public class SkeletonData : NativeAssetData
     {
+        // TODO: Add total bones count for inspector
         public Matrix4x4f InverseRootTransform = Matrix4x4f.Identity;
-        public List<Bone> Bones = new List<Bone>();
+        public readonly List<Bone> Bones = new List<Bone>();
 
-        public override void Serialize(BinaryWriter writer)
+        protected sealed override void SetDefaultValues()
         {
-            YamlManager.SaveToStream(writer.BaseStream, this);
-        }
-
-        public override void Deserialize(BinaryReader reader)
-        {
-            YamlManager.LoadFromStream(reader.BaseStream, this);
+            throw new NotImplementedException();
         }
 
         public override Skeleton ToRealAsset()
