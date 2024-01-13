@@ -9,6 +9,8 @@ namespace Engine.AssetsData
     [AssetData<Scene>]
     public class SceneData : NativeAssetData
     {
+        public sealed override string FileExtension => ".scene";
+
         // TODO: Add total objects count for inspector
         public readonly List<SerializableObject> SerializableObjects = new List<SerializableObject>();
 

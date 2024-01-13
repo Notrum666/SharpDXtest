@@ -6,6 +6,8 @@ namespace Engine.AssetsData
     [AssetData<SkeletalAnimation>]
     public class AnimationData : NativeAssetData
     {
+        public sealed override string FileExtension => ".anim";
+
         public string Name;
         public float DurationInTicks;
         public float TickPerSecond;

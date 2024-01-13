@@ -46,7 +46,7 @@ namespace Editor.AssetsImport
         {
             assetMetaData.ImporterVersion = importerVersion;
             YamlManager.SaveToFile(assetMetaPath, assetMetaData);
-            
+
             File.SetLastWriteTimeUtc(assetMetaPath, importTimeUtc);
         }
 
@@ -67,6 +67,23 @@ namespace Editor.AssetsImport
 
             AssetsManager.SaveAssetData(AssetContentPath, subGuid, subAsset);
             return subGuid;
+        }
+
+        public Guid CreateExternalAsset<T>(string assetName, T subAsset) where T : NativeAssetData
+        {
+            string sourceAssetFolder = Path.GetDirectoryName(AssetSourcePath)!;
+
+            Guid? guid = AssetsRegistry.CreateAsset(assetName, sourceAssetFolder, subAsset);
+            return guid.GetValueOrDefault(Guid.Empty);
+        }
+
+        public Guid GetExternalAsset<T>(string relativeFilePath) where T : AssetData
+        {
+            string sourceAssetFolder = Path.GetDirectoryName(AssetSourcePath)!;
+            string externalFilePath = Path.Combine(sourceAssetFolder, relativeFilePath);
+
+            Guid? guid = AssetsRegistry.ImportAsset(externalFilePath);
+            return guid.GetValueOrDefault(Guid.Empty);
         }
 
         public T GetImportSettings<T>() where T : AssetImporter.BaseImportSettings

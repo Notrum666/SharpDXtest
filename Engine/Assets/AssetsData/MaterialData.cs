@@ -12,6 +12,8 @@ namespace Engine.AssetsData
     [AssetData<Material>]
     public class MaterialData : NativeAssetData
     {
+        public sealed override string FileExtension => ".mat";
+
         public Vector4f? BaseColor = null;
         public readonly Dictionary<MaterialTextureType, Guid> TexturesGuids = new Dictionary<MaterialTextureType, Guid>();
 

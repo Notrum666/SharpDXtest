@@ -8,6 +8,8 @@ namespace Engine.AssetsData
     /// </summary>
     public abstract class NativeAssetData : AssetData
     {
+        public abstract string FileExtension { get; }
+        
         public sealed override void Serialize(BinaryWriter writer)
         {
             YamlManager.SaveToStream(writer.BaseStream, this);

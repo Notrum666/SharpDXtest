@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 
 using Editor.AssetsImport;
 
 using Engine;
+using Engine.AssetsData;
 
 using static Engine.FileSystemHelper;
 
@@ -73,6 +75,22 @@ namespace Editor
                 return null;
 
             return importer.ImportAsset(assetPath);
+        }
+
+        public static Guid? CreateAsset<T>(string assetName, string parentFolderPath, T assetData = null) where T : NativeAssetData
+        {
+            assetData ??= NativeAssetData.CreateDefault<T>();
+
+            string pathNoExtension = Path.Combine(parentFolderPath, assetName);
+            string newAssetPath = Path.ChangeExtension(pathNoExtension, assetData.FileExtension);
+            newAssetPath = GenerateUniquePath(newAssetPath);
+            
+            using FileStream fileStream = File.Open(newAssetPath, FileMode.Create);
+            using BinaryWriter binaryWriter = new BinaryWriter(fileStream, Encoding.UTF8, false);
+
+            assetData.Serialize(binaryWriter);
+
+            return ImportAsset(newAssetPath);
         }
 
         public static bool CopyAsset(string assetPath, string newAssetPath)

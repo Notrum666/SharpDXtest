@@ -9,6 +9,8 @@ namespace Engine.AssetsData
     [AssetData<Skeleton>]
     public class SkeletonData : NativeAssetData
     {
+        public sealed override string FileExtension => ".sklt";
+
         // TODO: Add total bones count for inspector
         public Matrix4x4f InverseRootTransform = Matrix4x4f.Identity;
         public readonly List<Bone> Bones = new List<Bone>();
