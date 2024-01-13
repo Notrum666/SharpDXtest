@@ -54,7 +54,7 @@
                         </this:DockableHost>
                         <this:DockableHost Orientation="Horizontal" SplitLocation="0.6">
                             <this:ContentBrowserControl/>
-                            <this:OutputControl/>
+                            <!--<this:OutputControl/>-->
                         </this:DockableHost>
                     </this:DockableHost>
                     <this:InspectorControl/>

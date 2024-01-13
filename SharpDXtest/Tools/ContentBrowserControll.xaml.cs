@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using Editor.AssetsImport;
 using Engine;
 
@@ -14,6 +16,8 @@ namespace Editor
     {
         public ObservableCollection<FileItem> Items { get; set; }
         public FileItem Item { get; set; }
+        
+        private TreeViewItem lastItem;
         private string currentFolderPath
         {
             get
@@ -23,10 +27,241 @@ namespace Editor
         } // Путь к стартовой папке
         private bool loaded;
         private List<LogMessage> newMessages = new ();
+        
+        private bool isDragging = false;
 
         public ContentBrowserControl()
         {
             InitializeComponent();
+            AllowDrop = true;
+            DragEnter += UserControl_DragEnter;
+            DragOver += UserControl_DragOver;
+            Drop += UserControl_Drop;
+            
+            ItemsControl.PreviewMouseLeftButtonDown += ItemsControl_PreviewMouseLeftButtonDown;
+            ItemsControl.MouseMove += ItemsControl_MouseMove;
+            ItemsControl.MouseLeftButtonUp += ItemsControl_MouseLeftButtonUp;
+
+            TreeView.DragEnter += TreeView_DragEnter;
+            TreeView.DragOver += TreeView_DragOver;
+            TreeView.Drop += TreeView_Drop;
+        }
+        private void ItemsControl_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            while (dep != null && !(dep is ContentPresenter || dep is TextBlock))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            if (dep == null)
+            {
+                return;
+            }
+
+            Item = (FileItem)((FrameworkElement)dep).DataContext;
+            if (Item.Type == ItemType.File)
+            {
+                isDragging = true;    
+            }
+            
+        }
+
+        private void ItemsControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging && e.LeftButton == MouseButtonState.Pressed)
+            {
+                DataObject data = new DataObject();
+                data.SetData(DataFormats.FileDrop, Item);
+
+                DragDrop.DoDragDrop((DependencyObject)e.OriginalSource, data, DragDropEffects.Copy);
+                
+                isDragging = false;
+            }
+        }
+
+        private void ItemsControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            isDragging = false;
+        }
+
+        private void TreeView_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        private void TreeView_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+            Point currentPosition = e.GetPosition(TreeView);
+
+            TreeViewItem item = GetTreeViewItemFromPoint(TreeView, currentPosition);
+
+            if (item != null && item != lastItem)
+            {
+                if (lastItem != null)
+                {
+                    lastItem.Background = Brushes.Transparent;
+                }
+
+                item.Background = Brushes.LightBlue;
+                lastItem = item;
+            }
+
+            if (item != null && item.HasItems)
+            {
+                item.IsExpanded = true;
+            }
+
+            e.Handled = true;
+        }
+        
+        private TreeViewItem GetTreeViewItemFromPoint(TreeView treeView, Point position)
+        {
+            HitTestResult hitTestResult = VisualTreeHelper.HitTest(treeView, position);
+            DependencyObject target = hitTestResult?.VisualHit;
+
+            while (target != null && !(target is TreeViewItem))
+            {
+                target = VisualTreeHelper.GetParent(target);
+            }
+
+            return target as TreeViewItem;
+        }
+
+        private void TreeView_Drop(object sender, DragEventArgs e)
+        {
+            var fileDrop = e.Data.GetData(DataFormats.FileDrop);
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            while (dep != null && !(dep is ContentPresenter || dep is TextBlock))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            if (dep == null)
+            {
+                return;
+            }
+
+            FileItem itemTreeViewTarget = (FileItem)((FrameworkElement)dep).DataContext;
+            
+            if (fileDrop.GetType() == typeof(string[]))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                foreach (string fileOther in files)
+                {
+                    CopyFile(fileOther, itemTreeViewTarget.FullPath); 
+                }
+
+                TreeView_ClearSelectColor();
+                return;
+            }
+
+            if (fileDrop.GetType() == typeof(string[]))
+            {
+                FileItem file = (FileItem)fileDrop;
+            
+
+                string getResultPath = itemTreeViewTarget.FullPath + "\\" + file.FullName;
+            
+                bool resultMove = AssetsRegistry.MoveAsset(file.FullPath, getResultPath);
+                if (resultMove)
+                {
+                    Guid? guid = AssetsRegistry.ImportAsset(getResultPath);
+                    if (guid != null)
+                    {
+                        UpdateItemsControl(getResultPath, Item.Name);
+                    }    
+                }
+
+                TreeView_ClearSelectColor();
+                return;
+            }
+            e.Handled = true;
+            // тут лог сделать что файл говно   
+        }
+
+        private void UserControl_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        private void TreeView_ClearSelectColor()
+        {
+            if (lastItem != null)
+            {
+                lastItem.Background = Brushes.Transparent;
+                lastItem = null;
+            }
+        }
+        
+
+        private void UserControl_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+
+            e.Handled = true;
+        }
+
+        private void UserControl_Drop(object sender, DragEventArgs e)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (string file in files)
+            {
+                CopyFile(file, Item.FullPath); 
+            }
+            
+            e.Handled = true;
+        }
+        
+        private void CopyFile(string sourceFilePath, string destinationFolderPath)
+        {
+            try
+            {
+                string fileName = Path.GetFileName(sourceFilePath);
+                string destinationFilePath = Path.Combine(destinationFolderPath, fileName);
+                File.Copy(sourceFilePath, destinationFilePath);
+                
+                Guid? guid = AssetsRegistry.ImportAsset(destinationFilePath);
+                if (guid != null && Item.Type == ItemType.Folder)
+                {
+                    UpdateItemsControl(destinationFolderPath, Item.Name);
+                }
+            }
+            catch (Exception ex)
+            {
+                
+            }
         }
         
         private void LoadDirectories(string rootPath, FileItem parent = null)
@@ -60,9 +295,7 @@ namespace Editor
                 }
 
                 var files = Directory.GetFiles(rootPath);
-                AssetImportContext importContext2 = new AssetImportContext(rootPath);
-                importContext2.LoadAssetMeta();
-                
+
                 foreach (var file in files)
                 {
                     if (file.Contains(".meta"))
@@ -78,17 +311,11 @@ namespace Editor
                         {
                             Name = Path.GetFileName(text.Substring(0, text.Length - (text.Length - text.IndexOf('.')))), 
                             FullPath = text, 
+                            FullName = Path.GetFileName(text), 
                             Type = ItemType.File, 
                             Parent = parent
                         };
                         parent?.Children.Add(fileItem);
-                        parent?.Children.Remove(parent.Children.FirstOrDefault(x => x.FullPath == text));
-                    }
-                    else
-                    {
-                        var fileItem = new FileItem { Name = Path.GetFileName(file), FullPath = file, Type = ItemType.File, Parent = parent };
-                        if(parent != null && parent.Children.Any(x => x.FullPath == file)) continue;
-                        parent.Children.Add(fileItem);   
                     }
                 }
             }
@@ -100,7 +327,6 @@ namespace Editor
 
         private void TreeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            
             var selectedFolderItem = e.NewValue as FileItem;
             if (selectedFolderItem is {Type: ItemType.Folder})
             {
@@ -153,7 +379,7 @@ namespace Editor
         }
         private void ContentBrowserControl_Activated(object sender, EventArgs e)
         {
-            if (Item != null)
+            if (Item != null && (Item.Type != ItemType.File || Item.Type != ItemType.Assets))
             {
                 UpdateItemsControl(Item.FullPath, Item.Name);    
             }
@@ -184,6 +410,7 @@ namespace Editor
     public class FileItem
     {
         public string Name { get; set; }
+        public string FullName { get; set; }
         public ItemType Type { get; set; }
         public ObservableCollection<FileItem> Children { get; } = new ();
         public string FullPath { get; set; }
