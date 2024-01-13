@@ -27,8 +27,7 @@ namespace Editor
         private RelayCommand recompileCommand;
 
         public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
-            _ => { ScriptManager.Recompile(); },
-            _ => true
+            _ => { ScriptManager.Recompile(); }
         );
 
         public EditorWindow()

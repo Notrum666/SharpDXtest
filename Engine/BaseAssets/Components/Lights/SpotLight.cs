@@ -51,7 +51,7 @@ namespace Engine.BaseAssets.Components
             ShadowTexture = new Texture(shadowSize, shadowSize, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil);
         }
 
-        public override void DoShadowPass()
+        public override void RenderShadows()
         {
             if (!ShaderPipeline.TryGetPipeline("depth_only", out ShaderPipeline pipeline))
                 return;

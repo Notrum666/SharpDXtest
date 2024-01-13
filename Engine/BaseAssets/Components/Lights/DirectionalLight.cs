@@ -92,7 +92,7 @@ namespace Engine.BaseAssets.Components
             ShadowTexture = new Texture(shadowSize, shadowSize, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil, cascadeFrustumDistances.Length - 1);
         }
 
-        public override void DoShadowPass()
+        public override void RenderShadows()
         {
             if (!ShaderPipeline.TryGetPipeline("depth_only", out ShaderPipeline pipeline))
                 return;
@@ -115,7 +115,7 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        public override bool DoLightPass(Camera camera)
+        public override bool PrepareLightPass(Camera camera)
         {
             if (!ShaderPipeline.TryGetPipeline("deferred_light_directional", out ShaderPipeline pipeline))
                 return false;

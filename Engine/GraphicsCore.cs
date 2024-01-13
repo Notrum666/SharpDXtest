@@ -216,7 +216,7 @@ namespace Engine
                 if (!light.LocalEnabled)
                     continue;
 
-                light.DoShadowPass();
+                light.RenderShadows();
             }
         }
 
@@ -342,7 +342,7 @@ namespace Engine
                 if (!light.LocalEnabled)
                     continue;
 
-                if (light.DoLightPass(camera))
+                if (light.PrepareLightPass(camera))
                 {
                     camera.GBuffer.worldPos.Use("worldPosTex");
                     camera.GBuffer.albedo.Use("albedoTex");

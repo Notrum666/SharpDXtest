@@ -9,6 +9,7 @@ namespace Engine
         public static string Name { get; set; }
         public static string FolderPath { get; private set; }
 
+        //TODO: Add null check
         public static GameGraphicsSettings GraphicsSettings { get; set; }
 
         public static string StartingSceneName { get; set; }

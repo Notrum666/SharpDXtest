@@ -86,12 +86,12 @@ namespace Engine.BaseAssets.Components
             //GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
-        public override void DoShadowPass()
+        public override void RenderShadows()
         {
             // TODO: IMPLEMENT POINT LIGHT SHADOWS
         }
 
-        public override bool DoLightPass(Camera camera)
+        public override bool PrepareLightPass(Camera camera)
         {
             if (!ShaderPipeline.TryGetPipeline("deferred_light_point", out ShaderPipeline pipeline))
                 return false;

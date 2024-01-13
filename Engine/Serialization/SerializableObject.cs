@@ -8,9 +8,10 @@ using YamlDotNet.Serialization.Callbacks;
 namespace Engine
 {
     [YamlTagMapped]
-    public class SerializableObject : INotifyFieldChanged
+    public class SerializableObject : INotifyFieldChanged //TODO: Add cache
     {
-        [SerializedField] private readonly Guid instanceId;
+        [SerializedField]
+        private readonly Guid instanceId;
 
         public Guid InstanceId => instanceId;
 

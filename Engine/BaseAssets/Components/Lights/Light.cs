@@ -14,9 +14,9 @@ namespace Engine.BaseAssets.Components
 
         public Ranged<float> Brightness => new Ranged<float>(ref brightness, 0.0f);
 
-        public virtual void DoShadowPass() { }
+        public virtual void RenderShadows() { }
 
-        public virtual bool DoLightPass(Camera camera)
+        public virtual bool PrepareLightPass(Camera camera)
         {
             return false;
         }

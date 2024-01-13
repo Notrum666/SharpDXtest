@@ -20,8 +20,8 @@ namespace Editor.AssetsImport
     {
         private const int SafeContextCount = 10;
 
-        public static bool IsCompilationRelevant;
-        public static Action OnCodeRecompiled;
+        public static bool IsCompilationRelevant { get; private set; }
+        public static Action OnCodeRecompiled { get; set; }
 
         internal static ReadOnlyDictionary<string, List<Type>> FilesToTypesMap { get; }
 

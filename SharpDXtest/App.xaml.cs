@@ -12,7 +12,7 @@ namespace SharpDXtest
     /// </summary>
     public partial class App : Application
     {
-        public static bool IsActive;
+        public static bool IsActive { get; private set; }
 
         void App_Activated(object sender, EventArgs e)
         {

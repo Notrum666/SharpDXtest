@@ -55,7 +55,7 @@ namespace Editor
 
         public override void Update()
         {
-            if (ProjectViewModel.Current != null && RecompileOnFocus)
+            if (ProjectViewModel.Current != null && RecompileOnFocus) //TODO: Use event subscription instead of Update
             {
                 if (App.IsActive && !ScriptManager.IsCompilationRelevant)
                     ScriptManager.Recompile();
