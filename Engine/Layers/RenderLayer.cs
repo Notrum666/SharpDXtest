@@ -1,12 +1,4 @@
 ﻿using Engine.BaseAssets.Components;
-using LinearAlgebra;
-using SharpDX.Direct3D;
-using SharpDX.Direct3D11;
-using SharpDX.Mathematics.Interop;
-using SharpDX;
-using System.Collections.Generic;
-using System;
-using Engine.BaseAssets.Components.Postprocessing;
 
 namespace Engine.Layers
 {
@@ -14,6 +6,11 @@ namespace Engine.Layers
     {
         public override float UpdateOrder => 3;
         public override float InitOrder => 3;
+
+        public override void Init()
+        {
+            GraphicsCore.Init();
+        }
 
         public override void Update()
         {

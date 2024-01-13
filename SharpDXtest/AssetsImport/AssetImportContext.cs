@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+
 using Engine;
 using Engine.AssetsData;
 
@@ -28,14 +29,25 @@ namespace Editor.AssetsImport
             assetMetaPath = Path.ChangeExtension(AssetSourcePath, $"{assetExtension}{AssetMeta.MetaExtension}");
 
             AssetMeta savedMeta = YamlManager.LoadFromFile<AssetMeta>(assetMetaPath);
-            assetMetaData = savedMeta ?? new AssetMeta();
+            if (assetMetaPath != null && savedMeta != null)
+            {
+                savedMeta.LastWriteTimeUtc = File.GetLastWriteTimeUtc(assetMetaPath);
+            }
+            else
+            {
+                savedMeta = new AssetMeta() { LastWriteTimeUtc = DateTime.MaxValue };
+            }
 
+            assetMetaData = savedMeta;
             return assetMetaData;
         }
 
-        public void SaveAssetMeta()
+        public void SaveAssetMeta(DateTime importTimeUtc, int importerVersion)
         {
+            assetMetaData.ImporterVersion = importerVersion;
             YamlManager.SaveToFile(assetMetaPath, assetMetaData);
+            
+            File.SetLastWriteTimeUtc(assetMetaPath, importTimeUtc);
         }
 
         public Guid AddMainAsset<T>(T mainAsset) where T : AssetData
@@ -59,9 +71,6 @@ namespace Editor.AssetsImport
 
         public T GetImportSettings<T>() where T : AssetImporter.BaseImportSettings
         {
-            if (assetMetaData == null)
-                return Activator.CreateInstance<T>();
-
             if (assetMetaData.ImportSettings is not T)
                 assetMetaData.ImportSettings = Activator.CreateInstance<T>();
 

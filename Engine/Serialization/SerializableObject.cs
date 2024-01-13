@@ -1,12 +1,14 @@
 using System;
 using System.Reflection;
+
 using Engine.Serialization;
+
 using YamlDotNet.Serialization.Callbacks;
 
 namespace Engine
 {
     [YamlTagMapped]
-    public class SerializableObject : INotifyFieldChanged
+    public class SerializableObject : INotifyFieldChanged //TODO: Add cache
     {
         [SerializedField]
         private readonly Guid instanceId;
@@ -20,17 +22,23 @@ namespace Engine
             instanceId = Guid.NewGuid();
         }
 
+        /// <summary>
+        /// Calls default constructor
+        /// </summary>
         protected static object Instantiate(Type type)
         {
             return Activator.CreateInstance(type);
         }
 
+        /// <summary>
+        /// <inheritdoc cref="Instantiate(Type)"/>
+        /// </summary>
         protected static T Instantiate<T>()
         {
             return Activator.CreateInstance<T>();
         }
 
-        internal void DestroyImmediate()
+        public void DestroyImmediate()
         {
             if (destroyed)
                 return;

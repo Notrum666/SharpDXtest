@@ -1,20 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+using Editor.AssetsImport;
+
+using Engine;
 using Engine.Layers;
+
+using SharpDXtest;
 
 namespace Editor
 {
     internal class EditorLayer : Layer
     {
+        private const bool RecompileOnFocus = true; // TODO: move to settings?
+
         private static EditorLayer current = null;
-        public static EditorLayer Current => current ?? (current = new EditorLayer());
-        public override float InitOrder => 1;
-        public override float UpdateOrder => 1;
+        public static EditorLayer Current => current ??= new EditorLayer();
+
+        public override float InitOrder => 1000;
+        public override float UpdateOrder => 1000;
 
         public const string EditorPathVarName = "EnvVar_SharpDxEditor";
         private const string DataFolderName = "SharpDxEditor";
@@ -37,13 +41,25 @@ namespace Editor
 
             ProjectsManager.InitializeInFolder(DataFolderPath);
         }
+
         public override void Init()
         {
+            ProjectViewModel.Current.ApplyProjectSettings();
 
+            AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
+
+            ProjectViewModel.Current.UpdateGameScenes();
+
+            ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
         }
+
         public override void Update()
         {
-
+            if (ProjectViewModel.Current != null && RecompileOnFocus) //TODO: Use event subscription instead of Update
+            {
+                if (App.IsActive && !ScriptManager.IsCompilationRelevant)
+                    ScriptManager.Recompile();
+            }
         }
     }
 }

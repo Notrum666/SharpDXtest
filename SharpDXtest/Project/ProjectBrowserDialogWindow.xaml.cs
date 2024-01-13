@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
 using System.Windows.Controls;
 
 using Engine;
@@ -25,7 +23,7 @@ namespace Editor
             (openProjectCommand = new RelayCommand(obj =>
             {
                 IsEnabled = false;
-                DialogResult = ProjectViewModel.Load((ProjectData)obj);
+                DialogResult = ProjectViewModel.LoadData((ProjectData)obj);
                 Close();
             },
                 obj => obj is ProjectData));
@@ -76,7 +74,7 @@ namespace Editor
                 }
 
                 IsEnabled = false;
-                DialogResult = ProjectViewModel.Load(data);
+                DialogResult = ProjectViewModel.LoadData(data);
                 Close();
             },
                 obj => obj is ProjectTemplate));

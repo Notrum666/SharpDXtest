@@ -15,6 +15,7 @@
 		<ProjectGuid>{c1f848f1-9743-4a3d-959d-c7e6476a52ed}</ProjectGuid>
 		<ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
 		<AssemblyName>TestProject</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 	</PropertyGroup>
 	<PropertyGroup>
 		<BaseDirectory>.</BaseDirectory>
@@ -23,9 +24,9 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
 
-<!--	<ItemGroup>-->
-<!--		<Compile Include="Content\**\*.cs" />-->
-<!--	</ItemGroup>-->
+	<ItemGroup>
+		<Compile Include="Content\**\*.cs" />
+	</ItemGroup>
 	
 	<PropertyGroup Label="UserMacros">
 		<Engine_IncludePath>$(EnvVar_SharpDxEditor)</Engine_IncludePath>

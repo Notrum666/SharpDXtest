@@ -130,7 +130,7 @@ namespace Editor
                 Width = double.NaN;
                 Height = double.NaN;
 
-                controlledGameObject = new GameObject();
+                controlledGameObject = EditorScene.Instantiate("Editor camera");
                 controlledGameObject.Transform.Position = new Vector3(0, -10, 5);
                 controller = controlledGameObject.AddComponent<EditorCameraController>();
                 camera = controlledGameObject.AddComponent<Camera>();
@@ -176,7 +176,6 @@ namespace Editor
             if (!EngineCore.IsAlive || !IsVisible)
                 return;
 
-            controlledGameObject.Update();
             if (keyboardFocused)
                 controller.UpdateInput();
 

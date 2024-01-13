@@ -6,6 +6,8 @@ namespace Editor.AssetsImport
     [AssetImporter("mat")]
     public class MaterialImporter : AssetImporter
     {
+        public override int LatestVersion => 1;
+
         protected override void OnImportAsset(AssetImportContext importContext)
         {
             MaterialData materialData = YamlManager.LoadFromStream<MaterialData>(importContext.DataStream);

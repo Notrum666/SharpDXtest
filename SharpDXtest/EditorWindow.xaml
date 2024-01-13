@@ -12,7 +12,7 @@
     <this:CustomWindowBase.Header>
         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
             <Image Source="Images\big-gear.png" Height="30" Width="30" Margin="1"/>
-            <Menu VerticalAlignment="Top" Margin="10,4,0,0">
+            <Menu VerticalAlignment="Top" Margin="10,4,0,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType=this:EditorWindow}}">
                 <MenuItem Header="File">
                     <MenuItem Header="Test1"/>
                     <MenuItem Header="Test2"/>
@@ -30,10 +30,13 @@
                     <MenuItem Header="Test3"/>
                     <MenuItem Header="Test4"/>
                 </MenuItem>
-                <MenuItem Header="View" DataContext="{Binding RelativeSource={RelativeSource AncestorType=this:EditorWindow}}">
+                <MenuItem Header="View">
                     <MenuItem Header="Camera" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:CameraRenderControl}"/>
                     <MenuItem Header="Output" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
                     <MenuItem Header="Inspector" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:InspectorControl}"/>
+                </MenuItem>
+                <MenuItem Header="Scripting">
+                    <MenuItem Header="Recompile" Command="{Binding Path=RecompileCommand}"/>
                 </MenuItem>
             </Menu>
         </StackPanel>
