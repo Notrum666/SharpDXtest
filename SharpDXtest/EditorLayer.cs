@@ -44,11 +44,11 @@ namespace Editor
 
         public override void Init()
         {
-            ProjectViewModel.Current.ApplyProjectSettings();
-
             AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
 
+            ProjectViewModel.Current.ApplyProjectSettings();
             ProjectViewModel.Current.UpdateGameScenes();
+            SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
 
             ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
         }
