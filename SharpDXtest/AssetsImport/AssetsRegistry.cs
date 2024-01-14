@@ -63,15 +63,13 @@ namespace Editor
 
         public static void Refresh()
         {
-            ImportFolder(ContentFolderPath);
-
             guidToPathMap.Clear();
             foreach (PathInfo pathInfo in EnumeratePathInfoEntries(ContentFolderPath, "*.meta", true))
             {
                 if (pathInfo.IsDirectory)
                     continue;
 
-                string assetPath = Path.GetFileNameWithoutExtension(pathInfo.FullPath);
+                string assetPath = Path.ChangeExtension(pathInfo.FullPath, null);
                 if (!Path.Exists(assetPath))
                 {
                     File.Delete(pathInfo.FullPath);
@@ -79,11 +77,13 @@ namespace Editor
                 }
 
                 AssetMeta assetMeta = YamlManager.LoadFromFile<AssetMeta>(pathInfo.FullPath);
-                if (!guidToPathMap.TryAdd(assetMeta.Guid, pathInfo.FullPath))
+                if (!guidToPathMap.TryAdd(assetMeta.Guid, assetPath))
                 {
                     File.Delete(pathInfo.FullPath);
                 }
             }
+
+            ImportFolder(ContentFolderPath);
         }
 
         public static bool TryGetAssetPath(Guid guid, out string assetPath)
@@ -120,6 +120,8 @@ namespace Editor
             using BinaryWriter binaryWriter = new BinaryWriter(fileStream, Encoding.UTF8, false);
 
             assetData.Serialize(binaryWriter);
+            binaryWriter.Flush();
+            binaryWriter.Close();
 
             return ImportAsset(assetPath);
         }
@@ -127,12 +129,15 @@ namespace Editor
         public static Guid? CreateAsset<T>(string assetName, string parentFolderPath, T assetData = null) where T : NativeAssetData
         {
             assetData ??= NativeAssetData.CreateDefault<T>();
+            assetName = SanitizeFileName(assetName, true);
 
             string pathNoExtension = Path.Combine(parentFolderPath, assetName);
             string newAssetPath = Path.ChangeExtension(pathNoExtension, assetData.FileExtension);
             newAssetPath = GenerateUniquePath(newAssetPath);
 
-            return SaveAsset(newAssetPath, assetData);
+            Directory.CreateDirectory(parentFolderPath);
+
+            return SaveAsset<T>(newAssetPath, assetData);
         }
 
         /// <summary>

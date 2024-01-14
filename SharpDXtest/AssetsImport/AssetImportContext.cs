@@ -81,23 +81,24 @@ namespace Editor.AssetsImport
         public Guid SaveExportedAsset<T>(string identifier, T subAsset, string subFolderName = null) where T : NativeAssetData
         {
             (Type, string) externalAssetKey = (typeof(T), identifier);
-            Guid externalGuid = assetMetaData.ExportedAssets.GetValueOrDefault(externalAssetKey, Guid.Empty);
+            Guid exportedGuid = assetMetaData.ExportedAssets.GetValueOrDefault(externalAssetKey, Guid.Empty);
 
-            if (externalGuid != Guid.Empty && AssetsRegistry.TryGetAssetPath(externalGuid, out string assetPath))
+            if (exportedGuid != Guid.Empty && AssetsRegistry.TryGetAssetPath(exportedGuid, out string assetPath))
+                exportedGuid = AssetsRegistry.SaveAsset(assetPath, subAsset) ?? Guid.Empty;
+            else
             {
-                Guid? savedGuid = AssetsRegistry.SaveAsset(assetPath, subAsset);
-                return savedGuid.GetValueOrDefault(Guid.Empty);
+                string assetName = Path.GetFileNameWithoutExtension(AssetSourcePath);
+                string parentFolderPath = Path.GetDirectoryName(AssetSourcePath)!;
+                if (string.IsNullOrEmpty(subFolderName))
+                    identifier = $"{assetName}_{identifier}";
+                else
+                    parentFolderPath = Path.Combine(parentFolderPath, $"{assetName}_{subFolderName}");
+
+                exportedGuid = AssetsRegistry.CreateAsset(identifier, parentFolderPath, subAsset) ?? Guid.Empty;
             }
 
-            string assetName = Path.GetFileNameWithoutExtension(AssetSourcePath);
-            string parentFolderPath = Path.GetDirectoryName(AssetSourcePath)!;
-            if (string.IsNullOrEmpty(subFolderName))
-                identifier = $"{assetName}_{identifier}";
-            else
-                parentFolderPath = Path.Combine(parentFolderPath, $"{assetName}_{subFolderName}");
-
-            Guid? createdGuid = AssetsRegistry.CreateAsset(identifier, parentFolderPath, subAsset);
-            return createdGuid.GetValueOrDefault(Guid.Empty);
+            exportedAssets[externalAssetKey] = exportedGuid;
+            return exportedGuid;
         }
 
         public Guid? GetExternalAssetGuid<T>(string relativeFilePath) where T : AssetData
