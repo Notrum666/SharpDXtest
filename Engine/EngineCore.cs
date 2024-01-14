@@ -106,6 +106,9 @@ namespace Engine
 
                     Time.Update();
 
+                    foreach (Layer layer in layersStack)
+                        layer.OnFrameEnded();
+
                     OnFrameEnded?.Invoke();
 
                     if (Time.DeltaTime < 1.0 / 144.0)

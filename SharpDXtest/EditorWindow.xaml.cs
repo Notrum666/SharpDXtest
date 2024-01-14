@@ -30,6 +30,35 @@ namespace Editor
             _ => { ScriptManager.Recompile(); }
         );
 
+        private RelayCommand runCommand;
+
+        public RelayCommand RunCommand => runCommand ??= new RelayCommand(
+            _ => { EditorLayer.EnterPlaymode(); },
+            _ => !EditorLayer.IsPlaying
+        );
+
+        private RelayCommand stopCommand;
+
+        public RelayCommand StopCommand => stopCommand ??= new RelayCommand(
+            _ => { EditorLayer.ExitPlaymode(); },
+            _ => EditorLayer.IsPlaying
+        );
+
+        private RelayCommand playCommand;
+
+        public RelayCommand PlayCommand => playCommand ??= new RelayCommand(
+            _ => { EditorLayer.EnterPlaymode(); },
+            _ => EditorLayer.IsPlaying && EngineCore.IsPaused
+        );
+
+        private RelayCommand pauseCommand;
+
+        public RelayCommand PauseCommand => pauseCommand ??= new RelayCommand(
+            _ => { EditorLayer.ExitPlaymode(); },
+            _ => EditorLayer.IsPlaying && !EngineCore.IsPaused
+        );
+
+
         public EditorWindow()
         {
             InitializeComponent();
@@ -44,9 +73,7 @@ namespace Editor
             if (ProjectViewModel.Current == null)
                 throw new Exception("ProjectViewModel is null on editor window load.");
 
-            EngineCore.Init(EditorLayer.Current, new EditorRuntimeLayer());
-            EngineCore.IsPaused = true;
-            EngineCore.Run();
+            EditorLayer.LaunchEngine();
         }
 
         private void EditorWindowInst_Closing(object sender, CancelEventArgs e)

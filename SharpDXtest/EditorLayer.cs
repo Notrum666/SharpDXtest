@@ -42,6 +42,16 @@ namespace Editor
             ProjectsManager.InitializeInFolder(DataFolderPath);
         }
 
+        internal static void LaunchEngine()
+        {
+            EngineCore.Init(Current, new EditorRuntimeLayer());
+
+            EngineCore.IsPaused = true;
+            isPlaying = false;
+
+            EngineCore.Run();
+        }
+
         public override void Init()
         {
             AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
@@ -52,6 +62,8 @@ namespace Editor
 
             ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
             ScriptManager.Recompile();
+
+            EngineCore.OnPaused += OnEnginePaused;
         }
 
         public override void Update()
@@ -62,5 +74,70 @@ namespace Editor
                     ScriptManager.Recompile();
             }
         }
+
+        #region Playmode
+
+        public static event Action OnPlaymodeEntered;
+        public static event Action OnPlaymodeExited;
+
+        /// <summary> True if in Play mode, false if in Edit mode </summary>
+        public static bool IsPlaying
+        {
+            get => isPlaying;
+            set
+            {
+                if (isPlaying == value)
+                    return;
+
+                desiredIsPlaying = value;
+            }
+        }
+
+        private static bool isPlaying = false;
+        private static bool desiredIsPlaying = false;
+
+
+        /// <summary>
+        /// Starts EngineCore playing
+        /// </summary>
+        public static void EnterPlaymode()
+        {
+            IsPlaying = true;
+        }
+
+        /// <summary>
+        /// Stops EngineCore playing and resets the scene
+        /// </summary>
+        public static void ExitPlaymode()
+        {
+            IsPlaying = false;
+        }
+
+        public override void OnFrameEnded()
+        {
+            if (desiredIsPlaying == IsPlaying)
+                return;
+
+            if (desiredIsPlaying)
+            {
+                EngineCore.IsPaused = false;
+                isPlaying = true;
+                OnPlaymodeEntered?.Invoke();
+            }
+            else
+                EngineCore.IsPaused = true;
+        }
+
+        private static void OnEnginePaused()
+        {
+            if (desiredIsPlaying)
+                return;
+
+            isPlaying = false;
+            OnPlaymodeExited?.Invoke();
+        }
+
+        #endregion Playmode
+
     }
 }

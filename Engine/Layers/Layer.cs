@@ -9,5 +9,6 @@
         public virtual void Prepare() { }
         public virtual void FixedUpdate() { }
         public virtual void Update() { }
+        public virtual void OnFrameEnded() { }
     }
 }

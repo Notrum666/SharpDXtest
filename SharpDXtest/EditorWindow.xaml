@@ -38,6 +38,12 @@
                 <MenuItem Header="Scripting">
                     <MenuItem Header="Recompile" Command="{Binding Path=RecompileCommand}"/>
                 </MenuItem>
+                <MenuItem Header="Playmode">
+                    <MenuItem Header="Run" Command="{Binding Path=RunCommand}"/>
+                    <MenuItem Header="Stop" Command="{Binding Path=StopCommand}"/>
+                    <MenuItem Header="Play" Command="{Binding Path=PlayCommand}"/>
+                    <MenuItem Header="Pause" Command="{Binding Path=PauseCommand}"/>
+                </MenuItem>
             </Menu>
         </StackPanel>
     </this:CustomWindowBase.Header>
