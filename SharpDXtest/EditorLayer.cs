@@ -51,6 +51,7 @@ namespace Editor
             SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
 
             ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
+            ScriptManager.Recompile();
         }
 
         public override void Update()

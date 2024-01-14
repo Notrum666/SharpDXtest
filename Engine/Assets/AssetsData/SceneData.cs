@@ -1,22 +1,31 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
+
 using Engine.Serialization;
+
 using YamlDotNet.Serialization.Callbacks;
 
 namespace Engine.AssetsData
 {
     [AssetData<Scene>]
-    public class SceneData : AssetData
+    public class SceneData : NativeAssetData
     {
-        public List<SerializableObject> SerializableObjects = new List<SerializableObject>();
+        public sealed override string FileExtension => ".scene";
 
-        public override void Serialize(BinaryWriter writer)
+        // TODO: Add total objects count for inspector
+        public readonly List<SerializableObject> SerializableObjects = new List<SerializableObject>();
+
+        protected sealed override void SetDefaultValues()
+        {
+            // TODO: Import/create default empty scene
+        }
+
+        public sealed override void Serialize(BinaryWriter writer)
         {
             YamlManager.SaveToStream(writer.BaseStream, this);
         }
 
-        public override void Deserialize(BinaryReader reader)
+        public sealed override void Deserialize(BinaryReader reader)
         {
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }

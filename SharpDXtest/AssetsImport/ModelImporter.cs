@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+
 using Assimp;
+
 using Engine.AssetsData;
+
 using LinearAlgebra;
 
 namespace Editor.AssetsImport
@@ -12,7 +15,7 @@ namespace Editor.AssetsImport
     [AssetImporter("fbx", "dae", "obj")]
     public class ModelImporter : AssetImporter
     {
-        public override int LatestVersion => 1;
+        public override int LatestVersion => 2;
 
         private Scene aiCurrentScene; // external Assimp data -> ai* prefix
         private ModelData currentModelData;
@@ -51,8 +54,9 @@ namespace Editor.AssetsImport
 
             ProcessScene();
 
-            if (currentSkeletonData is not null) {
-                Guid subGuid = currentImportContext.AddSubAsset("skeleton", currentSkeletonData);
+            if (currentSkeletonData is not null)
+            {
+                Guid subGuid = currentImportContext.SaveExportedAsset("skeleton", currentSkeletonData, "Animation");
                 currentModelData.SkeletonGuid = subGuid;
 
                 currentImportSettings.SkeletonOverride ??= subGuid;
@@ -101,14 +105,11 @@ namespace Editor.AssetsImport
             if (aiCurrentScene.Materials == null)
                 return;
 
-            string sourceAssetPath = currentImportContext.AssetSourcePath;
-            string sourceAssetFolder = Path.GetDirectoryName(sourceAssetPath);
-
             foreach (Material material in aiCurrentScene.Materials)
-                currentModelData.MaterialsGuids.Add(ProcessMaterial(material, sourceAssetFolder));
+                currentModelData.MaterialsGuids.Add(ProcessMaterial(material));
         }
 
-        private Guid ProcessMaterial(Material material, string sourceAssetFolder)
+        private Guid ProcessMaterial(Material material)
         {
             MaterialData materialData = new MaterialData();
 
@@ -117,7 +118,7 @@ namespace Editor.AssetsImport
                 Color4D color = material.ColorDiffuse;
                 materialData.BaseColor = new Vector4f(color.R, color.G, color.B, color.A);
             }
-            
+
             foreach (TextureType textureType in Enum.GetValues<TextureType>())
             {
                 MaterialTextureType materialTextureType = ConvertTextureType(textureType);
@@ -135,10 +136,9 @@ namespace Editor.AssetsImport
                 {
                     while (relativeFilePath.StartsWith(@".\") || relativeFilePath.StartsWith(@"./"))
                         relativeFilePath = relativeFilePath.Substring(2);
-                    string filePath = Path.Combine(sourceAssetFolder, relativeFilePath);
-                    Guid? guid = AssetsRegistry.ImportAsset(filePath);
-                    if (guid.HasValue)
-                        materialData.AddTexture(materialTextureType, guid.Value);
+                    Guid? externalGuid = currentImportContext.GetExternalAssetGuid<TextureData>(relativeFilePath);
+                    if (externalGuid.HasValue)
+                        materialData.AddTexture(materialTextureType, externalGuid.Value);
                 }
             }
 
@@ -178,7 +178,8 @@ namespace Editor.AssetsImport
 
         private void BuildSkeleton()
         {
-            if (aiCurrentScene.HasMeshes && aiCurrentScene.Meshes[0].HasBones) {
+            if (aiCurrentScene.HasMeshes && aiCurrentScene.Meshes[0].HasBones)
+            {
                 currentSkeletonData = new SkeletonData();
                 currentSkeletonData.InverseRootTransform = ConvertMatrix(aiCurrentScene.RootNode.Transform);
                 currentSkeletonData.InverseRootTransform.invert();
@@ -247,7 +248,7 @@ namespace Editor.AssetsImport
                     animationData.Channels.Add(animationChannel);
                 }
 
-                currentImportContext.AddSubAsset(animationData.Name, animationData);
+                currentImportContext.SaveExportedAsset(animationData.Name, animationData, "Animation");
             }
         }
 
@@ -265,7 +266,8 @@ namespace Editor.AssetsImport
             MeshData meshData = null;
             string meshName = $"{nodeName}_{mesh.Name}_{meshIndex}";
             foreach (MeshData loadedMeshData in currentModelData.Meshes)
-                if (loadedMeshData.Name == meshName) {
+                if (loadedMeshData.Name == meshName)
+                {
                     meshData = loadedMeshData;
                     break;
                 }

@@ -1,22 +1,30 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Engine.AssetsData
 {
     [AssetData<SkeletalAnimation>]
-    public class AnimationData : AssetData
+    public class AnimationData : NativeAssetData
     {
+        public sealed override string FileExtension => ".anim";
+
         public string Name;
         public float DurationInTicks;
         public float TickPerSecond;
         public List<AnimationChannel> Channels = new List<AnimationChannel>();
 
-        public override void Serialize(BinaryWriter writer)
+        protected sealed override void SetDefaultValues()
+        {
+            throw new NotImplementedException();
+        }
+        
+        public sealed override void Serialize(BinaryWriter writer)
         {
             YamlManager.SaveToStream(writer.BaseStream, this);
         }
 
-        public override void Deserialize(BinaryReader reader)
+        public sealed override void Deserialize(BinaryReader reader)
         {
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
