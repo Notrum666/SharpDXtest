@@ -58,6 +58,13 @@ namespace Editor
             _ => EditorLayer.IsPlaying && !EngineCore.IsPaused
         );
 
+        private RelayCommand stepCommand;
+
+        public RelayCommand StepCommand => stepCommand ??= new RelayCommand(
+            _ => { EditorLayer.QueueStep(); },
+            _ => EditorLayer.IsPlaying && EngineCore.IsPaused
+        );
+
 
         public EditorWindow()
         {

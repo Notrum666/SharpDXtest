@@ -148,8 +148,7 @@ namespace Editor
                 isStepQueued = false;
                 isInStep = true;
             }
-
-            if (!EngineCore.IsPaused && isInStep)
+            else if (!EngineCore.IsPaused && isInStep)
             {
                 EngineCore.IsPaused = true;
                 isInStep = false;

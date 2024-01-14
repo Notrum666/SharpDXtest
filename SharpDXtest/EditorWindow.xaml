@@ -44,6 +44,7 @@
                     <MenuItem Header="Play" Command="{Binding Path=PlayCommand}"/>
                     <MenuItem Header="Pause" Command="{Binding Path=PauseCommand}"/>
                 </MenuItem>
+                <MenuItem Header="Step" Command="{Binding Path=StepCommand}"/>
             </Menu>
         </StackPanel>
     </this:CustomWindowBase.Header>
