@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Engine.AssetsData
 {
@@ -16,6 +17,16 @@ namespace Engine.AssetsData
         protected sealed override void SetDefaultValues()
         {
             throw new NotImplementedException();
+        }
+        
+        public sealed override void Serialize(BinaryWriter writer)
+        {
+            YamlManager.SaveToStream(writer.BaseStream, this);
+        }
+
+        public sealed override void Deserialize(BinaryReader reader)
+        {
+            YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
         public override SkeletalAnimation ToRealAsset()

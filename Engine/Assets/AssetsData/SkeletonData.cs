@@ -20,6 +20,16 @@ namespace Engine.AssetsData
             throw new NotImplementedException();
         }
 
+        public sealed override void Serialize(BinaryWriter writer)
+        {
+            YamlManager.SaveToStream(writer.BaseStream, this);
+        }
+
+        public sealed override void Deserialize(BinaryReader reader)
+        {
+            YamlManager.LoadFromStream(reader.BaseStream, this);
+        }
+
         public override Skeleton ToRealAsset()
         {
             Skeleton skeleton = new Skeleton();

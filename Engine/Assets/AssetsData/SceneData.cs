@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 
 using Engine.Serialization;
 
@@ -17,6 +18,16 @@ namespace Engine.AssetsData
         protected sealed override void SetDefaultValues()
         {
             // TODO: Import/create default empty scene
+        }
+
+        public sealed override void Serialize(BinaryWriter writer)
+        {
+            YamlManager.SaveToStream(writer.BaseStream, this);
+        }
+
+        public sealed override void Deserialize(BinaryReader reader)
+        {
+            YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
         public override Scene ToRealAsset()

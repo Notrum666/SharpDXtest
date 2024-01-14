@@ -9,16 +9,6 @@ namespace Engine.AssetsData
     public abstract class NativeAssetData : AssetData
     {
         public abstract string FileExtension { get; }
-        
-        public sealed override void Serialize(BinaryWriter writer)
-        {
-            YamlManager.SaveToStream(writer.BaseStream, this);
-        }
-
-        public sealed override void Deserialize(BinaryReader reader)
-        {
-            YamlManager.LoadFromStream(reader.BaseStream, this);
-        }
 
         public static T CreateDefault<T>() where T : NativeAssetData
         {

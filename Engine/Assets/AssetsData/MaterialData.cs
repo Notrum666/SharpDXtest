@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 using LinearAlgebra;
@@ -24,6 +25,16 @@ namespace Engine.AssetsData
             {
                 TexturesGuids[textureType] = Guid.Empty;
             }
+        }
+        
+        public sealed override void Serialize(BinaryWriter writer)
+        {
+            YamlManager.SaveToStream(writer.BaseStream, this);
+        }
+
+        public sealed override void Deserialize(BinaryReader reader)
+        {
+            YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
         public override Material ToRealAsset()
