@@ -89,8 +89,6 @@ namespace Engine
 
             sampler = Sampler.Default;
             shadowsSampler = Sampler.DefaultShadows;
-
-            bloomEffect = new PostProcessEffect_Bloom();
         }
 
         private static void InitDirectX()
@@ -430,6 +428,7 @@ namespace Engine
 
         private static void PrePostProcessingPass(Camera camera)
         {
+            bloomEffect ??= new PostProcessEffect_Bloom();
             bloomEffect.Process(camera.ColorBuffer);
         }
 
