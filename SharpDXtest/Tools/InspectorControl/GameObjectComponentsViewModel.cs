@@ -24,9 +24,13 @@ namespace Editor
 
         public void Reload()
         {
+            EditorRuntimeLayer.OnUpdate -= Update;
+            
             ComponentViewModels.Clear();
             foreach (Component component in target.Components)
                 ComponentViewModels.Add(new ComponentViewModel(component));
+            
+            EditorRuntimeLayer.OnUpdate += Update;
         }
 
         public void Update()

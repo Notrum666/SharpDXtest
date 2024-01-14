@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -12,6 +13,8 @@ namespace Editor
         public override float UpdateOrder => 1.1f;
         public override float InitOrder => 1001;
 
+        public static event Action OnUpdate;
+
         public override void Update()
         {
             foreach (GameObject obj in EditorScene.GameObjects)
@@ -19,7 +22,12 @@ namespace Editor
                 if (obj != null && obj.Enabled)
                     obj.Update();
             }
+            
+            OnUpdate?.Invoke();
+        }
 
+        public override void OnFrameEnded()
+        {
             EditorScene.RemoveDestroyed();
         }
     }
