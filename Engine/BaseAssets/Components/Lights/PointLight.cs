@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reflection;
 
+using LinearAlgebra;
+
 namespace Engine.BaseAssets.Components
 {
     public class PointLight : Light
@@ -9,7 +11,7 @@ namespace Engine.BaseAssets.Components
         private float radius = 1.0f;
         [SerializedField]
         private float intensity = 0.4f;
-        
+
         public Ranged<float> Radius => new Ranged<float>(ref radius, 0.0f);
         public Ranged<float> Intensity => new Ranged<float>(ref intensity, 0.0f, 1.0f);
 
@@ -82,6 +84,30 @@ namespace Engine.BaseAssets.Components
             //GL.ReadBuffer(ReadBufferMode.None);
             //GL.BindTexture(TextureTarget.TextureCubeMap, 0);
             //GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+        }
+
+        public override void RenderShadows()
+        {
+            // TODO: IMPLEMENT POINT LIGHT SHADOWS
+        }
+
+        public override bool PrepareLightPass(Camera camera)
+        {
+            if (!ShaderPipeline.TryGetPipeline("deferred_light_point", out ShaderPipeline pipeline))
+                return false;
+
+            pipeline.Use();
+
+            pipeline.UpdateUniform("camPos", (Vector3f)camera.GameObject.Transform.Position);
+
+            pipeline.UpdateUniform("pointLight.position", (Vector3f)GameObject.Transform.Position);
+            pipeline.UpdateUniform("pointLight.radius", Radius);
+            pipeline.UpdateUniform("pointLight.brightness", Brightness);
+            pipeline.UpdateUniform("pointLight.intensity", Intensity);
+            pipeline.UpdateUniform("pointLight.color", Color);
+
+            pipeline.UploadUpdatedUniforms();
+            return true;
         }
     }
 }

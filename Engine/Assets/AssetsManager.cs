@@ -248,7 +248,7 @@ namespace Engine
 
     public class ArtifactDatabase
     {
-        private const int LatestVersion = 2;
+        private const int LatestVersion = 4;
 
         private const string FileName = "GuidDB.db";
 

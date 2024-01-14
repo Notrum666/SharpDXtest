@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+
 using Engine.BaseAssets.Components;
 
 namespace Engine
@@ -24,11 +25,14 @@ namespace Engine
 
         public bool Enabled => localEnabled && Transform != null && (Transform.Parent?.GameObject?.Enabled ?? true); //TODO: maybe better cache value
 
-        public GameObject()
+        public GameObject() : this(false) { }
+
+        public GameObject(bool external)
         {
             Name = "NewObject";
             Transform = AddComponent<Transform>();
-            if (Scene.CurrentScene != null)
+
+            if (!external && Scene.CurrentScene != null)
                 Scene.CurrentScene.AddObject(this);
         }
 
@@ -140,7 +144,7 @@ namespace Engine
             foreach (Component component in components)
             {
                 if (component is BehaviourComponent { LocalEnabled: true } comp)
-                    comp.Update();
+                    comp.Update(PendingDestroy);
             }
         }
 

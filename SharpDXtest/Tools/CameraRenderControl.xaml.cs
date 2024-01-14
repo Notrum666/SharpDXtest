@@ -131,7 +131,7 @@ namespace Editor
                 Width = double.NaN;
                 Height = double.NaN;
 
-                controlledGameObject = new GameObject();
+                controlledGameObject = EditorScene.Instantiate("Editor camera");
                 controlledGameObject.Transform.Position = new Vector3(0, -10, 5);
                 controller = controlledGameObject.AddComponent<EditorCameraController>();
                 camera = controlledGameObject.AddComponent<Camera>();
@@ -177,7 +177,6 @@ namespace Editor
             if (!EngineCore.IsAlive || !IsVisible)
                 return;
 
-            controlledGameObject.Update();
             if (keyboardFocused)
                 controller.UpdateInput();
 
@@ -280,8 +279,6 @@ namespace Editor
             Vector3 screenToWorldDir = camera.ScreenToWorldRay(mouseX, mouseY);
             Vector3 nearPlanePos = screenToWorldDir * camera.Near + camera.GameObject.Transform.Position;
 
-            //Logger.Log(LogType.Info, $"Mouse screen pos {mouseX}, {mouseY} \nMouse world dir {screenToWorldDir}\nMouse dir {screenToWorldDir - camera.GameObject.Transform.Position}");
-
             bool hasHit = Raycast.HitMesh(
                 new Ray
                 {
@@ -291,9 +288,8 @@ namespace Editor
                 out hitResult
             );
 
-            GameObject cursor = Scene.CurrentScene.GameObjects.First(obj => obj.Name == "Cursor");
-
-            cursor.Transform.Position = hitResult.Point;
+            //GameObject cursor = Scene.CurrentScene.GameObjects.First(obj => obj.Name == "Cursor");
+            //cursor.Transform.Position = hitResult.Point;
 
             InspectorControl.GameObjectViewModel.Target = hasHit ? hitResult.Target : null;
         }

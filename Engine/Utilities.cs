@@ -14,7 +14,7 @@ namespace Engine
         private static readonly EnumerationOptions defaultEnumerator = new EnumerationOptions() { IgnoreInaccessible = true };
         private static readonly EnumerationOptions recursiveEnumerator = new EnumerationOptions() { IgnoreInaccessible = true, RecurseSubdirectories = true };
 
-        public static string SanitizeFileName(string name)
+        public static string SanitizeFileName(string name, bool sanitizeDots = false)
         {
             int fileNameIndex = name.LastIndexOf(Path.DirectorySeparatorChar) + 1;
             StringBuilder path = new StringBuilder(name[..fileNameIndex]);
@@ -28,6 +28,9 @@ namespace Engine
             {
                 fileName.Replace(c, '_');
             }
+
+            if (sanitizeDots)
+                fileName.Replace('.', '_');
 
             return path.Append(fileName).ToString();
         }

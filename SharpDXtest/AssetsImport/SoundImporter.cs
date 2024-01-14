@@ -6,6 +6,8 @@ namespace Editor.AssetsImport
     [AssetImporter("wav")]
     public class SoundImporter : AssetImporter
     {
+        public override int LatestVersion => 1;
+
         public class SoundImportSettings : BaseImportSettings
         {
             public string Name = "SoundShit";

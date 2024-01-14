@@ -24,6 +24,8 @@ namespace Editor
 
         public void Reload()
         {
+            EditorRuntimeLayer.OnUpdate -= Update;
+            
             ComponentViewModels.Clear();
 
             if(target != null)
@@ -31,6 +33,8 @@ namespace Editor
                 foreach (Component component in target.Components)
                     ComponentViewModels.Add(new ComponentViewModel(component));
             }
+            
+            EditorRuntimeLayer.OnUpdate += Update;
         }
 
         public void Update()

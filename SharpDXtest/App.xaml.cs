@@ -1,11 +1,9 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Threading;
 using System.Windows;
-using System.Windows.Interop;
 
 using Editor;
-
-using Engine;
 
 namespace SharpDXtest
 {
@@ -14,6 +12,20 @@ namespace SharpDXtest
     /// </summary>
     public partial class App : Application
     {
+        public static bool IsActive { get; private set; }
+
+        void App_Activated(object sender, EventArgs e)
+        {
+            // Application activated
+            IsActive = true;
+        }
+
+        void App_Deactivated(object sender, EventArgs e)
+        {
+            // Application deactivated
+            IsActive = false;
+        }
+
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.CreateSpecificCulture("en-us");

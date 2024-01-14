@@ -2,6 +2,7 @@
 
 using LinearAlgebra;
 
+using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 
@@ -48,6 +49,23 @@ namespace Engine.BaseAssets.Components
         public SpotLight()
         {
             ShadowTexture = new Texture(shadowSize, shadowSize, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil);
+        }
+
+        public override void RenderShadows()
+        {
+            if (!ShaderPipeline.TryGetPipeline("depth_only", out ShaderPipeline pipeline))
+                return;
+
+            pipeline.Use();
+
+            DeviceContext context = GraphicsCore.CurrentDevice.ImmediateContext;
+            context.Rasterizer.SetViewport(new Viewport(0, 0, ShadowSize, ShadowSize, 0.0f, 1.0f));
+            context.OutputMerger.SetTargets(ShadowTexture.GetView<DepthStencilView>(), renderTargetView: null);
+            context.ClearDepthStencilView(ShadowTexture.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
+
+            pipeline.UpdateUniform("view", LightSpace);
+
+            RenderObjects(pipeline);
         }
     }
 }

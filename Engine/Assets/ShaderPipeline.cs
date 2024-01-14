@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+
 using SharpDX.Direct3D11;
 
 namespace Engine
@@ -11,44 +13,29 @@ namespace Engine
         public ReadOnlyCollection<Shader> Shaders => shaders.AsReadOnly();
         public static ShaderPipeline Current { get; private set; }
 
-        private static readonly Dictionary<string, ShaderPipeline> staticPipelines = new Dictionary<string, ShaderPipeline>();
+        private static readonly Dictionary<string, ShaderPipeline> registeredPipelines = new Dictionary<string, ShaderPipeline>();
 
-        public static ShaderPipeline GetStaticPipeline(string name)
+        public static bool TryGetPipeline(string pipelineName, out ShaderPipeline pipeline)
         {
-            return staticPipelines[name];
+            if (registeredPipelines.TryGetValue(pipelineName, out pipeline))
+                return true;
+
+            Logger.Log(LogType.Error, $"Tried to get pipeline \"{pipelineName}\", but it is not registered");
+            return false;
         }
 
-        public static ShaderPipeline CreateStaticPipeline(string pipelineName, params Shader[] shaders)
+        public static void LoadPipeline(string pipelineName, IEnumerable<string> shadersNames)
         {
-            if (staticPipelines.ContainsKey(pipelineName))
+            if (registeredPipelines.ContainsKey(pipelineName))
                 throw new ArgumentException($"Shader pipeline with name {pipelineName} is already loaded.");
 
-            staticPipelines[pipelineName] = new ShaderPipeline(shaders);
-            return GetStaticPipeline(pipelineName);
+            IEnumerable<Shader> shaders = shadersNames.Select(AssetsManager.LoadAssetAtPath<Shader>);
+            registeredPipelines[pipelineName] = new ShaderPipeline(shaders.ToArray());
         }
 
-        public static void InitializeStaticPipelines()
+        public static void UnloadPipeline(string pipelineName)
         {
-            // CreateStaticPipeline("default", Shader.Create("BaseAssets\\Shaders\\pbr_lighting.vsh"),
-            //                      Shader.Create("BaseAssets\\Shaders\\pbr_lighting.fsh"));
-            
-            CreateStaticPipeline("depth_only", Shader.Create("BaseAssets\\Shaders\\depth_only.vsh"),
-                                 Shader.Create("BaseAssets\\Shaders\\depth_only.fsh"));
-
-            CreateStaticPipeline("deferred_geometry", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.vsh"),
-                                 Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry.fsh"));
-
-            CreateStaticPipeline("deferred_geometry_particles", Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.vsh"),
-                                 Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.gsh"),
-                                 Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_geometry_particles.fsh"));
-            CreateStaticPipeline("volume", Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.vsh"),
-                                 Shader.Create("BaseAssets\\Shaders\\VolumetricRender\\volume.fsh"));
-
-            Shader screenQuadShader = Shader.GetStaticShader("screen_quad");
-            CreateStaticPipeline("deferred_light_point", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_point.fsh"));
-            CreateStaticPipeline("deferred_light_directional", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_light_directional.fsh"));
-            CreateStaticPipeline("deferred_addLight", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deffered_addLight.fsh"));
-            CreateStaticPipeline("deferred_gamma_correction", screenQuadShader, Shader.Create("BaseAssets\\Shaders\\DeferredRender\\deferred_gamma_correction.fsh"));
+            registeredPipelines.Remove(pipelineName);
         }
 
         public ShaderPipeline(params Shader[] shaders)
