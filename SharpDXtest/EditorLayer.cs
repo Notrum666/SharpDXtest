@@ -58,9 +58,9 @@ namespace Editor
 
             ProjectViewModel.Current.ApplyProjectSettings();
             ProjectViewModel.Current.UpdateGameScenes();
-            SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
+            SceneManager.ReloadScene();
 
-            ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
+            ScriptManager.OnCodeRecompiled += SceneManager.ReloadScene;
             ScriptManager.Recompile();
 
             EngineCore.OnPaused += OnEnginePaused;
@@ -134,6 +134,7 @@ namespace Editor
                 return;
 
             isPlaying = false;
+            SceneManager.ReloadScene();
             OnPlaymodeExited?.Invoke();
         }
 

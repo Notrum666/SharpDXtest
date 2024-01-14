@@ -20,6 +20,11 @@ namespace Engine
 
         private static string nextScenePath;
 
+        public static void ReloadScene()
+        {
+            LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
+        }
+        
         public static void LoadSceneByPath(string path)
         {
             if (!Scenes.ContainsKey(path))

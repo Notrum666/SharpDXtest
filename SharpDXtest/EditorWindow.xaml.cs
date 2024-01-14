@@ -47,14 +47,14 @@ namespace Editor
         private RelayCommand playCommand;
 
         public RelayCommand PlayCommand => playCommand ??= new RelayCommand(
-            _ => { EditorLayer.EnterPlaymode(); },
+            _ => { EngineCore.IsPaused = false; },
             _ => EditorLayer.IsPlaying && EngineCore.IsPaused
         );
 
         private RelayCommand pauseCommand;
 
         public RelayCommand PauseCommand => pauseCommand ??= new RelayCommand(
-            _ => { EditorLayer.ExitPlaymode(); },
+            _ => { EngineCore.IsPaused = true; },
             _ => EditorLayer.IsPlaying && !EngineCore.IsPaused
         );
 
