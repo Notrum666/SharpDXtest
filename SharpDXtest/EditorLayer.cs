@@ -79,7 +79,6 @@ namespace Editor
 
         public static event Action OnPlaymodeEntered;
         public static event Action OnPlaymodeExited;
-        public static bool IsPlayPaused => IsPlaying && EngineCore.IsPaused;
 
         /// <summary> True if in Play mode, false if in Edit mode </summary>
         public static bool IsPlaying
@@ -96,7 +95,7 @@ namespace Editor
 
         private static bool isPlaying = false;
         private static bool desiredIsPlaying = false;
-
+        private static bool stepInProcess = false;
 
         /// <summary>
         /// Starts EngineCore playing
@@ -114,44 +113,29 @@ namespace Editor
             IsPlaying = false;
         }
 
-        private static bool isInStep = false;
-        private static bool isStepQueued = false;
-
-        public static void QueueStep()
+        public static void ProcessStep()
         {
-            if (IsPlayPaused)
-                isStepQueued = true;
+            if (IsPlaying && EngineCore.IsPaused)
+                stepInProcess = true;
         }
 
         public override void OnFrameEnded()
         {
             if (desiredIsPlaying != IsPlaying)
             {
-                isStepQueued = false;
-                isInStep = false;
+                stepInProcess = false;
+                EngineCore.IsPaused = !desiredIsPlaying;
 
                 if (desiredIsPlaying)
                 {
-                    EngineCore.IsPaused = false;
                     isPlaying = true;
                     OnPlaymodeEntered?.Invoke();
                 }
-                else
-                    EngineCore.IsPaused = true;
-
-                return;
             }
-
-            if (IsPlayPaused && isStepQueued)
+            else if (IsPlaying && stepInProcess)
             {
-                EngineCore.IsPaused = false;
-                isStepQueued = false;
-                isInStep = true;
-            }
-            else if (!EngineCore.IsPaused && isInStep)
-            {
-                EngineCore.IsPaused = true;
-                isInStep = false;
+                stepInProcess = EngineCore.IsPaused;
+                EngineCore.IsPaused = !EngineCore.IsPaused;
             }
         }
 

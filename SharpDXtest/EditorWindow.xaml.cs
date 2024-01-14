@@ -61,7 +61,7 @@ namespace Editor
         private RelayCommand stepCommand;
 
         public RelayCommand StepCommand => stepCommand ??= new RelayCommand(
-            _ => { EditorLayer.QueueStep(); },
+            _ => { EditorLayer.ProcessStep(); },
             _ => EditorLayer.IsPlaying && EngineCore.IsPaused
         );
 
