@@ -78,7 +78,7 @@ namespace Editor.AssetsImport
             return subGuid;
         }
 
-        public Guid SaveExportedAsset<T>(string identifier, T subAsset) where T : NativeAssetData
+        public Guid SaveExportedAsset<T>(string identifier, T subAsset, string subFolderName = null) where T : NativeAssetData
         {
             (Type, string) externalAssetKey = (typeof(T), identifier);
             Guid externalGuid = assetMetaData.ExportedAssets.GetValueOrDefault(externalAssetKey, Guid.Empty);
@@ -89,9 +89,14 @@ namespace Editor.AssetsImport
                 return savedGuid.GetValueOrDefault(Guid.Empty);
             }
 
-            string sourceAssetName = Path.GetFileNameWithoutExtension(AssetSourcePath);
-            string sourceAssetFolder = Path.GetDirectoryName(AssetSourcePath)!;
-            Guid? createdGuid = AssetsRegistry.CreateAsset($"{sourceAssetName}_{identifier}", sourceAssetFolder, subAsset);
+            string assetName = Path.GetFileNameWithoutExtension(AssetSourcePath);
+            string parentFolderPath = Path.GetDirectoryName(AssetSourcePath)!;
+            if (string.IsNullOrEmpty(subFolderName))
+                identifier = $"{assetName}_{identifier}";
+            else
+                parentFolderPath = Path.Combine(parentFolderPath, $"{assetName}_{subFolderName}");
+
+            Guid? createdGuid = AssetsRegistry.CreateAsset(identifier, parentFolderPath, subAsset);
             return createdGuid.GetValueOrDefault(Guid.Empty);
         }
 

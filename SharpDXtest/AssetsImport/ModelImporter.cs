@@ -56,7 +56,7 @@ namespace Editor.AssetsImport
 
             if (currentSkeletonData is not null)
             {
-                Guid subGuid = currentImportContext.SaveExportedAsset("skeleton", currentSkeletonData);
+                Guid subGuid = currentImportContext.SaveExportedAsset("skeleton", currentSkeletonData, "Animation");
                 currentModelData.SkeletonGuid = subGuid;
 
                 currentImportSettings.SkeletonOverride ??= subGuid;
@@ -248,7 +248,7 @@ namespace Editor.AssetsImport
                     animationData.Channels.Add(animationChannel);
                 }
 
-                currentImportContext.SaveExportedAsset(animationData.Name, animationData);
+                currentImportContext.SaveExportedAsset(animationData.Name, animationData, "Animation");
             }
         }
 
