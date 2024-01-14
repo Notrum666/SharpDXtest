@@ -46,10 +46,10 @@ namespace Editor
         {
             EngineCore.Init(Current, new EditorRuntimeLayer());
 
-            EngineCore.IsPaused = true;
-            isPlaying = false;
-
+            EngineCore.OnPaused += OnEnginePaused;
             EngineCore.Run();
+
+            SceneManager.ReloadScene();
         }
 
         public override void Init()
@@ -58,12 +58,10 @@ namespace Editor
 
             ProjectViewModel.Current.ApplyProjectSettings();
             ProjectViewModel.Current.UpdateGameScenes();
-            SceneManager.ReloadScene();
 
-            ScriptManager.OnCodeRecompiled += SceneManager.ReloadScene;
             ScriptManager.Recompile();
+            ScriptManager.OnCodeRecompiled += SceneManager.ReloadScene;
 
-            EngineCore.OnPaused += OnEnginePaused;
         }
 
         public override void Update()

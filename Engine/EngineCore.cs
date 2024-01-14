@@ -12,8 +12,9 @@ namespace Engine
     {
         private static bool isAlive = false;
         public static bool IsAlive => isAlive;
-        private static bool desiredPauseState = false;
-        private static bool isPaused = false;
+
+        private static bool desiredPauseState = true;
+        private static bool isPaused = true;
         public static bool IsPaused
         {
             get => isPaused;
@@ -25,11 +26,11 @@ namespace Engine
                 desiredPauseState = value;
             }
         }
-        private static Task loopTask;
         public static event Action OnPaused;
         public static event Action OnResumed;
         public static event Action OnFrameEnded;
 
+        private static Task loopTask;
         private static List<Layer> layersStack;
 
         private static double accumulator = 0.0;
