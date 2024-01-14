@@ -61,8 +61,11 @@ namespace Engine.Layers
                 return;
 
             UpdateGameObjects();
+        }
 
-            CurrentScene.DestroyPendingObjects();
+        public override void OnFrameEnded()
+        {
+            CurrentScene?.DestroyPendingObjects();
             SceneManager.TryUnloadCurrentScene();
         }
 

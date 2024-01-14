@@ -42,16 +42,26 @@ namespace Editor
             ProjectsManager.InitializeInFolder(DataFolderPath);
         }
 
+        internal static void LaunchEngine()
+        {
+            EngineCore.Init(Current, new EditorRuntimeLayer());
+
+            EngineCore.OnPaused += OnEnginePaused;
+            EngineCore.Run();
+
+            SceneManager.ReloadScene();
+        }
+
         public override void Init()
         {
             AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
 
             ProjectViewModel.Current.ApplyProjectSettings();
             ProjectViewModel.Current.UpdateGameScenes();
-            SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
 
-            ScriptManager.OnCodeRecompiled += () => SceneManager.LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
             ScriptManager.Recompile();
+            ScriptManager.OnCodeRecompiled += SceneManager.ReloadScene;
+
         }
 
         public override void Update()
@@ -62,5 +72,82 @@ namespace Editor
                     ScriptManager.Recompile();
             }
         }
+
+        #region Playmode
+
+        public static event Action OnPlaymodeEntered;
+        public static event Action OnPlaymodeExited;
+
+        /// <summary> True if in Play mode, false if in Edit mode </summary>
+        public static bool IsPlaying
+        {
+            get => isPlaying;
+            set
+            {
+                if (isPlaying == value)
+                    return;
+
+                desiredIsPlaying = value;
+            }
+        }
+
+        private static bool isPlaying = false;
+        private static bool desiredIsPlaying = false;
+        private static bool stepInProcess = false;
+
+        /// <summary>
+        /// Starts EngineCore playing
+        /// </summary>
+        public static void EnterPlaymode()
+        {
+            IsPlaying = true;
+        }
+
+        /// <summary>
+        /// Stops EngineCore playing and resets the scene
+        /// </summary>
+        public static void ExitPlaymode()
+        {
+            IsPlaying = false;
+        }
+
+        public static void ProcessStep()
+        {
+            if (IsPlaying && EngineCore.IsPaused)
+                stepInProcess = true;
+        }
+
+        public override void OnFrameEnded()
+        {
+            if (desiredIsPlaying != IsPlaying)
+            {
+                stepInProcess = false;
+                EngineCore.IsPaused = !desiredIsPlaying;
+
+                if (desiredIsPlaying)
+                {
+                    isPlaying = true;
+                    OnPlaymodeEntered?.Invoke();
+                }
+            }
+            else if (IsPlaying && stepInProcess)
+            {
+                stepInProcess = EngineCore.IsPaused;
+                EngineCore.IsPaused = !EngineCore.IsPaused;
+            }
+        }
+
+        private static void OnEnginePaused()
+        {
+            if (desiredIsPlaying)
+                return;
+
+            isPlaying = false;
+            SceneManager.ReloadScene();
+            OnPlaymodeExited?.Invoke();
+        }
+
+        #endregion Playmode
+
     }
 }
