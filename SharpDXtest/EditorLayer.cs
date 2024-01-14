@@ -79,6 +79,7 @@ namespace Editor
 
         public static event Action OnPlaymodeEntered;
         public static event Action OnPlaymodeExited;
+        public static bool IsPlayPaused => IsPlaying && EngineCore.IsPaused;
 
         /// <summary> True if in Play mode, false if in Edit mode </summary>
         public static bool IsPlaying
@@ -113,19 +114,46 @@ namespace Editor
             IsPlaying = false;
         }
 
+        private static bool isInStep = false;
+        private static bool isStepQueued = false;
+
+        public static void QueueStep()
+        {
+            if (IsPlayPaused)
+                isStepQueued = true;
+        }
+
         public override void OnFrameEnded()
         {
-            if (desiredIsPlaying == IsPlaying)
-                return;
+            if (desiredIsPlaying != IsPlaying)
+            {
+                isStepQueued = false;
+                isInStep = false;
 
-            if (desiredIsPlaying)
+                if (desiredIsPlaying)
+                {
+                    EngineCore.IsPaused = false;
+                    isPlaying = true;
+                    OnPlaymodeEntered?.Invoke();
+                }
+                else
+                    EngineCore.IsPaused = true;
+
+                return;
+            }
+
+            if (IsPlayPaused && isStepQueued)
             {
                 EngineCore.IsPaused = false;
-                isPlaying = true;
-                OnPlaymodeEntered?.Invoke();
+                isStepQueued = false;
+                isInStep = true;
             }
-            else
+
+            if (!EngineCore.IsPaused && isInStep)
+            {
                 EngineCore.IsPaused = true;
+                isInStep = false;
+            }
         }
 
         private static void OnEnginePaused()
