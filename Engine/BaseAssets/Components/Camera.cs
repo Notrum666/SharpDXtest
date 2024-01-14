@@ -89,47 +89,27 @@ namespace Engine.BaseAssets.Components
             InvalidateMatrices();
         }
 
-        public LinearAlgebra.Vector3 ScreenToWorldRay(int x, int y)
+        /// <summary>
+        /// Transforms screen pixel position to world direction vector originating from camera
+        /// </summary>
+        /// <param name="mousePos">Pixel position, where X is left to right and Y is top to bottom</param>
+        /// <returns>Direction vector originating from camera position</returns>
+        public LinearAlgebra.Vector3 ScreenToWorld(LinearAlgebra.Vector2 pixelPos)
         {
-            Matrix4x4 viewMat = GameObject.Transform.View;
-            Matrix4x4 projMat = Proj;
-
-            LinearAlgebra.Vector2 mouse;
-            mouse.x = x;
-            mouse.y = y;
-
-            LinearAlgebra.Vector3 vector = 
-                UnProject(
-                    projMat,
-                    viewMat,
-                    new LinearAlgebra.Vector2(Width, Height), 
-                    mouse
-            );
-
-            LinearAlgebra.Vector3 farPlaneCoords = new LinearAlgebra.Vector3(vector.x, vector.y, vector.z);
-            LinearAlgebra.Vector3 screenToWorldRay = (farPlaneCoords - GameObject.Transform.Position).normalized();
-
-            return screenToWorldRay;
+            pixelPos.x = pixelPos.x / Width * 2 - 1.0;
+            pixelPos.y = 1.0 - pixelPos.y / Height * 2;
+            return ((GameObject.Transform.Model * InvProj).TransformPoint(new LinearAlgebra.Vector3(pixelPos, 1.0)) - GameObject.Transform.Position).normalized();
         }
 
-        LinearAlgebra.Vector3 UnProject(Matrix4x4 projection, Matrix4x4 view, LinearAlgebra.Vector2 viewport, LinearAlgebra.Vector2 mouse)
+        /// <summary>
+        /// Transforms world point to screen pixel position
+        /// </summary>
+        /// <param name="point">Point in world space</param>
+        /// <returns>Pixel position, where X is left to right and Y is top to bottom</returns>
+        public LinearAlgebra.Vector2 WorldToScreen(LinearAlgebra.Vector3 point)
         {
-            LinearAlgebra.Vector3 vec;
-
-            vec.x = (mouse.x / viewport.x) * 2 - 1.0;
-            vec.y = 1.0 - (mouse.y / viewport.y) * 2;
-            vec.z = 1;
-
-            Matrix4x4 viewInv = view;
-            Matrix4x4 projInv = projection;
-
-            viewInv.invert();
-            projInv.invert();
-
-            vec = projInv.TransformPoint(vec);
-            vec = viewInv.TransformPoint(vec);
-
-            return vec;
+            point = (GameObject.Transform.View * Proj).TransformPoint(point - GameObject.Transform.Position);
+            return new LinearAlgebra.Vector2((point.x + 1.0) / 2.0 * Width, -(point.y + 1.0) / 2.0 * Height);
         }
 
         #endregion ComponentLogic

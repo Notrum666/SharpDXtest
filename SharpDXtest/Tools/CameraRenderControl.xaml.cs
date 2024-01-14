@@ -276,13 +276,12 @@ namespace Editor
         private void HandlePicking(int mouseX, int mouseY)
         {
             HitResult hitResult;
-            Vector3 screenToWorldDir = camera.ScreenToWorldRay(mouseX, mouseY);
-            Vector3 nearPlanePos = screenToWorldDir * camera.Near + camera.GameObject.Transform.Position;
+            Vector3 screenToWorldDir = camera.ScreenToWorld(new Vector2(mouseX, mouseY));
 
             bool hasHit = Raycast.HitMesh(
                 new Ray
                 {
-                    Origin = nearPlanePos,
+                    Origin = camera.GameObject.Transform.Position,
                     Direction = screenToWorldDir
                 },
                 out hitResult
