@@ -15,7 +15,7 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private Material[] materials = Array.Empty<Material>();
 
-        internal double SquaredSphereRadius;
+        internal double SquaredBoundingSphereRadius;
 
         public virtual Model Model
         {
@@ -72,7 +72,7 @@ namespace Engine.BaseAssets.Components
         {
             if (model == null)
             {
-                SquaredSphereRadius = 0;
+                SquaredBoundingSphereRadius = 0;
                 return;
             }
 
@@ -98,13 +98,13 @@ namespace Engine.BaseAssets.Components
             foreach (Vector3 vertex in localVertices)
                 worldVertices.Add(modelMatrix.TransformPoint(vertex + offset));
 
-            SquaredSphereRadius = 0;
+            SquaredBoundingSphereRadius = 0;
 
             foreach (Vector3 vertex in worldVertices)
             {
                 double squaredDistanceToCenter = (vertex - center).squaredLength();
-                if (squaredDistanceToCenter > SquaredSphereRadius)
-                    SquaredSphereRadius = squaredDistanceToCenter;
+                if (squaredDistanceToCenter > SquaredBoundingSphereRadius)
+                    SquaredBoundingSphereRadius = squaredDistanceToCenter;
             }
         }
     }

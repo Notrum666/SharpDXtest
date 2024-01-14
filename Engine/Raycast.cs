@@ -1,6 +1,5 @@
 ﻿using Engine.BaseAssets.Components;
 using LinearAlgebra;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -8,13 +7,11 @@ namespace Engine
     {
         public Vector3 Origin;
         public Vector3 Direction;
-        public double Length;
 
-        public Ray(Vector3 origin, Vector3 direction, double length)
+        public Ray(Vector3 origin, Vector3 direction)
         {
             Origin = origin;
             Direction = direction;
-            Length = length;
         }
     }
 
@@ -26,7 +23,7 @@ namespace Engine
 
     public class Raycast
     {
-        public static bool Hit(Ray ray, out HitResult hitResult)
+        public static bool HitMesh(Ray ray, out HitResult hitResult)
         {
             hitResult = default;
             bool hasHitResult = false;
@@ -34,9 +31,13 @@ namespace Engine
             foreach(MeshComponent meshComponent in Scene.FindComponentsOfType<MeshComponent>())
             {
                 var model = meshComponent.Model;
+
+                if (!meshComponent.LocalEnabled || model == null)
+                    continue;
+
                 GameObject gameObject = meshComponent.GameObject;
 
-                if (!IsIntersectSphere(ray, meshComponent))
+                if (!IsIntersectBoundingSphere(ray, meshComponent))
                     continue;
 
                 foreach (Mesh mesh in model.Meshes)
@@ -47,6 +48,7 @@ namespace Engine
                         Vector3 v1 = mesh.Vertices[mesh.Indices[i + 1]].v;
                         Vector3 v2 = mesh.Vertices[mesh.Indices[i + 2]].v;
 
+                        //TODO: calculate intersection in local model space
                         v0 = gameObject.Transform.Model.TransformPoint(v0);
                         v1 = gameObject.Transform.Model.TransformPoint(v1);
                         v2 = gameObject.Transform.Model.TransformPoint(v2);
@@ -78,28 +80,26 @@ namespace Engine
             return hasHitResult;
         }
 
-        static bool IsIntersectSphere(Ray ray, MeshComponent meshComponent)
+        private static bool IsIntersectBoundingSphere(Ray ray, MeshComponent meshComponent)
         {
             Vector3 center = meshComponent.GameObject.Transform.Position;
 
             Vector3 m = ray.Origin - center;
             double b = m.dot(ray.Direction);
-            double c = m.dot(m) - meshComponent.SquaredSphereRadius;
+            double c = m.dot(m) - meshComponent.SquaredBoundingSphereRadius;
 
-            // Exit if r’s origin outside s (c > 0) and r pointing away from s (b > 0) 
             if (c > 0.0 && b > 0.0)
                 return false;
 
             double discr = b * b - c;
 
-            // A negative discriminant corresponds to ray missing sphere 
             if (discr < 0.0f)
                 return false;
 
             return true;
         }
 
-        static Vector3? IntersectRayTriangle(Vector3 rayOrigin, Vector3 rayDirection, Vector3 v0, Vector3 v1, Vector3 v2)
+        private static Vector3? IntersectRayTriangle(Vector3 rayOrigin, Vector3 rayDirection, Vector3 v0, Vector3 v1, Vector3 v2)
         {
             double eps = 0.0001;
 
@@ -137,7 +137,7 @@ namespace Engine
 
             var t = edge2.dot(qvec) * invDet;
 
-            return new Vector3(t, u, v);
+            return rayOrigin + rayDirection * t;
         }
     }
 }

@@ -25,8 +25,12 @@ namespace Editor
         public void Reload()
         {
             ComponentViewModels.Clear();
-            foreach (Component component in target.Components)
-                ComponentViewModels.Add(new ComponentViewModel(component));
+
+            if(target != null)
+            {
+                foreach (Component component in target.Components)
+                    ComponentViewModels.Add(new ComponentViewModel(component));
+            }
         }
 
         public void Update()

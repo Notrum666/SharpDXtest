@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -205,7 +206,8 @@ namespace Editor
             if (e.RightButton == MouseButtonState.Pressed)
                 CursorMode = CursorMode.HiddenAndLocked;
 
-            HandlePicking((int)e.GetPosition(this).X, (int)e.GetPosition(this).Y);
+            if(e.LeftButton == MouseButtonState.Pressed)
+                HandlePicking((int)e.GetPosition(RenderControl).X, (int)e.GetPosition(RenderControl).Y);
         }
 
         private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
@@ -275,20 +277,25 @@ namespace Editor
         private void HandlePicking(int mouseX, int mouseY)
         {
             HitResult hitResult;
-            Vector3 mouseWorldPos = camera.ScreenToWorldCoords(mouseX, mouseY);
-            Logger.Log(LogType.Info, $"Mouse screen pos {mouseX}, {mouseY} \nMouse world pos {mouseWorldPos}");
+            Vector3 screenToWorldDir = camera.ScreenToWorldRay(mouseX, mouseY);
+            Vector3 nearPlanePos = screenToWorldDir * camera.Near + camera.GameObject.Transform.Position;
 
-            bool hasHit = Raycast.Hit(
+            //Logger.Log(LogType.Info, $"Mouse screen pos {mouseX}, {mouseY} \nMouse world dir {screenToWorldDir}\nMouse dir {screenToWorldDir - camera.GameObject.Transform.Position}");
+
+            bool hasHit = Raycast.HitMesh(
                 new Ray
                 {
-                    Origin = mouseWorldPos,
-                    Direction = camera.GameObject.Transform.Forward
+                    Origin = nearPlanePos,
+                    Direction = screenToWorldDir
                 },
                 out hitResult
             );
 
-            if(hasHit)
-                Logger.Log(LogType.Info, $"Has hit at {hitResult.Target.Name}");
+            GameObject cursor = Scene.CurrentScene.GameObjects.First(obj => obj.Name == "Cursor");
+
+            cursor.Transform.Position = hitResult.Point;
+
+            InspectorControl.GameObjectViewModel.Target = hasHit ? hitResult.Target : null;
         }
 
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)

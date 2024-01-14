@@ -92,6 +92,12 @@ namespace Editor
             MeshComponent cubeObj1Mesh = cubeObj1.AddComponent<MeshComponent>();
             cubeObj1Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cube.obj");
 
+            GameObject cubeObj3 = GameObject.Instantiate("Cursor");
+            Transform cubeObj3Transform = cubeObj3.GetComponent<Transform>();
+            cubeObj3Transform.LocalScale = new Vector3(0.1, 0.001, 0.1);
+            MeshComponent cubeObj3Mesh = cubeObj3.AddComponent<MeshComponent>();
+            cubeObj3Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cube.obj");
+
             GameObject cubeObj2 = GameObject.Instantiate("Cube");
             Transform cubeObj2Transform = cubeObj2.GetComponent<Transform>();
             cubeObj2Transform.Position = new Vector3(0, 0, 2);

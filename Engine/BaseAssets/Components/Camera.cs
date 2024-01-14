@@ -89,10 +89,11 @@ namespace Engine.BaseAssets.Components
             InvalidateMatrices();
         }
 
-        public LinearAlgebra.Vector3 ScreenToWorldCoords(int x, int y)
+        public LinearAlgebra.Vector3 ScreenToWorldRay(int x, int y)
         {
-            Matrix4x4 viewMatrix = GameObject.Transform.View;
-            Matrix4x4 projectionMatrix = Proj;
+            Matrix4x4 viewMat = GameObject.Transform.View;
+            Matrix4x4 projMat = Proj;
+            Matrix4x4 modelMat = GameObject.Transform.Model;
 
             LinearAlgebra.Vector2 mouse;
             mouse.x = x;
@@ -100,31 +101,37 @@ namespace Engine.BaseAssets.Components
 
             LinearAlgebra.Vector3 vector = 
                 UnProject(
-                    projectionMatrix,
-                    viewMatrix, 
+                    projMat,
+                    viewMat,
+                    modelMat,
                     new LinearAlgebra.Vector2(Width, Height), 
                     mouse
             );
-            LinearAlgebra.Vector3 coords = new LinearAlgebra.Vector3(vector.x, vector.y, vector.z);
-            return coords;
+            LinearAlgebra.Vector3 farPlaneCoords = new LinearAlgebra.Vector3(vector.x, vector.y, vector.z);
+            LinearAlgebra.Vector3 screenToWorldRay = (farPlaneCoords - GameObject.Transform.Position).normalized();
+
+            return screenToWorldRay;
         }
 
-        LinearAlgebra.Vector3 UnProject(Matrix4x4 projection, Matrix4x4 view, LinearAlgebra.Vector2 viewport, LinearAlgebra.Vector2 mouse)
+        LinearAlgebra.Vector3 UnProject(Matrix4x4 projection, Matrix4x4 view, Matrix4x4 model, LinearAlgebra.Vector2 viewport, LinearAlgebra.Vector2 mouse)
         {
             LinearAlgebra.Vector3 vec;
 
-            vec.x = (mouse.x / viewport.x) * 2 - 1;
-            vec.y = 1 - (mouse.y / viewport.y) * 2;
-            vec.z = 0;
+            vec.x = (mouse.x / viewport.x) * 2 - 1.0;
+            vec.y = 1.0 - (mouse.y / viewport.y) * 2;
+            vec.z = 1;
 
             Matrix4x4 viewInv = view;
             Matrix4x4 projInv = projection;
+            Matrix4x4 modelInv = model;
 
             viewInv.invert();
             projInv.invert();
+            modelInv.inverse();
 
             vec = projInv.TransformPoint(vec);
             vec = viewInv.TransformPoint(vec);
+            //vec = modelInv.TransformPoint(vec);
 
             return vec;
         }
