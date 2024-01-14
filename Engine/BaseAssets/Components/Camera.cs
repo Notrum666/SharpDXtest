@@ -93,7 +93,6 @@ namespace Engine.BaseAssets.Components
         {
             Matrix4x4 viewMat = GameObject.Transform.View;
             Matrix4x4 projMat = Proj;
-            Matrix4x4 modelMat = GameObject.Transform.Model;
 
             LinearAlgebra.Vector2 mouse;
             mouse.x = x;
@@ -103,17 +102,17 @@ namespace Engine.BaseAssets.Components
                 UnProject(
                     projMat,
                     viewMat,
-                    modelMat,
                     new LinearAlgebra.Vector2(Width, Height), 
                     mouse
             );
+
             LinearAlgebra.Vector3 farPlaneCoords = new LinearAlgebra.Vector3(vector.x, vector.y, vector.z);
             LinearAlgebra.Vector3 screenToWorldRay = (farPlaneCoords - GameObject.Transform.Position).normalized();
 
             return screenToWorldRay;
         }
 
-        LinearAlgebra.Vector3 UnProject(Matrix4x4 projection, Matrix4x4 view, Matrix4x4 model, LinearAlgebra.Vector2 viewport, LinearAlgebra.Vector2 mouse)
+        LinearAlgebra.Vector3 UnProject(Matrix4x4 projection, Matrix4x4 view, LinearAlgebra.Vector2 viewport, LinearAlgebra.Vector2 mouse)
         {
             LinearAlgebra.Vector3 vec;
 
@@ -123,15 +122,12 @@ namespace Engine.BaseAssets.Components
 
             Matrix4x4 viewInv = view;
             Matrix4x4 projInv = projection;
-            Matrix4x4 modelInv = model;
 
             viewInv.invert();
             projInv.invert();
-            modelInv.inverse();
 
             vec = projInv.TransformPoint(vec);
             vec = viewInv.TransformPoint(vec);
-            //vec = modelInv.TransformPoint(vec);
 
             return vec;
         }
