@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -19,6 +20,8 @@ namespace Editor
         public static string ContentFolderPath { get; private set; }
 
         private static readonly Dictionary<string, AssetImporter> assetImporters = new Dictionary<string, AssetImporter>();
+
+        private static readonly Dictionary<Guid, string> guidToPathMap = new Dictionary<Guid, string>();
 
         static AssetsRegistry()
         {
@@ -61,6 +64,38 @@ namespace Editor
         public static void Refresh()
         {
             ImportFolder(ContentFolderPath);
+
+            guidToPathMap.Clear();
+            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(ContentFolderPath, "*.meta", true))
+            {
+                if (pathInfo.IsDirectory)
+                    continue;
+
+                string assetPath = Path.GetFileNameWithoutExtension(pathInfo.FullPath);
+                if (!Path.Exists(assetPath))
+                {
+                    File.Delete(pathInfo.FullPath);
+                    continue;
+                }
+
+                AssetMeta assetMeta = YamlManager.LoadFromFile<AssetMeta>(pathInfo.FullPath);
+                if (!guidToPathMap.TryAdd(assetMeta.Guid, pathInfo.FullPath))
+                {
+                    File.Delete(pathInfo.FullPath);
+                }
+            }
+        }
+
+        public static bool TryGetAssetPath(Guid guid, out string assetPath)
+        {
+            return guidToPathMap.TryGetValue(guid, out assetPath);
+        }
+
+        public static bool TryGetAssetMetaPath(string assetPath, out string metaPath)
+        {
+            string assetExtension = Path.GetExtension(assetPath);
+            metaPath = Path.ChangeExtension(assetPath, $"{assetExtension}{AssetMeta.MetaExtension}");
+            return Path.Exists(metaPath);
         }
 
         #region AssetOperations //Import, Copy, Move, Rename, Delete
@@ -74,7 +109,19 @@ namespace Editor
             if (!assetImporters.TryGetValue(assetExtension, out AssetImporter importer))
                 return null;
 
-            return importer.ImportAsset(assetPath);
+            Guid guid = importer.ImportAsset(assetPath);
+            guidToPathMap[guid] = assetPath;
+            return guid;
+        }
+
+        public static Guid? SaveAsset<T>(string assetPath, T assetData) where T : NativeAssetData
+        {
+            using FileStream fileStream = File.Open(assetPath, FileMode.Create);
+            using BinaryWriter binaryWriter = new BinaryWriter(fileStream, Encoding.UTF8, false);
+
+            assetData.Serialize(binaryWriter);
+
+            return ImportAsset(assetPath);
         }
 
         public static Guid? CreateAsset<T>(string assetName, string parentFolderPath, T assetData = null) where T : NativeAssetData
@@ -84,15 +131,15 @@ namespace Editor
             string pathNoExtension = Path.Combine(parentFolderPath, assetName);
             string newAssetPath = Path.ChangeExtension(pathNoExtension, assetData.FileExtension);
             newAssetPath = GenerateUniquePath(newAssetPath);
-            
-            using FileStream fileStream = File.Open(newAssetPath, FileMode.Create);
-            using BinaryWriter binaryWriter = new BinaryWriter(fileStream, Encoding.UTF8, false);
 
-            assetData.Serialize(binaryWriter);
-
-            return ImportAsset(newAssetPath);
+            return SaveAsset(newAssetPath, assetData);
         }
 
+        /// <summary>
+        /// Copies asset and imports it with new meta
+        /// </summary>
+        /// <param name="assetPath">Full path to source asset file</param>
+        /// <param name="newAssetPath">Full path to future asset file</param>
         public static bool CopyAsset(string assetPath, string newAssetPath)
         {
             if (!Path.Exists(assetPath))
@@ -103,6 +150,11 @@ namespace Editor
             return ImportAsset(newAssetPath) != null;
         }
 
+        /// <summary>
+        /// Moves asset and its meta to new path
+        /// </summary>
+        /// <param name="oldAssetPath">Full path to asset file</param>
+        /// <param name="newAssetPath">New full path to asset file</param>
         public static bool MoveAsset(string oldAssetPath, string newAssetPath)
         {
             if (!Path.Exists(oldAssetPath) || Path.Exists(newAssetPath))
@@ -115,9 +167,25 @@ namespace Editor
                 return false;
 
             File.Move(oldAssetPath, newAssetPath);
+
+            if (TryGetAssetMetaPath(oldAssetPath, out string oldMetaPath))
+            {
+                AssetMeta assetMeta = YamlManager.LoadFromFile<AssetMeta>(oldMetaPath);
+                guidToPathMap[assetMeta.Guid] = newAssetPath;
+
+                TryGetAssetMetaPath(newAssetPath, out string newMetaPath);
+                File.Move(oldMetaPath, newMetaPath);
+            }
+
             return true;
         }
 
+        /// <summary>
+        /// Renames asset and its meta
+        /// </summary>
+        /// <param name="assetPath">Full path to asset file</param>
+        /// <param name="newAssetName">New name for asset and meta files</param>
+        /// <returns></returns>
         public static bool RenameAsset(string assetPath, string newAssetName)
         {
             FileInfo fileInfo = new FileInfo(assetPath);
@@ -138,9 +206,12 @@ namespace Editor
 
             File.Delete(assetPath);
 
-            string assetExtension = Path.GetExtension(assetPath);
-            string metaPath = Path.ChangeExtension(assetPath, $"{assetExtension}{AssetMeta.MetaExtension}");
-            File.Delete(metaPath);
+            if (TryGetAssetMetaPath(assetPath, out string metaPath))
+            {
+                AssetMeta assetMeta = YamlManager.LoadFromFile<AssetMeta>(metaPath);
+                guidToPathMap.Remove(assetMeta.Guid);
+                File.Delete(metaPath);
+            }
 
             return true;
         }
@@ -199,25 +270,43 @@ namespace Editor
 
         public static bool MoveFolder(string oldFolderPath, string newFolderPath)
         {
-            if (!Path.Exists(oldFolderPath) || Path.Exists(newFolderPath))
+            if (!Path.Exists(oldFolderPath) || Path.Exists(newFolderPath) || string.IsNullOrEmpty(newFolderPath))
                 return false;
 
-            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(oldFolderPath, "*", true))
+            Directory.CreateDirectory(newFolderPath);
+
+            var folderEntries = EnumeratePathInfoEntries(oldFolderPath, "*", true).ToList();
+            foreach (PathInfo pathInfo in folderEntries.Where(x => x.IsDirectory))
             {
-                if (pathInfo.IsDirectory || !IsSupportedAssetFile(pathInfo.FullPath))
+                string relativeFolderPath = Path.GetRelativePath(oldFolderPath, pathInfo.FullPath);
+                string newRelativeFolderPath = Path.Combine(newFolderPath, relativeFolderPath);
+
+                Directory.CreateDirectory(newRelativeFolderPath);
+            }
+
+            foreach (PathInfo pathInfo in folderEntries.Where(x => !x.IsDirectory))
+            {
+                if (!IsSupportedAssetFile(pathInfo.FullPath))
                     continue;
 
                 string relativeAssetPath = Path.GetRelativePath(oldFolderPath, pathInfo.FullPath);
                 string newAssetPath = Path.Combine(newFolderPath, relativeAssetPath);
-
-                string oldContentAssetPath = GetContentAssetPath(pathInfo.FullPath);
-                string newContentAssetPath = GetContentAssetPath(newAssetPath);
-
-                if (!AssetsManager.UpdateAssetPath(oldContentAssetPath, newContentAssetPath))
-                    return false;
+                MoveAsset(pathInfo.FullPath, newAssetPath);
             }
 
-            Directory.Move(oldFolderPath, newFolderPath);
+            foreach (PathInfo pathInfo in folderEntries.Where(x => x.IsDirectory))
+            {
+                if (Directory.GetFiles(pathInfo.FullPath).Length == 0)
+                {
+                    Directory.Delete(pathInfo.FullPath);
+                }
+                string relativeFolderPath = Path.GetRelativePath(oldFolderPath, pathInfo.FullPath);
+                string newRelativeFolderPath = Path.Combine(newFolderPath, relativeFolderPath);
+
+                Directory.CreateDirectory(newRelativeFolderPath);
+            }
+
+            DeleteEmptyFolders(oldFolderPath);
             return true;
         }
 
@@ -239,13 +328,22 @@ namespace Editor
                 if (pathInfo.IsDirectory || !IsSupportedAssetFile(pathInfo.FullPath))
                     continue;
 
-                string contentRelativePath = GetContentAssetPath(pathInfo.FullPath);
-                if (!AssetsManager.DeleteAsset(contentRelativePath))
+                if (!DeleteAsset(pathInfo.FullPath))
                     return false;
             }
 
             Directory.Delete(folderPath, true);
             return true;
+        }
+
+        private static void DeleteEmptyFolders(string startFolderPath)
+        {
+            foreach (string folderPath in Directory.EnumerateDirectories(startFolderPath))
+            {
+                DeleteEmptyFolders(folderPath);
+                if (!Directory.EnumerateFileSystemEntries(folderPath).Any())
+                    Directory.Delete(folderPath, false);
+            }
         }
 
         #endregion FolderOperations

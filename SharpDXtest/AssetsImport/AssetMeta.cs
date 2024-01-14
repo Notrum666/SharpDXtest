@@ -13,9 +13,14 @@ namespace Editor.AssetsImport
         public Guid Guid = Guid.NewGuid();
         
         /// <summary>
-        /// All sub assets can only be displayed in ContentBrowser, but cannot be edited or referenced manually
+        /// Sub asset can only be displayed in ContentBrowser, but cannot be edited or referenced manually
         /// </summary>
         public readonly Dictionary<(Type, string), Guid> SubAssets = new Dictionary<(Type, string), Guid>();
+        
+        /// <summary>
+        /// Exported asset is a separate asset, which data is updated from main's import
+        /// </summary>
+        public readonly Dictionary<(Type, string), Guid> ExportedAssets = new Dictionary<(Type, string), Guid>();
 
         public object ImportSettings = null;
     }

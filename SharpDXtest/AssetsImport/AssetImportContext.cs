@@ -17,6 +17,9 @@ namespace Editor.AssetsImport
         private string assetMetaPath;
         private AssetMeta assetMetaData;
 
+        private readonly Dictionary<(Type, string), Guid> subAssets = new Dictionary<(Type, string), Guid>();
+        private readonly Dictionary<(Type, string), Guid> exportedAssets = new Dictionary<(Type, string), Guid>();
+
         public AssetImportContext(string assetSourcePath)
         {
             AssetSourcePath = assetSourcePath;
@@ -45,8 +48,14 @@ namespace Editor.AssetsImport
         public void SaveAssetMeta(DateTime importTimeUtc, int importerVersion)
         {
             assetMetaData.ImporterVersion = importerVersion;
-            YamlManager.SaveToFile(assetMetaPath, assetMetaData);
 
+            assetMetaData.SubAssets.Clear();
+            assetMetaData.SubAssets.AddRange(subAssets);
+
+            assetMetaData.ExportedAssets.Clear();
+            assetMetaData.ExportedAssets.AddRange(exportedAssets);
+
+            YamlManager.SaveToFile(assetMetaPath, assetMetaData);
             File.SetLastWriteTimeUtc(assetMetaPath, importTimeUtc);
         }
 
@@ -63,27 +72,35 @@ namespace Editor.AssetsImport
             (Type, string) subAssetKey = (typeof(T), identifier);
 
             Guid subGuid = assetMetaData.SubAssets.GetValueOrDefault(subAssetKey, Guid.NewGuid());
-            assetMetaData.SubAssets[subAssetKey] = subGuid;
+            subAssets[subAssetKey] = subGuid;
 
             AssetsManager.SaveAssetData(AssetContentPath, subGuid, subAsset);
             return subGuid;
         }
 
-        public Guid CreateExternalAsset<T>(string assetName, T subAsset) where T : NativeAssetData
+        public Guid SaveExportedAsset<T>(string identifier, T subAsset) where T : NativeAssetData
         {
-            string sourceAssetFolder = Path.GetDirectoryName(AssetSourcePath)!;
+            (Type, string) externalAssetKey = (typeof(T), identifier);
+            Guid externalGuid = assetMetaData.ExportedAssets.GetValueOrDefault(externalAssetKey, Guid.Empty);
 
-            Guid? guid = AssetsRegistry.CreateAsset(assetName, sourceAssetFolder, subAsset);
-            return guid.GetValueOrDefault(Guid.Empty);
+            if (externalGuid != Guid.Empty && AssetsRegistry.TryGetAssetPath(externalGuid, out string assetPath))
+            {
+                Guid? savedGuid = AssetsRegistry.SaveAsset(assetPath, subAsset);
+                return savedGuid.GetValueOrDefault(Guid.Empty);
+            }
+
+            string sourceAssetName = Path.GetFileNameWithoutExtension(AssetSourcePath);
+            string sourceAssetFolder = Path.GetDirectoryName(AssetSourcePath)!;
+            Guid? createdGuid = AssetsRegistry.CreateAsset($"{sourceAssetName}_{identifier}", sourceAssetFolder, subAsset);
+            return createdGuid.GetValueOrDefault(Guid.Empty);
         }
 
-        public Guid GetExternalAsset<T>(string relativeFilePath) where T : AssetData
+        public Guid? GetExternalAssetGuid<T>(string relativeFilePath) where T : AssetData
         {
             string sourceAssetFolder = Path.GetDirectoryName(AssetSourcePath)!;
             string externalFilePath = Path.Combine(sourceAssetFolder, relativeFilePath);
 
-            Guid? guid = AssetsRegistry.ImportAsset(externalFilePath);
-            return guid.GetValueOrDefault(Guid.Empty);
+            return AssetsRegistry.ImportAsset(externalFilePath);
         }
 
         public T GetImportSettings<T>() where T : AssetImporter.BaseImportSettings
