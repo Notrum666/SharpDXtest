@@ -104,12 +104,6 @@ namespace Engine
             gasVolumeTransform.Position = new Vector3(0, 0, 60);
             gasVolumeObj.AddComponent<GasVolume>().Size = new Vector3f(200, 200, 50);
 
-            GameObject cubeObj1 = GameObject.Instantiate("Plane");
-            Transform cubeObj1Transform = cubeObj1.GetComponent<Transform>();
-            cubeObj1Transform.LocalScale = new Vector3(50, 50, 0.5);
-            MeshComponent cubeObj1Mesh = cubeObj1.AddComponent<MeshComponent>();
-            cubeObj1Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cube.obj");
-
             GameObject cubeObj2 = GameObject.Instantiate("Cube");
             Transform cubeObj2Transform = cubeObj2.GetComponent<Transform>();
             cubeObj2Transform.Position = new Vector3(0, 0, 2);
@@ -118,6 +112,21 @@ namespace Engine
             MeshComponent cubeObj2Mesh = cubeObj2.AddComponent<MeshComponent>();
             cubeObj2Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cube_materials.fbx");
 
+            GameObject cubeObj1 = GameObject.Instantiate("Plane");
+            Transform cubeObj1Transform = cubeObj1.GetComponent<Transform>();
+            cubeObj1Transform.LocalScale = new Vector3(50, 50, 0.5);
+            MeshComponent cubeObj1Mesh = cubeObj1.AddComponent<MeshComponent>();
+            cubeObj1Mesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cube.obj");
+
+            GameObject cesiumMan2 = GameObject.Instantiate("CesiumMan2");
+            Transform cesiumManTransform2 = cesiumMan2.GetComponent<Transform>();
+            cesiumManTransform2.Position = new Vector3(0, 2, 5);
+            cesiumManTransform2.Rotation = Quaternion.FromEuler(new Vector3(-90 * (3.14 / 180), 0, 0));
+            //SkeletalMeshComponent cesiumManMesh2 = cesiumMan2.AddComponent<SkeletalMeshComponent>();
+            MeshComponent cesiumManMesh2 = cesiumMan2.AddComponent<MeshComponent>();
+            cesiumManMesh2.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cesium_man.fbx");
+            //cesiumManMesh2.AnimationIndex = 14;
+
             GameObject cesiumMan = GameObject.Instantiate("CesiumMan");
             Transform cesiumManTransform = cesiumMan.GetComponent<Transform>();
             cesiumManTransform.Position = new Vector3(0, 0, 5);
@@ -125,14 +134,6 @@ namespace Engine
             SkeletalMeshComponent cesiumManMesh = cesiumMan.AddComponent<SkeletalMeshComponent>();
             cesiumManMesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cesium_man.fbx");
             cesiumManMesh.Animation = AssetsManager.LoadAssetByGuid<SkeletalAnimation>(new Guid("baa6fca3e025454dbdaa02b48a8bb132"));
-
-            GameObject cesiumMan2 = GameObject.Instantiate("CesiumMan2");
-            Transform cesiumManTransform2 = cesiumMan2.GetComponent<Transform>();
-            cesiumManTransform2.Position = new Vector3(0, 2, 5);
-            cesiumManTransform2.Rotation = Quaternion.FromEuler(new Vector3(-90 * (3.14 / 180), 0, 0));
-            SkeletalMeshComponent cesiumManMesh2 = cesiumMan2.AddComponent<SkeletalMeshComponent>();
-            cesiumManMesh2.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cesium_man.fbx");
-            //cesiumManMesh2.AnimationIndex = 14;
 
             GameObject light1 = GameObject.Instantiate("Light1");
             light1.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);

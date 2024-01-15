@@ -96,6 +96,29 @@ namespace Engine.BaseAssets.Components
             InvalidateMatrices();
         }
 
+        /// <summary>
+        /// Transforms screen pixel position to world direction vector originating from camera
+        /// </summary>
+        /// <param name="mousePos">Pixel position, where X is left to right and Y is top to bottom</param>
+        /// <returns>Direction vector originating from camera position</returns>
+        public LinearAlgebra.Vector3 ScreenToWorld(LinearAlgebra.Vector2 pixelPos)
+        {
+            pixelPos.x = pixelPos.x / Width * 2 - 1.0;
+            pixelPos.y = 1.0 - pixelPos.y / Height * 2;
+            return ((GameObject.Transform.Model * InvProj).TransformPoint(new LinearAlgebra.Vector3(pixelPos, 1.0)) - GameObject.Transform.Position).normalized();
+        }
+
+        /// <summary>
+        /// Transforms world point to screen pixel position
+        /// </summary>
+        /// <param name="point">Point in world space</param>
+        /// <returns>Pixel position, where X is left to right and Y is top to bottom</returns>
+        public LinearAlgebra.Vector2 WorldToScreen(LinearAlgebra.Vector3 point)
+        {
+            point = (GameObject.Transform.View * Proj).TransformPoint(point - GameObject.Transform.Position);
+            return new LinearAlgebra.Vector2((point.x + 1.0) / 2.0 * Width, -(point.y + 1.0) / 2.0 * Height);
+        }
+
         #endregion ComponentLogic
 
         #region Matrices
