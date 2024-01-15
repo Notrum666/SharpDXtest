@@ -1,16 +1,9 @@
 using System.Windows;
 using System.Windows.Interop;
-using System.Windows.Media;
 
 using Engine;
 using Engine.BaseAssets.Components;
 using Engine.Graphics;
-
-using LinearAlgebra;
-
-using SharpDX.DXGI;
-
-using SharpDXtest.Assets.Components;
 
 namespace Editor
 {
@@ -32,6 +25,15 @@ namespace Editor
 
         private D9CameraRenderer D9Renderer => camera?.D9Renderer;
         private Camera camera;
+
+        public static void ResizeCamera(Camera camera, int width, int height)
+        {
+            if (camera == null)
+                return;
+
+            camera.Aspect = width / (double)height;
+            camera.Resize(width, height);
+        }
 
         public void SetCamera(Camera newCamera)
         {
@@ -60,13 +62,9 @@ namespace Editor
             targetImage.Unlock();
         }
 
-        public void ResizeCameraAndFramebuffer(int width, int height)
+        public void ResizeCamera(int width, int height)
         {
-            if (camera == null)
-                return;
-
-            camera.Aspect = width / (double)height;
-            camera.Resize(width, height);
+            ResizeCamera(camera, width, height);
         }
 
         private void GameCore_OnFrameEnded()

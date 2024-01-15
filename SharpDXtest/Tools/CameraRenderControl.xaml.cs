@@ -5,16 +5,12 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 
 using Engine;
 using Engine.BaseAssets.Components;
-using Engine.Graphics;
 
 using LinearAlgebra;
-
-using SharpDX.DXGI;
 
 using SharpDXtest.Assets.Components;
 
@@ -98,6 +94,7 @@ namespace Editor
                 if (isEditor)
                 {
                     Camera editorCamera = CreateEditorCamera();
+                    CameraViewModel.ResizeCamera(editorCamera, (int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
                     CameraViewModel.SetCamera(editorCamera);
                 }
 
@@ -189,7 +186,7 @@ namespace Editor
 
         private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            CameraViewModel?.ResizeCameraAndFramebuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+            CameraViewModel.ResizeCamera((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
 
         private static Camera CreateEditorCamera()
