@@ -68,6 +68,17 @@ namespace Editor
         private Point cursorLockPoint;
         private CursorMode cursorMode;
 
+        private int fpsCount = 0;
+        public int FpsCount
+        {
+            get => fpsCount;
+            set
+            {
+                fpsCount = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ObservableCollection<AspectRatio> AspectRatios { get; set; } = new ObservableCollection<AspectRatio>
         {
             new AspectRatio(),
@@ -190,7 +201,7 @@ namespace Editor
             framesCount++;
             if (timeCounter >= 1.0)
             {
-                FPSTextBlock.Dispatcher.Invoke(() => { FPSTextBlock.Text = framesCount.ToString(); });
+                FpsCount = framesCount;
 
                 timeCounter -= 1.0;
                 framesCount = 0;
@@ -290,7 +301,7 @@ namespace Editor
             //GameObject cursor = Scene.CurrentScene.GameObjects.First(obj => obj.Name == "Cursor");
             //cursor.Transform.Position = hitResult.Point;
 
-            InspectorControl.GameObjectViewModel.Target = hasHit ? hitResult.Target : null;
+            InspectorControl.GameObjectViewModel.Target = hasHit ? hitResult.HitObject : null;
         }
 
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
