@@ -4,15 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Editor"
-             mc:Ignorable="d" 
+             xmlns:assets="clr-namespace:Engine.AssetsData;assembly=Engine"
+             mc:Ignorable="d" Name="ThisContentBrowser"
              Loaded="UserControl_Loaded" 
              Unloaded="UserControl_Unloaded"
              Tag="ContentBrowser"
              d:DesignHeight="450" d:DesignWidth="800"
              d:DataContext="{d:DesignInstance {x:Type local:ContentBrowserControl}}">
     <UserControl.Resources>
-        <local:IconSelector x:Key="IconSelector"/>
         <local:ObjectToBoolConverter x:Key="ObjToBoolConv"/>
+        <local:BindingProxy x:Key="ContentBrowserControlProxy" Data="{Binding}"/>
     </UserControl.Resources>
     <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.ColumnDefinitions>
@@ -46,7 +47,7 @@
             </StackPanel>
             <ListBox x:Name="SelectedFolderListBox" Grid.Row="1" DataContext="{Binding SelectedItem, ElementName=FoldersTreeView}"
                      d:DataContext="{d:DesignInstance Type={x:Type local:ContentBrowserFolderViewModel}, IsDesignTimeCreatable=False}"
-                     ItemsSource="{Binding FolderItems}" Margin="5" Drop="ListBox_Drop" KeyDown="ListBox_KeyDown"
+                     Margin="5" Drop="ListBox_Drop" KeyDown="ListBox_KeyDown"
                      Background="Transparent" BorderBrush="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      ScrollViewer.VerticalScrollBarVisibility="Hidden" MouseLeftButtonDown="ListBox_MouseLeftButtonDown"
                      AllowDrop="{Binding SelectedItem, ElementName=FoldersTreeView, Converter={StaticResource ObjToBoolConv}}"
@@ -60,24 +61,98 @@
                         <WrapPanel/>
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
+                <ListBox.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Folder" Command="{Binding Data.StartFolderCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"/>
+                        <Separator/>
+                        <MenuItem Header="Scene" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
+                                  CommandParameter="{x:Type assets:SceneData}"/>
+                        <MenuItem Header="Material" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
+                                  CommandParameter="{x:Type assets:MaterialData}"/>
+                        <!--<MenuItem Header="Script" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
+                                  CommandParameter="{x:Type assets:ScriptData}"/>-->
+                    </ContextMenu>
+                </ListBox.ContextMenu>
+                <ListBox.Resources>
+                    <CollectionViewSource x:Key="FolderItemsCollection" Source="{Binding FolderItems}"/>
+                    <CollectionViewSource x:Key="AssetCreationCollection" Source="{Binding AssetCreationViewModels, ElementName=ThisContentBrowser}"/>
+                    <CollectionViewSource x:Key="FolderCreationCollection" Source="{Binding FolderCreationViewModels, ElementName=ThisContentBrowser}"/>
+                    
+                    <DataTemplate DataType="{x:Type local:ContentBrowserFolderViewModel}">
                         <Grid Margin="5" MouseDown="FolderItem_MouseDown" MouseMove="FolderItem_MouseMove" AllowDrop="True"
                               Drop="FolderItem_Drop"
-                              Width="{Binding ItemsWidth, RelativeSource={RelativeSource AncestorType=local:ContentBrowserControl}}"
-                              Height="{Binding ItemsHeight, RelativeSource={RelativeSource AncestorType=local:ContentBrowserControl}}">
+                              Width="{Binding ItemsWidth, ElementName=ThisContentBrowser}"
+                              Height="{Binding ItemsHeight, ElementName=ThisContentBrowser}">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="5*"/>
                                 <RowDefinition Height="2*"/>
                             </Grid.RowDefinitions>
-                            <Image Source="{Binding Converter={StaticResource IconSelector}}"
+                            <Image Source="/Tools/ContentBrowserControl/Icons/FolderIcon.png"
                                    Stretch="Uniform"/>
                             <TextBlock Text="{Binding Name}" Grid.Row="1" Foreground="{StaticResource ForegroundBrush}"
                                        FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center" TextWrapping="Wrap"
                                        ToolTip="{Binding Name}"/>
                         </Grid>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type local:ContentBrowserAssetViewModel}">
+                        <Grid Margin="5" MouseDown="FolderItem_MouseDown" MouseMove="FolderItem_MouseMove" AllowDrop="True"
+                              Drop="FolderItem_Drop"
+                              Width="{Binding ItemsWidth, ElementName=ThisContentBrowser}"
+                              Height="{Binding ItemsHeight, ElementName=ThisContentBrowser}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="5*"/>
+                                <RowDefinition Height="2*"/>
+                            </Grid.RowDefinitions>
+                            <Image Source="/Tools/ContentBrowserControl/Icons/FileIcon.png"
+                                   Stretch="Uniform"/>
+                            <TextBlock Text="{Binding Name}" Grid.Row="1" Foreground="{StaticResource ForegroundBrush}"
+                                       FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center" TextWrapping="Wrap"
+                                       ToolTip="{Binding Name}"/>
+                        </Grid>
+                    </DataTemplate>
+                    
+                    <DataTemplate DataType="{x:Type local:AssetCreationViewModel}">
+                        <Grid Margin="5"
+                              Width="{Binding ItemsWidth, ElementName=ThisContentBrowser}"
+                              Height="{Binding ItemsHeight, ElementName=ThisContentBrowser}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="5*"/>
+                                <RowDefinition Height="2*"/>
+                            </Grid.RowDefinitions>
+                            <Image Source="/Tools/ContentBrowserControl/Icons/FileIcon.png"
+                                   Stretch="Uniform"/>
+                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Foreground="{StaticResource ForegroundBrush}"
+                                     FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                     Background="Transparent" BorderBrush="Transparent"
+                                     LostFocus="ItemCreationTextBox_LostFocus" Loaded="FocusSelfOnLoad"
+                                     KeyDown="ItemCreationTextBox_KeyDown"/>
+                        </Grid>
+                    </DataTemplate>
+                    <DataTemplate DataType="{x:Type local:FolderCreationViewModel}">
+                        <Grid Margin="5"
+                              Width="{Binding ItemsWidth, ElementName=ThisContentBrowser}"
+                              Height="{Binding ItemsHeight, ElementName=ThisContentBrowser}">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="5*"/>
+                                <RowDefinition Height="2*"/>
+                            </Grid.RowDefinitions>
+                            <Image Source="/Tools/ContentBrowserControl/Icons/FolderIcon.png"
+                                   Stretch="Uniform"/>
+                            <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Foreground="{StaticResource ForegroundBrush}"
+                                     FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                     Background="Transparent" BorderBrush="Transparent"
+                                     LostFocus="ItemCreationTextBox_LostFocus" Loaded="FocusSelfOnLoad"
+                                     KeyDown="ItemCreationTextBox_KeyDown"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.Resources>
+                <ListBox.ItemsSource>
+                    <CompositeCollection>
+                        <CollectionContainer Collection="{Binding Source={StaticResource FolderItemsCollection}}"/>
+                        <CollectionContainer Collection="{Binding Source={StaticResource AssetCreationCollection}}"/>
+                        <CollectionContainer Collection="{Binding Source={StaticResource FolderCreationCollection}}"/>
+                    </CompositeCollection>
+                </ListBox.ItemsSource>
             </ListBox>
         </Grid>
     </Grid>

@@ -13,13 +13,20 @@ using System.Windows.Input;
 using Editor.AssetsImport;
 
 using Engine;
+using Engine.AssetsData;
 
 namespace Editor
 {
     public partial class ContentBrowserControl : UserControl, INotifyPropertyChanged
     {
+        private RelayCommand startFolderCreationCommand;
+        public RelayCommand StartFolderCreationCommand => startFolderCreationCommand ??= new RelayCommand(obj => FolderCreationViewModels.Add(new FolderCreationViewModel()));
+        private RelayCommand startAssetCreationCommand;
+        public RelayCommand StartAssetCreationCommand => startAssetCreationCommand ??= new RelayCommand(obj => AssetCreationViewModels.Add(new AssetCreationViewModel((Type)obj)));
         public event PropertyChangedEventHandler PropertyChanged;
         public ObservableCollection<ContentBrowserFolderViewModel> RootFolderViewModels { get; } = new ObservableCollection<ContentBrowserFolderViewModel>();
+        public ObservableCollection<AssetCreationViewModel> AssetCreationViewModels { get; } = new ObservableCollection<AssetCreationViewModel>();
+        public ObservableCollection<FolderCreationViewModel> FolderCreationViewModels { get; } = new ObservableCollection<FolderCreationViewModel>();
         private double itemsWidth = 100;
         public double ItemsWidth
         {
@@ -187,7 +194,7 @@ namespace Editor
                 if (listBox.SelectedItem is ContentBrowserFolderViewModel folderToDelete)
                     AssetsRegistry.DeleteFolder(folderToDelete.FullPath);
                 if (listBox.SelectedItem is ContentBrowserAssetViewModel assetToDelete)
-                    AssetsRegistry.DeleteAsset(assetToDelete.AssetPath);
+                    AssetsRegistry.DeleteAsset(Path.ChangeExtension(assetToDelete.AssetPath, null));
                 ((ContentBrowserFolderViewModel)listBox.DataContext).Refresh();
             }
         }
@@ -315,6 +322,65 @@ namespace Editor
             {
                 DragDrop.DoDragDrop(this, new DataObject(DataFormats.Serializable, ((FrameworkElement)sender).DataContext), DragDropEffects.Move);
             }
+        }
+
+        private void ItemCreationTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            AssetCreationViewModels.Clear();
+            FolderCreationViewModels.Clear();
+        }
+
+        private void ItemCreationTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Escape)
+            {
+                AssetCreationViewModels.Clear();
+                FolderCreationViewModels.Clear();
+                return;
+            }
+            if (e.Key == Key.Enter)
+            {
+                ContentBrowserFolderViewModel folder = (ContentBrowserFolderViewModel)SelectedFolderListBox.DataContext;
+                if (((FrameworkElement)sender).DataContext is FolderCreationViewModel folderCreationViewModel)
+                {
+                    try
+                    {
+                        AssetsRegistry.CreateFolder(folder.FullPath, folderCreationViewModel.Name);
+                    }
+                    catch (Exception exception)
+                    {
+                        Logger.Log(LogType.Error, "Error during folder creation: " + exception.Message);
+                    }
+                }
+                if (((FrameworkElement)sender).DataContext is AssetCreationViewModel assetCreationViewModel)
+                {
+                    try
+                    {
+                        if (assetCreationViewModel.Type == typeof(SceneData))
+                            AssetsRegistry.CreateAsset<SceneData>(assetCreationViewModel.Name, folder.FullPath);
+                        else if (assetCreationViewModel.Type == typeof(MaterialData))
+                            AssetsRegistry.CreateAsset<MaterialData>(assetCreationViewModel.Name, folder.FullPath);
+                        //else if (assetCreationViewModel.Type == typeof(ScriptData))
+                        //    AssetsRegistry.CreateAsset<ScriptData>(assetCreationViewModel.Name, folder.FullPath);
+                    }
+                    catch (Exception exception)
+                    {
+                        Logger.Log(LogType.Error, "Error during asset creation: " + exception.Message);
+                    }
+                }
+
+                AssetCreationViewModels.Clear();
+                FolderCreationViewModels.Clear();
+
+                folder.Refresh();
+
+                return;
+            }
+        }
+
+        private void FocusSelfOnLoad(object sender, RoutedEventArgs e)
+        {
+            ((FrameworkElement)sender).Focus();
         }
     }
 }

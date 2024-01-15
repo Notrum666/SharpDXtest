@@ -64,7 +64,8 @@ namespace Editor
             IEnumerable<PathInfo> sceneFiles = EnumeratePathInfoEntries(AssetsRegistry.ContentFolderPath, "*.scene", true);
             foreach (PathInfo sceneFile in sceneFiles)
             {
-                scenes[sceneFile.FullPath] = Path.GetFileNameWithoutExtension(sceneFile.FullPath);
+                string scenePath = AssetsRegistry.GetContentAssetPath(sceneFile.FullPath);
+                scenes[scenePath] = Path.GetFileNameWithoutExtension(sceneFile.FullPath);
             }
 
             Game.Scenes = scenes;
