@@ -115,7 +115,7 @@ namespace Editor
         {
             if (ViewportType.HasFlag(ViewportType.GameView))
             {
-                // TODO: find non editor camera
+                CameraViewModel.SetCamera(Camera.Current);
             }
         }
 

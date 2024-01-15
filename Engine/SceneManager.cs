@@ -97,6 +97,7 @@ namespace Engine
             camera.Near = 0.001;
             camera.Far = 500;
             cameraObj.AddComponent<SoundListener>();
+            camera.MakeCurrent();
 
             GameObject gasVolumeObj = GameObject.Instantiate("GasVolume");
             Transform gasVolumeTransform = gasVolumeObj.GetComponent<Transform>();

@@ -15,6 +15,8 @@ namespace Engine.Graphics
         public int Height { get; private set; }
         public nint D9SurfaceNativePointer => copyFramebuffer.D9SurfaceNativePointer;
 
+        internal int ViewersCount => viewers.Count;
+
         private D9FrameBuffer copyFramebuffer;
         private readonly HashSet<object> viewers = new HashSet<object>();
 
@@ -26,6 +28,15 @@ namespace Engine.Graphics
             Camera.OnResized += ResizeBuffer;
             if (!Camera.NeedsToBeResized)
                 ResizeBuffer();
+        }
+
+        private void ResizeBuffer()
+        {
+            Width = Camera.Width;
+            Height = Camera.Height;
+            copyFramebuffer = new D9FrameBuffer(Width, Height);
+
+            IsReady = true;
         }
 
         public void Subscribe(object viewer)
@@ -44,20 +55,11 @@ namespace Engine.Graphics
                 EngineCore.OnFrameEnded -= GameCore_OnFrameEnded;
         }
 
-        private void ResizeBuffer()
-        {
-            Width = Camera.Width;
-            Height = Camera.Height;
-            copyFramebuffer = new D9FrameBuffer(Width, Height);
-            
-            IsReady = true;
-        }
-
         private void GameCore_OnFrameEnded()
         {
             if (!IsReady)
                 return;
-            
+
             FrameBuffer buffer = Camera.GetNextFrontBuffer();
             GraphicsCore.CurrentDevice.ImmediateContext.ResolveSubresource(buffer.RenderTargetTexture.texture, 0,
                                                                            copyFramebuffer.RenderTargetTexture.texture, 0, Format.B8G8R8A8_UNorm);

@@ -191,6 +191,9 @@ namespace Engine
 
             camera.PreRenderUpdate();
 
+            if (!camera.ShouldRender)
+                return;
+
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.BackBuffer.RenderTargetTexture.GetView<RenderTargetView>(), camera.BackgroundColor);
             if (Scene.CurrentScene == null || !camera.Enabled || camera.GameObject == null)
             {

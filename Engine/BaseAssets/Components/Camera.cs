@@ -29,7 +29,7 @@ namespace Engine.BaseAssets.Components
         public static Camera Current
         {
             get => current;
-            set => current = value;
+            private set => current = value;
         }
         public bool IsCurrent => Current == this;
 
@@ -167,6 +167,7 @@ namespace Engine.BaseAssets.Components
         private int targetWidth;
         private int targetHeight;
         internal bool NeedsToBeResized { get; private set; }
+        internal bool ShouldRender => d9Renderer?.ViewersCount > 0;
 
         internal void PreRenderUpdate()
         {
