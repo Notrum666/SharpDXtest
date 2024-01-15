@@ -17,7 +17,6 @@ using SharpDX.Mathematics.Interop;
 using BlendOperation = SharpDX.Direct3D11.BlendOperation;
 using Device = SharpDX.Direct3D11.Device;
 using FillMode = SharpDX.Direct3D11.FillMode;
-using Format = SharpDX.DXGI.Format;
 using Light = Engine.BaseAssets.Components.Light;
 using Query = SharpDX.Direct3D11.Query;
 using QueryType = SharpDX.Direct3D11.QueryType;
@@ -25,39 +24,6 @@ using SwapEffect = SharpDX.Direct3D9.SwapEffect;
 
 namespace Engine
 {
-    struct GBuffer
-    {
-        public Texture worldPos;
-        public Texture albedo;
-        public Texture normal;
-        public Texture metallic;
-        public Texture roughness;
-        public Texture ambientOcclusion;
-        public Texture emission;
-
-        public GBuffer(int width, int height)
-        {
-            worldPos = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            albedo = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            normal = new Texture(width, height, null, Format.R32G32B32A32_Float, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            metallic = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            roughness = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            ambientOcclusion = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-            emission = new Texture(width, height, null, Format.R32_Typeless, BindFlags.RenderTarget | BindFlags.ShaderResource);
-        }
-
-        internal void Dispose()
-        {
-            worldPos?.Dispose();
-            albedo?.Dispose();
-            normal?.Dispose();
-            metallic?.Dispose();
-            roughness?.Dispose();
-            ambientOcclusion?.Dispose();
-            emission?.Dispose();
-        }
-    }
-
     public static class GraphicsCore
     {
         private static bool disposed = false;
@@ -225,7 +191,7 @@ namespace Engine
 
             camera.PreRenderUpdate();
 
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.Backbuffer.RenderTargetTexture.GetView<RenderTargetView>(), camera.BackgroundColor);
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.BackBuffer.RenderTargetTexture.GetView<RenderTargetView>(), camera.BackgroundColor);
             if (Scene.CurrentScene == null || !camera.Enabled || camera.GameObject == null)
             {
                 FlushAndSwapFrameBuffers(camera);
@@ -252,15 +218,15 @@ namespace Engine
 
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Width, camera.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(camera.DepthBuffer.GetView<DepthStencilView>(),
-                                                                   camera.GBuffer.worldPos.GetView<RenderTargetView>(),
-                                                                   camera.GBuffer.albedo.GetView<RenderTargetView>(),
-                                                                   camera.GBuffer.normal.GetView<RenderTargetView>(),
-                                                                   camera.GBuffer.metallic.GetView<RenderTargetView>(),
-                                                                   camera.GBuffer.roughness.GetView<RenderTargetView>(),
-                                                                   camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>(),
-                                                                   camera.GBuffer.emission.GetView<RenderTargetView>());
+                                                                   camera.GBuffer.WorldPos.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.Albedo.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.Normal.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.Metallic.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.Roughness.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.AmbientOcclusion.GetView<RenderTargetView>(),
+                                                                   camera.GBuffer.Emission.GetView<RenderTargetView>());
 
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.worldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.WorldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
 #if GraphicsDebugging
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.albedo.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.normal.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
@@ -332,7 +298,7 @@ namespace Engine
 
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.RadianceBuffer.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 1.0f));
 
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.BackBuffer.Width, camera.BackBuffer.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.RadianceBuffer.GetView<RenderTargetView>());
 
             foreach (Light light in Scene.FindComponentsOfType<Light>())
@@ -342,11 +308,11 @@ namespace Engine
 
                 if (light.PrepareLightPass(camera))
                 {
-                    camera.GBuffer.worldPos.Use("worldPosTex");
-                    camera.GBuffer.albedo.Use("albedoTex");
-                    camera.GBuffer.normal.Use("normalTex");
-                    camera.GBuffer.metallic.Use("metallicTex");
-                    camera.GBuffer.roughness.Use("roughnessTex");
+                    camera.GBuffer.WorldPos.Use("worldPosTex");
+                    camera.GBuffer.Albedo.Use("albedoTex");
+                    camera.GBuffer.Normal.Use("normalTex");
+                    camera.GBuffer.Metallic.Use("metallicTex");
+                    camera.GBuffer.Roughness.Use("roughnessTex");
                     sampler.use("texSampler");
                     CurrentDevice.ImmediateContext.Draw(6, 0);
                 }
@@ -362,9 +328,9 @@ namespace Engine
 
             pipeline.Use();
 
-            camera.GBuffer.worldPos.Use("worldPosTex");
-            camera.GBuffer.albedo.Use("albedoTex");
-            camera.GBuffer.ambientOcclusion.Use("ambientOcclusionTex");
+            camera.GBuffer.WorldPos.Use("worldPosTex");
+            camera.GBuffer.Albedo.Use("albedoTex");
+            camera.GBuffer.AmbientOcclusion.Use("ambientOcclusionTex");
             camera.RadianceBuffer.Use("radianceTex");
             sampler.use("texSampler");
             CurrentDevice.ImmediateContext.Draw(6, 0);
@@ -375,7 +341,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.State = frontCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = blendingBlendState;
 
-            Viewport viewport = new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f);
+            Viewport viewport = new Viewport(0, 0, camera.BackBuffer.Width, camera.BackBuffer.Height, 0.0f, 1.0f);
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(viewport);
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
 
@@ -437,8 +403,8 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.Backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.BackBuffer.Width, camera.BackBuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.BackBuffer.RenderTargetTexture.GetView<RenderTargetView>());
 
             if (!ShaderPipeline.TryGetPipeline("deferred_gamma_correction", out ShaderPipeline pipeline))
                 return;
@@ -452,8 +418,8 @@ namespace Engine
 
         private static void RenderTexture(Camera camera, Texture tex)
         {
-            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.Backbuffer.Width, camera.Backbuffer.Height, 0.0f, 1.0f));
-            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.Backbuffer.RenderTargetTexture.GetView<RenderTargetView>());
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.BackBuffer.Width, camera.BackBuffer.Height, 0.0f, 1.0f));
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.BackBuffer.RenderTargetTexture.GetView<RenderTargetView>());
 
             if (!ShaderPipeline.TryGetPipeline("tex_to_screen", out ShaderPipeline pipeline))
                 return;

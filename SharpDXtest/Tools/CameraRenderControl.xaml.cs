@@ -10,6 +10,7 @@ using System.Windows.Media;
 
 using Engine;
 using Engine.BaseAssets.Components;
+using Engine.Graphics;
 
 using LinearAlgebra;
 
@@ -99,7 +100,7 @@ namespace Editor
 
         private bool loaded = false;
 
-        private FrameBuffer copyFramebuffer;
+        private D9FrameBuffer copyFramebuffer;
 
         private int framesCount = 0;
         private double timeCounter = 0.0;
@@ -237,7 +238,7 @@ namespace Editor
 
             camera.Resize(width, height);
 
-            copyFramebuffer = new FrameBuffer(width, height);
+            copyFramebuffer = new D9FrameBuffer(width, height);
         }
 
         private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)

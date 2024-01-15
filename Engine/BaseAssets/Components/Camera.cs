@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Reflection;
+
+using Engine.Graphics;
+
 using LinearAlgebra;
 using SharpDX;
 using SharpDX.Direct3D11;
@@ -153,9 +156,9 @@ namespace Engine.BaseAssets.Components
         internal Texture RadianceBuffer { get; private set; }
         internal Texture ColorBuffer { get; private set; }
 
-        internal FrameBuffer Backbuffer { get; private set; }
-        private FrameBuffer middlebuffer;
-        private FrameBuffer frontbuffer;
+        internal FrameBuffer BackBuffer { get; private set; }
+        private FrameBuffer middleBuffer;
+        private FrameBuffer frontBuffer;
 
         private int targetWidth;
         private int targetHeight;
@@ -176,18 +179,18 @@ namespace Engine.BaseAssets.Components
             Width = width;
             Height = height;
 
-            frontbuffer?.Dispose();
-            middlebuffer?.Dispose();
-            Backbuffer?.Dispose();
+            frontBuffer?.Dispose();
+            middleBuffer?.Dispose();
+            BackBuffer?.Dispose();
 
             GBuffer.Dispose();
             DepthBuffer?.Dispose();
             RadianceBuffer?.Dispose();
             ColorBuffer?.Dispose();
 
-            frontbuffer = new FrameBuffer(width, height);
-            middlebuffer = new FrameBuffer(width, height);
-            Backbuffer = new FrameBuffer(width, height);
+            frontBuffer = new FrameBuffer(width, height);
+            middleBuffer = new FrameBuffer(width, height);
+            BackBuffer = new FrameBuffer(width, height);
 
             GBuffer = new GBuffer(width, height);
             DepthBuffer = new Texture(width, height, null, Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
@@ -197,19 +200,19 @@ namespace Engine.BaseAssets.Components
 
         internal void SwapFrameBuffers()
         {
-            lock (middlebuffer)
+            lock (middleBuffer)
             {
-                (Backbuffer, middlebuffer) = (middlebuffer, Backbuffer);
+                (BackBuffer, middleBuffer) = (middleBuffer, BackBuffer);
             }
         }
 
         public FrameBuffer GetNextFrontBuffer()
         {
-            lock (middlebuffer)
+            lock (middleBuffer)
             {
-                (middlebuffer, frontbuffer) = (frontbuffer, middlebuffer);
+                (middleBuffer, frontBuffer) = (frontBuffer, middleBuffer);
             }
-            return frontbuffer;
+            return frontBuffer;
         }
 
         #endregion Render
