@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+
 using LinearAlgebra;
+
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+
 using Buffer = SharpDX.Direct3D11.Buffer;
 
 namespace Engine
@@ -13,6 +16,7 @@ namespace Engine
     {
         private bool disposed;
         public List<Mesh> Meshes { get; } = new List<Mesh>();
+        public Skeleton Skeleton { get; set; } = null;
 
         public void Render()
         {
@@ -42,7 +46,6 @@ namespace Engine
     {
         // material assigned on mesh load
         public Material DefaultMaterial { get; set; } = null;
-        public Skeleton Skeleton { get; set; } = null;
 
         public readonly List<PrimitiveVertex> Vertices = new List<PrimitiveVertex>();
         public readonly List<int> Indices = new List<int>();
