@@ -59,12 +59,12 @@ vert_out main(vert_in vert)
         boneTransform += mul(gBones[vert.bones.w], vert.weights.w);
         normalTransform += mul(gInverseTransposeBones[vert.bones.w], vert.weights.w);
     }
-    float4 v_world = mul(mul(boneTransform, float4(vert.v, 1.f)), model);
+    float4 v_world = mul(mul(float4(vert.v, 1.f), boneTransform), model);
 
     res.sv_pos = mul(mul(v_world, view), proj);
     res.v = v_world;
     res.t = vert.t;
-    res.n = normalize(mul(mul(normalTransform, float4(vert.n, 0.0f)), modelNorm).xyz);
+    res.n = normalize(mul(mul(float4(vert.n, 0.0f), normalTransform), modelNorm).xyz);
 
     float3 tangent = normalize(mul(float4(vert.tx, 0.0f), modelNorm).xyz);
     float3 bitangent = cross(res.n, tangent);
