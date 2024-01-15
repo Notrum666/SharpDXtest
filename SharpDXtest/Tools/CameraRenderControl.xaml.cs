@@ -56,20 +56,22 @@ namespace Editor
         }
 
         private bool loaded = false;
-        private bool isEditor = false;
+        private ViewportType ViewportType { get; }
         public CameraViewModel CameraViewModel { get; }
+
+        private Camera editorCamera;
 
         // private int framesCount = 0;
         // private double timeCounter = 0.0;
         // private bool keyboardFocused = false;
 
-        public CameraRenderControl() : this(true) { }
+        public CameraRenderControl() : this(ViewportType.EditorView) { }
 
-        public CameraRenderControl(bool isEditor)
+        public CameraRenderControl(ViewportType type)
         {
             InitializeComponent();
 
-            this.isEditor = isEditor;
+            ViewportType = type;
             CursorMode = CursorMode.Normal;
 
             DataContext = CameraViewModel = new CameraViewModel();
@@ -91,17 +93,45 @@ namespace Editor
                 Width = double.NaN;
                 Height = double.NaN;
 
-                if (isEditor)
-                {
-                    Camera editorCamera = CreateEditorCamera();
-                    CameraViewModel.ResizeCamera(editorCamera, (int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
-                    CameraViewModel.SetCamera(editorCamera);
-                }
+                EditorLayer.OnPlaymodeEntered += OnPlaymodeEntered;
+                EditorLayer.OnPlaymodeExited += OnPlaymodeExited;
 
                 loaded = true;
             }
 
             CompositionTarget.Rendering += OnRender;
+        }
+
+        private void OnPlaymodeEntered()
+        {
+            if (ViewportType is ViewportType.GameView)
+            {
+                // TODO: find non editor camera
+            }
+        }
+
+        private void OnPlaymodeExited()
+        {
+            if (ViewportType is ViewportType.EditorView)
+            {
+                editorCamera ??= CreateEditorCamera();
+                CameraViewModel.ResizeCamera(editorCamera, (int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+                CameraViewModel.SetCamera(editorCamera);
+            }
+        }
+
+        private static Camera CreateEditorCamera()
+        {
+            GameObject editorCamera = EditorScene.Instantiate("Editor camera");
+            editorCamera.Transform.Position = new Vector3(0, -10, 5);
+            editorCamera.AddComponent<EditorCameraController>();
+
+            Camera camera = editorCamera.AddComponent<Camera>();
+            camera.Near = 0.001;
+            camera.Far = 500;
+            camera.OnResized += () => Logger.Log(LogType.Info, $"Editor camera was resized, new size: ({camera.Width}, {camera.Height}).");
+
+            return camera;
         }
 
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
@@ -188,29 +218,6 @@ namespace Editor
         {
             CameraViewModel.ResizeCamera((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
-
-        private static Camera CreateEditorCamera()
-        {
-            GameObject editorCamera = EditorScene.Instantiate("Editor camera");
-            editorCamera.Transform.Position = new Vector3(0, -10, 5);
-            editorCamera.AddComponent<EditorCameraController>();
-
-            Camera camera = editorCamera.AddComponent<Camera>();
-            camera.Near = 0.001;
-            camera.Far = 500;
-            camera.OnResized += () => Logger.Log(LogType.Info, $"Editor camera was resized, new size: ({camera.Width}, {camera.Height}).");
-
-            return camera;
-        }
-
-        // private void ResizeCameraAndFramebuffer(int width, int height)
-        // {
-        //     camera.Aspect = width / (double)height;
-        //
-        //     camera.Resize(width, height);
-        //
-        //     copyFramebuffer = new D9FrameBuffer(width, height);
-        // }
     }
 
     public readonly struct AspectRatio
@@ -248,5 +255,13 @@ namespace Editor
         Normal,
         Hidden,
         HiddenAndLocked
+    }
+
+    [Flags]
+    public enum ViewportType
+    {
+        GameView = 1 << 0,
+        EditorView = 1 << 1,
+        Both = GameView & EditorView
     }
 }

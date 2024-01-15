@@ -49,7 +49,7 @@ namespace Editor
             EngineCore.OnPaused += OnEnginePaused;
             EngineCore.Run();
 
-            SceneManager.ReloadScene();
+            OnEnginePaused();
         }
 
         public override void Init()
