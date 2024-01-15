@@ -4,6 +4,7 @@ using System.Reflection;
 using Engine.Graphics;
 
 using LinearAlgebra;
+
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -77,6 +78,9 @@ namespace Engine.BaseAssets.Components
             if (height <= 0)
                 throw new ArgumentOutOfRangeException(nameof(height));
 
+            if (width == targetWidth && height == targetHeight)
+                return;
+            
             targetHeight = height;
             targetWidth = width;
             needsToBeResized = true;
@@ -149,7 +153,7 @@ namespace Engine.BaseAssets.Components
 
         #region Render
 
-        public event Action<Camera> OnResized;
+        public event Action OnResized;
 
         internal GBuffer GBuffer { get; private set; }
         internal Texture DepthBuffer { get; private set; }
@@ -170,7 +174,7 @@ namespace Engine.BaseAssets.Components
             {
                 needsToBeResized = false;
                 GenerateBuffers(targetWidth, targetHeight);
-                OnResized?.Invoke(this);
+                OnResized?.Invoke();
             }
         }
 
@@ -216,6 +220,13 @@ namespace Engine.BaseAssets.Components
         }
 
         #endregion Render
+
+        #region D9Render
+
+        private D9CameraRenderer d9Renderer;
+        public D9CameraRenderer D9Renderer => d9Renderer ??= new D9CameraRenderer(this);
+
+        #endregion D9Render
 
     }
 }

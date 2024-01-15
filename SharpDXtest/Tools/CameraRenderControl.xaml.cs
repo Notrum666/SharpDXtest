@@ -22,48 +22,9 @@ using Point = System.Drawing.Point;
 
 namespace Editor
 {
-    public enum CursorMode
-    {
-        Normal,
-        Hidden,
-        HiddenAndLocked
-    }
-    public struct AspectRatio
-    {
-        public double width;
-        public double height;
-        public double Ratio => width / height;
-        public string displayText;
-
-        public AspectRatio() :
-            this(double.NaN, double.NaN, "") { }
-
-        public AspectRatio(double width, double height) :
-            this(width, height, "") { }
-
-        public AspectRatio(double width, double height, string displayText)
-        {
-            this.width = width;
-            this.height = height;
-            this.displayText = displayText;
-        }
-
-        public override string ToString()
-        {
-            if (displayText != "")
-                return displayText;
-            if (double.IsNaN(width) || double.IsNaN(height))
-                return "Free aspect";
-            return width.ToString() + ":" + height.ToString();
-        }
-    }
     public partial class CameraRenderControl : UserControl, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-
-        private GameObject controlledGameObject;
-        private EditorCameraController controller;
-        private Camera camera;
 
         private Point cursorLockPoint;
         private CursorMode cursorMode;
@@ -99,20 +60,23 @@ namespace Editor
         }
 
         private bool loaded = false;
+        private bool isEditor = false;
+        public CameraViewModel CameraViewModel { get; }
 
-        private D9FrameBuffer copyFramebuffer;
+        // private int framesCount = 0;
+        // private double timeCounter = 0.0;
+        // private bool keyboardFocused = false;
 
-        private int framesCount = 0;
-        private double timeCounter = 0.0;
-        private bool keyboardFocused = false;
+        public CameraRenderControl() : this(true) { }
 
-        public CameraRenderControl()
+        public CameraRenderControl(bool isEditor)
         {
             InitializeComponent();
 
+            this.isEditor = isEditor;
             CursorMode = CursorMode.Normal;
 
-            DataContext = this;
+            DataContext = CameraViewModel = new CameraViewModel();
         }
 
         public void OnPropertyChanged([CallerMemberName] string prop = "")
@@ -131,28 +95,20 @@ namespace Editor
                 Width = double.NaN;
                 Height = double.NaN;
 
-                controlledGameObject = EditorScene.Instantiate("Editor camera");
-                controlledGameObject.Transform.Position = new Vector3(0, -10, 5);
-                controller = controlledGameObject.AddComponent<EditorCameraController>();
-                camera = controlledGameObject.AddComponent<Camera>();
-                camera.Near = 0.001;
-                camera.Far = 500;
-                camera.OnResized += c => Logger.Log(LogType.Info, string.Format("Editor camera was resized, new size: ({0}, {1}).", c.Width, c.Height));
+                if (isEditor)
+                {
+                    Camera editorCamera = CreateEditorCamera();
+                    CameraViewModel.SetCamera(editorCamera);
+                }
 
-                ResizeCameraAndFramebuffer((int)ActualWidth, (int)ActualHeight);
+                loaded = true;
             }
 
-            EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
-
             CompositionTarget.Rendering += OnRender;
-
-            loaded = true;
         }
 
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            EngineCore.OnFrameEnded -= GameCore_OnFrameEnded;
-
             CompositionTarget.Rendering -= OnRender;
         }
 
@@ -164,37 +120,7 @@ namespace Editor
             if (cursorMode == CursorMode.HiddenAndLocked && IsKeyboardFocused)
                 System.Windows.Forms.Cursor.Position = cursorLockPoint;
 
-            d3dimage.Lock();
-
-            d3dimage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, copyFramebuffer.D9SurfaceNativePointer);
-            d3dimage.AddDirtyRect(new Int32Rect(0, 0, copyFramebuffer.Width, copyFramebuffer.Height));
-
-            d3dimage.Unlock();
-        }
-
-        private void GameCore_OnFrameEnded()
-        {
-            if (!EngineCore.IsAlive || !IsVisible)
-                return;
-
-            if (keyboardFocused)
-                controller.UpdateInput();
-
-            GraphicsCore.RenderScene(camera);
-
-            FrameBuffer buffer = camera.GetNextFrontBuffer();
-
-            GraphicsCore.CurrentDevice.ImmediateContext.ResolveSubresource(buffer.RenderTargetTexture.texture, 0, copyFramebuffer.RenderTargetTexture.texture, 0, Format.B8G8R8A8_UNorm);
-
-            timeCounter += Time.DeltaTime;
-            framesCount++;
-            if (timeCounter >= 1.0)
-            {
-                FPSTextBlock.Dispatcher.Invoke(() => { FPSTextBlock.Text = framesCount.ToString(); });
-
-                timeCounter -= 1.0;
-                framesCount = 0;
-            }
+            CameraViewModel?.Render(D3DImage);
         }
 
         private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
@@ -223,35 +149,26 @@ namespace Editor
         private void UserControl_GotKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = cursorMode == CursorMode.Normal ? Cursors.Arrow : Cursors.None;
-            keyboardFocused = true;
         }
 
         private void UserControl_LostKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = Cursors.Arrow;
-            keyboardFocused = false;
         }
 
-        private void ResizeCameraAndFramebuffer(int width, int height)
+        private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            camera.Aspect = width / (double)height;
-
-            camera.Resize(width, height);
-
-            copyFramebuffer = new D9FrameBuffer(width, height);
+            UpdateRenderControlSize();
         }
 
-        private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void AspectRatioComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!loaded)
-                return;
-
-            ResizeCameraAndFramebuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+            UpdateRenderControlSize();
         }
 
         private void UpdateRenderControlSize()
         {
-            if (double.IsNaN(SelectedAspectRatio.width) || double.IsNaN(SelectedAspectRatio.height))
+            if (double.IsNaN(SelectedAspectRatio.Width) || double.IsNaN(SelectedAspectRatio.Height))
             {
                 RenderControl.Width = double.NaN;
                 RenderControl.Height = double.NaN;
@@ -270,14 +187,69 @@ namespace Editor
             }
         }
 
-        private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            UpdateRenderControlSize();
+            CameraViewModel?.ResizeCameraAndFramebuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
 
-        private void AspectRatioComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private static Camera CreateEditorCamera()
         {
-            UpdateRenderControlSize();
+            GameObject editorCamera = EditorScene.Instantiate("Editor camera");
+            editorCamera.Transform.Position = new Vector3(0, -10, 5);
+            editorCamera.AddComponent<EditorCameraController>();
+
+            Camera camera = editorCamera.AddComponent<Camera>();
+            camera.Near = 0.001;
+            camera.Far = 500;
+            camera.OnResized += () => Logger.Log(LogType.Info, $"Editor camera was resized, new size: ({camera.Width}, {camera.Height}).");
+
+            return camera;
         }
+
+        // private void ResizeCameraAndFramebuffer(int width, int height)
+        // {
+        //     camera.Aspect = width / (double)height;
+        //
+        //     camera.Resize(width, height);
+        //
+        //     copyFramebuffer = new D9FrameBuffer(width, height);
+        // }
+    }
+
+    public readonly struct AspectRatio
+    {
+        public readonly double Width;
+        public readonly double Height;
+        public double Ratio => Width / Height;
+        public readonly string DisplayText;
+
+        public AspectRatio() :
+            this(double.NaN, double.NaN) { }
+
+        // public AspectRatio(double width, double height) :
+        //     this(width, height, "") { }
+
+        public AspectRatio(double width, double height, string displayText = "")
+        {
+            Width = width;
+            Height = height;
+            DisplayText = displayText;
+        }
+
+        public override string ToString()
+        {
+            if (DisplayText != "")
+                return DisplayText;
+            if (double.IsNaN(Width) || double.IsNaN(Height))
+                return "Free aspect";
+            return $"{Width} : {Height}";
+        }
+    }
+
+    public enum CursorMode
+    {
+        Normal,
+        Hidden,
+        HiddenAndLocked
     }
 }

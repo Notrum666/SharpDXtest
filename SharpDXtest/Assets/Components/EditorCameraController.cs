@@ -36,8 +36,11 @@ namespace SharpDXtest.Assets.Components
             }
 
             targetVelocity = Vector3.Zero;
+
+            UpdateInput();
         }
-        public void UpdateInput()
+
+        private void UpdateInput()
         {
             if (!InputManager.IsMouseButtonDown(1))
                 return;
@@ -67,7 +70,7 @@ namespace SharpDXtest.Assets.Components
             Vector2 mouseDelta = InputManager.GetMouseDelta() / 750;
 
             if (!mouseDelta.isZero())
-            // faster
+                // faster
             {
                 GameObject.Transform.LocalRotation = Quaternion.FromAxisAngle(GameObject.Transform.Parent == null ? Vector3.Up :
                                                                                   GameObject.Transform.Parent.View.TransformDirection(Vector3.UnitZ), -mouseDelta.x) *
