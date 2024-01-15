@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Engine.Layers;
 
 namespace Engine
@@ -11,8 +12,9 @@ namespace Engine
     {
         private static bool isAlive = false;
         public static bool IsAlive => isAlive;
-        private static bool desiredPauseState = false;
-        private static bool isPaused = false;
+
+        private static bool desiredPauseState = true;
+        private static bool isPaused = true;
         public static bool IsPaused
         {
             get => isPaused;
@@ -24,30 +26,27 @@ namespace Engine
                 desiredPauseState = value;
             }
         }
-        private static Task loopTask;
         public static event Action OnPaused;
         public static event Action OnResumed;
         public static event Action OnFrameEnded;
 
+        private static Task loopTask;
         private static List<Layer> layersStack;
 
-        public static void Init(nint HWND, int width, int height, params Layer[] addedLayers)
+        private static double accumulator = 0.0;
+
+        public static void Init(params Layer[] addedLayers)
         {
             Logger.Log(LogType.Info, "Engine initialization");
             // Order of initialization is important, same number means no difference
-            ProfilerCore.Init();
-            GraphicsCore.Init(HWND, width, height); // 1
-            SoundCore.Init(); // 1
-            Time.Init(); // 1
-            InputManager.Init(); // 2
 
             layersStack = new List<Layer>
             {
-                new InputLayer(),
                 new ProfilerLayer(),
-                new RenderLayer(),
+                new InputLayer(),
+                new EngineRuntimeLayer(),
                 new SoundLayer(),
-                new EngineLayer()
+                new RenderLayer(),
             };
 
             if (addedLayers != null)
@@ -70,6 +69,7 @@ namespace Engine
             if (isAlive)
                 return;
 
+            Time.Init();
             isAlive = true;
 
             loopTask = Task.Run(() =>
@@ -86,9 +86,29 @@ namespace Engine
                     }
 
                     foreach (Layer layer in layersStack)
+                        layer.Prepare();
+
+                    accumulator += Time.DeltaTime;
+
+                    if (accumulator >= Time.FixedDeltaTime)
+                    {
+                        Time.SwitchToFixed();
+                        do
+                        {
+                            foreach (Layer layer in layersStack)
+                                layer.FixedUpdate();
+                            accumulator -= Time.FixedDeltaTime;
+                        } while (accumulator >= Time.FixedDeltaTime);
+                        Time.SwitchToVariating();
+                    }
+
+                    foreach (Layer layer in layersStack)
                         layer.Update();
 
                     Time.Update();
+
+                    foreach (Layer layer in layersStack)
+                        layer.OnFrameEnded();
 
                     OnFrameEnded?.Invoke();
 

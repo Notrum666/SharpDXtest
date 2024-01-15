@@ -31,7 +31,7 @@ namespace Engine.BaseAssets.Components.Particles
 
         public ParticleEffect_SphereEmitter()
         {
-            EffectShader = Shader.GetStaticShader("particles_emit_sphere");
+            EffectShader = Shader.Create(@"BaseAssets\Shaders\Particles\particles_emit_sphere.csh");
         }
 
         public override void Update(ParticleSystem system)

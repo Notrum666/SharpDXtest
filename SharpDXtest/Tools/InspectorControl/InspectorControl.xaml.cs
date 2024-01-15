@@ -20,7 +20,7 @@ namespace Editor
     {
         internal static List<FieldDataTemplate> FieldDataTemplates { get; } = new List<FieldDataTemplate>();
         public event PropertyChangedEventHandler PropertyChanged;
-        public GameObjectComponentsViewModel GameObjectViewModel { get; }
+        public static GameObjectComponentsViewModel GameObjectViewModel { get; private set; }
         private bool loaded = false;
         private int objectIndex = -1;
 
@@ -51,7 +51,7 @@ namespace Editor
         {
             InitializeComponent();
 
-            GameObjectViewModel = new GameObjectComponentsViewModel();
+            GameObjectViewModel ??= new GameObjectComponentsViewModel();
 
             DataContext = this;
         }

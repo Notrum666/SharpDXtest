@@ -25,6 +25,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Images\big-gear.png" />
+		<None Remove="Resources\BaseAssets\Shaders\DeferredRender\deferred_geometry_skinned.vsh" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FileIcon.png" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
 	</ItemGroup>
@@ -34,6 +35,9 @@
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Lib.Harmony" Version="2.2.2" />
+		<PackageReference Include="Microsoft.Build.Locator" Version="1.6.10" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.0-2.final" />
+		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.9.0-2.final" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />

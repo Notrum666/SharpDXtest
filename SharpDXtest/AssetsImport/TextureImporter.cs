@@ -9,6 +9,8 @@ namespace Editor.AssetsImport
     [AssetImporter("jpg", "png", "bmp")]
     public class TextureImporter : AssetImporter
     {
+        public override int LatestVersion => 1;
+
         public class TextureImportSettings : BaseImportSettings
         {
             public bool ApplyGammaCorrection = false;

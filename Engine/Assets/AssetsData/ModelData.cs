@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+
 using LinearAlgebra;
 
 using YamlDotNet.Serialization;
@@ -42,11 +43,13 @@ namespace Engine.AssetsData
         {
             Model model = new Model();
 
+            if (SkeletonGuid != Guid.Empty)
+                model.Skeleton = AssetsManager.LoadAssetByGuid<Skeleton>(SkeletonGuid);
+
             foreach (MeshData meshData in Meshes)
             {
                 Mesh mesh = new Mesh();
                 mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material);
-                mesh.Skeleton = AssetsManager.LoadAssetByGuid<Skeleton>(SkeletonGuid);
 
                 foreach (VertexData vertexData in meshData.Vertices)
                 {

@@ -13,5 +13,26 @@ namespace Engine.BaseAssets.Components
         public Vector3f Color = new Vector3f(1f, 1f, 1f);
 
         public Ranged<float> Brightness => new Ranged<float>(ref brightness, 0.0f);
+
+        public virtual void RenderShadows() { }
+
+        public virtual bool PrepareLightPass(Camera camera)
+        {
+            return false;
+        }
+
+        protected void RenderObjects(ShaderPipeline pipeline)
+        {
+            foreach (MeshComponent meshComponent in Scene.FindComponentsOfType<MeshComponent>())
+            {
+                if (!meshComponent.LocalEnabled)
+                    continue;
+                pipeline.UpdateUniform("model", (Matrix4x4f)meshComponent.GameObject.Transform.Model);
+
+                pipeline.UploadUpdatedUniforms();
+
+                meshComponent.Render();
+            }
+        }
     }
 }
