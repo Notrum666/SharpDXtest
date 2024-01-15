@@ -71,10 +71,12 @@ namespace Editor
         {
             InitializeComponent();
 
-            ViewportType = type;
             CursorMode = CursorMode.Normal;
 
-            DataContext = CameraViewModel = new CameraViewModel();
+            ViewportType = type;
+            CameraViewModel = new CameraViewModel();
+
+            DataContext = this;
         }
 
         public void OnPropertyChanged([CallerMemberName] string prop = "")
@@ -95,7 +97,13 @@ namespace Editor
 
                 EditorLayer.OnPlaymodeEntered += OnPlaymodeEntered;
                 EditorLayer.OnPlaymodeExited += OnPlaymodeExited;
-                OnPlaymodeExited();
+
+                if (ViewportType.HasFlag(ViewportType.EditorView))
+                {
+                    editorCamera = CreateEditorCamera();
+                    CameraViewModel.ResizeCamera(editorCamera, (int)ActualWidth, (int)ActualHeight);
+                    CameraViewModel.SetCamera(editorCamera);
+                }
 
                 loaded = true;
             }
@@ -115,8 +123,6 @@ namespace Editor
         {
             if (ViewportType.HasFlag(ViewportType.EditorView))
             {
-                editorCamera ??= CreateEditorCamera();
-                CameraViewModel.ResizeCamera(editorCamera, (int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
                 CameraViewModel.SetCamera(editorCamera);
             }
         }

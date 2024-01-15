@@ -78,6 +78,8 @@ namespace Editor
                     FPS = -1;
                 return;
             }
+            
+            GraphicsCore.RenderScene(camera);
 
             timeCounter += Time.DeltaTime;
             framesCount++;
