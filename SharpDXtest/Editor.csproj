@@ -26,6 +26,8 @@
 	<ItemGroup>
 		<None Remove="Images\big-gear.png" />
 		<None Remove="Resources\BaseAssets\Shaders\DeferredRender\deferred_geometry_skinned.vsh" />
+		<None Remove="Tools\ContentBrowserControl\Icons\FileIcon.png" />
+		<None Remove="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Engine\Engine.csproj" />
@@ -47,6 +49,8 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Resource Include="Images\big-gear.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\FileIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Resources\**">
