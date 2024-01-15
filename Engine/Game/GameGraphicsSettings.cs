@@ -43,6 +43,13 @@ namespace Engine
                         }
                     },
                     {
+                        "deferred_geometry_skinned", new List<string>()
+                        {
+                            @"BaseAssets\Shaders\DeferredRender\deferred_geometry_skinned.vsh",
+                            @"BaseAssets\Shaders\DeferredRender\deferred_geometry.fsh"
+                        }
+                    },
+                    {
                         "deferred_geometry_particles", new List<string>()
                         {
                             @"BaseAssets\Shaders\DeferredRender\deferred_geometry_particles.vsh",

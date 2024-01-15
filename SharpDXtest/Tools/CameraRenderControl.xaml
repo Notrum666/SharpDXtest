@@ -33,8 +33,8 @@
             </ComboBox>
         </Grid>
         <Grid Grid.Row="1" x:Name="RenderControlHost" Background="{StaticResource CameraRenderControlBackgroundBrush}">
-            <TextBlock x:Name="FPSTextBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20"
-                       Text="0" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
+            <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20"
+                       Text="{Binding FpsCount}" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
             <Image x:Name="RenderControl" HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch" Stretch="Fill" SizeChanged="RenderControl_SizeChanged">
                 <Image.Source>

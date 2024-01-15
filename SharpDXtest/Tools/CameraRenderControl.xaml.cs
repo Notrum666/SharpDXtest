@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
@@ -66,6 +67,17 @@ namespace Editor
 
         private Point cursorLockPoint;
         private CursorMode cursorMode;
+
+        private int fpsCount = 0;
+        public int FpsCount
+        {
+            get => fpsCount;
+            set
+            {
+                fpsCount = value;
+                OnPropertyChanged();
+            }
+        }
 
         public ObservableCollection<AspectRatio> AspectRatios { get; set; } = new ObservableCollection<AspectRatio>
         {
@@ -189,7 +201,7 @@ namespace Editor
             framesCount++;
             if (timeCounter >= 1.0)
             {
-                FPSTextBlock.Dispatcher.Invoke(() => { FPSTextBlock.Text = framesCount.ToString(); });
+                FpsCount = framesCount;
 
                 timeCounter -= 1.0;
                 framesCount = 0;
@@ -203,6 +215,9 @@ namespace Editor
 
             if (e.RightButton == MouseButtonState.Pressed)
                 CursorMode = CursorMode.HiddenAndLocked;
+
+            if(e.LeftButton == MouseButtonState.Pressed)
+                HandlePicking((int)e.GetPosition(RenderControl).X, (int)e.GetPosition(RenderControl).Y);
         }
 
         private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
@@ -267,6 +282,26 @@ namespace Editor
                 RenderControl.Width = RenderControlHost.ActualWidth;
                 RenderControl.Height = RenderControl.Width / SelectedAspectRatio.Ratio;
             }
+        }
+
+        private void HandlePicking(int mouseX, int mouseY)
+        {
+            HitResult hitResult;
+            Vector3 screenToWorldDir = camera.ScreenToWorld(new Vector2(mouseX, mouseY));
+
+            bool hasHit = Raycast.HitMesh(
+                new Ray
+                {
+                    Origin = camera.GameObject.Transform.Position,
+                    Direction = screenToWorldDir
+                },
+                out hitResult
+            );
+
+            //GameObject cursor = Scene.CurrentScene.GameObjects.First(obj => obj.Name == "Cursor");
+            //cursor.Transform.Position = hitResult.Point;
+
+            InspectorControl.GameObjectViewModel.Target = hasHit ? hitResult.HitObject : null;
         }
 
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)

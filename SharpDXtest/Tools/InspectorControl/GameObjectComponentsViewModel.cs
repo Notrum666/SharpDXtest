@@ -27,8 +27,12 @@ namespace Editor
             EditorRuntimeLayer.OnUpdate -= Update;
             
             ComponentViewModels.Clear();
-            foreach (Component component in target.Components)
-                ComponentViewModels.Add(new ComponentViewModel(component));
+
+            if(target != null)
+            {
+                foreach (Component component in target.Components)
+                    ComponentViewModels.Add(new ComponentViewModel(component));
+            }
             
             EditorRuntimeLayer.OnUpdate += Update;
         }
