@@ -23,13 +23,18 @@
         </Grid.ColumnDefinitions>
         <TreeView Background="Transparent" BorderBrush="{StaticResource BorderBrush}"
                   Grid.Column="0" Margin="5" x:Name="FoldersTreeView"
-                  ItemsSource="{Binding RootFolderViewModels}">
+                  ItemsSource="{Binding RootFolderViewModels}"
+                  ItemContainerStyle="{StaticResource TreeViewItemStyle}">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type local:ContentBrowserFolderViewModel}" 
                                           ItemsSource="{Binding Subfolders}">
-                    <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="{Binding Name}"
-                               AllowDrop="True" Drop="TreeViewFolder_Drop" 
-                               MouseDown="TreeViewItem_MouseDown" MouseMove="TreeViewItem_MouseMove"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="Icons/FolderIcon.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                        <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="{Binding Name}"
+                                   AllowDrop="True" Drop="TreeViewFolder_Drop" 
+                                   MouseDown="TreeViewItem_MouseDown" MouseMove="TreeViewItem_MouseMove"/>
+                    </StackPanel>
+                    
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>

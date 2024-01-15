@@ -114,4 +114,9 @@
     <Color x:Key="InspectorCheckMarkColor">#FF0080FF</Color>
     <SolidColorBrush x:Key="InspectorCheckMarkBrush" Color="{StaticResource InspectorCheckMarkColor}"/>
     <!--#endregion-->
+    
+    <!--#region TreeViewItem-->
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="DodgerBlue" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.InactiveSelectionHighlightBrushKey}" Color="DimGray" />
+    <!--#endregion-->
 </ResourceDictionary>
