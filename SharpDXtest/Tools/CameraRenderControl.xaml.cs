@@ -164,6 +164,9 @@ namespace Editor
 
             if (e.RightButton == MouseButtonState.Pressed)
                 CursorMode = CursorMode.HiddenAndLocked;
+            
+            if(e.LeftButton == MouseButtonState.Pressed && editorCamera != null)
+                HandlePicking((int)e.GetPosition(RenderControl).X, (int)e.GetPosition(RenderControl).Y);
         }
 
         private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
@@ -224,6 +227,26 @@ namespace Editor
         private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             CameraViewModel.ResizeCamera((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+        }
+        
+        private void HandlePicking(int mouseX, int mouseY)
+        {
+            HitResult hitResult;
+            Vector3 screenToWorldDir = editorCamera.ScreenToWorld(new Vector2(mouseX, mouseY));
+
+            bool hasHit = Raycast.HitMesh(
+                new Ray
+                {
+                    Origin = editorCamera.GameObject.Transform.Position,
+                    Direction = screenToWorldDir
+                },
+                out hitResult
+            );
+
+            //GameObject cursor = Scene.CurrentScene.GameObjects.First(obj => obj.Name == "Cursor");
+            //cursor.Transform.Position = hitResult.Point;
+
+            InspectorControl.GameObjectViewModel.Target = hasHit ? hitResult.HitObject : null;
         }
     }
 
