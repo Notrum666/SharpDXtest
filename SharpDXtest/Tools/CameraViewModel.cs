@@ -79,8 +79,6 @@ namespace Editor
                 return;
             }
             
-            GraphicsCore.RenderScene(camera);
-
             timeCounter += Time.DeltaTime;
             framesCount++;
             if (timeCounter >= 1.0)

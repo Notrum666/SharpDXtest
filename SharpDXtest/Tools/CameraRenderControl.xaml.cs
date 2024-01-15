@@ -65,7 +65,7 @@ namespace Editor
         // private double timeCounter = 0.0;
         // private bool keyboardFocused = false;
 
-        public CameraRenderControl() : this(ViewportType.EditorView) { }
+        public CameraRenderControl() : this(ViewportType.Both) { }
 
         public CameraRenderControl(ViewportType type)
         {
@@ -269,6 +269,6 @@ namespace Editor
     {
         GameView = 1 << 0,
         EditorView = 1 << 1,
-        Both = GameView & EditorView
+        Both = GameView | EditorView
     }
 }
