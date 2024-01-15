@@ -83,7 +83,7 @@ namespace Engine.BaseAssets.Components
             
             targetHeight = height;
             targetWidth = width;
-            needsToBeResized = true;
+            NeedsToBeResized = true;
         }
 
         internal override void OnDeserialized()
@@ -166,13 +166,13 @@ namespace Engine.BaseAssets.Components
 
         private int targetWidth;
         private int targetHeight;
-        private bool needsToBeResized;
+        internal bool NeedsToBeResized { get; private set; }
 
         internal void PreRenderUpdate()
         {
-            if (needsToBeResized)
+            if (NeedsToBeResized)
             {
-                needsToBeResized = false;
+                NeedsToBeResized = false;
                 GenerateBuffers(targetWidth, targetHeight);
                 OnResized?.Invoke();
             }

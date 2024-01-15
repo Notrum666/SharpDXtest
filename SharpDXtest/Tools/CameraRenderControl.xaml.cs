@@ -95,6 +95,7 @@ namespace Editor
 
                 EditorLayer.OnPlaymodeEntered += OnPlaymodeEntered;
                 EditorLayer.OnPlaymodeExited += OnPlaymodeExited;
+                OnPlaymodeExited();
 
                 loaded = true;
             }
@@ -104,7 +105,7 @@ namespace Editor
 
         private void OnPlaymodeEntered()
         {
-            if (ViewportType is ViewportType.GameView)
+            if (ViewportType.HasFlag(ViewportType.GameView))
             {
                 // TODO: find non editor camera
             }
@@ -112,7 +113,7 @@ namespace Editor
 
         private void OnPlaymodeExited()
         {
-            if (ViewportType is ViewportType.EditorView)
+            if (ViewportType.HasFlag(ViewportType.EditorView))
             {
                 editorCamera ??= CreateEditorCamera();
                 CameraViewModel.ResizeCamera(editorCamera, (int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);

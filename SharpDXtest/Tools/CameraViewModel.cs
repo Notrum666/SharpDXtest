@@ -54,6 +54,9 @@ namespace Editor
 
         public void Render(D3DImage targetImage)
         {
+            if (!D9Renderer?.IsReady ?? true)
+                return;
+
             targetImage.Lock();
 
             targetImage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, D9Renderer.D9SurfaceNativePointer);

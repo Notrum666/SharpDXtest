@@ -10,6 +10,7 @@ namespace Engine.Graphics
     {
         public Camera Camera { get; }
 
+        public bool IsReady { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
         public nint D9SurfaceNativePointer => copyFramebuffer.D9SurfaceNativePointer;
@@ -20,9 +21,11 @@ namespace Engine.Graphics
         public D9CameraRenderer(Camera camera)
         {
             Camera = camera;
+            IsReady = false;
 
             Camera.OnResized += ResizeBuffer;
-            ResizeBuffer();
+            if (!Camera.NeedsToBeResized)
+                ResizeBuffer();
         }
 
         public void Subscribe(object viewer)
@@ -43,6 +46,8 @@ namespace Engine.Graphics
 
         private void ResizeBuffer()
         {
+            IsReady = true;
+            
             Width = Camera.Width;
             Height = Camera.Height;
             copyFramebuffer = new D9FrameBuffer(Width, Height);
