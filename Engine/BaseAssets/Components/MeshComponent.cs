@@ -15,7 +15,27 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private Material[] materials = Array.Empty<Material>();
 
-        internal double SquaredBoundingSphereRadius;
+        private double squaredBoundingSphereRadius;
+        public double SquaredBoundingSphereRadius
+        {
+            get
+            {
+                if (boundingSphereRequiresRecalculation)
+                    RecalculateBoundingSphereRadius();
+                return squaredBoundingSphereRadius;
+            }
+        }
+        private double boundingSphereRadius;
+        public double BoundingSphereRadius
+        {
+            get
+            {
+                if (boundingSphereRequiresRecalculation)
+                    RecalculateBoundingSphereRadius();
+                return boundingSphereRadius;
+            }
+        }
+        private bool boundingSphereRequiresRecalculation = true;
 
         public virtual Model Model
         {
@@ -27,7 +47,7 @@ namespace Engine.BaseAssets.Components
 
                 model = value;
                 RefreshMaterialsSlots();
-                CalculateSphereRadius();
+                InvalidateBoundingSphereRadius();
             }
         }
 
@@ -36,7 +56,15 @@ namespace Engine.BaseAssets.Components
         public override void OnFieldChanged(FieldInfo fieldInfo)
         {
             if (fieldInfo.Name == nameof(model))
+            {
                 RefreshMaterialsSlots();
+                InvalidateBoundingSphereRadius();
+            }
+        }
+        
+        private void InvalidateBoundingSphereRadius()
+        {
+            boundingSphereRequiresRecalculation = true;
         }
 
         protected void RefreshMaterialsSlots()
@@ -45,6 +73,18 @@ namespace Engine.BaseAssets.Components
                 materials = Array.Empty<Material>();
             else
                 materials = model.Meshes.Select(p => p.DefaultMaterial).ToArray();
+        }
+
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
+            GameObject.Transform.Invalidated += InvalidateBoundingSphereRadius;
+        }
+
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+            GameObject.Transform.Invalidated -= InvalidateBoundingSphereRadius;
         }
 
         public virtual void Render()
@@ -68,44 +108,29 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        private void CalculateSphereRadius()
+        private void RecalculateBoundingSphereRadius()
         {
+            boundingSphereRequiresRecalculation = false;
             if (model == null)
             {
-                SquaredBoundingSphereRadius = 0;
+                boundingSphereRadius = 0;
+                squaredBoundingSphereRadius = 0;
                 return;
             }
 
-            var localVertices = new List<Vector3>();
-            Vector3 center = Vector3.Zero;
-            Vector3 offset = Vector3.Zero;
-
+            Matrix4x4 m = GameObject.Transform.Model;
+            Vector3 pos = GameObject.Transform.Position;
+            double maxSqrLength = 0;
             foreach (Mesh mesh in model.Meshes)
-            {
                 foreach (Mesh.PrimitiveVertex vertex in mesh.Vertices)
                 {
-                    localVertices.Add(vertex.v);
-                    //center += vertex.v;
+                    double curSqrLength = (m.TransformPoint(vertex.v) - pos).squaredLength();
+                    if (curSqrLength > maxSqrLength)
+                        maxSqrLength = curSqrLength;
                 }
-            }
 
-            //center /= localVertices.Count;
-            center = GameObject.Transform.Model.TransformPoint(center + offset);
-
-            List<Vector3> worldVertices = new List<Vector3>(localVertices.Count);
-
-            Matrix4x4 modelMatrix = GameObject.Transform.Model;
-            foreach (Vector3 vertex in localVertices)
-                worldVertices.Add(modelMatrix.TransformPoint(vertex + offset));
-
-            SquaredBoundingSphereRadius = 0;
-
-            foreach (Vector3 vertex in worldVertices)
-            {
-                double squaredDistanceToCenter = (vertex - center).squaredLength();
-                if (squaredDistanceToCenter > SquaredBoundingSphereRadius)
-                    SquaredBoundingSphereRadius = squaredDistanceToCenter;
-            }
+            squaredBoundingSphereRadius = maxSqrLength;
+            boundingSphereRadius = Math.Sqrt(squaredBoundingSphereRadius);
         }
     }
 }

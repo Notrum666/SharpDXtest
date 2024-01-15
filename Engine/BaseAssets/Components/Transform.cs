@@ -23,7 +23,7 @@ namespace Engine.BaseAssets.Components
         public Transform Parent { get => parent; private set => parent = value; }
         public ReadOnlyCollection<Transform> Children => children.AsReadOnly();
 
-        private event Action Invalidated;
+        public event Action Invalidated;
         private bool requiresCachedDataRecalculation;
 
         /// <summary>
