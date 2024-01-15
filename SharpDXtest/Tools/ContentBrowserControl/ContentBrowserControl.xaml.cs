@@ -382,5 +382,11 @@ namespace Editor
         {
             ((FrameworkElement)sender).Focus();
         }
+
+        private void FoldersTreeView_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = true;
+            bool res = Focus();
+        }
     }
 }
