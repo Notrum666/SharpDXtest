@@ -344,11 +344,10 @@ namespace Editor
         private static void DeleteEmptyFolders(string startFolderPath)
         {
             foreach (string folderPath in Directory.EnumerateDirectories(startFolderPath))
-            {
                 DeleteEmptyFolders(folderPath);
-                if (!Directory.EnumerateFileSystemEntries(folderPath).Any())
-                    Directory.Delete(folderPath, false);
-            }
+
+            if (!Directory.EnumerateFileSystemEntries(startFolderPath).Any())
+                Directory.Delete(startFolderPath, false);
         }
 
         #endregion FolderOperations

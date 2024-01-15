@@ -399,6 +399,23 @@
         </Style.Triggers>
     </Style>
 
+    <Style TargetType="{x:Type ContextMenu}">
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Grid.IsSharedSizeScope" Value="true" />
+        <Setter Property="HasDropShadow" Value="True" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ContextMenu}">
+                    <Border x:Name="SubmenuBorder" SnapsToDevicePixels="True" BorderThickness="1"
+                        Background="{StaticResource BackgroundBrush}" BorderBrush="{StaticResource BorderBrush}">
+                        <StackPanel Margin="4,4,4,2" x:Name="ItemsPresenter" IsItemsHost="True"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="ClearOutputButton" TargetType="Button">
         <Setter Property="Focusable" Value="false"/>
         <Setter Property="TextElement.Foreground" Value="{StaticResource InactiveForegroundBrush}"/>
