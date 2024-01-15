@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
@@ -271,6 +273,7 @@ namespace Engine
 #endif
             CurrentDevice.ImmediateContext.ClearDepthStencilView(camera.DepthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
 
+            IEnumerable<MeshComponent> meshes = Scene.FindComponentsOfType<MeshComponent>().Where(m => m.LocalEnabled);
             if (ShaderPipeline.TryGetPipeline("deferred_geometry", out ShaderPipeline pipeline))
             {
                 pipeline.Use();
@@ -280,7 +283,30 @@ namespace Engine
                 pipeline.UpdateUniform("view", (Matrix4x4f)camera.GameObject.Transform.View);
                 pipeline.UpdateUniform("proj", (Matrix4x4f)camera.Proj);
 
-                foreach (MeshComponent meshComponent in Scene.FindComponentsOfType<MeshComponent>())
+                foreach (MeshComponent meshComponent in meshes.Where(m => m is not SkeletalMeshComponent))
+                {
+                    if (!meshComponent.LocalEnabled)
+                        continue;
+
+                    Transform transform = meshComponent.GameObject.Transform;
+                    pipeline.UpdateUniform("model", (Matrix4x4f)transform.Model);
+                    pipeline.UpdateUniform("modelNorm", (Matrix4x4f)transform.Model.inverse().transposed());
+
+                    pipeline.UploadUpdatedUniforms();
+                    meshComponent.Render();
+                }
+            }
+
+            if (ShaderPipeline.TryGetPipeline("deferred_geometry_skinned", out pipeline))
+            {
+                pipeline.Use();
+
+                sampler.use("texSampler");
+
+                pipeline.UpdateUniform("view", (Matrix4x4f)camera.GameObject.Transform.View);
+                pipeline.UpdateUniform("proj", (Matrix4x4f)camera.Proj);
+
+                foreach (MeshComponent meshComponent in meshes.Where(m => m is SkeletalMeshComponent))
                 {
                     if (!meshComponent.LocalEnabled)
                         continue;

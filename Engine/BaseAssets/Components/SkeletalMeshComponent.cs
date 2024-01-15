@@ -5,6 +5,7 @@ using SharpDX.Direct3D11;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -26,6 +27,8 @@ namespace Engine.BaseAssets.Components
 
         // private List<Matrix4x4f> BonesTransformations = new List<Matrix4x4f>();
         // private List<Matrix4x4f> InverseTransposeBonesTransformations = new List<Matrix4x4f>();
+        private List<Matrix4x4f> bonesTransforms = null;
+        public ReadOnlyCollection<Matrix4x4f> BonesTransforms => bonesTransforms.AsReadOnly();
 
         private int currentBufferElementsCount = 0;
         private Buffer bonesBuffer = null;
@@ -66,10 +69,13 @@ namespace Engine.BaseAssets.Components
             if (disposed)
                 throw new ObjectDisposedException(nameof(SkeletalMeshComponent));
 
-            UpdateAnimation(out List<Matrix4x4f> bonesTransform, out List<Matrix4x4f> invTransposeBonesTransform);
-            EnsureGPUBuffer(bonesTransform, invTransposeBonesTransform);
-            Use(bonesTransform, invTransposeBonesTransform);
+            UpdateAnimation(out List<Matrix4x4f> curBonesTransforms, out List<Matrix4x4f> invTransposeBonesTransform);
+            bonesTransforms = curBonesTransforms;
+            EnsureGPUBuffer(curBonesTransforms, invTransposeBonesTransform);
+            Use(curBonesTransforms, invTransposeBonesTransform);
             base.Render();
+            GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(0, null);
+            GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(1, null);
         }
 
         public override void OnFieldChanged(FieldInfo fieldInfo)

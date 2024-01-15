@@ -25,6 +25,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Images\big-gear.png" />
+		<None Remove="Resources\BaseAssets\Shaders\DeferredRender\deferred_geometry_skinned.vsh" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Engine\Engine.csproj" />

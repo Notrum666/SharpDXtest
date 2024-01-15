@@ -1,4 +1,8 @@
-﻿using Engine.BaseAssets.Components;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Documents;
+
+using Engine.BaseAssets.Components;
 using LinearAlgebra;
 
 using Windows.Devices.Radios;
@@ -37,9 +41,13 @@ namespace Engine
                 if (!meshComponent.LocalEnabled || model == null)
                     continue;
 
+                List<Matrix4x4> bonesTransforms = null;
+                if (meshComponent is SkeletalMeshComponent skeletalMeshComponent && skeletalMeshComponent.BonesTransforms is not null)
+                    bonesTransforms = skeletalMeshComponent.BonesTransforms.Select(m => (Matrix4x4)m.transposed()).ToList();
                 GameObject gameObject = meshComponent.GameObject;
 
-                if (!IsIntersectBoundingSphere(ray, meshComponent))
+                // TODO: skeletal animations are not taken into account, something should be done about it
+                if (bonesTransforms is null && !IsIntersectBoundingSphere(ray, meshComponent))
                     continue;
 
                 Vector3 localOrigin = gameObject.Transform.View.TransformPoint(ray.Origin);
@@ -53,7 +61,48 @@ namespace Engine
                         Vector3 v1 = mesh.Vertices[mesh.Indices[i + 1]].v;
                         Vector3 v2 = mesh.Vertices[mesh.Indices[i + 2]].v;
 
-                        Vector3? hitPoint = IntersectRayTriangle(localOrigin, localDirection, v0, v1, v2);
+                        if (bonesTransforms is not null)
+                        {
+                            Vector3 newV0 = Vector3.Zero;
+                            Vector3 newV1 = Vector3.Zero;
+                            Vector3 newV2 = Vector3.Zero;
+
+                            Vector4i bones = mesh.Vertices[mesh.Indices[i + 0]].bones;
+                            Vector4f weights = mesh.Vertices[mesh.Indices[i + 0]].weights;
+                            newV0 += bonesTransforms[bones.x].TransformPoint(v0) * weights.x;
+                            if (weights.y > 0)
+                                newV0 += bonesTransforms[bones.y].TransformPoint(v0) * weights.y;
+                            if (weights.z > 0)
+                                newV0 += bonesTransforms[bones.z].TransformPoint(v0) * weights.z;
+                            if (weights.w > 0)
+                                newV0 += bonesTransforms[bones.w].TransformPoint(v0) * weights.w;
+
+                            bones = mesh.Vertices[mesh.Indices[i + 1]].bones;
+                            weights = mesh.Vertices[mesh.Indices[i + 1]].weights;
+                            newV1 += bonesTransforms[bones.x].TransformPoint(v1) * weights.x;
+                            if (weights.y > 0)
+                                newV1 += bonesTransforms[bones.y].TransformPoint(v1) * weights.y;
+                            if (weights.z > 0)
+                                newV1 += bonesTransforms[bones.z].TransformPoint(v1) * weights.z;
+                            if (weights.w > 0)
+                                newV1 += bonesTransforms[bones.w].TransformPoint(v1) * weights.w;
+
+                            bones = mesh.Vertices[mesh.Indices[i + 2]].bones;
+                            weights = mesh.Vertices[mesh.Indices[i + 2]].weights;
+                            newV2 += bonesTransforms[bones.x].TransformPoint(v1) * weights.x;
+                            if (weights.y > 0)
+                                newV2 += bonesTransforms[bones.y].TransformPoint(v2) * weights.y;
+                            if (weights.z > 0)
+                                newV2 += bonesTransforms[bones.z].TransformPoint(v2) * weights.z;
+                            if (weights.w > 0)
+                                newV2 += bonesTransforms[bones.w].TransformPoint(v2) * weights.w;
+
+                            v0 = newV0;
+                            v1 = newV1;
+                            v2 = newV2;
+                        }
+                        
+                        Vector3? hitPoint = IntersectRayTriangle(localOrigin, localDirection, v0, v1, v2);                            
 
                         if (hitPoint.HasValue)
                         {
