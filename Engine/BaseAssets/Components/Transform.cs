@@ -23,7 +23,12 @@ namespace Engine.BaseAssets.Components
         public Transform Parent { get => parent; private set => parent = value; }
         public ReadOnlyCollection<Transform> Children => children.AsReadOnly();
 
-        public event Action Invalidated;
+        private event Action invalidated;
+        public event Action Invalidated
+        {
+            add => invalidated += value;
+            remove => invalidated -= value;
+        }
         private bool requiresCachedDataRecalculation;
 
         /// <summary>
@@ -93,7 +98,7 @@ namespace Engine.BaseAssets.Components
 
         private void InvalidateCachedData()
         {
-            Invalidated?.Invoke();
+            invalidated?.Invoke();
             requiresCachedDataRecalculation = true;
         }
 
