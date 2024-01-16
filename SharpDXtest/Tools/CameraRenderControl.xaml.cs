@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 
 using Engine;
@@ -14,70 +12,18 @@ using Engine.BaseAssets.Components;
 
 using LinearAlgebra;
 
-using SharpDX.DXGI;
-
 using SharpDXtest.Assets.Components;
 
 using Point = System.Drawing.Point;
 
 namespace Editor
 {
-    public enum CursorMode
-    {
-        Normal,
-        Hidden,
-        HiddenAndLocked
-    }
-    public struct AspectRatio
-    {
-        public double width;
-        public double height;
-        public double Ratio => width / height;
-        public string displayText;
-
-        public AspectRatio() :
-            this(double.NaN, double.NaN, "") { }
-
-        public AspectRatio(double width, double height) :
-            this(width, height, "") { }
-
-        public AspectRatio(double width, double height, string displayText)
-        {
-            this.width = width;
-            this.height = height;
-            this.displayText = displayText;
-        }
-
-        public override string ToString()
-        {
-            if (displayText != "")
-                return displayText;
-            if (double.IsNaN(width) || double.IsNaN(height))
-                return "Free aspect";
-            return width.ToString() + ":" + height.ToString();
-        }
-    }
     public partial class CameraRenderControl : UserControl, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private GameObject controlledGameObject;
-        private EditorCameraController controller;
-        private Camera camera;
-
         private Point cursorLockPoint;
         private CursorMode cursorMode;
-
-        private int fpsCount = 0;
-        public int FpsCount
-        {
-            get => fpsCount;
-            set
-            {
-                fpsCount = value;
-                OnPropertyChanged();
-            }
-        }
 
         public ObservableCollection<AspectRatio> AspectRatios { get; set; } = new ObservableCollection<AspectRatio>
         {
@@ -110,20 +56,34 @@ namespace Editor
         }
 
         private bool loaded = false;
+        private ViewportType ViewportType { get; }
+        public CameraViewModel CameraViewModel { get; }
 
-        private FrameBuffer copyFramebuffer;
+        private Camera editorCamera;
+        private EditorCameraController editorCameraController => editorCamera?.GameObject?.GetComponent<EditorCameraController>();
+        private static int editorCamerasCount = 0;
 
-        private int framesCount = 0;
-        private double timeCounter = 0.0;
-        private bool keyboardFocused = false;
+        // private int framesCount = 0;
+        // private double timeCounter = 0.0;
+        // private bool keyboardFocused = false;
 
-        public CameraRenderControl()
+        public CameraRenderControl() : this(ViewportType.Both) { }
+
+        public CameraRenderControl(ViewportType type)
         {
             InitializeComponent();
 
             CursorMode = CursorMode.Normal;
 
+            ViewportType = type;
+            CameraViewModel = new CameraViewModel();
+
             DataContext = this;
+        }
+
+        ~CameraRenderControl()
+        {
+            editorCamera?.GameObject?.DestroyImmediate();
         }
 
         public void OnPropertyChanged([CallerMemberName] string prop = "")
@@ -142,29 +102,63 @@ namespace Editor
                 Width = double.NaN;
                 Height = double.NaN;
 
-                controlledGameObject = EditorScene.Instantiate("Editor camera");
-                controlledGameObject.Transform.Position = new Vector3(0, -10, 5);
-                controller = controlledGameObject.AddComponent<EditorCameraController>();
-                camera = controlledGameObject.AddComponent<Camera>();
-                camera.Near = 0.001;
-                camera.Far = 500;
-                camera.OnResized += c => Logger.Log(LogType.Info, string.Format("Editor camera was resized, new size: ({0}, {1}).", c.Width, c.Height));
+                EditorLayer.OnPlaymodeEntered += OnPlaymodeEntered;
+                EditorLayer.OnPlaymodeExited += OnPlaymodeExited;
 
-                ResizeCameraAndFramebuffer((int)ActualWidth, (int)ActualHeight);
+                if (ViewportType.HasFlag(ViewportType.EditorView))
+                {
+                    editorCamera = CreateEditorCamera();
+                    CameraViewModel.ResizeCamera(editorCamera, (int)ActualWidth, (int)ActualHeight);
+                    CameraViewModel.SetCamera(editorCamera);
+                }
+
+                loaded = true;
             }
 
-            EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
+            if (editorCamera != null)
+                editorCamera.LocalEnabled = true;
 
             CompositionTarget.Rendering += OnRender;
+        }
 
-            loaded = true;
+        private void OnPlaymodeEntered()
+        {
+            if (ViewportType.HasFlag(ViewportType.GameView))
+            {
+                CameraViewModel.SetCamera(Camera.Current);
+            }
+        }
+
+        private void OnPlaymodeExited()
+        {
+            if (ViewportType.HasFlag(ViewportType.EditorView))
+            {
+                CameraViewModel.SetCamera(editorCamera);
+            }
+        }
+
+        private static Camera CreateEditorCamera()
+        {
+            editorCamerasCount++;
+
+            GameObject editorCamera = EditorScene.Instantiate($"Editor_camera_{editorCamerasCount}");
+            editorCamera.Transform.Position = new Vector3(0, -10, 5);
+            editorCamera.AddComponent<EditorCameraController>().LocalEnabled = false;
+
+            Camera camera = editorCamera.AddComponent<Camera>();
+            camera.Near = 0.001;
+            camera.Far = 500;
+            camera.OnResized += () => Logger.Log(LogType.Info, $"Editor camera was resized, new size: ({camera.Width}, {camera.Height}).");
+
+            return camera;
         }
 
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            EngineCore.OnFrameEnded -= GameCore_OnFrameEnded;
-
             CompositionTarget.Rendering -= OnRender;
+
+            if (editorCamera != null)
+                editorCamera.LocalEnabled = false;
         }
 
         private void OnRender(object sender, EventArgs e)
@@ -175,37 +169,7 @@ namespace Editor
             if (cursorMode == CursorMode.HiddenAndLocked && IsKeyboardFocused)
                 System.Windows.Forms.Cursor.Position = cursorLockPoint;
 
-            d3dimage.Lock();
-
-            d3dimage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, copyFramebuffer.D9SurfaceNativePointer);
-            d3dimage.AddDirtyRect(new Int32Rect(0, 0, copyFramebuffer.Width, copyFramebuffer.Height));
-
-            d3dimage.Unlock();
-        }
-
-        private void GameCore_OnFrameEnded()
-        {
-            if (!EngineCore.IsAlive || !IsVisible)
-                return;
-
-            if (keyboardFocused)
-                controller.UpdateInput();
-
-            GraphicsCore.RenderScene(camera);
-
-            FrameBuffer buffer = camera.GetNextFrontBuffer();
-
-            GraphicsCore.CurrentDevice.ImmediateContext.ResolveSubresource(buffer.RenderTargetTexture.texture, 0, copyFramebuffer.RenderTargetTexture.texture, 0, Format.B8G8R8A8_UNorm);
-
-            timeCounter += Time.DeltaTime;
-            framesCount++;
-            if (timeCounter >= 1.0)
-            {
-                FpsCount = framesCount;
-
-                timeCounter -= 1.0;
-                framesCount = 0;
-            }
+            CameraViewModel?.Render(D3DImage);
         }
 
         private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
@@ -216,7 +180,7 @@ namespace Editor
             if (e.RightButton == MouseButtonState.Pressed)
                 CursorMode = CursorMode.HiddenAndLocked;
 
-            if(e.LeftButton == MouseButtonState.Pressed)
+            if (e.LeftButton == MouseButtonState.Pressed && editorCamera != null)
                 HandlePicking((int)e.GetPosition(RenderControl).X, (int)e.GetPosition(RenderControl).Y);
         }
 
@@ -237,35 +201,28 @@ namespace Editor
         private void UserControl_GotKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = cursorMode == CursorMode.Normal ? Cursors.Arrow : Cursors.None;
-            keyboardFocused = true;
+            editorCameraController.LocalEnabled = true;
         }
 
         private void UserControl_LostKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = Cursors.Arrow;
-            keyboardFocused = false;
+            editorCameraController.LocalEnabled = false;
         }
 
-        private void ResizeCameraAndFramebuffer(int width, int height)
+        private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            camera.Aspect = width / (double)height;
-
-            camera.Resize(width, height);
-
-            copyFramebuffer = new FrameBuffer(width, height);
+            UpdateRenderControlSize();
         }
 
-        private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void AspectRatioComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!loaded)
-                return;
-
-            ResizeCameraAndFramebuffer((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+            UpdateRenderControlSize();
         }
 
         private void UpdateRenderControlSize()
         {
-            if (double.IsNaN(SelectedAspectRatio.width) || double.IsNaN(SelectedAspectRatio.height))
+            if (double.IsNaN(SelectedAspectRatio.Width) || double.IsNaN(SelectedAspectRatio.Height))
             {
                 RenderControl.Width = double.NaN;
                 RenderControl.Height = double.NaN;
@@ -284,15 +241,20 @@ namespace Editor
             }
         }
 
+        private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            CameraViewModel.ResizeCamera((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
+        }
+
         private void HandlePicking(int mouseX, int mouseY)
         {
             HitResult hitResult;
-            Vector3 screenToWorldDir = camera.ScreenToWorld(new Vector2(mouseX, mouseY));
+            Vector3 screenToWorldDir = editorCamera.ScreenToWorld(new Vector2(mouseX, mouseY));
 
             bool hasHit = Raycast.HitMesh(
                 new Ray
                 {
-                    Origin = camera.GameObject.Transform.Position,
+                    Origin = editorCamera.GameObject.Transform.Position,
                     Direction = screenToWorldDir
                 },
                 out hitResult
@@ -303,15 +265,50 @@ namespace Editor
 
             InspectorControl.GameObjectViewModel.Target = hasHit ? hitResult.HitObject : null;
         }
+    }
 
-        private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
+    public readonly struct AspectRatio
+    {
+        public readonly double Width;
+        public readonly double Height;
+        public double Ratio => Width / Height;
+        public readonly string DisplayText;
+
+        public AspectRatio() :
+            this(double.NaN, double.NaN) { }
+
+        // public AspectRatio(double width, double height) :
+        //     this(width, height, "") { }
+
+        public AspectRatio(double width, double height, string displayText = "")
         {
-            UpdateRenderControlSize();
+            Width = width;
+            Height = height;
+            DisplayText = displayText;
         }
 
-        private void AspectRatioComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public override string ToString()
         {
-            UpdateRenderControlSize();
+            if (DisplayText != "")
+                return DisplayText;
+            if (double.IsNaN(Width) || double.IsNaN(Height))
+                return "Free aspect";
+            return $"{Width} : {Height}";
         }
+    }
+
+    public enum CursorMode
+    {
+        Normal,
+        Hidden,
+        HiddenAndLocked
+    }
+
+    [Flags]
+    public enum ViewportType
+    {
+        GameView = 1 << 0,
+        EditorView = 1 << 1,
+        Both = GameView | EditorView
     }
 }

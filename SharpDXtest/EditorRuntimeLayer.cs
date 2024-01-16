@@ -29,6 +29,11 @@ namespace Editor
         public override void OnFrameEnded()
         {
             EditorScene.RemoveDestroyed();
+
+            // foreach (Camera editorCamera in EditorScene.FindComponentsOfType<Camera>())
+            // {
+            //     GraphicsCore.RenderScene(editorCamera);
+            // }
         }
     }
 
@@ -61,5 +66,27 @@ namespace Editor
         {
             gameObjects.RemoveAll(x => x == null);
         }
+        
+        // public static T[] FindComponentsOfType<T>(bool includeDisabledObjects = false) where T : Component
+        // {
+        //     return Array.ConvertAll(FindComponentsOfType(typeof(T), includeDisabledObjects), item => (T)item);
+        // }
+        //
+        // public static Component[] FindComponentsOfType(Type type, bool includeDisabledObjects = false)
+        // {
+        //     if (type != typeof(Component) && !type.IsSubclassOf(typeof(Component)))
+        //         return Array.Empty<Component>();
+        //
+        //     List<Component> foundComponents = new List<Component>();
+        //     foreach (GameObject gameObject in gameObjects)
+        //     {
+        //         if (includeDisabledObjects || gameObject.Enabled)
+        //         {
+        //             foundComponents.AddRange(gameObject.GetComponents(type));
+        //         }
+        //     }
+        //
+        //     return foundComponents.ToArray();
+        // }
     }
 }

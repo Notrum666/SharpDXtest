@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine
+namespace Engine.Graphics
 {
     public class FrameBufferPool : IDisposable
     {

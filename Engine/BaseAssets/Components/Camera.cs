@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
+
+using Engine.Graphics;
+
 using LinearAlgebra;
+
 using SharpDX;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
@@ -9,6 +14,7 @@ namespace Engine.BaseAssets.Components
 {
     public class Camera : BehaviourComponent
     {
+        internal static readonly List<Camera> Cameras = new List<Camera>();
 
         #region ComponentLogic
 
@@ -25,7 +31,7 @@ namespace Engine.BaseAssets.Components
         public static Camera Current
         {
             get => current;
-            set => current = value;
+            private set => current = value;
         }
         public bool IsCurrent => Current == this;
 
@@ -60,6 +66,13 @@ namespace Engine.BaseAssets.Components
             BackgroundColor = Color.FromRgba(0xFF010101);
             //BackgroundColor = Color.FromRgba(0xFFFFFFFF);
             Resize(1280, 720);
+
+            Cameras.Add(this);
+        }
+
+        protected override void OnDestroy()
+        {
+            Cameras.Remove(this);
         }
 
         public void MakeCurrent()
@@ -74,9 +87,12 @@ namespace Engine.BaseAssets.Components
             if (height <= 0)
                 throw new ArgumentOutOfRangeException(nameof(height));
 
+            if (width == targetWidth && height == targetHeight)
+                return;
+
             targetHeight = height;
             targetWidth = width;
-            needsToBeResized = true;
+            NeedsToBeResized = true;
         }
 
         internal override void OnDeserialized()
@@ -169,28 +185,32 @@ namespace Engine.BaseAssets.Components
 
         #region Render
 
-        public event Action<Camera> OnResized;
+        public event Action OnResized;
 
         internal GBuffer GBuffer { get; private set; }
         internal Texture DepthBuffer { get; private set; }
         internal Texture RadianceBuffer { get; private set; }
         internal Texture ColorBuffer { get; private set; }
 
-        internal FrameBuffer Backbuffer { get; private set; }
-        private FrameBuffer middlebuffer;
-        private FrameBuffer frontbuffer;
+        internal FrameBuffer BackBuffer { get; private set; }
+        private FrameBuffer middleBuffer;
+        private FrameBuffer frontBuffer;
 
         private int targetWidth;
         private int targetHeight;
-        private bool needsToBeResized;
+        internal bool NeedsToBeResized { get; private set; }
 
+        /// <summary>
+        /// Resizes Camera and recreates buffers if needed. <br/>
+        /// Executed every RenderUpdate
+        /// </summary>
         internal void PreRenderUpdate()
         {
-            if (needsToBeResized)
+            if (NeedsToBeResized)
             {
-                needsToBeResized = false;
+                NeedsToBeResized = false;
                 GenerateBuffers(targetWidth, targetHeight);
-                OnResized?.Invoke(this);
+                OnResized?.Invoke();
             }
         }
 
@@ -199,18 +219,18 @@ namespace Engine.BaseAssets.Components
             Width = width;
             Height = height;
 
-            frontbuffer?.Dispose();
-            middlebuffer?.Dispose();
-            Backbuffer?.Dispose();
+            frontBuffer?.Dispose();
+            middleBuffer?.Dispose();
+            BackBuffer?.Dispose();
 
             GBuffer.Dispose();
             DepthBuffer?.Dispose();
             RadianceBuffer?.Dispose();
             ColorBuffer?.Dispose();
 
-            frontbuffer = new FrameBuffer(width, height);
-            middlebuffer = new FrameBuffer(width, height);
-            Backbuffer = new FrameBuffer(width, height);
+            frontBuffer = new FrameBuffer(width, height);
+            middleBuffer = new FrameBuffer(width, height);
+            BackBuffer = new FrameBuffer(width, height);
 
             GBuffer = new GBuffer(width, height);
             DepthBuffer = new Texture(width, height, null, Format.R32_Typeless, BindFlags.DepthStencil | BindFlags.ShaderResource);
@@ -220,22 +240,38 @@ namespace Engine.BaseAssets.Components
 
         internal void SwapFrameBuffers()
         {
-            lock (middlebuffer)
+            lock (middleBuffer)
             {
-                (Backbuffer, middlebuffer) = (middlebuffer, Backbuffer);
+                (BackBuffer, middleBuffer) = (middleBuffer, BackBuffer);
+                renderReady = true;
             }
-        }
-
-        public FrameBuffer GetNextFrontBuffer()
-        {
-            lock (middlebuffer)
-            {
-                (middlebuffer, frontbuffer) = (frontbuffer, middlebuffer);
-            }
-            return frontbuffer;
         }
 
         #endregion Render
+
+        #region D9Render
+
+        public D9CameraRenderer D9Renderer => d9Renderer ??= new D9CameraRenderer(this);
+        internal bool ShouldRender => d9Renderer?.ViewersCount > 0 && GameObject != null && Enabled;
+
+        private D9CameraRenderer d9Renderer;
+        private bool renderReady;
+
+        public void DrawFrontBuffer()
+        {
+            if (middleBuffer == null || !renderReady)
+                return;
+
+            lock (middleBuffer)
+            {
+                (middleBuffer, frontBuffer) = (frontBuffer, middleBuffer);
+                renderReady = false;
+            }
+
+            d9Renderer?.Draw(frontBuffer);
+        }
+
+        #endregion D9Render
 
     }
 }

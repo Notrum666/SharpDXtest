@@ -46,6 +46,9 @@ namespace Engine
 
         public static Component[] FindComponentsOfType(Type type, bool includeDisabledObjects = false)
         {
+            if (CurrentScene == null)
+                return Array.Empty<Component>();
+
             if (type != typeof(Component) && !type.IsSubclassOf(typeof(Component)))
                 return Array.Empty<Component>();
 
