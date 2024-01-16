@@ -40,7 +40,15 @@ namespace Editor.AssetsImport
             IsCompilationRelevant = false;
             FilesToTypesMap = new ReadOnlyDictionary<string, List<Type>>(filesToTypesMap);
 
-            currentWorkspace = MSBuildWorkspace.Create();
+
+            var properties = new Dictionary<string, string>()
+            {
+                { "CheckForSystemRuntimeDependency", "true" },
+                { "DesignTimeBuild", "true" },
+                { "BuildingInsideVisualStudio", "true" },
+                { "AlwaysCompileMarkupFilesInSeparateDomain", "false" }
+            };
+            currentWorkspace = MSBuildWorkspace.Create(properties);
 
             filesWatcher = new FileSystemWatcher();
             filesWatcher.EnableRaisingEvents = false;
@@ -62,10 +70,14 @@ namespace Editor.AssetsImport
             Task<bool> recompileTask = Task.Run(RecompileAsync);
             recompileTask.Wait();
 
-            if (recompileTask.Result && currentAssemblyContext != oldContext)
-                oldContext?.Unload();
+            if (!recompileTask.Result || currentAssemblyContext == oldContext)
+            {
+                return;
+            }
 
+            oldContext?.Unload();
             SanitizeUnloadingContexts();
+
             IsCompilationRelevant = true;
             filesWatcher.Path = AssetsRegistry.ContentFolderPath;
             filesWatcher.EnableRaisingEvents = true;

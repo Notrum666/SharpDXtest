@@ -8,6 +8,8 @@ namespace Engine.BaseAssets.Components
         public bool LocalEnabled { get => localEnabled; set => localEnabled = value; }
         public bool Enabled => LocalEnabled && GameObject.Enabled;
 
+        private bool started = false;
+
         /// <summary>
         /// Called before first Update
         /// </summary>
@@ -23,6 +25,12 @@ namespace Engine.BaseAssets.Components
             {
                 OnDestroy();
                 return;
+            }
+
+            if (!started )
+            {
+                started = true;
+                Start();
             }
 
             Update();

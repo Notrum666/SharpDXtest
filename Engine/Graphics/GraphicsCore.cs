@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
 
 using Engine.BaseAssets.Components;
@@ -31,6 +32,8 @@ namespace Engine
         private static bool disposed = false;
         public static Device CurrentDevice { get; private set; }
         public static SharpDX.Direct3D9.Device D9Device { get; private set; }
+
+        public static Panel GameInterface { get; set; }
 
         public static Sampler ShadowsSampler => shadowsSampler;
 
