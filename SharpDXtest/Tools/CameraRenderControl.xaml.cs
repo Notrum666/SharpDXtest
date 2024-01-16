@@ -60,6 +60,7 @@ namespace Editor
         public CameraViewModel CameraViewModel { get; }
 
         private Camera editorCamera;
+        private EditorCameraController editorCameraController => editorCamera?.GameObject?.GetComponent<EditorCameraController>();
 
         // private int framesCount = 0;
         // private double timeCounter = 0.0;
@@ -131,7 +132,7 @@ namespace Editor
         {
             GameObject editorCamera = EditorScene.Instantiate("Editor camera");
             editorCamera.Transform.Position = new Vector3(0, -10, 5);
-            editorCamera.AddComponent<EditorCameraController>();
+            editorCamera.AddComponent<EditorCameraController>().LocalEnabled = false;
 
             Camera camera = editorCamera.AddComponent<Camera>();
             camera.Near = 0.001;
@@ -186,11 +187,13 @@ namespace Editor
         private void UserControl_GotKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = cursorMode == CursorMode.Normal ? Cursors.Arrow : Cursors.None;
+            editorCameraController.LocalEnabled = true;
         }
 
         private void UserControl_LostKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = Cursors.Arrow;
+            editorCameraController.LocalEnabled = false;
         }
 
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
