@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
 
@@ -174,8 +175,15 @@ namespace Editor.AssetsImport
                 return (null, null);
             }
 
+            // compilation.Name()
+            string inputPath = AssetsRegistry.ContentFolderPath;
+            string outputPath = csProject.OutputFilePath;
+            string rootNamespace = "TestProject";
+
+            var resourceDescriptions = CollectResources(inputPath, outputPath, rootNamespace, rootNamespace);
+
             MemoryStream stream = new MemoryStream();
-            EmitResult result = compilation.Emit(stream);
+            EmitResult result = compilation.Emit(stream, manifestResources: resourceDescriptions.ToArray());
             stream.Position = 0;
 
             foreach (Diagnostic diagnostic in result.Diagnostics)
@@ -215,6 +223,54 @@ namespace Editor.AssetsImport
             }
 
             return (stream, filesToTypeNamesMap);
+        }
+
+        private static List<ResourceDescription> CollectResources(string inputPath, string outputPath, string RootNamespace, string assemblyName)
+        {
+            List<ResourceDescription> resourceDescriptions = new List<ResourceDescription>();
+
+            string resourcePath = string.Format("{0}{1}.g.resources", outputPath, RootNamespace);
+            ResourceWriter rsWriter = new ResourceWriter(resourcePath);
+
+            foreach (string file in Directory.GetFiles(outputPath).Where(item => item.EndsWith(".baml")))
+            {
+                var fileName = Path.GetFileName(file.ToLower());
+                var data = File.OpenRead(file);
+                rsWriter.AddResource(fileName, data, true);
+            }
+
+            foreach (string file in Directory.GetFiles(inputPath).Where(item => item.EndsWith(".xaml")))
+            {
+                var fileName = Path.GetFileName(file.ToLower());
+                var data = File.OpenRead(file);
+                rsWriter.AddResource(fileName, data, true);
+            }
+
+            rsWriter.Generate();
+            rsWriter.Close();
+            
+            var resourceDescription = new ResourceDescription(
+                string.Format("{0}.g.resources", RootNamespace),
+                () => File.OpenRead(resourcePath),
+                true);
+            resourceDescriptions.Add(resourceDescription);
+
+            if (RootNamespace != assemblyName)
+            {
+                resourceDescription = new ResourceDescription(
+                    string.Format("{0}.g.resources", assemblyName),
+                    () => File.OpenRead(resourcePath),
+                    true);
+                resourceDescriptions.Add(resourceDescription);
+            }
+
+            // var resourceDescription = new ResourceDescription(
+            //     string.Format("{0}.g.resources", RootNamespace),
+            //     () => File.OpenRead(resourcePath),
+            //     true);
+
+            resourceDescriptions.Add(resourceDescription);
+            return resourceDescriptions;
         }
 
         private static IEnumerable<INamedTypeSymbol> GetNamedTypeSymbols(Compilation compilation)
