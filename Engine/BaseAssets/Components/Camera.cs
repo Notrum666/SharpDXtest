@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 using Engine.Graphics;
@@ -13,6 +14,7 @@ namespace Engine.BaseAssets.Components
 {
     public class Camera : BehaviourComponent
     {
+        internal static readonly List<Camera> Cameras = new List<Camera>();
 
         #region ComponentLogic
 
@@ -64,6 +66,13 @@ namespace Engine.BaseAssets.Components
             BackgroundColor = Color.FromRgba(0xFF010101);
             //BackgroundColor = Color.FromRgba(0xFFFFFFFF);
             Resize(1280, 720);
+
+            Cameras.Add(this);
+        }
+
+        protected override void OnDestroy()
+        {
+            Cameras.Remove(this);
         }
 
         public void MakeCurrent()
@@ -80,7 +89,7 @@ namespace Engine.BaseAssets.Components
 
             if (width == targetWidth && height == targetHeight)
                 return;
-            
+
             targetHeight = height;
             targetWidth = width;
             NeedsToBeResized = true;
@@ -190,8 +199,11 @@ namespace Engine.BaseAssets.Components
         private int targetWidth;
         private int targetHeight;
         internal bool NeedsToBeResized { get; private set; }
-        internal bool ShouldRender => d9Renderer?.ViewersCount > 0;
 
+        /// <summary>
+        /// Resizes Camera and recreates buffers if needed. <br/>
+        /// Executed every RenderUpdate
+        /// </summary>
         internal void PreRenderUpdate()
         {
             if (NeedsToBeResized)
@@ -231,24 +243,33 @@ namespace Engine.BaseAssets.Components
             lock (middleBuffer)
             {
                 (BackBuffer, middleBuffer) = (middleBuffer, BackBuffer);
+                renderReady = true;
             }
-        }
-
-        public FrameBuffer GetNextFrontBuffer()
-        {
-            lock (middleBuffer)
-            {
-                (middleBuffer, frontBuffer) = (frontBuffer, middleBuffer);
-            }
-            return frontBuffer;
         }
 
         #endregion Render
 
         #region D9Render
 
-        private D9CameraRenderer d9Renderer;
         public D9CameraRenderer D9Renderer => d9Renderer ??= new D9CameraRenderer(this);
+        internal bool ShouldRender => d9Renderer?.ViewersCount > 0 && GameObject != null && Enabled;
+
+        private D9CameraRenderer d9Renderer;
+        private bool renderReady;
+
+        public void DrawFrontBuffer()
+        {
+            if (middleBuffer == null || !renderReady)
+                return;
+
+            lock (middleBuffer)
+            {
+                (middleBuffer, frontBuffer) = (frontBuffer, middleBuffer);
+                renderReady = false;
+            }
+
+            d9Renderer?.Draw(frontBuffer);
+        }
 
         #endregion D9Render
 

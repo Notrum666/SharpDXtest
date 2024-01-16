@@ -1,4 +1,6 @@
-﻿using Engine.BaseAssets.Components;
+﻿using System.Linq;
+
+using Engine.BaseAssets.Components;
 
 namespace Engine.Layers
 {
@@ -14,9 +16,19 @@ namespace Engine.Layers
 
         public override void Update()
         {
-            if (Camera.Current != null)
+            foreach (Camera camera in Camera.Cameras.Where(x => x.Enabled))
+            {
                 //GraphicsCore.RenderShadows();
-                GraphicsCore.RenderScene(Camera.Current);
+                GraphicsCore.RenderScene(camera);
+            }
+        }
+
+        public override void OnFrameEnded()
+        {
+            foreach (Camera camera in Camera.Cameras.Where(x => x.Enabled))
+            {
+                camera.DrawFrontBuffer();
+            }
         }
     }
 }

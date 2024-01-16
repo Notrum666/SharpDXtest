@@ -26,15 +26,6 @@ namespace Editor
         private D9CameraRenderer D9Renderer => camera?.D9Renderer;
         private Camera camera;
 
-        public static void ResizeCamera(Camera camera, int width, int height)
-        {
-            if (camera == null)
-                return;
-
-            camera.Aspect = width / (double)height;
-            camera.Resize(width, height);
-        }
-
         public void SetCamera(Camera newCamera)
         {
             if (camera != null)
@@ -54,7 +45,7 @@ namespace Editor
 
         public void Render(D3DImage targetImage)
         {
-            if (!D9Renderer?.IsReady ?? true)
+            if (D9Renderer is not { IsInitialized: true })
                 return;
 
             targetImage.Lock();
@@ -70,6 +61,15 @@ namespace Editor
             ResizeCamera(camera, width, height);
         }
 
+        public static void ResizeCamera(Camera camera, int width, int height)
+        {
+            if (camera == null)
+                return;
+
+            camera.Aspect = width / (double)height;
+            camera.Resize(width, height);
+        }
+
         private void GameCore_OnFrameEnded()
         {
             if (!EngineCore.IsAlive || camera == null)
@@ -78,7 +78,7 @@ namespace Editor
                     FPS = -1;
                 return;
             }
-            
+
             timeCounter += Time.DeltaTime;
             framesCount++;
             if (timeCounter >= 1.0)

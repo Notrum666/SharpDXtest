@@ -186,18 +186,15 @@ namespace Engine
             }
         }
 
-        public static void RenderScene(Camera camera)
+        internal static void RenderScene(Camera camera)
         {
             if (camera == null)
                 throw new ArgumentNullException(nameof(camera));
 
             camera.PreRenderUpdate();
-
-            if (!camera.ShouldRender)
-                return;
-
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.BackBuffer.RenderTargetTexture.GetView<RenderTargetView>(), camera.BackgroundColor);
-            if (Scene.CurrentScene == null || !camera.Enabled || camera.GameObject == null)
+
+            if (Scene.CurrentScene == null || !camera.ShouldRender)
             {
                 FlushAndSwapFrameBuffers(camera);
                 return;

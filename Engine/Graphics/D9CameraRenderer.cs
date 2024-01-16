@@ -9,21 +9,21 @@ namespace Engine.Graphics
     public class D9CameraRenderer
     {
         public Camera Camera { get; }
+        public bool IsInitialized { get; private set; }
 
-        public bool IsReady { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
         public nint D9SurfaceNativePointer => copyFramebuffer.D9SurfaceNativePointer;
 
         internal int ViewersCount => viewers.Count;
 
-        private D9FrameBuffer copyFramebuffer;
         private readonly HashSet<object> viewers = new HashSet<object>();
+        private D9FrameBuffer copyFramebuffer;
 
         public D9CameraRenderer(Camera camera)
         {
             Camera = camera;
-            IsReady = false;
+            IsInitialized = false;
 
             Camera.OnResized += ResizeBuffer;
             if (!Camera.NeedsToBeResized)
@@ -36,31 +36,25 @@ namespace Engine.Graphics
             Height = Camera.Height;
             copyFramebuffer = new D9FrameBuffer(Width, Height);
 
-            IsReady = true;
+            IsInitialized = true;
         }
 
         public void Subscribe(object viewer)
         {
             viewers.Add(viewer);
-
-            if (viewers.Count == 1)
-                EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
         }
 
         public void Unsubscribe(object viewer)
         {
             viewers.Remove(viewer);
-
-            if (viewers.Count == 0)
-                EngineCore.OnFrameEnded -= GameCore_OnFrameEnded;
         }
 
-        private void GameCore_OnFrameEnded()
+        internal void Draw(FrameBuffer buffer)
         {
-            if (!IsReady)
+            if (!IsInitialized)
                 return;
 
-            FrameBuffer buffer = Camera.GetNextFrontBuffer();
+            // FrameBuffer buffer = Camera.GetNextFrontBuffer();
             GraphicsCore.CurrentDevice.ImmediateContext.ResolveSubresource(buffer.RenderTargetTexture.texture, 0,
                                                                            copyFramebuffer.RenderTargetTexture.texture, 0, Format.B8G8R8A8_UNorm);
         }
