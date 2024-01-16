@@ -61,6 +61,7 @@ namespace Editor
 
         private Camera editorCamera;
         private EditorCameraController editorCameraController => editorCamera?.GameObject?.GetComponent<EditorCameraController>();
+        private static int editorCamerasCount = 0;
 
         // private int framesCount = 0;
         // private double timeCounter = 0.0;
@@ -138,7 +139,9 @@ namespace Editor
 
         private static Camera CreateEditorCamera()
         {
-            GameObject editorCamera = EditorScene.Instantiate("Editor camera");
+            editorCamerasCount++;
+
+            GameObject editorCamera = EditorScene.Instantiate($"Editor_camera_{editorCamerasCount}");
             editorCamera.Transform.Position = new Vector3(0, -10, 5);
             editorCamera.AddComponent<EditorCameraController>().LocalEnabled = false;
 
