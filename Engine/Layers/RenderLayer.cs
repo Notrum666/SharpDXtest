@@ -16,7 +16,7 @@ namespace Engine.Layers
 
         public override void Update()
         {
-            foreach (Camera camera in Camera.Cameras.Where(x => x.Enabled))
+            foreach (Camera camera in Camera.Cameras.ToList().Where(x => x.Enabled))
             {
                 //GraphicsCore.RenderShadows();
                 GraphicsCore.RenderScene(camera);
@@ -25,7 +25,7 @@ namespace Engine.Layers
 
         public override void OnFrameEnded()
         {
-            foreach (Camera camera in Camera.Cameras.Where(x => x.Enabled))
+            foreach (Camera camera in Camera.Cameras.ToList().Where(x => x.Enabled))
             {
                 camera.DrawFrontBuffer();
             }
