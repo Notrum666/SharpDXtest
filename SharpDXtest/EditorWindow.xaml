@@ -56,7 +56,7 @@
         </Grid.RowDefinitions>
         <Grid>
             <this:DockingManager x:Name="EditorDockingManager" Grid.Row="1">
-                <this:DockableHost Orientation="Horizontal" SplitLocation="0.7">
+                <this:DockableHost Orientation="Horizontal" SplitLocation="0.77">
                     <this:DockableHost Orientation="Vertical" SplitLocation="0.7">
                         <this:DockableHost Orientation="Horizontal" SplitLocation="0.2">
                             <this:SceneOverviewControl/>

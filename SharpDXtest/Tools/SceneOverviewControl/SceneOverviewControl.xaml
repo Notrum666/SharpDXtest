@@ -10,7 +10,7 @@
              Style="{StaticResource ToolControl}">
     <Grid Background="{StaticResource BackgroundBrush}" DataContext="{Binding SceneViewModel}">
         <TreeView Background="Transparent" ItemsSource="{Binding GameObjectViewModels}"
-                  >
+                  ItemContainerStyle="{StaticResource TreeViewItemStyle}">
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="local:GameObjectComponentsViewModel" ItemsSource="{Binding Children}">
                     <TextBlock Text="{Binding Name}" Foreground="{StaticResource ForegroundBrush}"
