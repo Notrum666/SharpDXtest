@@ -80,6 +80,11 @@ namespace Editor
             DataContext = this;
         }
 
+        ~CameraRenderControl()
+        {
+            editorCamera?.GameObject?.DestroyImmediate();
+        }
+
         public void OnPropertyChanged([CallerMemberName] string prop = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
@@ -108,6 +113,9 @@ namespace Editor
 
                 loaded = true;
             }
+
+            if (editorCamera != null)
+                editorCamera.LocalEnabled = true;
 
             CompositionTarget.Rendering += OnRender;
         }
@@ -145,6 +153,9 @@ namespace Editor
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
         {
             CompositionTarget.Rendering -= OnRender;
+
+            if (editorCamera != null)
+                editorCamera.LocalEnabled = false;
         }
 
         private void OnRender(object sender, EventArgs e)
@@ -165,8 +176,8 @@ namespace Editor
 
             if (e.RightButton == MouseButtonState.Pressed)
                 CursorMode = CursorMode.HiddenAndLocked;
-            
-            if(e.LeftButton == MouseButtonState.Pressed && editorCamera != null)
+
+            if (e.LeftButton == MouseButtonState.Pressed && editorCamera != null)
                 HandlePicking((int)e.GetPosition(RenderControl).X, (int)e.GetPosition(RenderControl).Y);
         }
 
@@ -231,7 +242,7 @@ namespace Editor
         {
             CameraViewModel.ResizeCamera((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
-        
+
         private void HandlePicking(int mouseX, int mouseY)
         {
             HitResult hitResult;
