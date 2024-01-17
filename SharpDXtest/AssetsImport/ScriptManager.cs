@@ -46,7 +46,7 @@ namespace Editor.AssetsImport
             var properties = new Dictionary<string, string>()
             {
                 { "CheckForSystemRuntimeDependency", "true" },
-                { "DesignTimeBuild", "true" },
+                { "DesignTimeBuild", "false" },
                 { "BuildingInsideVisualStudio", "true" },
                 { "AlwaysCompileMarkupFilesInSeparateDomain", "false" }
             };
@@ -118,6 +118,7 @@ namespace Editor.AssetsImport
                 return false;
             }
 
+            //string temp = @"C:\Users\yahima\Documents\WpfControlLibrary1";
             string solutionPath = Directory.GetFiles(currentProject.FolderPath, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
             if (solutionPath == default)
             {
@@ -127,6 +128,9 @@ namespace Editor.AssetsImport
             }
 
             currentWorkspace.CloseSolution();
+
+            DotnetRestore(currentProject.FolderPath);
+            //throw new Exception();
             Solution solution = await currentWorkspace.OpenSolutionAsync(solutionPath);
 
             AssemblyLoadContext assemblyContext = new AssemblyLoadContext(currentProject.Name, true);
@@ -143,7 +147,7 @@ namespace Editor.AssetsImport
                 if (assemblyStream == null)
                     continue;
 
-                Assembly asm = assemblyContext.LoadFromStream(assemblyStream);
+                Assembly asm = assemblyContext.LoadFromAssemblyPath(csProject.OutputFilePath);
                 assemblyStream.Close();
 
                 foreach (string file in filesToTypeNamesMap.Keys)
@@ -180,6 +184,9 @@ namespace Editor.AssetsImport
 
         private static async Task<(MemoryStream stream, Dictionary<string, List<string>> filesToTypeNamesMap)> CompileProject(Project csProject)
         {
+            CompilationOptions compilationOptions = csProject.CompilationOptions.WithPlatform(Platform.X64);
+            csProject = csProject.WithCompilationOptions(compilationOptions);
+
             Compilation compilation = await csProject.GetCompilationAsync();
             if (compilation == null)
             {
@@ -187,13 +194,18 @@ namespace Editor.AssetsImport
                 return (null, null);
             }
 
-            string inputPath = AssetsRegistry.ContentFolderPath;
-            string outputPath = csProject.OutputFilePath;
+            DotnetBuildBamls(csProject.FilePath);
 
-            var resourceDescriptions = CollectResources(inputPath, outputPath, csProject.DefaultNamespace, csProject.AssemblyName);
+            string objPath = Path.Combine(ProjectViewModel.Current.FolderPath,"obj");
+            string outputFilePath = csProject.OutputFilePath;
+
+            var pdbFilePath = Path.ChangeExtension(outputFilePath, "pdb");
+
+            var resourceDescriptions = CollectResources(objPath, outputFilePath, csProject.DefaultNamespace, csProject.AssemblyName);
 
             MemoryStream stream = new MemoryStream();
-            EmitResult result = compilation.Emit(stream, manifestResources: resourceDescriptions.ToArray());
+            //EmitResult result = compilation.Emit(stream, manifestResources: resourceDescriptions.ToArray());
+            EmitResult result = compilation.Emit(outputFilePath, pdbFilePath, manifestResources: resourceDescriptions.ToArray());
             stream.Position = 0;
 
             foreach (Diagnostic diagnostic in result.Diagnostics)
@@ -235,7 +247,42 @@ namespace Editor.AssetsImport
             return (stream, filesToTypeNamesMap);
         }
 
-        private static List<ResourceDescription> CollectResources(string inputPath, string outputPath, string RootNamespace, string assemblyName)
+        private static void DotnetRestore(string solutionPath)
+        {
+            solutionPath = ProjectViewModel.Current.FolderPath;
+
+            Process process = new Process();
+            process.StartInfo = new ProcessStartInfo()
+            {
+                FileName = "cmd.exe",
+                WorkingDirectory = solutionPath,
+                Arguments = "/c dotnet restore",
+                CreateNoWindow = true,
+            };
+
+            process.Start();
+            process.WaitForExit();
+        }
+
+        private static void DotnetBuildBamls(string projectPath)
+        {
+            string projectFolder = Path.GetDirectoryName(projectPath);
+            string projectName = Path.GetFileNameWithoutExtension(projectPath);
+
+            Process process = new Process();
+            process.StartInfo = new ProcessStartInfo()
+            {
+                FileName = "cmd.exe",
+                WorkingDirectory = projectFolder,
+                Arguments = $@"/c dotnet msbuild /t:ResolveReferences /t:MarkupCompilePass1 /t:MarkupCompilePass2 .\{projectName}.csproj",
+                CreateNoWindow = true,
+            };
+
+            process.Start();
+            process.WaitForExit();
+        }
+
+        private static List<ResourceDescription> CollectResources(string objPath, string outputPath, string RootNamespace, string assemblyName)
         {
             outputPath = Path.GetDirectoryName(outputPath);
             List<ResourceDescription> resourceDescriptions = new List<ResourceDescription>();
@@ -243,7 +290,8 @@ namespace Editor.AssetsImport
             string resourcePath = string.Format("{0}\\{1}.g.resources", outputPath, RootNamespace);
             ResourceWriter rsWriter = new ResourceWriter(resourcePath);
 
-            foreach (string file in Directory.GetFiles(outputPath).Where(item => item.EndsWith(".baml")))
+            Debug.WriteLine($"Searching in {objPath}");
+            foreach (string file in Directory.GetFiles(objPath, "*.baml", SearchOption.AllDirectories))
             {
                 Debug.WriteLine($"FOUND BAML: {file}");
                 var fileName = "content/" + Path.GetFileName(file.ToLower());
@@ -260,11 +308,14 @@ namespace Editor.AssetsImport
                 true);
             resourceDescriptions.Add(resourceDescription);
 
-            resourceDescription = new ResourceDescription(
+            if (RootNamespace != assemblyName)
+            {
+                resourceDescription = new ResourceDescription(
                     string.Format("{0}.{1}.g.resources", assemblyName, RootNamespace),
                     () => File.OpenRead(resourcePath),
                     true);
-            resourceDescriptions.Add(resourceDescription);
+                resourceDescriptions.Add(resourceDescription);
+            }
 
             return resourceDescriptions;
         }
