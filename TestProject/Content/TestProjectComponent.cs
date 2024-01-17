@@ -19,7 +19,7 @@ namespace TestProject
             {
                 GraphicsCore.GameInterface.Dispatcher.Invoke(() =>
                 {
-                    var control = new UserControl1();
+                    var control = new UserControlTest();
                     Grid grid = (Grid)control.Content;
                     TextBlock textBlock = (TextBlock)grid.Children[0];
                     textBlock.Text = "SOSI_PISOS";
