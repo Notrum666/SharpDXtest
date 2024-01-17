@@ -1,16 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Loader;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Threading;
 
+using Editor.AssetsImport;
+
 using Engine;
+using Engine.BaseAssets.Components;
 
 using SharpDXtest;
+using SharpDXtest.Assets.Components;
+
+using Component = Engine.BaseAssets.Components.Component;
 
 namespace Editor
 {
@@ -56,6 +66,20 @@ namespace Editor
             return obj is null || obj.GetType().IsClass;
         }
 
+        private RelayCommand openAddComponentPopup;
+        public RelayCommand OpenAddComponentPopup => openAddComponentPopup ??= new RelayCommand(
+            popup =>
+            {
+                ((Popup)popup).IsOpen = true;
+            }
+        );
+        private RelayCommand closeAddComponentPopup;
+        public RelayCommand CloseAddComponentPopup => closeAddComponentPopup ??= new RelayCommand(
+            popup =>
+            {
+                ((Popup)popup).IsOpen = false;
+            }
+        );
         internal static List<FieldDataTemplate> FieldDataTemplates { get; } = new List<FieldDataTemplate>();
         public event PropertyChangedEventHandler PropertyChanged;
         private InspectorObjectViewModel targetObjectViewModel;
@@ -70,6 +94,9 @@ namespace Editor
         }
         private bool loaded = false;
         private int objectIndex = -1;
+
+        private List<Type> componentTypes = new List<Type>();
+        public ReadOnlyCollection<Type> ComponentTypes => componentTypes.AsReadOnly();
 
         private DispatcherTimer UpdateTimer;
 
@@ -106,12 +133,31 @@ namespace Editor
             UpdateTimer.Interval = TimeSpan.FromSeconds(0.1);
             UpdateTimer.Tick += UpdateTick;
             UpdateTimer.Start();
+
+            ScriptManager.OnCodeRecompiled += ReloadTypes;
         }
 
         private void UpdateTick(object sender, EventArgs e)
         {
             if (targetObjectViewModel is not null)
                 targetObjectViewModel.Update();
+        }
+
+        private void ReloadTypes()
+        {
+            componentTypes.Clear();
+
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()
+                .Where(a => a.FullName.Contains("Editor") || a.FullName.Contains("Engine"))
+                .Concat(AssemblyLoadContext.CurrentContextualReflectionContext.Assemblies))
+                componentTypes.AddRange(assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(Component)) && !t.IsAbstract));
+
+            componentTypes.Sort((a, b) => a.Name.CompareTo(b.Name));
+        }
+
+        public void Reload()
+        {
+            TargetObjectViewModel?.Reload();
         }
 
         public void OnPropertyChanged([CallerMemberName] string prop = "")

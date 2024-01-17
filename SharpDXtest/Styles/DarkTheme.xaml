@@ -102,11 +102,17 @@
     <!--#endregion-->
 
     <!--#region InspectorControl-->
+    <Color x:Key="InspectorBackgroundColor">#FF282828</Color>
+    <SolidColorBrush x:Key="InspectorBackgroundBrush" Color="{StaticResource InspectorBackgroundColor}"/>
+
     <Color x:Key="InspectorComponentHeaderBackgroundColor">#FF505050</Color>
     <SolidColorBrush x:Key="InspectorComponentHeaderBackgroundBrush" Color="{StaticResource InspectorComponentHeaderBackgroundColor}"/>
 
     <Color x:Key="InspectorComponentBackgroundColor">#FF383838</Color>
     <SolidColorBrush x:Key="InspectorComponentBackgroundBrush" Color="{StaticResource InspectorComponentBackgroundColor}"/>
+
+    <Color x:Key="InspectorGameObjectHeaderBackgroundColor">#FF707070</Color>
+    <SolidColorBrush x:Key="InspectorGameObjectHeaderBackgroundBrush" Color="{StaticResource InspectorGameObjectHeaderBackgroundColor}"/>
 
     <Color x:Key="InspectorInputBorderColor">#FF909090</Color>
     <SolidColorBrush x:Key="InspectorInputBorderBrush" Color="{StaticResource InspectorInputBorderColor}"/>

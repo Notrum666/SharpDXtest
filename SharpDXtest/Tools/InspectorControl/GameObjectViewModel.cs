@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 
 using Engine;
@@ -8,6 +9,15 @@ namespace Editor
 {
     public class GameObjectViewModel : InspectorObjectViewModel
     {
+        private RelayCommand addComponentCommand;
+        public RelayCommand AddComponentCommand => addComponentCommand ??= new RelayCommand(
+            obj =>
+            {
+                Target.AddComponent((Type)obj);
+                Reload();
+            }
+        );
+
         private GameObject target = null;
         public GameObject Target => target;
         public ObservableCollection<ObjectViewModel> ComponentsViewModels { get; private set; } = new ObservableCollection<ObjectViewModel>();

@@ -270,7 +270,7 @@
                            VerticalAlignment="Center" Margin="4,1,4,3"
                            Foreground="{StaticResource ForegroundBrush}"/>
             </ToggleButton>
-            <Rectangle Grid.Row="1" Fill="{DynamicResource BackgroundBrush}"/>
+            <Rectangle Grid.Row="1" Fill="{DynamicResource InspectorBackgroundBrush}"/>
             <ItemsControl Visibility="{Binding IsChecked, ElementName=ArrayToggleButton, Converter={StaticResource VisibilityConv}}"
                           ItemsSource="{Binding SubFieldsViewModels}" Grid.Row="1" Grid.Column="1"
                           ItemTemplateSelector="{StaticResource FieldDataTemplateSelector}">
@@ -332,7 +332,7 @@
                            VerticalAlignment="Center" Margin="4,1,4,3"
                            Foreground="{StaticResource ForegroundBrush}"/>
             </ToggleButton>
-            <Rectangle Grid.Row="1" Fill="{DynamicResource BackgroundBrush}"/>
+            <Rectangle Grid.Row="1" Fill="{DynamicResource InspectorBackgroundBrush}"/>
             <ItemsControl Visibility="{Binding IsChecked, ElementName=StructToggleButton, Converter={StaticResource VisibilityConv}}"
                           ItemsSource="{Binding SubFieldsViewModels}" Grid.Row="1" Grid.Column="1"
                           ItemTemplateSelector="{StaticResource FieldDataTemplateSelector}">
@@ -375,7 +375,7 @@
             <TextBlock Text="{Binding DisplayName, StringFormat='\{0\}?'}" HorizontalAlignment="Left" Grid.Column="1"
                        VerticalAlignment="Center" Margin="4,1,4,3"
                        Foreground="{StaticResource ForegroundBrush}"/>
-            <Rectangle Grid.Row="1" Fill="{DynamicResource BackgroundBrush}"/>
+            <Rectangle Grid.Row="1" Fill="{DynamicResource InspectorBackgroundBrush}"/>
             <ContentControl Visibility="{Binding IsChecked, ElementName=HasValueToggleButton, Mode=OneWay, Converter={StaticResource VisibilityConv}}"
                             VerticalAlignment="Top" HorizontalAlignment="Stretch" Grid.Row="1" Grid.Column="1"
                             Content="{Binding}">
