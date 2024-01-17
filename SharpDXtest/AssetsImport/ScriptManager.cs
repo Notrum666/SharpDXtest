@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
 
 using Engine;
+
 using System.Diagnostics;
 
 namespace Editor.AssetsImport
@@ -64,17 +65,6 @@ namespace Editor.AssetsImport
             filesWatcher.Changed += OnFilesChanged;
         }
 
-        public static void SetResourceAssembly(Assembly assembly)
-        {
-            //var _resourceAssemblyField = typeof(Application).GetField("_resourceAssembly", BindingFlags.Static | BindingFlags.NonPublic);
-            ////if (_resourceAssemblyField != null)
-            //_resourceAssemblyField.SetValue(null, assembly);
-
-            //var resourceAssemblyProperty = typeof(BaseUriHelper).GetProperty("ResourceAssembly", BindingFlags.Static | BindingFlags.NonPublic);
-            ////if (resourceAssemblyProperty != null)
-            //resourceAssemblyProperty.SetValue(null, assembly);
-        }
-
         public static void Recompile()
         {
             filesWatcher.EnableRaisingEvents = false;
@@ -84,9 +74,7 @@ namespace Editor.AssetsImport
             recompileTask.Wait();
 
             if (!recompileTask.Result || currentAssemblyContext == oldContext)
-            {
                 return;
-            }
 
             oldContext?.Unload();
             SanitizeUnloadingContexts();
@@ -118,7 +106,6 @@ namespace Editor.AssetsImport
                 return false;
             }
 
-            //string temp = @"C:\Users\yahima\Documents\WpfControlLibrary1";
             string solutionPath = Directory.GetFiles(currentProject.FolderPath, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
             if (solutionPath == default)
             {
@@ -127,10 +114,7 @@ namespace Editor.AssetsImport
                 return false;
             }
 
-            currentWorkspace.CloseSolution();
-
             DotnetRestore(currentProject.FolderPath);
-            //throw new Exception();
             Solution solution = await currentWorkspace.OpenSolutionAsync(solutionPath);
 
             AssemblyLoadContext assemblyContext = new AssemblyLoadContext(currentProject.Name, true);
@@ -143,12 +127,11 @@ namespace Editor.AssetsImport
             {
                 Project csProject = solution.GetProject(projectId)!;
 
-                (MemoryStream assemblyStream, Dictionary<string, List<string>> filesToTypeNamesMap) = await CompileProject(csProject);
-                if (assemblyStream == null)
+                (bool success, Dictionary<string, List<string>> filesToTypeNamesMap) = await CompileProject(csProject);
+                if (!success || string.IsNullOrEmpty(csProject.OutputFilePath))
                     continue;
 
                 Assembly asm = assemblyContext.LoadFromAssemblyPath(csProject.OutputFilePath);
-                assemblyStream.Close();
 
                 foreach (string file in filesToTypeNamesMap.Keys)
                 {
@@ -176,37 +159,31 @@ namespace Editor.AssetsImport
             string assembliesNames = string.Join("; ", assemblyContext.Assemblies.Select(x => x.FullName));
             Logger.Log(LogType.Info, $"Recompile succeeded! Loaded {assembliesCount} assemblies for solution at {currentProject.FolderPath}: {assembliesNames}");
 
+            currentWorkspace.CloseSolution();
             currentAssemblyContext = assemblyContext;
             filesToTypesMap.Clear();
             filesToTypesMap.AddRange(filesToTypes);
             return true;
         }
 
-        private static async Task<(MemoryStream stream, Dictionary<string, List<string>> filesToTypeNamesMap)> CompileProject(Project csProject)
+        private static async Task<(bool success, Dictionary<string, List<string>> filesToTypeNamesMap)> CompileProject(Project csProject)
         {
-            CompilationOptions compilationOptions = csProject.CompilationOptions.WithPlatform(Platform.X64);
-            csProject = csProject.WithCompilationOptions(compilationOptions);
-
             Compilation compilation = await csProject.GetCompilationAsync();
             if (compilation == null)
             {
                 Logger.Log(LogType.Error, $"Compilation failed! Could not precompile project {csProject.Name}. SupportsCompilation = {csProject.SupportsCompilation}");
-                return (null, null);
+                return (false, null);
             }
 
-            DotnetBuildBamls(csProject.FilePath);
+            DotnetBuildBaml(csProject.FilePath);
 
-            string objPath = Path.Combine(ProjectViewModel.Current.FolderPath,"obj");
-            string outputFilePath = csProject.OutputFilePath;
+            string outputFilePath = csProject.OutputFilePath!;
+            string pdbFilePath = Path.ChangeExtension(outputFilePath, "pdb");
+            string objFolderPath = Path.Combine(ProjectViewModel.Current.FolderPath, "obj");
 
-            var pdbFilePath = Path.ChangeExtension(outputFilePath, "pdb");
+            List<ResourceDescription> resourceDescriptions = CollectResources(objFolderPath, outputFilePath, csProject.AssemblyName, csProject.DefaultNamespace);
 
-            var resourceDescriptions = CollectResources(objPath, outputFilePath, csProject.DefaultNamespace, csProject.AssemblyName);
-
-            MemoryStream stream = new MemoryStream();
-            //EmitResult result = compilation.Emit(stream, manifestResources: resourceDescriptions.ToArray());
             EmitResult result = compilation.Emit(outputFilePath, pdbFilePath, manifestResources: resourceDescriptions.ToArray());
-            stream.Position = 0;
 
             foreach (Diagnostic diagnostic in result.Diagnostics)
             {
@@ -226,7 +203,7 @@ namespace Editor.AssetsImport
 
             if (!result.Success)
             {
-                return (null, null);
+                return (false, null);
             }
 
             SymbolDisplayFormat displayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
@@ -244,13 +221,11 @@ namespace Editor.AssetsImport
                 filesToTypeNamesMap[filePath].Add(typeSymbol.ToDisplayString(displayFormat));
             }
 
-            return (stream, filesToTypeNamesMap);
+            return (true, filesToTypeNamesMap);
         }
 
         private static void DotnetRestore(string solutionPath)
         {
-            solutionPath = ProjectViewModel.Current.FolderPath;
-
             Process process = new Process();
             process.StartInfo = new ProcessStartInfo()
             {
@@ -264,9 +239,9 @@ namespace Editor.AssetsImport
             process.WaitForExit();
         }
 
-        private static void DotnetBuildBamls(string projectPath)
+        private static void DotnetBuildBaml(string projectPath)
         {
-            string projectFolder = Path.GetDirectoryName(projectPath);
+            string projectFolder = Path.GetDirectoryName(projectPath)!;
             string projectName = Path.GetFileNameWithoutExtension(projectPath);
 
             Process process = new Process();
@@ -282,36 +257,33 @@ namespace Editor.AssetsImport
             process.WaitForExit();
         }
 
-        private static List<ResourceDescription> CollectResources(string objPath, string outputPath, string RootNamespace, string assemblyName)
+        private static List<ResourceDescription> CollectResources(string objPath, string outputPath, string assemblyName, string defaultNamespace)
         {
-            outputPath = Path.GetDirectoryName(outputPath);
             List<ResourceDescription> resourceDescriptions = new List<ResourceDescription>();
-
-            string resourcePath = string.Format("{0}\\{1}.g.resources", outputPath, RootNamespace);
+            string resourcePath = @$"{Path.GetDirectoryName(outputPath)}\{assemblyName}.g.resources";
             ResourceWriter rsWriter = new ResourceWriter(resourcePath);
 
-            Debug.WriteLine($"Searching in {objPath}");
+            string configurationPath = Path.Combine(objPath, "Debug");
             foreach (string file in Directory.GetFiles(objPath, "*.baml", SearchOption.AllDirectories))
             {
-                Debug.WriteLine($"FOUND BAML: {file}");
-                var fileName = "content/" + Path.GetFileName(file.ToLower());
-                var data = File.OpenRead(file);
-                rsWriter.AddResource(fileName, data, true);
+                string fileName = Path.GetRelativePath(configurationPath, file);
+                FileStream data = File.OpenRead(file);
+                rsWriter.AddResource(fileName.ToLower(), data, true);
             }
 
             rsWriter.Generate();
             rsWriter.Close();
-            
-            var resourceDescription = new ResourceDescription(
-                string.Format("{0}.g.resources", RootNamespace),
+
+            ResourceDescription resourceDescription = new ResourceDescription(
+                $"{assemblyName}.g.resources",
                 () => File.OpenRead(resourcePath),
                 true);
             resourceDescriptions.Add(resourceDescription);
 
-            if (RootNamespace != assemblyName)
+            if (defaultNamespace != assemblyName)
             {
                 resourceDescription = new ResourceDescription(
-                    string.Format("{0}.{1}.g.resources", assemblyName, RootNamespace),
+                    $"{assemblyName}.{defaultNamespace}.g.resources",
                     () => File.OpenRead(resourcePath),
                     true);
                 resourceDescriptions.Add(resourceDescription);
