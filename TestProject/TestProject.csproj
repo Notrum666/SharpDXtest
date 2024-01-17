@@ -23,7 +23,7 @@
 		<OutputPath>Temp\TestProject\</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 	</PropertyGroup>
-
+    
 	<ItemGroup>
 		<Compile Include="Content\**\*.cs" />
 	</ItemGroup>
@@ -41,6 +41,11 @@
 		<Reference Include="SharpDX.Editor">
 			<HintPath>$(Engine_IncludePath)\Editor.dll</HintPath>
 		</Reference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Page Update="Content\Dictionary1.xaml">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Page>
 	</ItemGroup>
 	
 </Project>

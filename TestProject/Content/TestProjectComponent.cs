@@ -2,8 +2,12 @@ using Engine;
 using Engine.BaseAssets.Components;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using System.Threading;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Markup;
 
 namespace TestProject
 {
@@ -11,28 +15,24 @@ namespace TestProject
     {
         public override void Start()
         {
-            Uri uri = new Uri("/TestProject;component/content/usercontrol1.xaml", System.UriKind.Relative);
             try
             {
-                Debug.WriteLine($"resourceAssembly = {System.Windows.Application.ResourceAssembly}");
-
-                Thread thread = new Thread(() =>
+                GraphicsCore.GameInterface.Dispatcher.Invoke(() =>
                 {
                     var control = new UserControl1();
+                    Grid grid = (Grid)control.Content;
+                    TextBlock textBlock = (TextBlock)grid.Children[0];
+                    textBlock.Text = "SOSI_PISOS";
+                    GraphicsCore.GameInterface.Children.Add( control );
                     Debug.WriteLine($"control = {control}");
                 });
-                thread.SetApartmentState(ApartmentState.STA);
-                thread.Start();
-                thread.Join();
-
-                var resource = System.Windows.Application.LoadComponent(uri);
-                Debug.WriteLine($"resource = {resource}");
-            } 
-            catch (Exception ex) 
+                
+            }
+            catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
+                throw;
             }
-            //GraphicsCore.GameInterface.Dispatcher.Invoke(() => GraphicsCore.GameInterface.Children.Add(resource));
         }
     }
 }
