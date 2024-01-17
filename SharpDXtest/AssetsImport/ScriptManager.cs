@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
 
 using Engine;
+using System.Diagnostics;
 
 namespace Editor.AssetsImport
 {
@@ -61,6 +62,17 @@ namespace Editor.AssetsImport
                                         | NotifyFilters.LastWrite;
 
             filesWatcher.Changed += OnFilesChanged;
+        }
+
+        public static void SetResourceAssembly(Assembly assembly)
+        {
+            //var _resourceAssemblyField = typeof(Application).GetField("_resourceAssembly", BindingFlags.Static | BindingFlags.NonPublic);
+            ////if (_resourceAssemblyField != null)
+            //_resourceAssemblyField.SetValue(null, assembly);
+
+            //var resourceAssemblyProperty = typeof(BaseUriHelper).GetProperty("ResourceAssembly", BindingFlags.Static | BindingFlags.NonPublic);
+            ////if (resourceAssemblyProperty != null)
+            //resourceAssemblyProperty.SetValue(null, assembly);
         }
 
         public static void Recompile()
@@ -175,12 +187,10 @@ namespace Editor.AssetsImport
                 return (null, null);
             }
 
-            // compilation.Name()
             string inputPath = AssetsRegistry.ContentFolderPath;
             string outputPath = csProject.OutputFilePath;
-            string rootNamespace = "TestProject";
 
-            var resourceDescriptions = CollectResources(inputPath, outputPath, rootNamespace, rootNamespace);
+            var resourceDescriptions = CollectResources(inputPath, outputPath, csProject.DefaultNamespace, csProject.AssemblyName);
 
             MemoryStream stream = new MemoryStream();
             EmitResult result = compilation.Emit(stream, manifestResources: resourceDescriptions.ToArray());
@@ -227,21 +237,16 @@ namespace Editor.AssetsImport
 
         private static List<ResourceDescription> CollectResources(string inputPath, string outputPath, string RootNamespace, string assemblyName)
         {
+            outputPath = Path.GetDirectoryName(outputPath);
             List<ResourceDescription> resourceDescriptions = new List<ResourceDescription>();
 
-            string resourcePath = string.Format("{0}{1}.g.resources", outputPath, RootNamespace);
+            string resourcePath = string.Format("{0}\\{1}.g.resources", outputPath, RootNamespace);
             ResourceWriter rsWriter = new ResourceWriter(resourcePath);
 
             foreach (string file in Directory.GetFiles(outputPath).Where(item => item.EndsWith(".baml")))
             {
-                var fileName = Path.GetFileName(file.ToLower());
-                var data = File.OpenRead(file);
-                rsWriter.AddResource(fileName, data, true);
-            }
-
-            foreach (string file in Directory.GetFiles(inputPath).Where(item => item.EndsWith(".xaml")))
-            {
-                var fileName = Path.GetFileName(file.ToLower());
+                Debug.WriteLine($"FOUND BAML: {file}");
+                var fileName = "content/" + Path.GetFileName(file.ToLower());
                 var data = File.OpenRead(file);
                 rsWriter.AddResource(fileName, data, true);
             }
@@ -255,21 +260,12 @@ namespace Editor.AssetsImport
                 true);
             resourceDescriptions.Add(resourceDescription);
 
-            if (RootNamespace != assemblyName)
-            {
-                resourceDescription = new ResourceDescription(
-                    string.Format("{0}.g.resources", assemblyName),
+            resourceDescription = new ResourceDescription(
+                    string.Format("{0}.{1}.g.resources", assemblyName, RootNamespace),
                     () => File.OpenRead(resourcePath),
                     true);
-                resourceDescriptions.Add(resourceDescription);
-            }
-
-            // var resourceDescription = new ResourceDescription(
-            //     string.Format("{0}.g.resources", RootNamespace),
-            //     () => File.OpenRead(resourcePath),
-            //     true);
-
             resourceDescriptions.Add(resourceDescription);
+
             return resourceDescriptions;
         }
 
