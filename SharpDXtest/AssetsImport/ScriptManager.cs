@@ -131,7 +131,9 @@ namespace Editor.AssetsImport
                 if (!success || string.IsNullOrEmpty(csProject.OutputFilePath))
                     continue;
 
-                Assembly asm = assemblyContext.LoadFromAssemblyPath(csProject.OutputFilePath);
+                using FileStream asmFile = File.OpenRead(csProject.OutputFilePath);
+                Assembly asm = assemblyContext.LoadFromStream(asmFile);
+                asmFile.Close();
 
                 foreach (string file in filesToTypeNamesMap.Keys)
                 {
@@ -183,7 +185,13 @@ namespace Editor.AssetsImport
 
             List<ResourceDescription> resourceDescriptions = CollectResources(objFolderPath, outputFilePath, csProject.AssemblyName, csProject.DefaultNamespace);
 
-            EmitResult result = compilation.Emit(outputFilePath, pdbFilePath, manifestResources: resourceDescriptions.ToArray());
+            await using FileStream dllFile = File.Create(outputFilePath);
+            await using FileStream pdbFile = File.Create(pdbFilePath);
+
+            EmitResult result = compilation.Emit(dllFile, pdbFile, manifestResources: resourceDescriptions.ToArray());
+
+            dllFile.Close();
+            pdbFile.Close();
 
             foreach (Diagnostic diagnostic in result.Diagnostics)
             {
