@@ -371,9 +371,10 @@
         <Setter Property="OverridesDefaultStyle" Value="True"/>
         <Setter Property="Template">
             <Setter.Value>
-                <ControlTemplate TargetType="Menu">
+                <ControlTemplate TargetType="MenuItem">
                     <Grid Background="{Binding Background}" VerticalAlignment="Center">
-                        <ItemsPresenter/>
+                        <ContentControl Content="{TemplateBinding Header}"/>
+                        <!--<ItemsPresenter/>-->
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>

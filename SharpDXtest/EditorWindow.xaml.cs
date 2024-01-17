@@ -21,7 +21,15 @@ namespace Editor
                 flyingControl.Items.Add(item);
                 EditorDockingManager.AddFlyingControl(flyingControl);
             },
-            obj => obj is Type && (obj as Type).IsSubclassOf(typeof(FrameworkElement))
+            obj =>
+            {
+                if (obj is not Type || !(obj as Type).IsSubclassOf(typeof(FrameworkElement)))
+                    return false;
+                Type t = (Type)obj;
+                if (t == typeof(InspectorControl) && InspectorControl.Current is not null)
+                    return false;
+                return true;
+            }
         ));
 
         private RelayCommand recompileCommand;

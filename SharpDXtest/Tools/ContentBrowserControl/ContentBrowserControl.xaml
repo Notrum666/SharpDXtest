@@ -58,7 +58,9 @@
                      d:DataContext="{d:DesignInstance Type={x:Type local:ContentBrowserFolderViewModel}, IsDesignTimeCreatable=False}"
                      Margin="5" Drop="ListBox_Drop" KeyDown="ListBox_KeyDown"
                      Background="Transparent" BorderBrush="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     ScrollViewer.VerticalScrollBarVisibility="Hidden" MouseLeftButtonDown="ListBox_MouseLeftButtonDown"
+                     ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                     PreviewMouseDown="ListBox_PreviewMouseButtonDown"
+                     MouseLeftButtonUp="ListBox_MouseLeftButtonUp"
                      AllowDrop="{Binding SelectedItem, ElementName=FoldersTreeView, Converter={StaticResource ObjToBoolConv}}"
                      Focusable="True">
                 <ListBox.CommandBindings>
@@ -88,7 +90,7 @@
                     <CollectionViewSource x:Key="FolderCreationCollection" Source="{Binding FolderCreationViewModels, ElementName=ThisContentBrowser}"/>
                     
                     <DataTemplate DataType="{x:Type local:ContentBrowserFolderViewModel}">
-                        <Grid Margin="5" MouseDown="FolderItem_MouseDown" MouseMove="FolderItem_MouseMove" AllowDrop="True"
+                        <Grid Margin="5" MouseMove="FolderItem_MouseMove" AllowDrop="True"
                               Drop="FolderItem_Drop"
                               Width="{Binding ItemsWidth, ElementName=ThisContentBrowser}"
                               Height="{Binding ItemsHeight, ElementName=ThisContentBrowser}">
@@ -104,7 +106,7 @@
                         </Grid>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type local:ContentBrowserAssetViewModel}">
-                        <Grid Margin="5" MouseDown="FolderItem_MouseDown" MouseMove="FolderItem_MouseMove" AllowDrop="True"
+                        <Grid Margin="5" MouseMove="FolderItem_MouseMove" AllowDrop="True"
                               Drop="FolderItem_Drop"
                               Width="{Binding ItemsWidth, ElementName=ThisContentBrowser}"
                               Height="{Binding ItemsHeight, ElementName=ThisContentBrowser}">
