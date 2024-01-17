@@ -266,7 +266,7 @@ namespace Editor.AssetsImport
             string configurationPath = Path.Combine(objPath, "Debug");
             foreach (string file in Directory.GetFiles(objPath, "*.baml", SearchOption.AllDirectories))
             {
-                string fileName = Path.GetRelativePath(configurationPath, file);
+                string fileName = Path.GetRelativePath(configurationPath, file).Replace(@"\","/");
                 FileStream data = File.OpenRead(file);
                 rsWriter.AddResource(fileName.ToLower(), data, true);
             }
