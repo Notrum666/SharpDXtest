@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary x:Class="Editor.DefaultInspectorStyles"
                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:local="clr-namespace:Editor"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <DataTemplate x:Key="FieldNotImplementedTemplate">
@@ -34,8 +35,15 @@
         <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource InspectorInputBorderBrush}"/>
         <EventSetter Event="KeyDown" Handler="InspectorTextBox_KeyDown"/>
-        <EventSetter Event="LostFocus" Handler="InspectorTextBox_LostFocus"/>
         <EventSetter Event="GotKeyboardFocus" Handler="InspectorTextBox_GotKeyboardFocus"/>
+        <EventSetter Event="LostKeyboardFocus" Handler="InspectorTextBox_LostKeyboardFocus"/>
         <EventSetter Event="PreviewMouseLeftButtonDown" Handler="InspectorTextBox_PreviewMouseLeftButtonDown"/>
+    </Style>
+
+    <Style x:Key="DropTextBlock" TargetType="{x:Type local:DropTextBlock}">
+        <Setter Property="AllowDrop" Value="True"/>
+        <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
+        <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
+        <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=Text}"/>
     </Style>
 </ResourceDictionary>

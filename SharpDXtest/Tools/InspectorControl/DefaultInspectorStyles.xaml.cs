@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace Editor
@@ -12,14 +13,35 @@ namespace Editor
                 ((DependencyObject)sender).FindParent<InspectorControl>().Focus();
         }
 
-        private void InspectorTextBox_LostFocus(object sender, RoutedEventArgs e)
-        {
-            ((TextBox)sender).GetBindingExpression(TextBox.TextProperty).UpdateTarget();
-        }
-
         private void InspectorTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-            ((TextBox)sender).SelectAll();
+            TextBox textBox = (TextBox)sender;
+
+            string text = textBox.Text;
+
+            Binding binding = textBox.GetBindingExpression(TextBox.TextProperty).ParentBinding;
+            Binding newBinding = new Binding();
+            newBinding.Path = binding.Path;
+            newBinding.Converter = binding.Converter;
+            newBinding.Mode = BindingMode.OneWayToSource;
+            textBox.SetBinding(TextBox.TextProperty, newBinding);
+
+            textBox.Text = text;
+
+            textBox.SelectAll();
+        }
+
+        private void InspectorTextBox_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+            BindingExpression expr = textBox.GetBindingExpression(TextBox.TextProperty);
+            expr.UpdateSource();
+            Binding binding = expr.ParentBinding;
+            Binding newBinding = new Binding();
+            newBinding.Path = binding.Path;
+            newBinding.Converter = binding.Converter;
+            newBinding.Mode = BindingMode.OneWay;
+            textBox.SetBinding(TextBox.TextProperty, newBinding);
         }
 
         private void InspectorTextBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)

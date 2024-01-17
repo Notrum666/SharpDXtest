@@ -115,6 +115,12 @@ namespace Editor
 
         private void MoveAsset(ContentBrowserAssetViewModel sourceFile, ContentBrowserFolderViewModel destinationFolder)
         {
+            if (sourceFile.AssetPath is null)
+            {
+                Logger.Log(LogType.Warning, "Tried to move subasset, which does not have a file, move the base asset instead.");
+                return;
+            }
+
             string filePath = Path.ChangeExtension(sourceFile.AssetPath, null);
             string fileName = Path.GetFileName(filePath);
             string destinationFilePath = Path.Combine(destinationFolder.FullPath, fileName);
@@ -173,12 +179,51 @@ namespace Editor
             }
         }
 
-        private void ListBox_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void ListBox_PreviewMouseButtonDown(object sender, MouseButtonEventArgs e)
         {
-            e.Handled = true;
+            e.Handled = e.LeftButton == MouseButtonState.Pressed;
+
+            ListBoxItem item = ((DependencyObject)e.OriginalSource).FindParentWithPath<ListBox>().FirstOrDefault(d => d is ListBoxItem, null) as ListBoxItem;
+            if (item is not null)
+            {
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    object dataContext = item.DataContext;
+
+                    if (dataContext is not ContentBrowserFolderViewModel && dataContext is not ContentBrowserAssetViewModel)
+                        return;
+
+                    if (e.ClickCount == 2 && dataContext is ContentBrowserFolderViewModel folder)
+                    {
+                        SelectFolder(folder);
+                        return;
+                    }
+
+                    isGrabbed = true;
+                    localGrabPos = e.GetPosition(this);
+                }
+
+                return;
+            }
 
             ((ListBox)sender).UnselectAll();
             ((ListBox)sender).Focus();
+        }
+
+        private void ListBox_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left)
+                return;
+
+            isGrabbed = false;
+
+            ((ListBox)sender).Focus();
+
+            ListBoxItem item = ((DependencyObject)e.OriginalSource).FindParentWithPath<ListBox>().FirstOrDefault(d => d is ListBoxItem, null) as ListBoxItem;
+            if (item is not null)
+                SelectedFolderListBox.SelectedItem = item.DataContext;
+
+            SendSelectedAssetToInspector();
         }
 
         private void ListBox_KeyDown(object sender, KeyEventArgs e)
@@ -199,21 +244,6 @@ namespace Editor
             }
         }
 
-        private void FolderItem_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-            {
-                if (e.ClickCount == 2 && ((FrameworkElement)sender).DataContext is ContentBrowserFolderViewModel folder)
-                {
-                    SelectFolder(folder);
-                    return;
-                }
-
-                isGrabbed = true;
-                localGrabPos = e.GetPosition(this);
-            }
-        }
-
         private void FolderItem_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Released)
@@ -223,7 +253,11 @@ namespace Editor
 
             if (isGrabbed && (e.GetPosition(this) - localGrabPos).LengthSquared >= DragThreshold * DragThreshold)
             {
-                DragDrop.DoDragDrop(this, new DataObject(DataFormats.Serializable, ((FrameworkElement)sender).DataContext), DragDropEffects.Move);
+                object dataContext = ((FrameworkElement)sender).DataContext;
+                DragDropEffects effects = DragDropEffects.Move;
+                if (dataContext is ContentBrowserAssetViewModel)
+                    effects |= DragDropEffects.Link;
+                DragDrop.DoDragDrop(this, new DataObject(DataFormats.Serializable, dataContext), effects);
             }
         }
 
@@ -272,7 +306,7 @@ namespace Editor
 
         private void FolderItem_Drop(object sender, DragEventArgs e)
         {
-            ContentBrowserFolderViewModel targetFolder = (ContentBrowserFolderViewModel)((FrameworkElement)sender).DataContext;
+            ContentBrowserFolderViewModel targetFolder = ((FrameworkElement)sender).DataContext as ContentBrowserFolderViewModel;
             if (targetFolder is null)
                 return;
 
@@ -291,7 +325,7 @@ namespace Editor
                 return;
             }
 
-            if (obj is ContentBrowserFolderViewModel folder)
+            if (obj is ContentBrowserFolderViewModel folder && targetFolder != folder)
             {
                 MoveFolder(folder, targetFolder);
                 targetFolder.Refresh();
@@ -387,6 +421,18 @@ namespace Editor
         {
             e.Handled = true;
             bool res = Focus();
+        }
+
+        private void SendSelectedAssetToInspector()
+        {
+            ContentBrowserAssetViewModel asset = SelectedFolderListBox.SelectedItem as ContentBrowserAssetViewModel;
+            if (asset is null || asset.IsSubAsset)
+            {
+                InspectorControl.Current.TargetObject = null;
+                return;
+            }
+
+            InspectorControl.Current.TargetObject = new InspectorAssetViewModel(asset);
         }
     }
 }

@@ -263,7 +263,7 @@ namespace Editor
             //GameObject cursor = Scene.CurrentScene.GameObjects.First(obj => obj.Name == "Cursor");
             //cursor.Transform.Position = hitResult.Point;
 
-            InspectorControl.GameObjectViewModel.Target = hasHit ? hitResult.HitObject : null;
+            InspectorControl.Current.TargetObject = hasHit ? hitResult.HitObject : null;
         }
     }
 

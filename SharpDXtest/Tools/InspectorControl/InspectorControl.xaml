@@ -13,19 +13,122 @@
     <UserControl.Resources>
         <local:InspectorFieldDataTemplateSelector x:Key="FieldDataTemplateSelector"/>
         <local:BoolToVisibilityConverter x:Key="VisibilityConv"/>
+
+        <Style x:Key="SaveAssetButton" TargetType="Button">
+            <Setter Property="Focusable" Value="false"/>
+            <Setter Property="TextElement.Foreground" Value="#FFF8F8F8"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Host" BorderThickness="1" BorderBrush="#FFD0D0D0" Background="#FF303030">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Host" Property="Background" Value="#FF404040"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Host" Property="Background" Value="#FF202020"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Host" Property="Background" Value="#FF505050"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="TextElement.Foreground" Value="#FFF8F8F8"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="TextElement.Foreground" Value="#FFF8F8F8"/>
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="TextElement.Foreground" Value="#FF808080"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
-    <Grid Background="{StaticResource BackgroundBrush}" DataContext="{Binding GameObjectViewModel}">
+    <Grid Background="{StaticResource BackgroundBrush}">
         <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Hidden"
                       Focusable="False" Grid.IsSharedSizeScope="True">
-            <ItemsControl ItemsSource="{Binding ComponentViewModels}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Background="{StaticResource InspectorComponentBackgroundBrush}" Margin="0, 0, 0, 5">
+            <ContentControl Content="{Binding TargetObjectViewModel}">
+                <ContentControl.Resources>
+                    <DataTemplate DataType="{x:Type local:GameObjectViewModel}">
+                        <ItemsControl ItemsSource="{Binding ComponentsViewModels}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Background="{StaticResource InspectorComponentBackgroundBrush}" Margin="0, 0, 0, 5">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="24"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <ToggleButton x:Name="HeaderToggleButton" Style="{StaticResource InspectorExpandContentToggleButton}"
+                                                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                                      Background="{StaticResource InspectorComponentHeaderBackgroundBrush}">
+                                            <TextBlock Text="{Binding DisplayName}" HorizontalAlignment="Left"
+                                                       VerticalAlignment="Center" Margin="4,1,4,3"
+                                                       Foreground="{StaticResource ForegroundBrush}"
+                                                       FontSize="16"/>
+                                        </ToggleButton>
+                                        <ItemsControl Visibility="{Binding IsChecked, ElementName=HeaderToggleButton, Converter={StaticResource VisibilityConv}}"
+                                          ItemsSource="{Binding FieldViewModels}" TextElement.FontSize="14" Grid.Row="1"
+                                          ItemTemplateSelector="{StaticResource FieldDataTemplateSelector}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                        </ItemsControl>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type local:AssetObjectViewModel}">
+                        <Grid Background="{StaticResource InspectorComponentBackgroundBrush}" Margin="0, 0, 0, 5"
+                              VerticalAlignment="Top">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="24"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="auto"/>
+                            </Grid.RowDefinitions>
+                            <ToggleButton x:Name="AssetHeaderToggleButton" Style="{StaticResource InspectorExpandContentToggleButton}"
+                                          HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                          Background="{StaticResource InspectorComponentHeaderBackgroundBrush}">
+                                <TextBlock Text="{Binding DisplayName}" HorizontalAlignment="Left"
+                                           VerticalAlignment="Center" Margin="4,1,4,3"
+                                           Foreground="{StaticResource ForegroundBrush}"
+                                           FontSize="16"/>
+                            </ToggleButton>
+                            <ItemsControl Visibility="{Binding IsChecked, ElementName=AssetHeaderToggleButton, Converter={StaticResource VisibilityConv}}"
+                                          ItemsSource="{Binding FieldViewModels}" TextElement.FontSize="14" Grid.Row="1"
+                                          ItemTemplateSelector="{StaticResource FieldDataTemplateSelector}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" VerticalAlignment="Top"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                            <Button Style="{StaticResource SaveAssetButton}" Margin="20, 8, 20, 5"
+                                    HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                                    Command="{Binding SaveCommand}" Grid.Row="2">
+                                <TextBlock Text="Save asset" HorizontalAlignment="Center" 
+                                           Margin="16, 0, 16, 1" FontSize="18"/>
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                    
+                    <DataTemplate DataType="{x:Type local:ObjectViewModel}">
+                        <Grid Background="{StaticResource InspectorComponentBackgroundBrush}" Margin="0, 0, 0, 5"
+                              VerticalAlignment="Top">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="24"/>
                                 <RowDefinition Height="*"/>
@@ -49,8 +152,8 @@
                             </ItemsControl>
                         </Grid>
                     </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                </ContentControl.Resources>
+            </ContentControl>
         </ScrollViewer>
     </Grid>
 </UserControl>

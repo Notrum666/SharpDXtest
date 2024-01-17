@@ -6,6 +6,7 @@ namespace Engine.AssetsData
     /// <summary>
     /// Does not have ImportSettings in meta, acts as ImportSettings on its own
     /// </summary>
+    [YamlTagMapped]
     public abstract class NativeAssetData : AssetData
     {
         public abstract string FileExtension { get; }

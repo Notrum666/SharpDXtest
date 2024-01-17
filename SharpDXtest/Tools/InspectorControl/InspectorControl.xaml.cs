@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 using Engine;
 
@@ -18,11 +19,59 @@ namespace Editor
     /// </summary>
     public partial class InspectorControl : UserControl, INotifyPropertyChanged
     {
+        private static InspectorControl current = null;
+        public static InspectorControl Current => current;
+
+        public static readonly DependencyProperty TargetObjectProperty = DependencyProperty.Register("TargetObject", typeof(object), 
+            typeof(InspectorControl),
+            new FrameworkPropertyMetadata(null, OnTargetObjectPropertyChanged),
+            new ValidateValueCallback(IsValidTargetObject));
+        public object TargetObject
+        {
+            get => GetValue(TargetObjectProperty);
+            set => SetValue(TargetObjectProperty, value);
+        }
+        private static void OnTargetObjectPropertyChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            InspectorControl control = (InspectorControl)sender;
+            if (e.NewValue is GameObject gameObject)
+            {
+                control.TargetObjectViewModel = new GameObjectViewModel(gameObject);
+                return;
+            }
+
+            if (e.NewValue is InspectorAssetViewModel assetViewModel)
+            {
+                control.TargetObjectViewModel = new AssetObjectViewModel(assetViewModel);
+                return;
+            }
+
+            if (e.NewValue is not null)
+                control.TargetObjectViewModel = new ObjectViewModel(e.NewValue);
+            else
+                control.TargetObjectViewModel = null;
+        }
+        private static bool IsValidTargetObject(object obj)
+        {
+            return obj is null || obj.GetType().IsClass;
+        }
+
         internal static List<FieldDataTemplate> FieldDataTemplates { get; } = new List<FieldDataTemplate>();
         public event PropertyChangedEventHandler PropertyChanged;
-        public static GameObjectComponentsViewModel GameObjectViewModel { get; private set; }
+        private InspectorObjectViewModel targetObjectViewModel;
+        public InspectorObjectViewModel TargetObjectViewModel
+        {
+            get => targetObjectViewModel;
+            private set
+            {
+                targetObjectViewModel = value;
+                OnPropertyChanged();
+            }
+        }
         private bool loaded = false;
         private int objectIndex = -1;
+
+        private DispatcherTimer UpdateTimer;
 
         static InspectorControl()
         {
@@ -41,8 +90,8 @@ namespace Editor
 
         public static void RegisterFieldDataTemplate(FieldDataTemplate template)
         {
-            if (FieldDataTemplates.Any(t => t.TargetType == template.TargetType))
-                throw new ArgumentException("FieldDataTemplate for type " + template.TargetType.Name + " already registered.");
+            if (FieldDataTemplates.Any(t => t.TargetType == template.TargetType && t.Predicate is null))
+                throw new ArgumentException("FieldDataTemplate for type " + template.TargetType.Name + " without predicate is already registered.");
 
             FieldDataTemplates.Add(template);
         }
@@ -51,9 +100,18 @@ namespace Editor
         {
             InitializeComponent();
 
-            GameObjectViewModel ??= new GameObjectComponentsViewModel();
-
             DataContext = this;
+
+            UpdateTimer = new DispatcherTimer();
+            UpdateTimer.Interval = TimeSpan.FromSeconds(0.1);
+            UpdateTimer.Tick += UpdateTick;
+            UpdateTimer.Start();
+        }
+
+        private void UpdateTick(object sender, EventArgs e)
+        {
+            if (targetObjectViewModel is not null)
+                targetObjectViewModel.Update();
         }
 
         public void OnPropertyChanged([CallerMemberName] string prop = "")
@@ -74,6 +132,8 @@ namespace Editor
             }
 
             loaded = true;
+
+            current = this;
         }
 
         private void UserControl_Unloaded(object sender, RoutedEventArgs e)
@@ -82,6 +142,7 @@ namespace Editor
             if (!EngineCore.IsAlive)
                 return;
 
+            current = null;
         }
 
         private void UserControl_MouseDown(object sender, MouseButtonEventArgs e)
@@ -95,7 +156,7 @@ namespace Editor
             Scene currentScene = Scene.CurrentScene;
             if (currentScene == null || currentScene.GameObjects.Count == 0)
             {
-                GameObjectViewModel.Target = null;
+                TargetObject = null;
                 return;
             }
             
@@ -103,7 +164,7 @@ namespace Editor
 
             if (objectIndex >= currentScene.GameObjects.Count)
                 objectIndex = 0;
-            GameObjectViewModel.Target = currentScene.GameObjects[objectIndex];
+            TargetObject = currentScene.GameObjects[objectIndex];
         }
     }
 }

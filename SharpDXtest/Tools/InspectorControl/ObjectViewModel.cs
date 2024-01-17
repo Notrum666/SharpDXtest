@@ -6,20 +6,20 @@ using Engine.BaseAssets.Components;
 
 namespace Editor
 {
-    public class ComponentViewModel : ViewModelBase
+    public class ObjectViewModel : InspectorObjectViewModel
     {
-        private Component target = null;
-        public Component Target => target;
+        private object target = null;
+        public object Target => target;
         public ObservableCollection<FieldViewModel> FieldViewModels { get; private set; } = new ObservableCollection<FieldViewModel>();
         public string DisplayName => target.GetType().Name;
 
-        public ComponentViewModel(Component target)
+        public ObjectViewModel(object target)
         {
             this.target = target;
             Reload();
         }
 
-        public void Reload()
+        public override void Reload()
         {
             FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             foreach (FieldInfo field in fields)
@@ -31,7 +31,7 @@ namespace Editor
             }
         }
 
-        public void Update()
+        public override void Update()
         {
             foreach (FieldViewModel viewModel in FieldViewModels)
                 viewModel.Update();
