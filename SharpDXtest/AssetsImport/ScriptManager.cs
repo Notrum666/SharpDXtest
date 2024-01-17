@@ -187,11 +187,16 @@ namespace Editor.AssetsImport
                 return (null, null);
             }
 
+            var docs = await csProject.GetSourceGeneratedDocumentsAsync();
+            foreach (var doc in docs)
+            {
+                Console.WriteLine(doc.SourceCodeKind);
+            }
             string inputPath = AssetsRegistry.ContentFolderPath;
             string outputPath = csProject.OutputFilePath;
 
             var resourceDescriptions = CollectResources(inputPath, outputPath, csProject.DefaultNamespace, csProject.AssemblyName);
-
+            
             MemoryStream stream = new MemoryStream();
             EmitResult result = compilation.Emit(stream, manifestResources: resourceDescriptions.ToArray());
             stream.Position = 0;

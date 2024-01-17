@@ -1,6 +1,8 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject.csproj", "{c1f848f1-9743-4a3d-959d-c7e6476a52ed}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject.csproj", "{C1F848F1-9743-4A3D-959D-C7E6476A52ED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary1", "ClassLibrary1\ClassLibrary1.csproj", "{C22B39F1-E45D-4D92-8926-F9D162C8FB96}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -9,8 +11,10 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{c1f848f1-9743-4a3d-959d-c7e6476a52ed}.Debug|x64.ActiveCfg = Debug|x64
 		{c1f848f1-9743-4a3d-959d-c7e6476a52ed}.Debug|x64.Build.0 = Debug|x64
+		{C22B39F1-E45D-4D92-8926-F9D162C8FB96}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C22B39F1-E45D-4D92-8926-F9D162C8FB96}.Debug|x64.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
-    	HideSolutionNode = FALSE
-    EndGlobalSection
+					HideSolutionNode = FALSE
+	EndGlobalSection
 EndGlobal
