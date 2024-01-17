@@ -139,6 +139,14 @@ namespace Editor
 
             return SaveAsset<T>(newAssetPath, assetData);
         }
+        public static NativeAssetData LoadNativeAsset(string assetPath)
+        {
+            if (!Path.Exists(assetPath))
+                return null;
+
+            NativeAssetData assetData = YamlManager.LoadFromFile<NativeAssetData>(assetPath);
+            return assetData;
+        }
 
         /// <summary>
         /// Copies asset and imports it with new meta

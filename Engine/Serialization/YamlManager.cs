@@ -104,10 +104,22 @@ namespace Engine
             Serializer.Serialize(writer, obj, typeof(T));
         }
 
+        public static void SaveObjectToStream(Stream stream, object obj)
+        {
+            using StreamWriter writer = new StreamWriter(stream, leaveOpen: true);
+            Serializer.Serialize(writer, obj);
+        }
+
         public static void SaveToFile<T>(string filePath, T obj)
         {
             using FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             SaveToStream(fileStream, obj);
+        }
+
+        public static void SaveObjectToFile(string filePath, object obj)
+        {
+            using FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
+            SaveObjectToStream(fileStream, obj);
         }
 
         public static object LoadFromStream(Stream stream, Type type)

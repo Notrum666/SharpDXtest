@@ -18,15 +18,9 @@ namespace Editor
                 OnPropertyChanged();
             }
         }
-        private bool isSubAsset = false;
         public bool IsSubAsset
         {
-            get => isSubAsset;
-            set
-            {
-                isSubAsset = value;
-                OnPropertyChanged();
-            }
+            get => string.IsNullOrWhiteSpace(assetPath);
         }
         private string assetPath;
         public string AssetPath
@@ -36,6 +30,7 @@ namespace Editor
             {
                 assetPath = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(IsSubAsset));
             }
         }
         private AssetMeta assetMeta = null;

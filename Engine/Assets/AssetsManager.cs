@@ -77,6 +77,17 @@ namespace Engine
             return false;
         }
 
+        public static bool TryGetAssetTypeByGuid(Guid guid, out Type assetType)
+        {
+            assetType = null;
+            if (!artifactDatabase.TryGetArtifactType(guid, out Type dataType))
+                return false;
+
+            assetType = typeToDataTypeMap.FirstOrDefault(p => p.Value == dataType, new KeyValuePair<Type, Type>(null, null)).Key;
+
+            return assetType is not null;
+        }
+
         private static void CacheAsset(BaseAsset asset)
         {
             assetsCache[asset.Guid] = new WeakReference<BaseAsset>(asset);

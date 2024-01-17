@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
+using Engine.Assets;
+
 using LinearAlgebra;
 
 using YamlDotNet.Serialization;
@@ -11,6 +13,7 @@ namespace Engine.AssetsData
     [AssetData<Model>]
     public class ModelData : AssetData
     {
+        [GuidExpectedType(typeof(Skeleton))]
         public Guid SkeletonGuid = Guid.Empty;
 
         public Dictionary<string, Guid> EmbeddedTexturesGuids = new Dictionary<string, Guid>();
@@ -109,6 +112,7 @@ namespace Engine.AssetsData
     public class MeshData
     {
         public string Name;
+        [GuidExpectedType(typeof(Material))]
         public Guid Material;
 
         public List<VertexData> Vertices = new List<VertexData>();
