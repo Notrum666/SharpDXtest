@@ -33,7 +33,7 @@ namespace Engine
         public static Device CurrentDevice { get; private set; }
         public static SharpDX.Direct3D9.Device D9Device { get; private set; }
 
-        public static Panel GameInterface { get; set; }
+        public static Panel ViewportPanel { get; set; }
 
         public static Sampler ShadowsSampler => shadowsSampler;
 
@@ -60,6 +60,8 @@ namespace Engine
 
             sampler = Sampler.Default;
             shadowsSampler = Sampler.DefaultShadows;
+
+            SceneManager.OnSceneUnloading += ClearGameInterface;
         }
 
         private static void InitDirectX()
@@ -477,6 +479,11 @@ namespace Engine
             Flush();
 
             camera.SwapFrameBuffers();
+        }
+
+        private static void ClearGameInterface(string _)
+        {
+            ViewportPanel.Dispatcher.Invoke(() => { ViewportPanel.Children.Clear(); });
         }
 
         public static void Dispose()

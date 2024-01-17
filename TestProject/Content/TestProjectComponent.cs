@@ -17,13 +17,13 @@ namespace TestProject
         {
             try
             {
-                GraphicsCore.GameInterface.Dispatcher.Invoke(() =>
+                GraphicsCore.ViewportPanel.Dispatcher.Invoke(() =>
                 {
                     var control = new UserControlTest();
                     Grid grid = (Grid)control.Content;
                     TextBlock textBlock = (TextBlock)grid.Children[0];
                     textBlock.Text = "SOSI_PISOS";
-                    GraphicsCore.GameInterface.Children.Add( control );
+                    GraphicsCore.ViewportPanel.Children.Add( control );
                     Debug.WriteLine($"control = {control}");
                 });
                 

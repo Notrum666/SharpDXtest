@@ -112,7 +112,7 @@ namespace Editor
                     CameraViewModel.SetCamera(editorCamera);
                 }
 
-                GraphicsCore.GameInterface = GameInterface;
+                GraphicsCore.ViewportPanel = GameInterface;
                 loaded = true;
             }
 
