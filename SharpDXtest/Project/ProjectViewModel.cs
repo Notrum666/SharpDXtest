@@ -42,6 +42,11 @@ namespace Editor
 
         public void Unload()
         {
+            if (filesWatcher != null)
+            {
+                filesWatcher.EnableRaisingEvents = false;
+                filesWatcher.Dispose();
+            }
             SaveData();
             Game.Unload();
         }
@@ -57,6 +62,24 @@ namespace Editor
         }
 
         public void SaveData() { }
+
+
+        private FileSystemWatcher filesWatcher;
+
+        public void MonitorGameScenes()
+        {
+            filesWatcher = new FileSystemWatcher();
+            filesWatcher.EnableRaisingEvents = false;
+            filesWatcher.IncludeSubdirectories = true;
+            filesWatcher.Filter = "*.scene";
+            filesWatcher.NotifyFilter = NotifyFilters.CreationTime
+                                        | NotifyFilters.DirectoryName
+                                        | NotifyFilters.FileName;
+                                        // | NotifyFilters.LastWrite;
+
+            filesWatcher.Path = AssetsRegistry.ContentFolderPath;
+            filesWatcher.Changed += OnSceneFilesChanged;
+        }
 
         public void UpdateGameScenes()
         {
@@ -85,6 +108,13 @@ namespace Editor
             }
 
             AssetsRegistry.SaveAsset(path, SceneData.FromScene(Scene.CurrentScene));
+        }
+
+        private void OnSceneFilesChanged(object sender, FileSystemEventArgs e)
+        {
+            filesWatcher.EnableRaisingEvents = false;
+            UpdateGameScenes();
+            filesWatcher.EnableRaisingEvents = true;
         }
     }
 

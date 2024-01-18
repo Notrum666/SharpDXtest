@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+
 using Engine.AssetsData;
 
 namespace Engine
@@ -134,7 +135,9 @@ namespace Engine
 
             AssetData artifact = LoadArtifact(guid, assetDataType);
             asset = artifact?.ToRealAsset(guid);
-            CacheAsset(asset);
+
+            if (assetDataType != typeof(SceneData))
+                CacheAsset(asset);
 
             return asset;
         }
