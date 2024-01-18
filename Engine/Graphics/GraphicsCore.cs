@@ -61,7 +61,7 @@ namespace Engine
             sampler = Sampler.Default;
             shadowsSampler = Sampler.DefaultShadows;
 
-            SceneManager.OnSceneUnloading += ClearGameInterface;
+            SceneManager.OnSceneUnloading += ClearViewportPanel;
         }
 
         private static void InitDirectX()
@@ -481,7 +481,7 @@ namespace Engine
             camera.SwapFrameBuffers();
         }
 
-        private static void ClearGameInterface(string _)
+        private static void ClearViewportPanel(string _)
         {
             ViewportPanel.Dispatcher.Invoke(() => { ViewportPanel.Children.Clear(); });
         }

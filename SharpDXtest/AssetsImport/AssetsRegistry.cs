@@ -288,7 +288,7 @@ namespace Editor
 
             Directory.CreateDirectory(newFolderPath);
 
-            var folderEntries = EnumeratePathInfoEntries(oldFolderPath, "*", true).ToList();
+            IEnumerable<PathInfo> folderEntries = EnumeratePathInfoEntries(oldFolderPath, "*", true).ToList();
             foreach (PathInfo pathInfo in folderEntries.Where(x => x.IsDirectory))
             {
                 string relativeFolderPath = Path.GetRelativePath(oldFolderPath, pathInfo.FullPath);

@@ -44,7 +44,7 @@ namespace Editor.AssetsImport
             FilesToTypesMap = new ReadOnlyDictionary<string, List<Type>>(filesToTypesMap);
 
 
-            var properties = new Dictionary<string, string>()
+            Dictionary<string, string> properties = new Dictionary<string, string>()
             {
                 { "CheckForSystemRuntimeDependency", "true" },
                 { "DesignTimeBuild", "false" },
