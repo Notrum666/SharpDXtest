@@ -16,7 +16,9 @@
             </local:ComplexConverter.ConvertersSequence>
         </local:ComplexConverter>
     </UserControl.Resources>
-    <Grid Background="Transparent" DragEnter="UserControl_DragEnter" DragLeave="UserControl_DragLeave" AllowDrop="True" Drop="Grid_Drop">
+    <Grid Background="Transparent" DragEnter="UserControl_DragEnter" 
+          DragLeave="UserControl_DragLeave" AllowDrop="True" Drop="Grid_Drop"
+          DragOver="UserControl_DragOver">
         <Grid Panel.ZIndex="2" IsHitTestVisible="False" Visibility="{Binding ShowPlaceholder, Converter={StaticResource VisConv}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>

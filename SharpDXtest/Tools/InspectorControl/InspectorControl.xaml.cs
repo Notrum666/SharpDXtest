@@ -9,6 +9,7 @@ using System.Runtime.Loader;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -18,7 +19,6 @@ using Engine;
 using Engine.BaseAssets.Components;
 
 using SharpDXtest;
-using SharpDXtest.Assets.Components;
 
 using Component = Engine.BaseAssets.Components.Component;
 
@@ -93,10 +93,13 @@ namespace Editor
             }
         }
         private bool loaded = false;
-        private int objectIndex = -1;
 
         private List<Type> componentTypes = new List<Type>();
         public ReadOnlyCollection<Type> ComponentTypes => componentTypes.AsReadOnly();
+        private static readonly Type[] ComponentsBlacklist = new Type[]
+        {
+            typeof(Transform)
+        };
 
         private DispatcherTimer UpdateTimer;
 
@@ -152,6 +155,8 @@ namespace Editor
                 .Concat(AssemblyLoadContext.CurrentContextualReflectionContext.Assemblies))
                 componentTypes.AddRange(assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(Component)) && !t.IsAbstract));
 
+            componentTypes.RemoveAll(t => ComponentsBlacklist.Contains(t));
+
             componentTypes.Sort((a, b) => a.Name.CompareTo(b.Name));
         }
 
@@ -175,6 +180,11 @@ namespace Editor
             {
                 Width = double.NaN;
                 Height = double.NaN;
+
+                BindingOperations.SetBinding(this, TargetObjectProperty, new Binding()
+                {
+                    Path = new PropertyPath("(0).InspectedObject", typeof(EditorLayer).GetProperty(nameof(EditorLayer.Current)))
+                });
             }
 
             loaded = true;
@@ -195,22 +205,6 @@ namespace Editor
         {
             e.Handled = true;
             Focus();
-
-            if (e.RightButton != MouseButtonState.Pressed)
-                return;
-
-            Scene currentScene = Scene.CurrentScene;
-            if (currentScene == null || currentScene.GameObjects.Count == 0)
-            {
-                TargetObject = null;
-                return;
-            }
-            
-            objectIndex++;
-
-            if (objectIndex >= currentScene.GameObjects.Count)
-                objectIndex = 0;
-            TargetObject = currentScene.GameObjects[objectIndex];
         }
     }
 }

@@ -21,6 +21,24 @@ namespace Editor
         private GameObject target = null;
         public GameObject Target => target;
         public ObservableCollection<ObjectViewModel> ComponentsViewModels { get; private set; } = new ObservableCollection<ObjectViewModel>();
+        public string Name
+        {
+            get => target.Name;
+            set
+            {
+                target.Name = value;
+                OnPropertyChanged();
+            }
+        }
+        public bool Enabled
+        {
+            get => Target.LocalEnabled;
+            set
+            {
+                Target.LocalEnabled = value;
+                OnPropertyChanged();
+            }
+        }
 
         public GameObjectViewModel(GameObject target) 
         {
@@ -32,12 +50,17 @@ namespace Editor
         {
             ComponentsViewModels.Clear();
 
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(Enabled));
+
             foreach (Component component in target.Components)
                 ComponentsViewModels.Add(new ObjectViewModel(component));
         }
 
         public override void Update()
         {
+            OnPropertyChanged(nameof(Name));
+            OnPropertyChanged(nameof(Enabled));
             foreach (ObjectViewModel viewModel in ComponentsViewModels)
                 viewModel.Update();
         }

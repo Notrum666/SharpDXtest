@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.Reflection;
 
 using Engine.BaseAssets.Components;
 
@@ -78,10 +79,18 @@ namespace Engine
         public Component AddComponent(Type type)
         {
             if (!type.IsSubclassOf(typeof(Component)))
-                throw new ArgumentException("Given type must be a component");
-
-            if (Instantiate(type) is not Component newComponent)
+            {
+                Logger.Log(LogType.Warning, $"Given type must be a subclass of Component, but {type.Name} was given");
                 return null;
+            }
+
+            if (type.GetCustomAttribute<UniqueComponentAttribute>() is not null && GetComponent(type) is not null)
+            {
+                Logger.Log(LogType.Warning, $"GameObject can have only one component of type {type.Name}");
+                return null;
+            }
+
+            Component newComponent = (Component)Instantiate(type);
 
             newComponent.GameObject = this;
             components.Add(newComponent);
@@ -99,7 +108,10 @@ namespace Engine
         public Component GetComponent(Type type)
         {
             if (!type.IsSubclassOf(typeof(Component)))
-                throw new ArgumentException("Given type must be a component");
+            {
+                Logger.Log(LogType.Warning, $"Given type must be a subclass of Component, but {type.Name} was given");
+                return null;
+            }
 
             foreach (Component component in components)
             {
@@ -119,7 +131,10 @@ namespace Engine
         public Component[] GetComponents(Type type)
         {
             if (!type.IsSubclassOf(typeof(Component)))
-                throw new ArgumentException("Given type must be a component");
+            {
+                Logger.Log(LogType.Warning, $"Given type must be a subclass of Component, but {type.Name} was given");
+                return Array.Empty<Component>();
+            }
 
             List<Component> typedComponents = new List<Component>();
             foreach (Component component in components)

@@ -81,5 +81,10 @@ namespace Editor
                 return -1;
             return hierarchy.Count();
         }
+
+        public static bool IsSameOrSubclassOf(this Type type, Type baseType)
+        {
+            return type.IsSubclassOf(baseType) || type == baseType;
+        }
     }
 }

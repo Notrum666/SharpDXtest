@@ -15,13 +15,8 @@ namespace Editor
             new RelayCommand(_ => Value = null, _ => Nullable.GetUnderlyingType(TargetType) is not null);
         private RelayCommand setDefaultNullableValueCommand;
         public RelayCommand SetDefaultNullableValueCommand => setDefaultNullableValueCommand ??= 
-            new RelayCommand(_ => test(), _ => Nullable.GetUnderlyingType(TargetType) is not null);
-        void test()
-        {
-            Type t = Nullable.GetUnderlyingType(TargetType);
-            object obj = Activator.CreateInstance(t);
-            Value = obj;
-        }
+            new RelayCommand(_ => Value = Activator.CreateInstance(Nullable.GetUnderlyingType(TargetType)), 
+                _ => Nullable.GetUnderlyingType(TargetType) is not null);
         private FieldInfo targetField;
         public FieldInfo TargetField => targetField;
         public Type TargetType { get; }
