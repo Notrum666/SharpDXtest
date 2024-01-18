@@ -22,6 +22,8 @@
                   KeyDown="SceneTreeView_KeyDown"
                   DragOver="SceneTreeView_DragOver"
                   Drop="SceneTreeView_Drop"
+                  ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Hidden"
                   ItemContainerStyle="{StaticResource TreeViewItemStyle}">
             <TreeView.ContextMenu>
                 <ContextMenu>
