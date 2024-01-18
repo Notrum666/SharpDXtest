@@ -43,6 +43,14 @@ namespace Editor
                 OnPropertyChanged();
             }
         }
+        public void Open()
+        {
+            if (!AssetsManager.TryGetAssetTypeByGuid(assetMeta.Guid, out Type type))
+                return;
+
+            if (type.IsSameOrSubclassOf(typeof(Scene)))
+                SceneManager.LoadSceneByPath(Path.ChangeExtension(Path.GetRelativePath(AssetsRegistry.ContentFolderPath, assetPath), null));
+        }
         public ContentBrowserAssetViewModel()
         {
 

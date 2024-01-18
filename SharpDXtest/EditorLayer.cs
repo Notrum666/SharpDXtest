@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows.Threading;
 
 using Editor.AssetsImport;
 
@@ -36,6 +37,8 @@ namespace Editor
         public string EditorFolderPath { get; private set; }
         public string ResourcesFolderPath { get; private set; }
 
+        private DispatcherTimer WpfTimer;
+
         private EditorLayer()
         {
             DataFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DataFolderName);
@@ -54,10 +57,14 @@ namespace Editor
         {
             EngineCore.Init(Current, new EditorRuntimeLayer());
 
-            EngineCore.OnPaused += Current.OnEnginePaused;
             EngineCore.Run();
 
-            Current.OnEnginePaused();
+            SceneManager.ReloadScene();
+
+            Current.WpfTimer = new DispatcherTimer();
+            Current.WpfTimer.Interval = TimeSpan.FromSeconds(0.1);
+            Current.WpfTimer.Tick += Current.WpfTick;
+            current.WpfTimer.Start();
         }
 
         public override void Init()
@@ -107,6 +114,7 @@ namespace Editor
         public event Action OnPlaymodeEntered;
         public event Action OnPlaymodeExited;
 
+        private bool isPlaying = false;
         /// <summary> True if in Play mode, false if in Edit mode </summary>
         public bool IsPlaying
         {
@@ -119,10 +127,19 @@ namespace Editor
                 desiredIsPlaying = value;
             }
         }
-
-        private bool isPlaying = false;
         private bool desiredIsPlaying = false;
         private bool stepInProcess = false;
+        private bool notifyPlaymodeEntered = false;
+
+        public bool IsEnginePaused
+        {
+            get => EngineCore.IsPaused;
+            set => EngineCore.IsPaused = value;
+        }
+
+        // can't make it internal cause then wpf binding stops working :c
+        // TODO: move to converter
+        public bool PauseButtonVisible => !IsPlaying || !IsEnginePaused;
 
         /// <summary>
         /// Starts EngineCore playing
@@ -142,38 +159,52 @@ namespace Editor
 
         public void ProcessStep()
         {
-            if (IsPlaying && EngineCore.IsPaused)
+            EngineCore.IsPaused = true;
+            if (IsPlaying)
                 stepInProcess = true;
         }
 
         public override void OnFrameEnded()
         {
-            if (desiredIsPlaying != IsPlaying)
+            // to delay event firing until next frame because CameraRenderControl can get null from Camera.Current
+            // TODO: rework CameraRenderControl camera selection to go off of actually Camera.Current being changed
+            if (notifyPlaymodeEntered)
+            {
+                OnPlaymodeEntered?.Invoke();
+                notifyPlaymodeEntered = false;
+            }
+
+            if (desiredIsPlaying != isPlaying)
+            {
+                isPlaying = desiredIsPlaying;
+                stepInProcess = false;
+
+                if (isPlaying)
+                {
+                    EngineCore.IsPaused = false;
+                    notifyPlaymodeEntered = true;
+                }
+                else
+                {
+                    EngineCore.IsPaused = true;
+                    OnPlaymodeExited?.Invoke();
+                }
+
+                return;
+            }
+            
+            if (isPlaying && stepInProcess)
             {
                 stepInProcess = false;
-                EngineCore.IsPaused = !desiredIsPlaying;
-
-                if (desiredIsPlaying)
-                {
-                    isPlaying = true;
-                    OnPlaymodeEntered?.Invoke();
-                }
-            }
-            else if (IsPlaying && stepInProcess)
-            {
-                stepInProcess = EngineCore.IsPaused;
-                EngineCore.IsPaused = !EngineCore.IsPaused;
+                EngineCore.IsPaused = true;
             }
         }
 
-        private void OnEnginePaused()
+        private void WpfTick(object sender, EventArgs e)
         {
-            if (desiredIsPlaying)
-                return;
-
-            isPlaying = false;
-            SceneManager.ReloadScene();
-            OnPlaymodeExited?.Invoke();
+            OnPropertyChanged(nameof(IsPlaying));
+            OnPropertyChanged(nameof(IsEnginePaused));
+            OnPropertyChanged(nameof(PauseButtonVisible));
         }
 
         #endregion Playmode

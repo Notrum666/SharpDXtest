@@ -22,20 +22,23 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid Background="{StaticResource BorderBrush}">
-            <ComboBox HorizontalAlignment="Left" Width="100" Margin="1" ItemsSource="{Binding AspectRatios}"
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <ComboBox Width="100" Margin="1" ItemsSource="{Binding AspectRatios}"
                       SelectedItem="{Binding SelectedAspectRatio}" Style="{StaticResource EditlessComboBox}"
                       SelectionChanged="AspectRatioComboBox_SelectionChanged" MaxDropDownHeight="600">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
                                    Text="{Binding}"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="16,1,0,2"
+                           Text="{Binding CameraViewModel.FPS, StringFormat='fps: \{0\}'}"
+                           FontSize="14" Foreground="#FFD0D0D0"/>
+            </StackPanel>
         </Grid>
         <Grid Grid.Row="1" x:Name="RenderControlHost" Background="{StaticResource CameraRenderControlBackgroundBrush}">
-            <TextBlock x:Name="FPSTextBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20"
-                       Text="{Binding CameraViewModel.FPS}" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
             <Grid x:Name="GameInterface" Panel.ZIndex="20"/>
             <Image x:Name="RenderControl" HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch" Stretch="Fill" SizeChanged="RenderControl_SizeChanged">

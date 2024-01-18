@@ -208,8 +208,8 @@ namespace Engine.BaseAssets.Components
         {
             if (NeedsToBeResized)
             {
-                NeedsToBeResized = false;
                 GenerateBuffers(targetWidth, targetHeight);
+                NeedsToBeResized = false;
                 OnResized?.Invoke();
             }
         }

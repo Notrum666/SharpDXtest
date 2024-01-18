@@ -27,7 +27,8 @@ namespace Editor
                     return false;
                 Type t = (Type)obj;
                 if (t == typeof(InspectorControl) && InspectorControl.Current is not null ||
-                    t == typeof(SceneOverviewControl) && SceneOverviewControl.Current is not null)
+                    t == typeof(SceneOverviewControl) && SceneOverviewControl.Current is not null ||
+                    t == typeof(ContentBrowserControl) && ContentBrowserControl.Current is not null)
                     return false;
                 return true;
             }
@@ -39,39 +40,39 @@ namespace Editor
             _ => { ScriptManager.Recompile(); }
         );
 
-        private RelayCommand runCommand;
+        private RelayCommand playCommand;
 
-        public RelayCommand RunCommand => runCommand ??= new RelayCommand(
-            _ => { EditorLayer.Current.EnterPlaymode(); },
-            _ => !EditorLayer.Current.IsPlaying
+        public RelayCommand PlayCommand => playCommand ??= new RelayCommand(
+            _ => { EditorLayer.Current.EnterPlaymode(); }/*,
+            _ => !EditorLayer.Current.IsPlaying*/
         );
 
         private RelayCommand stopCommand;
 
         public RelayCommand StopCommand => stopCommand ??= new RelayCommand(
-            _ => { EditorLayer.Current.ExitPlaymode(); },
-            _ => EditorLayer.Current.IsPlaying
+            _ => { EditorLayer.Current.ExitPlaymode(); }/*,
+            _ => EditorLayer.Current.IsPlaying*/
         );
 
-        private RelayCommand playCommand;
+        private RelayCommand resumeCommand;
 
-        public RelayCommand PlayCommand => playCommand ??= new RelayCommand(
-            _ => { EngineCore.IsPaused = false; },
-            _ => EditorLayer.Current.IsPlaying && EngineCore.IsPaused
+        public RelayCommand ResumeCommand => resumeCommand ??= new RelayCommand(
+            _ => { EditorLayer.Current.IsEnginePaused = false; }/*,
+            _ => EditorLayer.Current.IsPlaying && EditorLayer.Current.IsEnginePaused*/
         );
 
         private RelayCommand pauseCommand;
 
         public RelayCommand PauseCommand => pauseCommand ??= new RelayCommand(
-            _ => { EngineCore.IsPaused = true; },
-            _ => EditorLayer.Current.IsPlaying && !EngineCore.IsPaused
+            _ => { EngineCore.IsPaused = true; }/*,
+            _ => EditorLayer.Current.IsPlaying && !EditorLayer.Current.IsEnginePaused*/
         );
 
         private RelayCommand stepCommand;
 
         public RelayCommand StepCommand => stepCommand ??= new RelayCommand(
-            _ => { EditorLayer.Current.ProcessStep(); },
-            _ => EditorLayer.Current.IsPlaying && EngineCore.IsPaused
+            _ => { EditorLayer.Current.ProcessStep(); }/*,
+            _ => EditorLayer.Current.IsPlaying*/
         );
 
 
@@ -103,6 +104,11 @@ namespace Editor
         private void EditorWindowInst_MouseDown(object sender, MouseButtonEventArgs e)
         {
             Keyboard.ClearFocus();
+        }
+
+        private void SaveCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ProjectViewModel.Current.SaveCurrentScene();
         }
     }
 }

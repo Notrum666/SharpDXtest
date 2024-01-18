@@ -1,0 +1,18 @@
+!SceneData
+SerializableObjects:
+- !GameObject
+  instanceId: 64188becf7b044f0b30c6552b6b29fef
+  name: NewGameObject
+  localEnabled: true
+  transform: 59f04aed325e476489f53e6d26e5abec
+  components:
+  - 59f04aed325e476489f53e6d26e5abec
+- !Transform
+  instanceId: 59f04aed325e476489f53e6d26e5abec
+  gameObject: 64188becf7b044f0b30c6552b6b29fef
+  Rotation:
+    w: 1
+  Scale:
+    x: 1
+    y: 1
+    z: 1

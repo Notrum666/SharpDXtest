@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 
 using Engine;
+using Engine.AssetsData;
 
 using static Engine.FileSystemHelper;
 
@@ -70,6 +71,20 @@ namespace Editor
 
             Game.Scenes = scenes;
             Game.StartingSceneName = scenes.Values.ElementAtOrDefault(BuildSettings.StartingSceneIndex);
+        }
+
+        public void SaveCurrentScene()
+        {
+            if (Scene.CurrentScene is null)
+                return;
+
+            if (!AssetsRegistry.TryGetAssetPath(Scene.CurrentScene.Guid, out string path))
+            {
+                Logger.Log(LogType.Error, "Current scene not found in registry");
+                return;
+            }
+
+            AssetsRegistry.SaveAsset(path, SceneData.FromScene(Scene.CurrentScene));
         }
     }
 
