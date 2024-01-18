@@ -35,6 +35,12 @@ namespace Engine.BaseAssets.Components.Colliders
             }
         }
 
+        internal override void OnDeserialized()
+        {
+            base.OnDeserialized();
+            Model = model;
+        }
+
         public override Vector3 InertiaTensor => inertiaTensor;
         public override double OuterSphereRadius => outerSphereRadius;
         public override double SquaredOuterSphereRadius => squaredOuterSphereRadius;

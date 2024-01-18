@@ -46,6 +46,11 @@ namespace Engine.BaseAssets.Components
                     return;
             }
         }
+        
+        internal override void OnDeserialized()
+        {
+            UpdateData();
+        }
 
         public Vector3 GlobalCenter { get; private set; }
 

@@ -36,6 +36,12 @@ namespace Engine.BaseAssets.Components.Colliders
             }
         }
 
+        internal override void OnDeserialized()
+        {
+            base.OnDeserialized();
+            Size = size;
+        }
+
         private Vector3 inertiaTensor;
         public override Vector3 InertiaTensor => inertiaTensor;
 

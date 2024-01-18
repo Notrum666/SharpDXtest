@@ -28,6 +28,12 @@ namespace Engine.BaseAssets.Components.Colliders
                     return;
             }
         }
+        
+        internal override void OnDeserialized()
+        {
+            base.OnDeserialized();
+            Radius.Set(radius);
+        }
 
         public override Vector3 InertiaTensor => inertiaTensor;
         public override double OuterSphereRadius => outerSphereRadius;
