@@ -19,6 +19,7 @@ namespace Editor
 {
     public partial class ContentBrowserControl : UserControl, INotifyPropertyChanged
     {
+        public static ContentBrowserControl Current { get; private set; }
         private RelayCommand startFolderCreationCommand;
         public RelayCommand StartFolderCreationCommand => startFolderCreationCommand ??= new RelayCommand(obj => FolderCreationViewModels.Add(new FolderCreationViewModel()));
         private RelayCommand startAssetCreationCommand;
@@ -78,6 +79,8 @@ namespace Editor
                 SelectFolder(RootFolderViewModels.First());
             }
 
+            Current = this;
+
             loaded = true;
         }
         //private void ContentBrowserControl_Activated(object sender, EventArgs e)
@@ -92,6 +95,8 @@ namespace Editor
             // to prevent errors during xaml designer loading in visual studio
             if (!EngineCore.IsAlive)
                 return;
+
+            Current = null;
         }
 
         private void CopyFile(string sourceFilePath, ContentBrowserFolderViewModel destinationFolder)

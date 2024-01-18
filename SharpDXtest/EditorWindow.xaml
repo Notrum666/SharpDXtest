@@ -8,47 +8,76 @@
                        Title="SharpDXtest" Loaded="Window_Loaded" Focusable="True"
                        WindowState="Maximized" Width="1920" Height="1080"
                        Closing="EditorWindowInst_Closing" MouseDown="EditorWindowInst_MouseDown"
-                       Style="{StaticResource CustomWindowStyle}">
+                       Style="{StaticResource CustomWindowStyle}"
+                       d:DataContext="{d:DesignInstance Type=this:EditorWindow, IsDesignTimeCreatable=False}">
+    <this:CustomWindowBase.Resources>
+        <this:BoolInverter x:Key="InvBool"/>
+        <this:BoolToVisibilityConverter x:Key="BoolToVisConv"/>
+        <this:BoolToVisibilityConverter x:Key="InvBoolToVisConv" TrueValue="Hidden" FalseValue="Visible"/>
+    </this:CustomWindowBase.Resources>
     <this:CustomWindowBase.Header>
-        <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
-            <Image Source="Images\ObjectIcon.png" Height="30" Width="30" Margin="3,3,1,1"
+        <Grid Background="#FF303030">
+            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                <Image Source="Images\ObjectIcon.png" Height="30" Width="30" Margin="3,3,1,1"
                    RenderOptions.BitmapScalingMode="HighQuality"/>
-            <Menu VerticalAlignment="Top" Margin="10,4,0,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType=this:EditorWindow}}">
-                <MenuItem Header="File">
-                    <MenuItem Header="Test1"/>
-                    <MenuItem Header="Test2"/>
-                    <MenuItem Header="Test3"/>
-                    <MenuItem Header="Test4">
-                        <MenuItem Header="SubTest1"/>
-                        <MenuItem Header="SubTest2"/>
-                        <MenuItem Header="SubTest3"/>
-                        <MenuItem Header="SubTest4"/>
+                <Menu VerticalAlignment="Top" Margin="10,4,0,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType=this:EditorWindow}}">
+                    <MenuItem Header="View">
+                        <MenuItem Header="Camera Viewport" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:CameraRenderControl}"/>
+                        <MenuItem Header="Output Console" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
+                        <MenuItem Header="Inspector" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:InspectorControl}"/>
+                        <MenuItem Header="Content Browser" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:ContentBrowserControl}"/>
+                        <MenuItem Header="Scene Overview" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:SceneOverviewControl}"/>
                     </MenuItem>
-                </MenuItem>
-                <MenuItem Header="Edit">
-                    <MenuItem Header="Test1"/>
-                    <MenuItem Header="Test2"/>
-                    <MenuItem Header="Test3"/>
-                    <MenuItem Header="Test4"/>
-                </MenuItem>
-                <MenuItem Header="View">
-                    <MenuItem Header="Camera" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:CameraRenderControl}"/>
-                    <MenuItem Header="Output" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:OutputControl}"/>
-                    <MenuItem Header="Inspector" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:InspectorControl}"/>
-                    <MenuItem Header="Content" Command="{Binding SpawnFlyingControl}" CommandParameter="{x:Type this:ContentBrowserControl}"/>
-                </MenuItem>
-                <MenuItem Header="Scripting">
-                    <MenuItem Header="Recompile" Command="{Binding Path=RecompileCommand}"/>
-                </MenuItem>
-                <MenuItem Header="Playmode">
-                    <MenuItem Header="Run" Command="{Binding Path=RunCommand}"/>
-                    <MenuItem Header="Stop" Command="{Binding Path=StopCommand}"/>
-                    <MenuItem Header="Play" Command="{Binding Path=PlayCommand}"/>
-                    <MenuItem Header="Pause" Command="{Binding Path=PauseCommand}"/>
-                </MenuItem>
-                <MenuItem Header="Step" Command="{Binding Path=StepCommand}"/>
-            </Menu>
-        </StackPanel>
+                    <MenuItem Header="Scripting">
+                        <MenuItem Header="Recompile All" Command="{Binding Path=RecompileCommand}"/>
+                    </MenuItem>
+                </Menu>
+            </StackPanel>
+            <Grid HorizontalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="1"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="1"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Margin="3" Visibility="{Binding IsPlaying, Source={x:Static this:EditorLayer.Current},
+                    Converter={StaticResource InvBoolToVisConv}}"
+                        IsEnabled="{Binding IsPlaying, Source={x:Static this:EditorLayer.Current},
+                    Converter={StaticResource InvBool}, Mode=OneWay}"
+                        Style="{StaticResource FlowControlButton}"
+                        Command="{Binding PlayCommand}">
+                    <Image Source="Images/PlayIcon.png" Margin="3"/>
+                </Button>
+                <Button Margin="3" Visibility="{Binding IsPlaying, Source={x:Static this:EditorLayer.Current},
+                    Converter={StaticResource BoolToVisConv}, Mode=OneWay}"
+                        IsEnabled="{Binding IsPlaying, Source={x:Static this:EditorLayer.Current}, Mode=OneWay}"
+                        Style="{StaticResource FlowControlButton}"
+                        Command="{Binding StopCommand}">
+                    <Image Source="Images/StopIcon.png" Margin="3"/>
+                </Button>
+                <Button Margin="3" Grid.Column="2" Visibility="{Binding PauseButtonVisible, Source={x:Static this:EditorLayer.Current},
+                    Converter={StaticResource BoolToVisConv}, Mode=OneWay}"
+                        IsEnabled="{Binding IsPlaying, Source={x:Static this:EditorLayer.Current}, Mode=OneWay}"
+                        Style="{StaticResource FlowControlButton}"
+                        Command="{Binding PauseCommand}">
+                    <Image Source="Images/PauseIcon.png" Margin="3"/>
+                </Button>
+                <Button Margin="3" Grid.Column="2" Visibility="{Binding PauseButtonVisible, Source={x:Static this:EditorLayer.Current},
+                    Converter={StaticResource InvBoolToVisConv}, Mode=OneWay}"
+                        IsEnabled="{Binding IsPlaying, Source={x:Static this:EditorLayer.Current}, Mode=OneWay}"
+                        Style="{StaticResource FlowControlButton}"
+                        Command="{Binding ResumeCommand}">
+                    <Image Source="Images/ResumeIcon.png" Margin="2.5"/>
+                </Button>
+                <Button Margin="3" Grid.Column="4"
+                        IsEnabled="{Binding IsPlaying, Source={x:Static this:EditorLayer.Current}, Mode=OneWay}"
+                        Style="{StaticResource FlowControlButton}"
+                        Command="{Binding StepCommand}">
+                    <Image Source="Images/StepIcon.png" Margin="3"/>
+                </Button>
+            </Grid>
+        </Grid>
     </this:CustomWindowBase.Header>
     <Grid>
         <Grid.RowDefinitions>

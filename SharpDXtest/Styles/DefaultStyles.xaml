@@ -3,6 +3,35 @@
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <Style x:Key="FlowControlButton" TargetType="Button">
+        <Setter Property="Focusable" Value="false"/>
+        <Setter Property="TextElement.Foreground" Value="#FFF8F8F8"/>
+        <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border CornerRadius="2" x:Name="Host" Background="#FF808080">
+                        <Grid>
+                            <Rectangle Fill="Transparent" Name="OverlayRect" Panel.ZIndex="10"/>
+                            <ContentPresenter/>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Host" Property="Background" Value="#FFA0A0A0"/>
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Host" Property="Background" Value="#FF606060"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="OverlayRect" Property="Fill" Value="#80202020"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    
     <Style x:Key="DockingSpot" TargetType="Control">
         <Setter Property="Margin" Value="5"/>
         <Setter Property="Template">

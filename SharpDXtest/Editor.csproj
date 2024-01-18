@@ -25,8 +25,12 @@
 		<ApplicationIcon>Icons\ObjectIcon.ico</ApplicationIcon>
 	</PropertyGroup>
 	<ItemGroup>
-		<None Remove="Images\big-gear.png" />
 		<None Remove="Images\ObjectIcon.png" />
+		<None Remove="Images\PauseIcon.png" />
+		<None Remove="Images\Playicon.png" />
+		<None Remove="Images\ResumeIcon.png" />
+		<None Remove="Images\StepIcon.png" />
+		<None Remove="Images\StopIcon.png" />
 		<None Remove="Resources\BaseAssets\Shaders\DeferredRender\deferred_geometry_skinned.vsh" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FileIcon.png" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
@@ -51,8 +55,12 @@
 		<PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
 	</ItemGroup>
 	<ItemGroup>
-		<Resource Include="Images\big-gear.png" />
 		<Resource Include="Images\ObjectIcon.png" />
+		<Resource Include="Images\PauseIcon.png" />
+		<Resource Include="Images\Playicon.png" />
+		<Resource Include="Images\ResumeIcon.png" />
+		<Resource Include="Images\StepIcon.png" />
+		<Resource Include="Images\StopIcon.png" />
 		<Resource Include="Tools\ContentBrowserControl\Icons\FileIcon.png" />
 		<Resource Include="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
 		<Resource Include="Tools\SceneOverviewControl\Icons\ObjectIcon.png" />
