@@ -39,7 +39,7 @@ namespace Engine.BaseAssets.Components.Colliders
         private double outerSphereRadius;
         public override double OuterSphereRadius => outerSphereRadius;
 
-        protected override void getBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest)
+        protected override void GetBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest)
         {
             if (globalVertexes.Count == 0)
                 throw new Exception("No vertexes present in this collider.");
@@ -65,7 +65,7 @@ namespace Engine.BaseAssets.Components.Colliders
             }
         }
 
-        protected override List<Vector3> getVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon)
+        protected override List<Vector3> GetVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon)
         {
             List<Vector3> result = new List<Vector3>();
             foreach (Vector3 vertex in globalVertexes)
@@ -146,9 +146,9 @@ namespace Engine.BaseAssets.Components.Colliders
                 addUnique(normal);
         }
 
-        public override void updateData()
+        public override void UpdateData()
         {
-            base.updateData();
+            base.UpdateData();
 
             globalVertexes.Clear();
             globalNormals.Clear();
@@ -162,10 +162,9 @@ namespace Engine.BaseAssets.Components.Colliders
             foreach (Vector3 normal in nonCollinearNormals)
                 globalNonCollinearNormals.Add(model.TransformDirection(normal));
 
-            double curSqrRadius;
             foreach (Vector3 vertex in globalVertexes)
             {
-                curSqrRadius = (vertex - GlobalCenter).squaredLength();
+                var curSqrRadius = (vertex - GlobalCenter).squaredLength();
                 if (curSqrRadius > squaredOuterSphereRadius)
                     squaredOuterSphereRadius = curSqrRadius;
             }

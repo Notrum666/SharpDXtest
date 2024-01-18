@@ -57,14 +57,14 @@ namespace Engine.BaseAssets.Components.Colliders
             squaredOuterSphereRadius = radius * radius;
         }
 
-        protected override void getBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest)
+        protected override void GetBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest)
         {
             direction = direction.normalized() * radius;
             furthest = GlobalCenter + direction;
             hindmost = GlobalCenter - direction;
         }
 
-        protected override List<Vector3> getVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon)
+        protected override List<Vector3> GetVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon)
         {
             Vector3 result = (collisionPlanePoint - GlobalCenter).projectOnVector(collisionPlaneNormal);
 

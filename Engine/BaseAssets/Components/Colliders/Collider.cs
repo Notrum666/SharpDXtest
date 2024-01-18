@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 using Engine.BaseAssets.Components.Colliders;
 
@@ -9,140 +10,238 @@ namespace Engine.BaseAssets.Components
 {
     public abstract class Collider : BehaviourComponent
     {
-        private class PolygonDistanceComparer : IComparer<double>
-        {
-            public int Compare(double x, double y)
-            {
-                int value = y.CompareTo(x);
-                return value == 0 ? -1 : value;
-            }
-        }
+        private const int EpaMaxIter = 4096;
         private static readonly PolygonDistanceComparer distanceComparer = new PolygonDistanceComparer();
-        private const int EPA_MAX_ITER = 4096;
-        private class Polygon
-        {
-            public int indexA, indexB, indexC;
-            public Polygon adjacentAB, adjacentBC, adjacentCA;
-            public Vector3 normal;
 
-            public Polygon(int indexA, int indexB, int indexC)
-            {
-                this.indexA = indexA;
-                this.indexB = indexB;
-                this.indexC = indexC;
-            }
-        }
-        public abstract Vector3 InertiaTensor { get; }
-
-        public virtual Vector3 Offset { get; set; }
-        private Vector3 globalCenter;
-        public Vector3 GlobalCenter => globalCenter;
+        [SerializedField]
         private double massPart = 1.0;
-        public double MassPart
+        [SerializedField]
+        private Vector3 offset;
+
+        public Ranged<double> MassPart => new Ranged<double>(ref massPart, min: 0);
+        public Vector3 Offset { get => offset; set => offset = value; }
+
+        public override void OnFieldChanged(FieldInfo fieldInfo)
         {
-            get => massPart;
-            set
+            base.OnFieldChanged(fieldInfo);
+
+            switch (fieldInfo.Name)
             {
-                if (value < 0.0)
-                    throw new ArgumentException("Mass part can't be negative.");
-                massPart = value;
+                case nameof(massPart):
+                    MassPart.Set(massPart);
+                    return;
             }
         }
 
-        public abstract double SquaredOuterSphereRadius { get; }
+        public Vector3 GlobalCenter { get; private set; }
+
+        public abstract Vector3 InertiaTensor { get; }
         public abstract double OuterSphereRadius { get; }
+        public abstract double SquaredOuterSphereRadius { get; }
 
-        protected abstract void getBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest);
+        protected abstract List<Vector3> GetVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon);
+        protected abstract void GetBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest);
 
-        private static List<Vector3> getPossibleCollisionDirections(Collider col1, Collider col2, bool first = true)
+        public virtual void UpdateData()
         {
-            List<Vector3> result = new List<Vector3>();
+            GlobalCenter = GameObject.Transform.Model.TransformPoint(Offset);
+        }
 
-            void addUnique(Vector3 vec)
+        public bool GetCollisionExitVector(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        {
+            return GetCollisionExitVector_SAT(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+            //return GetCollisionExitVector_GJK_EPA(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+        }
+
+        public static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
+        {
+            Vector3 point = GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.FloatEpsilon);
+            return point;
+            //return double.IsNaN(point.x) || double.IsNaN(point.y) || double.IsNaN(point.z) ?
+            //    GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.FloatEpsilon) :
+            //    point;
+        }
+
+        private static Vector3 GetAverageCollisionPointWithEpsilon(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon = 1E-7)
+        {
+            double sqrEpsilon = epsilon * epsilon;
+
+            Vector3[] GetFigureFromVertexes(List<Vector3> vertexes)
             {
-                bool exists = false;
-                foreach (Vector3 vector in result)
+                int count = vertexes.Count;
+                Vector3[] figure = new Vector3[count];
+                figure[0] = vertexes[0];
+                vertexes.RemoveAt(0);
+
+                Vector3 start = figure[0];
+                Vector3 current;
+                for (int k = 1; k < count - 1; k++)
                 {
-                    if (vector.isCollinearTo(vec))
+                    current = vertexes[0] - start;
+                    int currentIndex = 0;
+                    for (int i = 1; i < vertexes.Count; i++)
                     {
-                        exists = true;
-                        break;
+                        if ((vertexes[i] - start).cross(current) * collisionPlaneNormal > 0)
+                        {
+                            currentIndex = i;
+                            current = vertexes[i] - start;
+                        }
+                    }
+
+                    figure[k] = vertexes[currentIndex];
+                    vertexes.RemoveAt(currentIndex);
+                }
+
+                if (vertexes.Count > 0)
+                    figure[figure.Length - 1] = vertexes[0];
+
+                return figure;
+            }
+
+            bool IsPointInsideFigure(Vector3[] figure, Vector3 point, out bool isPointOnEdge)
+            {
+                Vector3 start, end, edge;
+                Vector3 vec, vecMult, prevVecMult;
+
+                prevVecMult = (figure[1] - figure[0]).cross(point - figure[0]);
+                for (int i = 0; i < figure.Length; i++)
+                {
+                    start = figure[i];
+                    end = figure[(i + 1) % figure.Length];
+                    edge = end - start;
+                    vec = point - start;
+
+                    vecMult = edge.cross(vec);
+                    if (vecMult.squaredLength() < sqrEpsilon)
+                    {
+                        double edgeDotMult = edge.dot(edge);
+                        double currentDotMult = vec.dot(edge);
+
+                        if (currentDotMult >= 0 && currentDotMult <= edgeDotMult)
+                        {
+                            isPointOnEdge = true;
+                            return true;
+                        }
+                        continue;
+                    }
+
+                    if (vecMult.dot(prevVecMult) < 0)
+                    {
+                        isPointOnEdge = false;
+                        return false;
+                    }
+
+                    prevVecMult = vecMult;
+                }
+
+                isPointOnEdge = false;
+                return true;
+            }
+
+            List<Vector3> vertexesOnPlane1 = collider1.GetVertexesOnPlane(collisionPlanePoint, collisionPlaneNormal, epsilon);
+            List<Vector3> vertexesOnPlane2 = collider2.GetVertexesOnPlane(collisionPlanePoint, collisionPlaneNormal, epsilon);
+
+            if (vertexesOnPlane1.Count == 0 || vertexesOnPlane2.Count == 0)
+                throw new ArgumentException("Colliders don't intersect in the given plane.");
+
+            if (vertexesOnPlane1.Count == 1)
+                return vertexesOnPlane1[0];
+            if (vertexesOnPlane2.Count == 1)
+                return vertexesOnPlane2[0];
+
+            Vector3[] figure1 = GetFigureFromVertexes(vertexesOnPlane1);
+            Vector3[] figure2 = GetFigureFromVertexes(vertexesOnPlane2);
+
+            List<Vector3> intersectionPoints = new List<Vector3>();
+
+            bool pointOnEdge;
+            bool pointExists;
+            void AddIntersectionPoints(ref Vector3[] points1, ref Vector3[] points2)
+            {
+                foreach (Vector3 point in points1)
+                {
+                    if (IsPointInsideFigure(points2, point, out pointOnEdge))
+                    {
+                        if (!pointOnEdge)
+                        {
+                            intersectionPoints.Add(point);
+                            continue;
+                        }
+
+                        pointExists = false;
+                        foreach (Vector3 intersectionPoint in intersectionPoints)
+                        {
+                            if (intersectionPoint.equals(point))
+                            {
+                                pointExists = true;
+                                break;
+                            }
+                        }
+                        if (!pointExists)
+                            intersectionPoints.Add(point);
                     }
                 }
-                if (!exists)
-                    result.Add(vec);
             }
-
-            switch (col1)
+            AddIntersectionPoints(ref figure1, ref figure2);
+            AddIntersectionPoints(ref figure2, ref figure1);
+            Vector3 start1, end1, start2, end2;
+            Vector3 start1start2, start1end2;
+            Vector3 edge1, edge2;
+            Vector3 start2proj, end2proj;
+            for (int i = 0; i < figure1.Length; i++)
             {
-                case MeshCollider mesh1:
-                    switch (col2)
+                start1 = figure1[i];
+                end1 = figure1[(i + 1) % figure1.Length];
+                edge1 = end1 - start1;
+                for (int j = 0; j < figure2.Length; j++)
+                {
+                    start2 = figure2[j];
+                    end2 = figure2[(j + 1) % figure2.Length];
+                    edge2 = end2 - start2;
+
+                    start1start2 = start2 - start1;
+                    start1end2 = end2 - start1;
+                    if (start1start2.cross(edge1).dot(start1end2.cross(edge1)) >= -sqrEpsilon ||
+                        (-start1start2).cross(edge2).dot((end1 - start2).cross(edge2)) >= -sqrEpsilon)
+                        continue;
+
+                    start2proj = start1 + start1start2.projectOnVector(edge1);
+                    end2proj = start1 + start1end2.projectOnVector(edge1);
+
+                    double k = (start2 - start2proj).length();
+                    k = k / (k + (end2 - end2proj).length());
+
+                    // start2 is reused as variable for final point
+                    start2 = start2proj * k + end2proj * (1.0 - k);
+
+                    pointExists = false;
+                    foreach (Vector3 intersectionPoint in intersectionPoints)
                     {
-                        case MeshCollider mesh2:
-                            {
-                                result.AddRange(mesh1.GlobalNonCollinearNormals);
-                                foreach (Vector3 vec in mesh2.GlobalNonCollinearNormals)
-                                    addUnique(vec);
-                                IReadOnlyList<Vector3> globalVertexes1 = mesh1.GlobalVertexes;
-                                IReadOnlyList<Vector3> globalVertexes2 = mesh2.GlobalVertexes;
-
-                                IReadOnlyList<(int a, int b)> edges2 = mesh2.Edges;
-                                foreach ((int a, int b) edge1 in mesh1.Edges)
-                                {
-                                    foreach ((int a, int b) edge2 in edges2)
-                                        addUnique((globalVertexes1[edge1.b] - globalVertexes1[edge1.a]).cross(globalVertexes2[edge2.b] - globalVertexes2[edge2.a]));
-                                }
-
-                                return result;
-                            }
-                        case SphereCollider sphere2:
-                            {
-                                result.AddRange(mesh1.GlobalNonCollinearNormals);
-
-                                IReadOnlyList<Vector3> globalVertexes1 = mesh1.GlobalVertexes;
-                                Vector3 curAxis;
-                                foreach (Vector3 vertex in globalVertexes1)
-                                    addUnique(vertex - sphere2.globalCenter);
-
-                                foreach ((int a, int b) edge1 in mesh1.Edges)
-                                {
-                                    curAxis = globalVertexes1[edge1.b] - globalVertexes1[edge1.a];
-                                    curAxis = curAxis.vecMul(sphere2.globalCenter - globalVertexes1[edge1.a]).vecMul(curAxis);
-                                    addUnique(curAxis);
-                                }
-
-                                return result;
-                            }
+                        if (intersectionPoint.equals(start2))
+                        {
+                            pointExists = true;
+                            break;
+                        }
                     }
-                    break;
-                case SphereCollider sphere1:
-                    switch (col2)
-                    {
-                        case SphereCollider sphere2:
-                            Vector3 tmp = sphere2.globalCenter - sphere1.globalCenter;
-                            if (tmp.isZero())
-                                result.Add(Vector3.UnitX);
-                            else
-                                result.Add(tmp);
-                            return result;
-                    }
-                    break;
+                    if (!pointExists)
+                        intersectionPoints.Add(start2);
+                }
             }
 
+            double x = 0, y = 0, z = 0;
+            foreach (Vector3 point in intersectionPoints)
+            {
+                x += point.x;
+                y += point.y;
+                z += point.z;
+            }
 
-            if (first)
-                return getPossibleCollisionDirections(col2, col1, false);
-
-            throw new NotImplementedException("getPossibleCollisionDirections is not implemented for " + col1.GetType().Name + " and " + col2.GetType().Name + " pair.");
+            return new Vector3(x / intersectionPoints.Count, y / intersectionPoints.Count, z / intersectionPoints.Count);
         }
 
-        protected bool IsOuterSphereIntersectWith(Collider collider)
-        {
-            Vector3 centersVector = collider.globalCenter - globalCenter;
-            return centersVector.squaredLength() <= SquaredOuterSphereRadius + 2 * OuterSphereRadius * collider.OuterSphereRadius + collider.SquaredOuterSphereRadius;
-        }
+        #region SAT
 
-        public bool getCollisionExitVector_SAT(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        protected bool GetCollisionExitVector_SAT(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
             collisionExitVector = null;
             exitDirectionVector = null;
@@ -151,14 +250,14 @@ namespace Engine.BaseAssets.Components
             if (!IsOuterSphereIntersectWith(other))
                 return false;
 
-            List<Vector3> axises = getPossibleCollisionDirections(this, other);
+            List<Vector3> axes = GetPossibleCollisionDirections(this, other);
 
             Vector3[] projection = new Vector3[2];
             Vector3[] projectionOther = new Vector3[2];
-            foreach (Vector3 axis in axises)
+            foreach (Vector3 axis in axes)
             {
-                getBoundaryPointsInDirection(axis, out projection[0], out projection[1]);
-                other.getBoundaryPointsInDirection(axis, out projectionOther[0], out projectionOther[1]);
+                GetBoundaryPointsInDirection(axis, out projection[0], out projection[1]);
+                other.GetBoundaryPointsInDirection(axis, out projectionOther[0], out projectionOther[1]);
 
                 projection[0] = projection[0].projectOnVector(axis);
                 projection[1] = projection[1].projectOnVector(axis);
@@ -198,6 +297,113 @@ namespace Engine.BaseAssets.Components
             return true;
         }
 
+        private bool IsOuterSphereIntersectWith(Collider collider)
+        {
+            Vector3 centersVector = collider.GlobalCenter - GlobalCenter;
+            return centersVector.squaredLength() <= SquaredOuterSphereRadius + 2 * OuterSphereRadius * collider.OuterSphereRadius + collider.SquaredOuterSphereRadius;
+        }
+
+        private static List<Vector3> GetPossibleCollisionDirections(Collider col1, Collider col2, bool first = true)
+        {
+            List<Vector3> result = new List<Vector3>();
+
+            void AddUnique(Vector3 vec)
+            {
+                bool exists = false;
+                foreach (Vector3 vector in result)
+                {
+                    if (vector.isCollinearTo(vec))
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists)
+                    result.Add(vec);
+            }
+
+            switch (col1)
+            {
+                case MeshCollider mesh1:
+                    switch (col2)
+                    {
+                        case MeshCollider mesh2:
+                            {
+                                result.AddRange(mesh1.GlobalNonCollinearNormals);
+                                foreach (Vector3 vec in mesh2.GlobalNonCollinearNormals)
+                                    AddUnique(vec);
+                                IReadOnlyList<Vector3> globalVertexes1 = mesh1.GlobalVertexes;
+                                IReadOnlyList<Vector3> globalVertexes2 = mesh2.GlobalVertexes;
+
+                                IReadOnlyList<(int a, int b)> edges2 = mesh2.Edges;
+                                foreach ((int a, int b) edge1 in mesh1.Edges)
+                                {
+                                    foreach ((int a, int b) edge2 in edges2)
+                                        AddUnique((globalVertexes1[edge1.b] - globalVertexes1[edge1.a]).cross(globalVertexes2[edge2.b] - globalVertexes2[edge2.a]));
+                                }
+
+                                return result;
+                            }
+                        case SphereCollider sphere2:
+                            {
+                                result.AddRange(mesh1.GlobalNonCollinearNormals);
+
+                                IReadOnlyList<Vector3> globalVertexes1 = mesh1.GlobalVertexes;
+                                Vector3 curAxis;
+                                foreach (Vector3 vertex in globalVertexes1)
+                                    AddUnique(vertex - sphere2.GlobalCenter);
+
+                                foreach ((int a, int b) edge1 in mesh1.Edges)
+                                {
+                                    curAxis = globalVertexes1[edge1.b] - globalVertexes1[edge1.a];
+                                    curAxis = curAxis.vecMul(sphere2.GlobalCenter - globalVertexes1[edge1.a]).vecMul(curAxis);
+                                    AddUnique(curAxis);
+                                }
+
+                                return result;
+                            }
+                    }
+                    break;
+                case SphereCollider sphere1:
+                    switch (col2)
+                    {
+                        case SphereCollider sphere2:
+                            Vector3 tmp = sphere2.GlobalCenter - sphere1.GlobalCenter;
+                            if (tmp.isZero())
+                                result.Add(Vector3.UnitX);
+                            else
+                                result.Add(tmp);
+                            return result;
+                    }
+                    break;
+            }
+
+            if (first)
+                return GetPossibleCollisionDirections(col2, col1, false);
+
+            throw new NotImplementedException("getPossibleCollisionDirections is not implemented for " + col1.GetType().Name + " and " + col2.GetType().Name + " pair.");
+        }
+
+        #endregion SAT
+
+        #region GJK_EPA
+
+        protected bool GetCollisionExitVector_GJK_EPA(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        {
+            collisionExitVector = null;
+            exitDirectionVector = null;
+            colliderEndPoint = null;
+
+            List<Vector3> simplex;
+
+            if (!GilbertJohnsonKeerthi(other, out simplex))
+                return false;
+
+            ExpandingPolytopeAlgorithm(other, simplex, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+
+            return true;
+        }
+
         private bool GilbertJohnsonKeerthi(Collider other, out List<Vector3> simplex)
         {
             simplex = new List<Vector3>();
@@ -207,8 +413,8 @@ namespace Engine.BaseAssets.Components
             Vector3 point1, point2;
             Vector3 MinkowskiDifference()
             {
-                getBoundaryPointsInDirection(direction, out _, out point1);
-                other.getBoundaryPointsInDirection(direction, out point2, out _);
+                GetBoundaryPointsInDirection(direction, out _, out point1);
+                other.GetBoundaryPointsInDirection(direction, out point2, out _);
                 return point1 - point2;
             }
 
@@ -327,108 +533,47 @@ namespace Engine.BaseAssets.Components
             Vector3 direction;
             Vector3 MinkowskiDifference()
             {
-                getBoundaryPointsInDirection(direction, out _, out point1);
-                other.getBoundaryPointsInDirection(direction, out point2, out _);
+                GetBoundaryPointsInDirection(direction, out _, out point1);
+                other.GetBoundaryPointsInDirection(direction, out point2, out _);
                 return point1 - point2;
             }
 
             SortedList<double, Polygon> polygons = new SortedList<double, Polygon>(distanceComparer);
 
-            void addPolygon(Polygon polygon)
+            void AddPolygon(Polygon polygon)
             {
                 polygon.normal = (initialSimplex[polygon.indexB] - initialSimplex[polygon.indexA]).cross(initialSimplex[polygon.indexC] - initialSimplex[polygon.indexA]);
                 polygons.Add(initialSimplex[polygon.indexA].projectOnVector(polygon.normal).squaredLength(), polygon);
             }
 
             {
-                Polygon BAC = new Polygon(1, 0, 2);
-                Polygon ABD = new Polygon(0, 1, 3);
-                Polygon CDB = new Polygon(2, 3, 1);
-                Polygon DCA = new Polygon(3, 2, 0);
+                Polygon bac = new Polygon(1, 0, 2);
+                Polygon abd = new Polygon(0, 1, 3);
+                Polygon cdb = new Polygon(2, 3, 1);
+                Polygon dca = new Polygon(3, 2, 0);
 
-                BAC.adjacentAB = ABD;
-                ABD.adjacentAB = BAC;
+                bac.adjacentAB = abd;
+                abd.adjacentAB = bac;
 
-                BAC.adjacentBC = DCA;
-                DCA.adjacentBC = BAC;
+                bac.adjacentBC = dca;
+                dca.adjacentBC = bac;
 
-                BAC.adjacentCA = CDB;
-                CDB.adjacentCA = BAC;
+                bac.adjacentCA = cdb;
+                cdb.adjacentCA = bac;
 
-                ABD.adjacentBC = CDB;
-                CDB.adjacentBC = ABD;
+                abd.adjacentBC = cdb;
+                cdb.adjacentBC = abd;
 
-                ABD.adjacentCA = DCA;
-                DCA.adjacentCA = ABD;
+                abd.adjacentCA = dca;
+                dca.adjacentCA = abd;
 
-                CDB.adjacentAB = DCA;
-                DCA.adjacentAB = CDB;
+                cdb.adjacentAB = dca;
+                dca.adjacentAB = cdb;
 
-                addPolygon(BAC);
-                addPolygon(ABD);
-                addPolygon(CDB);
-                addPolygon(DCA);
-            }
-
-            void replaceAdjacent(Polygon polygon, Polygon toReplace, Polygon replaceFor)
-            {
-                if (polygon.adjacentAB == toReplace)
-                    polygon.adjacentAB = replaceFor;
-                else if (polygon.adjacentBC == toReplace)
-                    polygon.adjacentBC = replaceFor;
-                else if (polygon.adjacentCA == toReplace)
-                    polygon.adjacentCA = replaceFor;
-            }
-            void getAdjacentPolygons(Polygon polygon, int indexLeft, int indexRight, out Polygon adjacentLeft, out Polygon adjacentRight, out int thirdVertexIndex)
-            {
-                if (polygon.indexA != indexLeft && polygon.indexA != indexRight)
-                {
-                    thirdVertexIndex = polygon.indexA;
-                    if (polygon.indexB == indexLeft)
-                    {
-                        adjacentLeft = polygon.adjacentAB;
-                        adjacentRight = polygon.adjacentCA;
-                        return;
-                    }
-                    else
-                    {
-                        adjacentLeft = polygon.adjacentCA;
-                        adjacentRight = polygon.adjacentAB;
-                        return;
-                    }
-                }
-                else if (polygon.indexB != indexLeft && polygon.indexB != indexRight)
-                {
-                    thirdVertexIndex = polygon.indexB;
-                    if (polygon.indexA == indexLeft)
-                    {
-                        adjacentLeft = polygon.adjacentAB;
-                        adjacentRight = polygon.adjacentBC;
-                        return;
-                    }
-                    else
-                    {
-                        adjacentLeft = polygon.adjacentBC;
-                        adjacentRight = polygon.adjacentAB;
-                        return;
-                    }
-                }
-                else
-                {
-                    thirdVertexIndex = polygon.indexC;
-                    if (polygon.indexA == indexLeft)
-                    {
-                        adjacentLeft = polygon.adjacentCA;
-                        adjacentRight = polygon.adjacentBC;
-                        return;
-                    }
-                    else
-                    {
-                        adjacentLeft = polygon.adjacentBC;
-                        adjacentRight = polygon.adjacentCA;
-                        return;
-                    }
-                }
+                AddPolygon(bac);
+                AddPolygon(abd);
+                AddPolygon(cdb);
+                AddPolygon(dca);
             }
 
             Polygon currentPolygon;
@@ -442,11 +587,11 @@ namespace Engine.BaseAssets.Components
             List<Polygon> polygonsToReplace = new List<Polygon>();
             List<Polygon> newPolygons = new List<Polygon>();
 
-            void createHolePart(Polygon adjacentPolygon, int indexLeft, int indexRight)
+            void CreateHolePart(Polygon adjacentPolygon, int indexLeft, int indexRight)
             {
                 if ((tmp - initialSimplex[adjacentPolygon.indexA]).dot(adjacentPolygon.normal) >= -Constants.SqrEpsilon)
                 {
-                    getAdjacentPolygons(adjacentPolygon, indexLeft, indexRight, out adjLeft, out adjRight, out adjVertexIndex);
+                    Polygon.GetAdjacentPolygons(adjacentPolygon, indexLeft, indexRight, out adjLeft, out adjRight, out adjVertexIndex);
                     hole.Add(indexLeft);
                     hole.Add(adjVertexIndex);
                     adjacentPolygons.Add(adjLeft);
@@ -463,6 +608,7 @@ namespace Engine.BaseAssets.Components
                     polygonsToReplace.Add(currentPolygon);
                 }
             }
+
             do
             {
                 currentPolygon = polygons.Values[polygons.Count - 1];
@@ -481,9 +627,9 @@ namespace Engine.BaseAssets.Components
                 polygonsToReplace.Clear();
                 newPolygons.Clear();
 
-                createHolePart(currentPolygon.adjacentAB, currentPolygon.indexA, currentPolygon.indexB);
-                createHolePart(currentPolygon.adjacentBC, currentPolygon.indexB, currentPolygon.indexC);
-                createHolePart(currentPolygon.adjacentCA, currentPolygon.indexC, currentPolygon.indexA);
+                CreateHolePart(currentPolygon.adjacentAB, currentPolygon.indexA, currentPolygon.indexB);
+                CreateHolePart(currentPolygon.adjacentBC, currentPolygon.indexB, currentPolygon.indexC);
+                CreateHolePart(currentPolygon.adjacentCA, currentPolygon.indexC, currentPolygon.indexA);
 
                 for (int j = 1; j < hole.Count - 2; j++)
                 {
@@ -499,8 +645,8 @@ namespace Engine.BaseAssets.Components
                 {
                     Polygon polygon = new Polygon(hole[j], hole[(j + 1) % hole.Count], tmpIndex);
                     polygon.adjacentAB = adjacentPolygons[j];
-                    replaceAdjacent(adjacentPolygons[j], polygonsToReplace[j], polygon);
-                    addPolygon(polygon);
+                    Polygon.ReplaceAdjacent(adjacentPolygons[j], polygonsToReplace[j], polygon);
+                    AddPolygon(polygon);
                     newPolygons.Add(polygon);
                 }
 
@@ -511,9 +657,9 @@ namespace Engine.BaseAssets.Components
                 }
 
                 i++;
-            } while (i < EPA_MAX_ITER);
+            } while (i < EpaMaxIter);
 
-            if (i == EPA_MAX_ITER)
+            if (i == EpaMaxIter)
             {
                 currentPolygon = polygons.Values[polygons.Count - 1];
 
@@ -526,223 +672,89 @@ namespace Engine.BaseAssets.Components
             exitDirectionVector = direction;
             collisionExitVector = tmp;
             Vector3 _colliderEndPoint;
-            getBoundaryPointsInDirection(direction, out _, out _colliderEndPoint);
+            GetBoundaryPointsInDirection(direction, out _, out _colliderEndPoint);
             colliderEndPoint = _colliderEndPoint;
         }
 
-        public bool getCollisionExitVector_GJK_EPA(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        #endregion GJK_EPA
+
+        private class Polygon
         {
-            collisionExitVector = null;
-            exitDirectionVector = null;
-            colliderEndPoint = null;
+            public int indexA, indexB, indexC;
+            public Polygon adjacentAB, adjacentBC, adjacentCA;
+            public Vector3 normal;
 
-            List<Vector3> simplex;
-
-            if (!GilbertJohnsonKeerthi(other, out simplex))
-                return false;
-
-            ExpandingPolytopeAlgorithm(other, simplex, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
-
-            return true;
-        }
-
-        public bool getCollisionExitVector(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
-        {
-            return getCollisionExitVector_SAT(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
-            //return getCollisionExitVector_GJK_EPA(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
-        }
-
-        protected abstract List<Vector3> getVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon);
-
-        private static Vector3 GetAverageCollisionPointWithEpsilon(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon = 1E-7)
-        {
-            double sqrEpsilon = epsilon * epsilon;
-
-            Vector3[] getFigureFromVertexes(List<Vector3> vertexes)
+            public Polygon(int indexA, int indexB, int indexC)
             {
-                int count = vertexes.Count;
-                Vector3[] figure = new Vector3[count];
-                figure[0] = vertexes[0];
-                vertexes.RemoveAt(0);
-
-                Vector3 start = figure[0];
-                Vector3 current;
-                for (int k = 1; k < count - 1; k++)
-                {
-                    current = vertexes[0] - start;
-                    int currentIndex = 0;
-                    for (int i = 1; i < vertexes.Count; i++)
-                    {
-                        if ((vertexes[i] - start).cross(current) * collisionPlaneNormal > 0)
-                        {
-                            currentIndex = i;
-                            current = vertexes[i] - start;
-                        }
-                    }
-
-                    figure[k] = vertexes[currentIndex];
-                    vertexes.RemoveAt(currentIndex);
-                }
-
-                if (vertexes.Count > 0)
-                    figure[figure.Length - 1] = vertexes[0];
-
-                return figure;
+                this.indexA = indexA;
+                this.indexB = indexB;
+                this.indexC = indexC;
             }
 
-            bool IsPointInsideFigure(Vector3[] figure, Vector3 point, out bool isPointOnEdge)
+            public static void ReplaceAdjacent(Polygon polygon, Polygon toReplace, Polygon replaceFor)
             {
-                Vector3 start, end, edge;
-                Vector3 vec, vecMult, prevVecMult;
-
-                prevVecMult = (figure[1] - figure[0]).cross(point - figure[0]);
-                for (int i = 0; i < figure.Length; i++)
-                {
-                    start = figure[i];
-                    end = figure[(i + 1) % figure.Length];
-                    edge = end - start;
-                    vec = point - start;
-
-                    vecMult = edge.cross(vec);
-                    if (vecMult.squaredLength() < sqrEpsilon)
-                    {
-                        double edgeDotMult = edge.dot(edge);
-                        double currentDotMult = vec.dot(edge);
-
-                        if (currentDotMult >= 0 && currentDotMult <= edgeDotMult)
-                        {
-                            isPointOnEdge = true;
-                            return true;
-                        }
-                        continue;
-                    }
-
-                    if (vecMult.dot(prevVecMult) < 0)
-                    {
-                        isPointOnEdge = false;
-                        return false;
-                    }
-
-                    prevVecMult = vecMult;
-                }
-
-                isPointOnEdge = false;
-                return true;
+                if (polygon.adjacentAB == toReplace)
+                    polygon.adjacentAB = replaceFor;
+                else if (polygon.adjacentBC == toReplace)
+                    polygon.adjacentBC = replaceFor;
+                else if (polygon.adjacentCA == toReplace)
+                    polygon.adjacentCA = replaceFor;
             }
 
-            List<Vector3> vertexesOnPlane1 = collider1.getVertexesOnPlane(collisionPlanePoint, collisionPlaneNormal, epsilon);
-            List<Vector3> vertexesOnPlane2 = collider2.getVertexesOnPlane(collisionPlanePoint, collisionPlaneNormal, epsilon);
-
-            if (vertexesOnPlane1.Count == 0 || vertexesOnPlane2.Count == 0)
-                throw new ArgumentException("Colliders don't intersect in the given plane.");
-
-            if (vertexesOnPlane1.Count == 1)
-                return vertexesOnPlane1[0];
-            if (vertexesOnPlane2.Count == 1)
-                return vertexesOnPlane2[0];
-
-            Vector3[] figure1 = getFigureFromVertexes(vertexesOnPlane1);
-            Vector3[] figure2 = getFigureFromVertexes(vertexesOnPlane2);
-
-            List<Vector3> intersectionPoints = new List<Vector3>();
-
-            bool pointOnEdge;
-            bool pointExists;
-            void addIntersectionPoints(ref Vector3[] points1, ref Vector3[] points2)
+            public static void GetAdjacentPolygons(Polygon polygon, int indexLeft, int indexRight, out Polygon adjacentLeft, out Polygon adjacentRight, out int thirdVertexIndex)
             {
-                foreach (Vector3 point in points1)
+                if (polygon.indexA != indexLeft && polygon.indexA != indexRight)
                 {
-                    if (IsPointInsideFigure(points2, point, out pointOnEdge))
+                    thirdVertexIndex = polygon.indexA;
+                    if (polygon.indexB == indexLeft)
                     {
-                        if (!pointOnEdge)
-                        {
-                            intersectionPoints.Add(point);
-                            continue;
-                        }
-
-                        pointExists = false;
-                        foreach (Vector3 intersectionPoint in intersectionPoints)
-                        {
-                            if (intersectionPoint.equals(point))
-                            {
-                                pointExists = true;
-                                break;
-                            }
-                        }
-                        if (!pointExists)
-                            intersectionPoints.Add(point);
+                        adjacentLeft = polygon.adjacentAB;
+                        adjacentRight = polygon.adjacentCA;
+                    }
+                    else
+                    {
+                        adjacentLeft = polygon.adjacentCA;
+                        adjacentRight = polygon.adjacentAB;
+                    }
+                }
+                else if (polygon.indexB != indexLeft && polygon.indexB != indexRight)
+                {
+                    thirdVertexIndex = polygon.indexB;
+                    if (polygon.indexA == indexLeft)
+                    {
+                        adjacentLeft = polygon.adjacentAB;
+                        adjacentRight = polygon.adjacentBC;
+                    }
+                    else
+                    {
+                        adjacentLeft = polygon.adjacentBC;
+                        adjacentRight = polygon.adjacentAB;
+                    }
+                }
+                else
+                {
+                    thirdVertexIndex = polygon.indexC;
+                    if (polygon.indexA == indexLeft)
+                    {
+                        adjacentLeft = polygon.adjacentCA;
+                        adjacentRight = polygon.adjacentBC;
+                    }
+                    else
+                    {
+                        adjacentLeft = polygon.adjacentBC;
+                        adjacentRight = polygon.adjacentCA;
                     }
                 }
             }
-            addIntersectionPoints(ref figure1, ref figure2);
-            addIntersectionPoints(ref figure2, ref figure1);
-            Vector3 start1, end1, start2, end2;
-            Vector3 start1start2, start1end2;
-            Vector3 edge1, edge2;
-            Vector3 start2proj, end2proj;
-            for (int i = 0; i < figure1.Length; i++)
-            {
-                start1 = figure1[i];
-                end1 = figure1[(i + 1) % figure1.Length];
-                edge1 = end1 - start1;
-                for (int j = 0; j < figure2.Length; j++)
-                {
-                    start2 = figure2[j];
-                    end2 = figure2[(j + 1) % figure2.Length];
-                    edge2 = end2 - start2;
-
-                    start1start2 = start2 - start1;
-                    start1end2 = end2 - start1;
-                    if (start1start2.cross(edge1).dot(start1end2.cross(edge1)) >= -sqrEpsilon ||
-                        (-start1start2).cross(edge2).dot((end1 - start2).cross(edge2)) >= -sqrEpsilon)
-                        continue;
-
-                    start2proj = start1 + start1start2.projectOnVector(edge1);
-                    end2proj = start1 + start1end2.projectOnVector(edge1);
-
-                    double k = (start2 - start2proj).length();
-                    k = k / (k + (end2 - end2proj).length());
-
-                    // start2 is reused as variable for final point
-                    start2 = start2proj * k + end2proj * (1.0 - k);
-
-                    pointExists = false;
-                    foreach (Vector3 intersectionPoint in intersectionPoints)
-                    {
-                        if (intersectionPoint.equals(start2))
-                        {
-                            pointExists = true;
-                            break;
-                        }
-                    }
-                    if (!pointExists)
-                        intersectionPoints.Add(start2);
-                }
-            }
-
-            double x = 0, y = 0, z = 0;
-            foreach (Vector3 point in intersectionPoints)
-            {
-                x += point.x;
-                y += point.y;
-                z += point.z;
-            }
-
-            return new Vector3(x / intersectionPoints.Count, y / intersectionPoints.Count, z / intersectionPoints.Count);
         }
 
-        public static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
+        private class PolygonDistanceComparer : IComparer<double>
         {
-            Vector3 point = GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.FloatEpsilon);
-            return point;
-            //return double.IsNaN(point.x) || double.IsNaN(point.y) || double.IsNaN(point.z) ?
-            //    GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.FloatEpsilon) :
-            //    point;
-        }
-
-        public virtual void updateData()
-        {
-            globalCenter = GameObject.Transform.Model.TransformPoint(Offset);
+            public int Compare(double x, double y)
+            {
+                int value = y.CompareTo(x);
+                return value == 0 ? -1 : value;
+            }
         }
     }
 }

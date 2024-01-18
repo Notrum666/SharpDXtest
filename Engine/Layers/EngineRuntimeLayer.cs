@@ -42,7 +42,7 @@ namespace Engine.Layers
                 if (rigidbody != null)
                 {
                     foreach (Collider collider in CurrentScene.GameObjects[i].GetComponents<Collider>())
-                        collider.updateData();
+                        collider.UpdateData();
                     foreach (Rigidbody otherRigidbody in rigidbodies)
                         rigidbody.SolveCollisionWith(otherRigidbody);
                     rigidbodies.Add(rigidbody);

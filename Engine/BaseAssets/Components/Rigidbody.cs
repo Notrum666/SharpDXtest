@@ -20,6 +20,8 @@ namespace Engine.BaseAssets.Components
     {
         public static Vector3 GravitationalAcceleration = new Vector3(0, 0, -9.8);
 
+        #region ComponentData
+
         [SerializedField]
         private double mass = 1.0;
         [SerializedField]
@@ -118,6 +120,8 @@ namespace Engine.BaseAssets.Components
                     return;
             }
         }
+
+        #endregion ComponentData
 
         public PhysicalMaterial Material { get; set; } = new PhysicalMaterial();
 
@@ -315,7 +319,7 @@ namespace Engine.BaseAssets.Components
                     Vector3? _collisionExitVector; //TODO: whut?
                     Vector3? _collisionExitNormal;
                     Vector3? _colliderEndPoint;
-                    if (!collider.getCollisionExitVector(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
+                    if (!collider.GetCollisionExitVector(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
                         continue;
 
                     Vector3 collisionExitVector = (Vector3)_collisionExitVector;
@@ -352,12 +356,12 @@ namespace Engine.BaseAssets.Components
                     if (!moveVector.isZero())
                     {
                         GameObject.Transform.Position += moveVector;
-                        collider.updateData();
+                        collider.UpdateData();
                     }
                     if (!otherMoveVector.isZero())
                     {
                         otherRigidbody.GameObject.Transform.Position += otherMoveVector;
-                        otherCollider.updateData();
+                        otherCollider.UpdateData();
                     }
 
                     Vector3 collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
@@ -367,13 +371,13 @@ namespace Engine.BaseAssets.Components
                         {
                             GameObject.Transform.Position -= moveVector;
                             collisionExitVectors.Add(moveVector);
-                            collider.updateData();
+                            collider.UpdateData();
                         }
                         if (!otherMoveVector.isZero())
                         {
                             otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
                             otherRigidbody.collisionExitVectors.Add(otherMoveVector);
-                            otherCollider.updateData();
+                            otherCollider.UpdateData();
                         }
                         return;
                     }
@@ -412,13 +416,13 @@ namespace Engine.BaseAssets.Components
                     {
                         GameObject.Transform.Position -= moveVector;
                         collisionExitVectors.Add(moveVector);
-                        collider.updateData();
+                        collider.UpdateData();
                     }
                     if (!otherMoveVector.isZero())
                     {
                         otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
                         otherRigidbody.collisionExitVectors.Add(otherMoveVector);
-                        otherCollider.updateData();
+                        otherCollider.UpdateData();
                     }
                 }
             }
