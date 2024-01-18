@@ -12,6 +12,9 @@ namespace Engine
     {
         public static Scene CurrentScene { get; set; }
 
+        public event Action<GameObject> OnGameObjectAdded;
+        public event Action<GameObject> OnGameObjectRemoved;
+
         public string Name { get; internal set; }
         public ReadOnlyCollection<GameObject> GameObjects => gameObjects.AsReadOnly();
 
@@ -100,6 +103,8 @@ namespace Engine
                 newObject.OnDestroyed += OnObjectDestroyed;
                 gameObjects.Add(newObject);
                 newObjects.Remove(newObject);
+
+                OnGameObjectAdded?.Invoke(newObject);
             }
         }
 
@@ -107,6 +112,8 @@ namespace Engine
         {
             serializableObject.OnDestroyed -= OnObjectDestroyed;
             gameObjects.Remove(serializableObject as GameObject);
+
+            OnGameObjectRemoved?.Invoke(serializableObject as GameObject);
         }
     }
 }

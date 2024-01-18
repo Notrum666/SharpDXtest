@@ -97,13 +97,13 @@ namespace Editor
             if (!EngineCore.IsAlive)
                 return;
 
+            EditorLayer.Current.OnPlaymodeEntered += OnPlaymodeEntered;
+            EditorLayer.Current.OnPlaymodeExited += OnPlaymodeExited;
+
             if (!loaded)
             {
                 Width = double.NaN;
                 Height = double.NaN;
-
-                EditorLayer.OnPlaymodeEntered += OnPlaymodeEntered;
-                EditorLayer.OnPlaymodeExited += OnPlaymodeExited;
 
                 if (ViewportType.HasFlag(ViewportType.EditorView))
                 {
@@ -160,6 +160,9 @@ namespace Editor
 
             if (editorCamera != null)
                 editorCamera.LocalEnabled = false;
+
+            EditorLayer.Current.OnPlaymodeEntered -= OnPlaymodeEntered;
+            EditorLayer.Current.OnPlaymodeExited -= OnPlaymodeExited;
         }
 
         private void OnRender(object sender, EventArgs e)
@@ -179,9 +182,12 @@ namespace Editor
             Focus();
 
             if (e.RightButton == MouseButtonState.Pressed)
+            {
                 CursorMode = CursorMode.HiddenAndLocked;
+                return;
+            }
 
-            if (e.LeftButton == MouseButtonState.Pressed && editorCamera != null)
+            if (e.LeftButton == MouseButtonState.Pressed && editorCamera != null && !EditorLayer.Current.IsPlaying)
                 HandlePicking((int)e.GetPosition(RenderControl).X, (int)e.GetPosition(RenderControl).Y);
         }
 
@@ -261,10 +267,7 @@ namespace Editor
                 out hitResult
             );
 
-            //GameObject cursor = Scene.CurrentScene.GameObjects.First(obj => obj.Name == "Cursor");
-            //cursor.Transform.Position = hitResult.Point;
-
-            InspectorControl.Current.TargetObject = hasHit ? hitResult.HitObject : null;
+            EditorLayer.Current.SelectedGameObject = hasHit ? hitResult.HitObject : null;
         }
     }
 

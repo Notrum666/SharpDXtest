@@ -11,7 +11,8 @@
                        Style="{StaticResource CustomWindowStyle}">
     <this:CustomWindowBase.Header>
         <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
-            <Image Source="Images\big-gear.png" Height="30" Width="30" Margin="1"/>
+            <Image Source="Images\ObjectIcon.png" Height="30" Width="30" Margin="3,3,1,1"
+                   RenderOptions.BitmapScalingMode="HighQuality"/>
             <Menu VerticalAlignment="Top" Margin="10,4,0,0" DataContext="{Binding RelativeSource={RelativeSource AncestorType=this:EditorWindow}}">
                 <MenuItem Header="File">
                     <MenuItem Header="Test1"/>

@@ -26,7 +26,8 @@ namespace Editor
                 if (obj is not Type || !(obj as Type).IsSubclassOf(typeof(FrameworkElement)))
                     return false;
                 Type t = (Type)obj;
-                if (t == typeof(InspectorControl) && InspectorControl.Current is not null)
+                if (t == typeof(InspectorControl) && InspectorControl.Current is not null ||
+                    t == typeof(SceneOverviewControl) && SceneOverviewControl.Current is not null)
                     return false;
                 return true;
             }
@@ -41,36 +42,36 @@ namespace Editor
         private RelayCommand runCommand;
 
         public RelayCommand RunCommand => runCommand ??= new RelayCommand(
-            _ => { EditorLayer.EnterPlaymode(); },
-            _ => !EditorLayer.IsPlaying
+            _ => { EditorLayer.Current.EnterPlaymode(); },
+            _ => !EditorLayer.Current.IsPlaying
         );
 
         private RelayCommand stopCommand;
 
         public RelayCommand StopCommand => stopCommand ??= new RelayCommand(
-            _ => { EditorLayer.ExitPlaymode(); },
-            _ => EditorLayer.IsPlaying
+            _ => { EditorLayer.Current.ExitPlaymode(); },
+            _ => EditorLayer.Current.IsPlaying
         );
 
         private RelayCommand playCommand;
 
         public RelayCommand PlayCommand => playCommand ??= new RelayCommand(
             _ => { EngineCore.IsPaused = false; },
-            _ => EditorLayer.IsPlaying && EngineCore.IsPaused
+            _ => EditorLayer.Current.IsPlaying && EngineCore.IsPaused
         );
 
         private RelayCommand pauseCommand;
 
         public RelayCommand PauseCommand => pauseCommand ??= new RelayCommand(
             _ => { EngineCore.IsPaused = true; },
-            _ => EditorLayer.IsPlaying && !EngineCore.IsPaused
+            _ => EditorLayer.Current.IsPlaying && !EngineCore.IsPaused
         );
 
         private RelayCommand stepCommand;
 
         public RelayCommand StepCommand => stepCommand ??= new RelayCommand(
-            _ => { EditorLayer.ProcessStep(); },
-            _ => EditorLayer.IsPlaying && EngineCore.IsPaused
+            _ => { EditorLayer.Current.ProcessStep(); },
+            _ => EditorLayer.Current.IsPlaying && EngineCore.IsPaused
         );
 
 

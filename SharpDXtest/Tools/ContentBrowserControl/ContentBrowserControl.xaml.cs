@@ -23,6 +23,8 @@ namespace Editor
         public RelayCommand StartFolderCreationCommand => startFolderCreationCommand ??= new RelayCommand(obj => FolderCreationViewModels.Add(new FolderCreationViewModel()));
         private RelayCommand startAssetCreationCommand;
         public RelayCommand StartAssetCreationCommand => startAssetCreationCommand ??= new RelayCommand(obj => AssetCreationViewModels.Add(new AssetCreationViewModel((Type)obj)));
+        private RelayCommand refreshCommand;
+        public RelayCommand RefreshCommand => refreshCommand ??= new RelayCommand(_ => ((ContentBrowserFolderViewModel)SelectedFolderListBox.DataContext).Refresh());
         public event PropertyChangedEventHandler PropertyChanged;
         public ObservableCollection<ContentBrowserFolderViewModel> RootFolderViewModels { get; } = new ObservableCollection<ContentBrowserFolderViewModel>();
         public ObservableCollection<AssetCreationViewModel> AssetCreationViewModels { get; } = new ObservableCollection<AssetCreationViewModel>();
@@ -140,7 +142,7 @@ namespace Editor
             AssetsRegistry.MoveFolder(sourceFolder.FullPath, destinationFolderPath);
         }
 
-        private void ListBox_Drop(object sender, DragEventArgs e)
+        private void SelectedFolderListBox_Drop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files != null)
@@ -226,7 +228,7 @@ namespace Editor
             SendSelectedAssetToInspector();
         }
 
-        private void ListBox_KeyDown(object sender, KeyEventArgs e)
+        private void SelectedFolderListBox_KeyDown(object sender, KeyEventArgs e)
         {
             ListBox listBox = (ListBox)sender;
             if (listBox.SelectedItem is null)
@@ -265,6 +267,8 @@ namespace Editor
         {
             ContentBrowserFolderViewModel targetFolder = (ContentBrowserFolderViewModel)((FrameworkElement)sender).DataContext;
 
+            e.Handled = true;
+
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files != null)
             {
@@ -287,8 +291,6 @@ namespace Editor
                 SelectFolder(RootFolderViewModels[0]);
                 return;
             }
-
-            e.Handled = true;
         }
 
         private void PasteCommand_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -309,6 +311,8 @@ namespace Editor
             ContentBrowserFolderViewModel targetFolder = ((FrameworkElement)sender).DataContext as ContentBrowserFolderViewModel;
             if (targetFolder is null)
                 return;
+
+            e.Handled = true;
 
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files != null)
@@ -332,8 +336,6 @@ namespace Editor
                 ((ContentBrowserFolderViewModel)SelectedFolderListBox.DataContext).Refresh();
                 return;
             }
-
-            e.Handled = true;
         }
 
         private void TreeViewItem_MouseDown(object sender, MouseButtonEventArgs e)
@@ -428,11 +430,44 @@ namespace Editor
             ContentBrowserAssetViewModel asset = SelectedFolderListBox.SelectedItem as ContentBrowserAssetViewModel;
             if (asset is null || asset.IsSubAsset)
             {
-                InspectorControl.Current.TargetObject = null;
+                EditorLayer.Current.InspectedObject = null;
                 return;
             }
 
-            InspectorControl.Current.TargetObject = new InspectorAssetViewModel(asset);
+            EditorLayer.Current.InspectedObject = new InspectorAssetViewModel(asset);
+        }
+
+        private void TreeViewFolder_DragOver(object sender, DragEventArgs e)
+        {
+            e.Handled = true;
+
+            if ((string[])e.Data.GetData(DataFormats.FileDrop) is not null ||
+                e.Data.GetData(DataFormats.Serializable) is ContentBrowserAssetViewModel or ContentBrowserFolderViewModel)
+                e.Effects = DragDropEffects.Move;
+            else
+                e.Effects = DragDropEffects.None;
+        }
+
+        private void SelectedFolderListBox_DragOver(object sender, DragEventArgs e)
+        {
+            e.Handled = true;
+
+            if ((string[])e.Data.GetData(DataFormats.FileDrop) is not null ||
+                e.Data.GetData(DataFormats.Serializable) is ContentBrowserAssetViewModel or ContentBrowserFolderViewModel)
+                e.Effects = DragDropEffects.Move;
+            else
+                e.Effects = DragDropEffects.None;
+        }
+
+        private void FolderItem_DragOver(object sender, DragEventArgs e)
+        {
+            e.Handled = true;
+
+            if ((string[])e.Data.GetData(DataFormats.FileDrop) is not null ||
+                e.Data.GetData(DataFormats.Serializable) is ContentBrowserAssetViewModel or ContentBrowserFolderViewModel)
+                e.Effects = DragDropEffects.Move;
+            else
+                e.Effects = DragDropEffects.None;
         }
     }
 }

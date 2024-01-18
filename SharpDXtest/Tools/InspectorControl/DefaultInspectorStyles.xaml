@@ -31,6 +31,7 @@
     <Style x:Key="InspectorTextBox" TargetType="TextBox">
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="CaretBrush" Value="{StaticResource CaretBrush}"/>
         <Setter Property="Foreground" Value="{StaticResource ForegroundBrush}"/>
         <Setter Property="Background" Value="{StaticResource BackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="{StaticResource InspectorInputBorderBrush}"/>

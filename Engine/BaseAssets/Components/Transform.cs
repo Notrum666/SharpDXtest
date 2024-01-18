@@ -12,6 +12,8 @@ namespace Engine.BaseAssets.Components
 
         #region ComponentLogic
 
+        public static event Action<Transform> ParentChanged;
+
         [HideInInspector]
         [SerializedField]
         private Transform parent = null;
@@ -70,13 +72,19 @@ namespace Engine.BaseAssets.Components
         public void SetParent(Transform transform, bool keepRelative = true)
         {
             if (Parent != null)
+            {
                 Parent.Invalidated -= InvalidateCachedData;
+                Parent.children.Remove(this);
+            }
 
             Transform tmp = transform;
             while (tmp != null)
             {
                 if (tmp == this)
-                    throw new ArgumentException("Object can't be ancestor of itself in transform hierarchy.");
+                {
+                    Logger.Log(LogType.Error, "Object can't be ancestor of itself in transform hierarchy.");
+                    return;
+                }
                 tmp = tmp.Parent;
             }
 
@@ -94,6 +102,8 @@ namespace Engine.BaseAssets.Components
                 Parent.Invalidated += InvalidateCachedData;
                 Parent.children.Add(this);
             }
+
+            ParentChanged?.Invoke(this);
         }
 
         private void InvalidateCachedData()

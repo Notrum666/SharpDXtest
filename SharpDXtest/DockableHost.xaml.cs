@@ -408,5 +408,14 @@ namespace Editor
             IsLocked = false;
             UpdateConfiguration();
         }
+
+        private void UserControl_DragOver(object sender, DragEventArgs e)
+        {
+            e.Handled = true;
+            if (e.Data.GetData(DataFormats.Serializable) is FlyingControl)
+                e.Effects = DragDropEffects.Move;
+            else
+                e.Effects = DragDropEffects.None;
+        }
     }
 }

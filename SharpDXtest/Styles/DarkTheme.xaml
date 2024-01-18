@@ -15,6 +15,9 @@
     <Color x:Key="ForegroundColor">#FFFFFFFF</Color>
     <SolidColorBrush x:Key="ForegroundBrush" Color="{StaticResource ForegroundColor}"/>
 
+    <Color x:Key="CaretColor">#FFD0D0D0</Color>
+    <SolidColorBrush x:Key="CaretBrush" Color="{StaticResource CaretColor}"/>
+
     <Color x:Key="HoverForegroundColor">#FFC0C0C0</Color>
     <SolidColorBrush x:Key="HoverForegroundBrush" Color="{StaticResource HoverForegroundColor}"/>
 

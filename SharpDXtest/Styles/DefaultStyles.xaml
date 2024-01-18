@@ -315,7 +315,7 @@
                 <ColumnDefinition Width="13"/>
             </Grid.ColumnDefinitions>
             <ContentPresenter x:Name="Icon" Margin="6,0,6,0" Grid.Column="0" VerticalAlignment="Center" ContentSource="Icon"/>
-            <ContentPresenter x:Name="HeaderHost" Grid.Column="1" Margin="10,0,0,0" TextElement.Foreground="{StaticResource MenuForegroundBrush}"
+            <ContentPresenter x:Name="HeaderHost" Grid.Column="1" Margin="10,2,0,2" TextElement.Foreground="{StaticResource MenuForegroundBrush}"
                               VerticalAlignment="Stretch" ContentSource="Header"/>
             <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="10,2,0,2" VerticalAlignment="Stretch"/>
         </Grid>
@@ -342,7 +342,7 @@
                 <ColumnDefinition Width="13"/>
             </Grid.ColumnDefinitions>
             <ContentPresenter x:Name="Icon" Margin="6,0,6,0" Grid.Column="0" VerticalAlignment="Center" ContentSource="Icon"/>
-            <ContentPresenter x:Name="HeaderHost" Grid.Column="1" Margin="10,0,0,0" TextElement.Foreground="{StaticResource MenuForegroundBrush}"
+            <ContentPresenter x:Name="HeaderHost" Grid.Column="1" Margin="10,2,0,2" TextElement.Foreground="{StaticResource MenuForegroundBrush}"
                               VerticalAlignment="Stretch" ContentSource="Header"/>
             <TextBlock x:Name="InputGestureText" Grid.Column="2" Text="{TemplateBinding InputGestureText}" Margin="10,0,0,2" VerticalAlignment="Stretch"/>
             <Path x:Name="SubmenuArrow" Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Center"
@@ -369,6 +369,7 @@
 
     <Style TargetType="MenuItem">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="TextElement.FontSize" Value="16"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
@@ -593,10 +594,64 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
+    <Style x:Key="TreeViewToggleButton" TargetType="ToggleButton">
+        <Setter Property="IsChecked" Value="True"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Grid VerticalAlignment="Stretch" Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+                          Background="{TemplateBinding Background}">
+                        <Path x:Name="Arrow" Fill="{StaticResource ForegroundBrush}" Data="M0,0 L6,6 L0,12 z"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Arrow" Property="Data" Value="M0,0 L12,0 L6,6 z"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="TreeViewItemStyle" TargetType="{x:Type TreeViewItem}">
         <Setter Property="FontSize" Value="16"/>
         <Setter Property="Margin" Value="0,0,0,2"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TreeViewItem}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <ToggleButton x:Name="Expander" Style="{StaticResource TreeViewToggleButton}" ClickMode="Press" Background="Transparent"
+                                      IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"/>
+                        <Grid x:Name="HeaderGrid" Grid.Column="1" Background="Transparent">
+                            <ContentPresenter x:Name="PART_Header" ContentSource="Header" Margin="0,0,20,0"/>
+                        </Grid>
+                        <ItemsPresenter x:Name="ItemsHost" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HasItems" Value="false">
+                            <Setter TargetName="Expander" Property="Visibility" Value="Hidden" />
+                        </Trigger>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ItemsHost" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="HeaderGrid" Property="Background" Value="#80808080"/>
+                            <Setter TargetName="Expander" Property="Background" Value="#80808080"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 </ResourceDictionary>
