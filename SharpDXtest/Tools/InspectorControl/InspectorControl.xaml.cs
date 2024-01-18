@@ -52,6 +52,8 @@ namespace Editor
 
             if (e.NewValue is InspectorAssetViewModel assetViewModel)
             {
+                if (assetViewModel.TargetObject is null)
+                    return;
                 control.TargetObjectViewModel = new AssetObjectViewModel(assetViewModel);
                 return;
             }

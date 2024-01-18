@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.Loader;
 using System.Threading.Tasks;
 
@@ -13,6 +14,8 @@ using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.MSBuild;
 
 using Engine;
+
+using System.Diagnostics;
 
 namespace Editor.AssetsImport
 {
@@ -40,7 +43,15 @@ namespace Editor.AssetsImport
             IsCompilationRelevant = false;
             FilesToTypesMap = new ReadOnlyDictionary<string, List<Type>>(filesToTypesMap);
 
-            currentWorkspace = MSBuildWorkspace.Create();
+
+            Dictionary<string, string> properties = new Dictionary<string, string>()
+            {
+                { "CheckForSystemRuntimeDependency", "true" },
+                { "DesignTimeBuild", "false" },
+                { "BuildingInsideVisualStudio", "true" },
+                { "AlwaysCompileMarkupFilesInSeparateDomain", "false" }
+            };
+            currentWorkspace = MSBuildWorkspace.Create(properties);
 
             filesWatcher = new FileSystemWatcher();
             filesWatcher.EnableRaisingEvents = false;
@@ -62,10 +73,12 @@ namespace Editor.AssetsImport
             Task<bool> recompileTask = Task.Run(RecompileAsync);
             recompileTask.Wait();
 
-            if (recompileTask.Result && currentAssemblyContext != oldContext)
-                oldContext?.Unload();
+            if (!recompileTask.Result || currentAssemblyContext == oldContext)
+                return;
 
+            oldContext?.Unload();
             SanitizeUnloadingContexts();
+
             IsCompilationRelevant = true;
             filesWatcher.Path = AssetsRegistry.ContentFolderPath;
             filesWatcher.EnableRaisingEvents = true;
@@ -101,7 +114,7 @@ namespace Editor.AssetsImport
                 return false;
             }
 
-            currentWorkspace.CloseSolution();
+            DotnetRestore(currentProject.FolderPath);
             Solution solution = await currentWorkspace.OpenSolutionAsync(solutionPath);
 
             AssemblyLoadContext assemblyContext = new AssemblyLoadContext(currentProject.Name, true);
@@ -114,12 +127,13 @@ namespace Editor.AssetsImport
             {
                 Project csProject = solution.GetProject(projectId)!;
 
-                (MemoryStream assemblyStream, Dictionary<string, List<string>> filesToTypeNamesMap) = await CompileProject(csProject);
-                if (assemblyStream == null)
+                (bool success, Dictionary<string, List<string>> filesToTypeNamesMap) = await CompileProject(csProject);
+                if (!success || string.IsNullOrEmpty(csProject.OutputFilePath))
                     continue;
 
-                Assembly asm = assemblyContext.LoadFromStream(assemblyStream);
-                assemblyStream.Close();
+                using FileStream asmFile = File.OpenRead(csProject.OutputFilePath);
+                Assembly asm = assemblyContext.LoadFromStream(asmFile);
+                asmFile.Close();
 
                 foreach (string file in filesToTypeNamesMap.Keys)
                 {
@@ -147,24 +161,37 @@ namespace Editor.AssetsImport
             string assembliesNames = string.Join("; ", assemblyContext.Assemblies.Select(x => x.FullName));
             Logger.Log(LogType.Info, $"Recompile succeeded! Loaded {assembliesCount} assemblies for solution at {currentProject.FolderPath}: {assembliesNames}");
 
+            currentWorkspace.CloseSolution();
             currentAssemblyContext = assemblyContext;
             filesToTypesMap.Clear();
             filesToTypesMap.AddRange(filesToTypes);
             return true;
         }
 
-        private static async Task<(MemoryStream stream, Dictionary<string, List<string>> filesToTypeNamesMap)> CompileProject(Project csProject)
+        private static async Task<(bool success, Dictionary<string, List<string>> filesToTypeNamesMap)> CompileProject(Project csProject)
         {
             Compilation compilation = await csProject.GetCompilationAsync();
             if (compilation == null)
             {
                 Logger.Log(LogType.Error, $"Compilation failed! Could not precompile project {csProject.Name}. SupportsCompilation = {csProject.SupportsCompilation}");
-                return (null, null);
+                return (false, null);
             }
 
-            MemoryStream stream = new MemoryStream();
-            EmitResult result = compilation.Emit(stream);
-            stream.Position = 0;
+            DotnetBuildBaml(csProject.FilePath);
+
+            string outputFilePath = csProject.OutputFilePath!;
+            string pdbFilePath = Path.ChangeExtension(outputFilePath, "pdb");
+            string objFolderPath = Path.Combine(ProjectViewModel.Current.FolderPath, "obj");
+
+            List<ResourceDescription> resourceDescriptions = CollectResources(objFolderPath, outputFilePath, csProject.AssemblyName, csProject.DefaultNamespace);
+
+            await using FileStream dllFile = File.Create(outputFilePath);
+            await using FileStream pdbFile = File.Create(pdbFilePath);
+
+            EmitResult result = compilation.Emit(dllFile, pdbFile, manifestResources: resourceDescriptions.ToArray());
+
+            dllFile.Close();
+            pdbFile.Close();
 
             foreach (Diagnostic diagnostic in result.Diagnostics)
             {
@@ -184,7 +211,7 @@ namespace Editor.AssetsImport
 
             if (!result.Success)
             {
-                return (null, null);
+                return (false, null);
             }
 
             SymbolDisplayFormat displayFormat = new SymbolDisplayFormat(typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
@@ -202,7 +229,75 @@ namespace Editor.AssetsImport
                 filesToTypeNamesMap[filePath].Add(typeSymbol.ToDisplayString(displayFormat));
             }
 
-            return (stream, filesToTypeNamesMap);
+            return (true, filesToTypeNamesMap);
+        }
+
+        private static void DotnetRestore(string solutionPath)
+        {
+            Process process = new Process();
+            process.StartInfo = new ProcessStartInfo()
+            {
+                FileName = "cmd.exe",
+                WorkingDirectory = solutionPath,
+                Arguments = "/c dotnet restore",
+                CreateNoWindow = true,
+            };
+
+            process.Start();
+            process.WaitForExit();
+        }
+
+        private static void DotnetBuildBaml(string projectPath)
+        {
+            string projectFolder = Path.GetDirectoryName(projectPath)!;
+            string projectName = Path.GetFileNameWithoutExtension(projectPath);
+
+            Process process = new Process();
+            process.StartInfo = new ProcessStartInfo()
+            {
+                FileName = "cmd.exe",
+                WorkingDirectory = projectFolder,
+                Arguments = $@"/c dotnet msbuild /t:ResolveReferences /t:MarkupCompilePass1 /t:MarkupCompilePass2 .\{projectName}.csproj",
+                CreateNoWindow = true,
+            };
+
+            process.Start();
+            process.WaitForExit();
+        }
+
+        private static List<ResourceDescription> CollectResources(string objPath, string outputPath, string assemblyName, string defaultNamespace)
+        {
+            List<ResourceDescription> resourceDescriptions = new List<ResourceDescription>();
+            string resourcePath = @$"{Path.GetDirectoryName(outputPath)}\{assemblyName}.g.resources";
+            ResourceWriter rsWriter = new ResourceWriter(resourcePath);
+
+            string configurationPath = Path.Combine(objPath, "Debug");
+            foreach (string file in Directory.GetFiles(objPath, "*.baml", SearchOption.AllDirectories))
+            {
+                string fileName = Path.GetRelativePath(configurationPath, file).Replace(@"\","/");
+                FileStream data = File.OpenRead(file);
+                rsWriter.AddResource(fileName.ToLower(), data, true);
+            }
+
+            rsWriter.Generate();
+            rsWriter.Close();
+
+            ResourceDescription resourceDescription = new ResourceDescription(
+                $"{assemblyName}.g.resources",
+                () => File.OpenRead(resourcePath),
+                true);
+            resourceDescriptions.Add(resourceDescription);
+
+            if (defaultNamespace != assemblyName)
+            {
+                resourceDescription = new ResourceDescription(
+                    $"{assemblyName}.{defaultNamespace}.g.resources",
+                    () => File.OpenRead(resourcePath),
+                    true);
+                resourceDescriptions.Add(resourceDescription);
+            }
+
+            return resourceDescriptions;
         }
 
         private static IEnumerable<INamedTypeSymbol> GetNamedTypeSymbols(Compilation compilation)

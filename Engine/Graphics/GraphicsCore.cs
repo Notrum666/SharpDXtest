@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Interop;
 
 using Engine.BaseAssets.Components;
@@ -32,6 +33,8 @@ namespace Engine
         public static Device CurrentDevice { get; private set; }
         public static SharpDX.Direct3D9.Device D9Device { get; private set; }
 
+        public static Panel ViewportPanel { get; set; }
+
         public static Sampler ShadowsSampler => shadowsSampler;
 
         private static RasterizerState backCullingRasterizer;
@@ -57,6 +60,8 @@ namespace Engine
 
             sampler = Sampler.Default;
             shadowsSampler = Sampler.DefaultShadows;
+
+            SceneManager.OnSceneUnloading += ClearViewportPanel;
         }
 
         private static void InitDirectX()
@@ -474,6 +479,11 @@ namespace Engine
             Flush();
 
             camera.SwapFrameBuffers();
+        }
+
+        private static void ClearViewportPanel(string _)
+        {
+            ViewportPanel.Dispatcher.Invoke(() => { ViewportPanel.Children.Clear(); });
         }
 
         public static void Dispose()

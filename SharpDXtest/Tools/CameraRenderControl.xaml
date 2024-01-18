@@ -36,6 +36,7 @@
         <Grid Grid.Row="1" x:Name="RenderControlHost" Background="{StaticResource CameraRenderControlBackgroundBrush}">
             <TextBlock x:Name="FPSTextBlock" HorizontalAlignment="Left" VerticalAlignment="Top" Padding="20"
                        Text="{Binding CameraViewModel.FPS}" FontSize="48" FontWeight="Bold" Foreground="Red" Panel.ZIndex="10"/>
+            <Grid x:Name="GameInterface" Panel.ZIndex="20"/>
             <Image x:Name="RenderControl" HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch" Stretch="Fill" SizeChanged="RenderControl_SizeChanged">
                 <Image.Source>

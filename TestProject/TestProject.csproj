@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	
 	<PropertyGroup>
 		<TargetFramework>net7.0-windows</TargetFramework>
@@ -22,8 +22,9 @@
 		<OutputType>Library</OutputType>
 		<OutputPath>Temp\TestProject\</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)</IntermediateOutputPath>
 	</PropertyGroup>
-
+    
 	<ItemGroup>
 		<Compile Include="Content\**\*.cs" />
 	</ItemGroup>
@@ -41,6 +42,11 @@
 		<Reference Include="SharpDX.Editor">
 			<HintPath>$(Engine_IncludePath)\Editor.dll</HintPath>
 		</Reference>
+	</ItemGroup>
+	<ItemGroup>
+	  <Page Update="Content\Dictionary1.xaml">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Page>
 	</ItemGroup>
 	
 </Project>

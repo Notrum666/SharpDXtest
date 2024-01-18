@@ -46,11 +46,11 @@ namespace Editor.AssetsImport
             Debug.WriteLine($"Found {classDeclarations.Count()} classes in file");
             foreach (ClassDeclarationSyntax classDeclaration in classDeclarations)
             {
-                var baseTypes = classDeclaration.BaseList?.Types;
+                SeparatedSyntaxList<BaseTypeSyntax>? baseTypes = classDeclaration.BaseList?.Types;
                 if (!baseTypes.HasValue || baseTypes.Value.Count == 0)
                     continue;
 
-                var baseType = baseTypes.Value[0];
+                BaseTypeSyntax baseType = baseTypes.Value[0];
             }
         }
     }

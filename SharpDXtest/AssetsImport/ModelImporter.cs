@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 
 using Assimp;
 
+using Engine.Assets;
 using Engine.AssetsData;
 
 using LinearAlgebra;
@@ -26,6 +27,7 @@ namespace Editor.AssetsImport
 
         public class ModelImportSettings : BaseImportSettings
         {
+            [GuidExpectedType(typeof(Engine.Skeleton))]
             public Guid? SkeletonOverride = null;
             public Dictionary<string, Guid?> MeshMaterialsOverride = new Dictionary<string, Guid?>();
         }

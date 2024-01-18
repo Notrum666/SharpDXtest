@@ -1,22 +1,37 @@
-using System.Linq;
-
 using Engine;
 using Engine.BaseAssets.Components;
+using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Threading;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Markup;
 
 namespace TestProject
 {
     public class TestProjectComponent : BehaviourComponent
     {
-        public int[] data = new int[3];
-        private double time = 0;
-
-        public override void Update()
+        public override void Start()
         {
-            time += Time.DeltaTime;
-            if (time > 1)
+            try
             {
-                Logger.Log(LogType.Info, string.Join(", ", data.Select(v => v.ToString())));
-                time = 0;
+                GraphicsCore.ViewportPanel.Dispatcher.Invoke(() =>
+                {
+                    var control = new UserControlTest();
+                    Grid grid = (Grid)control.Content;
+                    TextBlock textBlock = (TextBlock)grid.Children[0];
+                    textBlock.Text = "SOSI_PISOS";
+                    GraphicsCore.ViewportPanel.Children.Add( control );
+                    Debug.WriteLine($"control = {control}");
+                });
+                
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                throw;
             }
         }
     }
