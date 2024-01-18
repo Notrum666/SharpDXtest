@@ -45,24 +45,6 @@ namespace Engine.BaseAssets.Components.Colliders
         private Vector3 inertiaTensor;
         public override Vector3 InertiaTensor => inertiaTensor;
 
-        public CubeCollider()
-        {
-            Size = new Vector3(1.0, 1.0, 1.0);
-            Offset = Vector3.Zero;
-        }
-
-        public CubeCollider(Vector3 size)
-        {
-            Size = size;
-            Offset = Vector3.Zero;
-        }
-
-        public CubeCollider(Vector3 size, Vector3 offset)
-        {
-            Size = size;
-            Offset = offset;
-        }
-
         private void CalculateInertiaTensor()
         {
             inertiaTensor = 1.0 / 12.0 * new Vector3(Size.y * Size.y + Size.z * Size.z,

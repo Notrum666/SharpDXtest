@@ -43,22 +43,6 @@ namespace Engine.BaseAssets.Components.Colliders
         private double squaredOuterSphereRadius;
         private double outerSphereRadius;
 
-        public SphereCollider()
-        {
-            Radius.Set(1.0);
-        }
-
-        public SphereCollider(double radius)
-        {
-            Radius.Set(radius);
-        }
-
-        public SphereCollider(double radius, Vector3 offset)
-        {
-            Radius.Set(radius);
-            Offset = offset;
-        }
-
         protected override List<Vector3> GetVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon)
         {
             Vector3 result = (collisionPlanePoint - GlobalCenter).projectOnVector(collisionPlaneNormal);

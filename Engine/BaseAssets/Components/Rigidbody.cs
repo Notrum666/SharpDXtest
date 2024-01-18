@@ -104,14 +104,17 @@ namespace Engine.BaseAssets.Components
 
             switch (fieldInfo.Name)
             {
-                case nameof(isStatic):
-                    IsStatic = isStatic;
-                    return;
                 case nameof(mass):
                     Mass.Set(mass);
                     return;
                 case nameof(inertiaTensor):
                     InertiaTensor = inertiaTensor;
+                    return;
+                case nameof(isStatic):
+                    IsStatic = isStatic;
+                    return;
+                case nameof(freezeMovement):
+                    FreezeMovement = freezeMovement;
                     return;
                 case nameof(freezeRotationX):
                 case nameof(freezeRotationY):
@@ -130,7 +133,6 @@ namespace Engine.BaseAssets.Components
         #endregion ComponentData
 
         public PhysicalMaterial Material { get; set; } = new PhysicalMaterial();
-
 
         private double inverseMass = 1.0;
         private Matrix3x3 inverseGlobalInertiaTensor = Matrix3x3.Identity;
