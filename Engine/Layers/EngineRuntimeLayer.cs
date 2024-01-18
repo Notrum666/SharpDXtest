@@ -44,15 +44,15 @@ namespace Engine.Layers
                     foreach (Collider collider in CurrentScene.GameObjects[i].GetComponents<Collider>())
                         collider.updateData();
                     foreach (Rigidbody otherRigidbody in rigidbodies)
-                        rigidbody.solveCollisionWith(otherRigidbody);
+                        rigidbody.SolveCollisionWith(otherRigidbody);
                     rigidbodies.Add(rigidbody);
                 }
             }
             foreach (Rigidbody rb in rigidbodies)
-                rb.updateCollidingPairs();
+                rb.UpdateCollidingPairs();
 
             foreach (Rigidbody rigidbody in rigidbodies)
-                rigidbody.applyChanges();
+                rigidbody.ApplyChanges();
         }
 
         public override void Update()

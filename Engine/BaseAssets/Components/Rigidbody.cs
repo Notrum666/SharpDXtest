@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
@@ -15,7 +16,7 @@ namespace Engine.BaseAssets.Components
         Z = 1 << 3,
     }
 
-    public sealed class Rigidbody : BehaviourComponent, INotifyFieldChanged
+    public sealed class Rigidbody : BehaviourComponent
     {
         public static Vector3 GravitationalAcceleration = new Vector3(0, 0, -9.8);
 
@@ -44,7 +45,7 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private bool freezeRotationZ = false;
 
-        public Ranged<double> Mass => new Ranged<double>(ref mass, min: 0 + double.Epsilon, onSet: recalculateInverseMass);
+        public Ranged<double> Mass => new Ranged<double>(ref mass, min: 0 + double.Epsilon, onSet: RecalculateInverseMass);
         public Vector3 Velocity { get => velocity; set => velocity = value; }
         public Vector3 AngularVelocity { get => angularVelocity; set => angularVelocity = value; }
         public Vector3 InertiaTensor
@@ -53,11 +54,11 @@ namespace Engine.BaseAssets.Components
             private set
             {
                 inertiaTensor = value;
-                recalculateInverseGlobalInertiaTensor();
+                RecalculateInverseGlobalInertiaTensor();
             }
         }
 
-        public Ranged<double> LinearDrag1 => new Ranged<double>(ref linearDrag, min: 0);
+        public Ranged<double> LinearDrag => new Ranged<double>(ref linearDrag, min: 0);
         public Ranged<double> AngularDrag => new Ranged<double>(ref angularDrag, min: 0);
 
         public bool IsStatic
@@ -66,8 +67,8 @@ namespace Engine.BaseAssets.Components
             set
             {
                 isStatic = value;
-                recalculateInverseMass();
-                recalculateInverseGlobalInertiaTensor();
+                RecalculateInverseMass();
+                RecalculateInverseGlobalInertiaTensor();
             }
         }
         public bool FreezeMovement
@@ -76,15 +77,15 @@ namespace Engine.BaseAssets.Components
             set
             {
                 freezeMovement = value;
-                recalculateInverseMass();
+                RecalculateInverseMass();
             }
         }
 
         public FreezeRotationFlags GetFreezeRotationFlags()
         {
             return (freezeRotationX ? FreezeRotationFlags.X : FreezeRotationFlags.None)
-                | (freezeRotationY ? FreezeRotationFlags.Y : FreezeRotationFlags.None)
-                | (freezeRotationZ ? FreezeRotationFlags.Z : FreezeRotationFlags.None);
+                   | (freezeRotationY ? FreezeRotationFlags.Y : FreezeRotationFlags.None)
+                   | (freezeRotationZ ? FreezeRotationFlags.Z : FreezeRotationFlags.None);
         }
 
         public void SetFreezeRotationFlags(FreezeRotationFlags freezeRotationFlags)
@@ -92,7 +93,7 @@ namespace Engine.BaseAssets.Components
             freezeRotationX = freezeRotationFlags.HasFlag(FreezeRotationFlags.X);
             freezeRotationY = freezeRotationFlags.HasFlag(FreezeRotationFlags.Y);
             freezeRotationZ = freezeRotationFlags.HasFlag(FreezeRotationFlags.Z);
-            recalculateInverseGlobalInertiaTensor();
+            RecalculateInverseGlobalInertiaTensor();
         }
 
         public override void OnFieldChanged(FieldInfo fieldInfo)
@@ -113,7 +114,7 @@ namespace Engine.BaseAssets.Components
                 case nameof(freezeRotationX):
                 case nameof(freezeRotationY):
                 case nameof(freezeRotationZ):
-                    recalculateInverseGlobalInertiaTensor();
+                    RecalculateInverseGlobalInertiaTensor();
                     return;
             }
         }
@@ -121,21 +122,12 @@ namespace Engine.BaseAssets.Components
         public PhysicalMaterial Material { get; set; } = new PhysicalMaterial();
 
 
-
-
-
-
-
-
-
-
         private double inverseMass = 1.0;
         private Matrix3x3 inverseGlobalInertiaTensor = Matrix3x3.Identity;
 
-
         private Vector3 velocityChange = new Vector3();
         private Vector3 angularVelocityChange = new Vector3();
-        private List<Vector3> collisionExitVectors = new List<Vector3>();
+        private readonly List<Vector3> collisionExitVectors = new List<Vector3>();
 
         //private const int LinearVelocitySleepCounterBase = 5;
         //private const int AngularVelocitySleepCounterBase = 5;
@@ -144,18 +136,10 @@ namespace Engine.BaseAssets.Components
         //private double linearSleepThresholdSquared = 0.005;
         //private double angularSleepThresholdSquared = 0.005;
 
-
-        private List<KeyValuePair<Collider, Collider>> prevCollidingPairs = new List<KeyValuePair<Collider, Collider>>();
-        private List<KeyValuePair<Collider, Collider>> collidingPairs = new List<KeyValuePair<Collider, Collider>>();
-        public delegate void onCollision_del(Rigidbody sender, Collider col, Collider other);
-        public event onCollision_del OnCollisionBegin;
-        public event onCollision_del OnCollision;
-        public event onCollision_del OnCollisionEnd;
-
         public override void FixedUpdate()
         {
-            addForce(GravitationalAcceleration * mass);
-            recalculateInertiaTensor();
+            AddForce(GravitationalAcceleration * mass);
+            RecalculateInertiaTensor();
 
             Transform t = GameObject.Transform;
 
@@ -205,14 +189,15 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        private void recalculateInertiaTensor()
+        private void RecalculateInertiaTensor()
         {
-            IEnumerable<Collider> colliders = GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
-            if (colliders.Count() == 0)
+            List<Collider> colliders = GameObject.GetComponents<Collider>().Where(coll => coll.Enabled).ToList();
+            if (!colliders.Any())
             {
                 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
                 return;
             }
+
             double massSum = 0.0;
             foreach (Collider collider in colliders)
                 massSum += collider.MassPart;
@@ -226,12 +211,12 @@ namespace Engine.BaseAssets.Components
             InertiaTensor = result;
         }
 
-        private void recalculateInverseMass()
+        private void RecalculateInverseMass()
         {
             inverseMass = IsStatic || FreezeMovement ? 0.0 : 1.0 / mass;
         }
 
-        private void recalculateInverseGlobalInertiaTensor()
+        private void RecalculateInverseGlobalInertiaTensor()
         {
             if (isStatic)
             {
@@ -244,31 +229,31 @@ namespace Engine.BaseAssets.Components
                                                                0.0, 0.0, freezeRotationZ ? 0.0 : 1.0 / InertiaTensor.z) * model.transposed();
         }
 
-        public void addForce(Vector3 force)
+        public void AddForce(Vector3 force)
         {
             velocityChange += force * Time.DeltaTime * inverseMass;
             //linearVelocitySleepCounter = LinearVelocitySleepCounterBase;
         }
 
-        public void addImpulse(Vector3 impulse)
+        public void AddImpulse(Vector3 impulse)
         {
             velocityChange += impulse * inverseMass;
             //linearVelocitySleepCounter = LinearVelocitySleepCounterBase;
         }
 
-        public void addTorque(Vector3 torque)
+        public void AddTorque(Vector3 torque)
         {
             angularVelocityChange += torque * inverseGlobalInertiaTensor * Time.DeltaTime;
             //angularVelocitySleepCounter = AngularVelocitySleepCounterBase;
         }
 
-        public void addAngularImpulse(Vector3 angularImpulse)
+        public void AddAngularImpulse(Vector3 angularImpulse)
         {
             angularVelocityChange += angularImpulse * inverseGlobalInertiaTensor;
             //angularVelocitySleepCounter = AngularVelocitySleepCounterBase;
         }
 
-        public void addForceAtPoint(Vector3 force, Vector3 point)
+        public void AddForceAtPoint(Vector3 force, Vector3 point)
         {
             velocityChange += force * Time.DeltaTime * inverseMass;
             angularVelocityChange += (point - GameObject.Transform.Position) % force * inverseGlobalInertiaTensor * Time.DeltaTime;
@@ -277,7 +262,7 @@ namespace Engine.BaseAssets.Components
             //angularVelocitySleepCounter = AngularVelocitySleepCounterBase;
         }
 
-        public void addImpulseAtPoint(Vector3 impulse, Vector3 point)
+        public void AddImpulseAtPoint(Vector3 impulse, Vector3 point)
         {
             velocityChange += impulse * inverseMass;
             angularVelocityChange += (point - GameObject.Transform.Position) % impulse * inverseGlobalInertiaTensor;
@@ -286,7 +271,7 @@ namespace Engine.BaseAssets.Components
             //angularVelocitySleepCounter = AngularVelocitySleepCounterBase;
         }
 
-        public void applyChanges()
+        public void ApplyChanges()
         {
             Velocity += velocityChange;
             AngularVelocity += angularVelocityChange;
@@ -305,19 +290,29 @@ namespace Engine.BaseAssets.Components
             collisionExitVectors.Clear();
         }
 
-        public void solveCollisionWith(Rigidbody otherRigidbody)
+        #region Collision
+
+        public delegate void CollisionEvent(Rigidbody sender, Collider col, Collider other);
+        public event CollisionEvent OnCollisionBegin;
+        public event CollisionEvent OnCollision;
+        public event CollisionEvent OnCollisionEnd;
+
+        private List<KeyValuePair<Collider, Collider>> prevCollidingPairs = new List<KeyValuePair<Collider, Collider>>(); //TODO: Change to tuples
+        private List<KeyValuePair<Collider, Collider>> collidingPairs = new List<KeyValuePair<Collider, Collider>>(); //TODO: Change to tuples
+
+        public void SolveCollisionWith(Rigidbody otherRigidbody)
         {
             if (!Enabled || !otherRigidbody.Enabled || IsStatic && otherRigidbody.IsStatic)
                 return;
 
             IEnumerable<Collider> colliders = GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
-            IEnumerable<Collider> otherColliders = otherRigidbody.GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
+            List<Collider> otherColliders = otherRigidbody.GameObject.GetComponents<Collider>().Where(coll => coll.Enabled).ToList();
 
             foreach (Collider collider in colliders)
             {
                 foreach (Collider otherCollider in otherColliders)
                 {
-                    Vector3? _collisionExitVector;
+                    Vector3? _collisionExitVector; //TODO: whut?
                     Vector3? _collisionExitNormal;
                     Vector3? _colliderEndPoint;
                     if (!collider.getCollisionExitVector(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
@@ -383,26 +378,6 @@ namespace Engine.BaseAssets.Components
                         return;
                     }
 
-                    Vector3 newtonIteration(Func<Vector3, Vector3> f, Vector3 start)
-                    {
-                        Vector3 baseValue = f(start);
-                        Matrix3x3 jacobi = new Matrix3x3();
-                        Vector3 delta = f(start + new Vector3(Constants.Epsilon, 0.0, 0.0)) - baseValue;
-                        jacobi.v00 = delta.x / Constants.Epsilon;
-                        jacobi.v10 = delta.y / Constants.Epsilon;
-                        jacobi.v20 = delta.z / Constants.Epsilon;
-                        delta = f(start + new Vector3(0.0, Constants.Epsilon, 0.0)) - baseValue;
-                        jacobi.v01 = delta.x / Constants.Epsilon;
-                        jacobi.v11 = delta.y / Constants.Epsilon;
-                        jacobi.v21 = delta.z / Constants.Epsilon;
-                        delta = f(start + new Vector3(0.0, 0.0, Constants.Epsilon)) - baseValue;
-                        jacobi.v02 = delta.x / Constants.Epsilon;
-                        jacobi.v12 = delta.y / Constants.Epsilon;
-                        jacobi.v22 = delta.z / Constants.Epsilon;
-
-                        return start + jacobi.inverse() * -baseValue;
-                    }
-
                     Vector3 r1 = collisionPoint - GameObject.Transform.Position;
                     Vector3 r2 = collisionPoint - otherRigidbody.GameObject.Transform.Position;
                     Vector3 vp = Velocity + AngularVelocity % r1;
@@ -417,9 +392,9 @@ namespace Engine.BaseAssets.Components
                                                          otherRigidbody.inverseGlobalInertiaTensor * (r2 % F) % r2 +
                                                          dvn * (1 + bounciness) + dvf * friction;
 
-                    Vector3 impulse = newtonIteration(func, Vector3.Zero);
+                    Vector3 impulse = NewtonIteration(func, Vector3.Zero);
 
-                    addImpulseAtPoint(impulse, collisionPoint);
+                    AddImpulseAtPoint(impulse, collisionPoint);
 
                     bounciness = otherRigidbody.Material.GetComdinedBouncinessWith(Material);
                     friction = otherRigidbody.Material.GetCombinedFrictionWith(Material);
@@ -429,9 +404,9 @@ namespace Engine.BaseAssets.Components
                                   otherRigidbody.inverseGlobalInertiaTensor * (r2 % F) % r2 +
                                   dvn * (1 + bounciness) + dvf * friction;
 
-                    impulse = newtonIteration(func, Vector3.Zero);
+                    impulse = NewtonIteration(func, Vector3.Zero);
 
-                    otherRigidbody.addImpulseAtPoint(-impulse, collisionPoint);
+                    otherRigidbody.AddImpulseAtPoint(-impulse, collisionPoint);
 
                     if (!moveVector.isZero())
                     {
@@ -449,7 +424,7 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        internal void updateCollidingPairs()
+        internal void UpdateCollidingPairs()
         {
             foreach (KeyValuePair<Collider, Collider> pair in prevCollidingPairs)
             {
@@ -466,5 +441,28 @@ namespace Engine.BaseAssets.Components
             prevCollidingPairs = new List<KeyValuePair<Collider, Collider>>(collidingPairs);
             collidingPairs.Clear();
         }
+
+        private Vector3 NewtonIteration(Func<Vector3, Vector3> f, Vector3 start)
+        {
+            Vector3 baseValue = f(start);
+            Matrix3x3 jacobi = new Matrix3x3();
+            Vector3 delta = f(start + new Vector3(Constants.Epsilon, 0.0, 0.0)) - baseValue;
+            jacobi.v00 = delta.x / Constants.Epsilon;
+            jacobi.v10 = delta.y / Constants.Epsilon;
+            jacobi.v20 = delta.z / Constants.Epsilon;
+            delta = f(start + new Vector3(0.0, Constants.Epsilon, 0.0)) - baseValue;
+            jacobi.v01 = delta.x / Constants.Epsilon;
+            jacobi.v11 = delta.y / Constants.Epsilon;
+            jacobi.v21 = delta.z / Constants.Epsilon;
+            delta = f(start + new Vector3(0.0, 0.0, Constants.Epsilon)) - baseValue;
+            jacobi.v02 = delta.x / Constants.Epsilon;
+            jacobi.v12 = delta.y / Constants.Epsilon;
+            jacobi.v22 = delta.z / Constants.Epsilon;
+
+            return start + jacobi.inverse() * -baseValue;
+        }
+
+        #endregion Collision
+
     }
 }
