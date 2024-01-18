@@ -14,12 +14,20 @@ namespace Engine.BaseAssets.Components
         private static readonly PolygonDistanceComparer distanceComparer = new PolygonDistanceComparer();
 
         [SerializedField]
-        private double massPart = 1.0;
+        protected double massPart = 1.0;
         [SerializedField]
-        private Vector3 offset;
+        protected Vector3 offset;
 
         public Ranged<double> MassPart => new Ranged<double>(ref massPart, min: 0);
-        public Vector3 Offset { get => offset; set => offset = value; }
+        public Vector3 Offset
+        {
+            get => offset;
+            set
+            {
+                offset = value;
+                UpdateData();
+            }
+        }
 
         public override void OnFieldChanged(FieldInfo fieldInfo)
         {
@@ -29,6 +37,12 @@ namespace Engine.BaseAssets.Components
             {
                 case nameof(massPart):
                     MassPart.Set(massPart);
+                    return;
+            }
+            switch (fieldInfo.Name)
+            {
+                case nameof(offset):
+                    Offset = offset;
                     return;
             }
         }

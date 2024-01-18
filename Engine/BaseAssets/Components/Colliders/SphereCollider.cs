@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 using LinearAlgebra;
 
@@ -7,61 +8,49 @@ namespace Engine.BaseAssets.Components.Colliders
 {
     public sealed class SphereCollider : Collider
     {
+        [SerializedField]
         private double radius;
-        public double Radius
+
+        public Ranged<double> Radius => new Ranged<double>(ref radius, min: 0 + double.Epsilon, onSet: () =>
         {
-            get => radius;
-            set
+            RecalculateOuterSphere();
+            CalculateInertiaTensor();
+        });
+
+        public override void OnFieldChanged(FieldInfo fieldInfo)
+        {
+            base.OnFieldChanged(fieldInfo);
+
+            switch (fieldInfo.Name)
             {
-                if (value <= 0)
-                    throw new ArgumentException("Sphere radius should be positive.");
-
-                radius = value;
-
-                recalculateOuterSphere();
-                calculateIntertiaTensor();
+                case nameof(radius):
+                    Radius.Set(radius);
+                    return;
             }
         }
-        private Vector3 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
+
         public override Vector3 InertiaTensor => inertiaTensor;
-        private double squaredOuterSphereRadius;
-        public override double SquaredOuterSphereRadius => squaredOuterSphereRadius;
-        private double outerSphereRadius;
         public override double OuterSphereRadius => outerSphereRadius;
+        public override double SquaredOuterSphereRadius => squaredOuterSphereRadius;
+
+        private Vector3 inertiaTensor = new Vector3(1.0, 1.0, 1.0);
+        private double squaredOuterSphereRadius;
+        private double outerSphereRadius;
 
         public SphereCollider()
         {
-            Radius = 1.0;
+            Radius.Set(1.0);
         }
 
         public SphereCollider(double radius)
         {
-            Radius = radius;
+            Radius.Set(radius);
         }
 
         public SphereCollider(double radius, Vector3 offset)
         {
-            Radius = radius;
+            Radius.Set(radius);
             Offset = offset;
-        }
-
-        private void calculateIntertiaTensor()
-        {
-            double inertia = 2.0 / 5.0 * radius * radius;
-            inertiaTensor = new Vector3(inertia, inertia, inertia);
-        }
-
-        private void recalculateOuterSphere()
-        {
-            outerSphereRadius = radius;
-            squaredOuterSphereRadius = radius * radius;
-        }
-
-        protected override void GetBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest)
-        {
-            direction = direction.normalized() * radius;
-            furthest = GlobalCenter + direction;
-            hindmost = GlobalCenter - direction;
         }
 
         protected override List<Vector3> GetVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon)
@@ -72,6 +61,25 @@ namespace Engine.BaseAssets.Components.Colliders
                 return new List<Vector3>();
 
             return new List<Vector3>() { GlobalCenter + result };
+        }
+
+        protected override void GetBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest)
+        {
+            direction = direction.normalized() * radius;
+            furthest = GlobalCenter + direction;
+            hindmost = GlobalCenter - direction;
+        }
+
+        private void CalculateInertiaTensor()
+        {
+            double inertia = 2.0 / 5.0 * radius * radius;
+            inertiaTensor = new Vector3(inertia, inertia, inertia);
+        }
+
+        private void RecalculateOuterSphere()
+        {
+            outerSphereRadius = radius;
+            squaredOuterSphereRadius = radius * radius;
         }
     }
 }
