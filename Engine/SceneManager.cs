@@ -135,21 +135,21 @@ namespace Engine
             cesiumManMesh.Model = AssetsManager.LoadAssetAtPath<Model>("Models\\cesium_man.fbx");
             cesiumManMesh.Animation = AssetsManager.LoadAssetByGuid<SkeletalAnimation>(new Guid("baa6fca3e025454dbdaa02b48a8bb132"));
 
-            GameObject light1 = GameObject.Instantiate("Light1");
+            GameObject light1 = GameObject.Instantiate("PointLight1");
             light1.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);
             light1.AddComponent<PointLight>().Radius.Set(10);
 
-            GameObject light2 = GameObject.Instantiate("Light2");
+            GameObject light2 = GameObject.Instantiate("PointLight2");
             light2.GetComponent<Transform>().LocalPosition = new Vector3(-5, 0, 3);
             light2.AddComponent<PointLight>().Radius.Set(10);
 
-            GameObject light3 = GameObject.Instantiate("Light3");
-            light3.GetComponent<Transform>().LocalPosition = new Vector3(-5, 0, 3);
-            light3.AddComponent<PointLight>().Radius.Set(10);
+            GameObject light3 = GameObject.Instantiate("SpotLight");
+            light3.GetComponent<Transform>().LocalPosition = new Vector3(0, -5, 3);
+            light3.AddComponent<SpotLight>().Radius.Set(10);
 
-            GameObject light4 = GameObject.Instantiate("Light4");
-            light4.GetComponent<Transform>().LocalPosition = new Vector3(5, 0, 3);
-            light4.AddComponent<PointLight>().Radius.Set(10);
+            GameObject light4 = GameObject.Instantiate("DirectionalLight");
+            light4.GetComponent<Transform>().LocalPosition = new Vector3(0, 5, 3);
+            light4.AddComponent<DirectionalLight>();
 
             ScriptAsset scriptAsset = AssetsManager.LoadAssetAtPath<ScriptAsset>("TestProjectComponent.cs");
             cubeObj1.AddComponent(scriptAsset.ComponentType);

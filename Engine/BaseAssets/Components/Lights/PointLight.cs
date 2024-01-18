@@ -86,7 +86,7 @@ namespace Engine.BaseAssets.Components
             //GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
         }
 
-        public override void RenderShadows()
+        public override void RenderShadows(Camera camera)
         {
             // TODO: IMPLEMENT POINT LIGHT SHADOWS
         }

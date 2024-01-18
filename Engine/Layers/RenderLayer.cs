@@ -18,7 +18,7 @@ namespace Engine.Layers
         {
             foreach (Camera camera in Camera.Cameras.ToList().Where(x => x.Enabled))
             {
-                //GraphicsCore.RenderShadows();
+                GraphicsCore.RenderShadows(camera);
                 GraphicsCore.RenderScene(camera);
             }
         }
