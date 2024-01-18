@@ -183,7 +183,7 @@ namespace Engine
                     return instance;
                 }
 
-                if (type == typeof(GameObject) || type == typeof(Transform))
+                if (type == typeof(GameObject))
                     return FormatterServices.GetUninitializedObject(type);
 
                 return fallback.Create(type);

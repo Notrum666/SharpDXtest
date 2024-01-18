@@ -68,6 +68,8 @@ namespace Editor
 
         public void MonitorGameScenes()
         {
+            UpdateGameScenes();
+
             filesWatcher = new FileSystemWatcher();
             filesWatcher.EnableRaisingEvents = false;
             filesWatcher.IncludeSubdirectories = true;

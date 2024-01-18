@@ -72,7 +72,7 @@ namespace Editor
             AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
 
             ProjectViewModel.Current.ApplyProjectSettings();
-            ProjectViewModel.Current.UpdateGameScenes();
+            ProjectViewModel.Current.MonitorGameScenes();
 
             ScriptManager.Recompile();
             ScriptManager.OnCodeRecompiled += SceneManager.ReloadScene;
