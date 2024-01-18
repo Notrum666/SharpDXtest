@@ -10,7 +10,10 @@ namespace Editor
         private void InspectorTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter || e.Key == Key.Escape)
+            {
                 ((DependencyObject)sender).FindParent<InspectorControl>().Focus();
+                e.Handled = true;
+            }
         }
 
         private void InspectorTextBox_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
