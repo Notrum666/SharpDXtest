@@ -44,8 +44,10 @@ namespace Editor
                 }
                 invalidated = true;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(Name));
             }
         }
+        public string Name => Scene?.Name ?? "(None)";
         private bool invalidated = false;
         public bool Invalidated => invalidated;
         public SceneViewModel()
