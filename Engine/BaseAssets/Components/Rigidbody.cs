@@ -120,6 +120,12 @@ namespace Engine.BaseAssets.Components
                     return;
             }
         }
+        
+        internal override void OnDeserialized()
+        {
+            RecalculateInverseMass();
+            RecalculateInverseGlobalInertiaTensor();
+        }
 
         #endregion ComponentData
 
