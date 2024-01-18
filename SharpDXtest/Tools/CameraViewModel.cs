@@ -51,7 +51,7 @@ namespace Editor
             targetImage.Lock();
 
             targetImage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, D9Renderer.D9SurfaceNativePointer);
-            targetImage.AddDirtyRect(new Int32Rect(0, 0, D9Renderer.Width, D9Renderer.Height));
+            targetImage.AddDirtyRect(new Int32Rect(0, 0, (int)targetImage.Width, (int)targetImage.Height));
 
             targetImage.Unlock();
         }
