@@ -51,7 +51,7 @@ namespace Engine.BaseAssets.Components
             ShadowTexture = new Texture(shadowSize, shadowSize, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil);
         }
 
-        public override void RenderShadows()
+        public override void RenderShadows(Camera camera)
         {
             if (!ShaderPipeline.TryGetPipeline("depth_only", out ShaderPipeline pipeline))
                 return;
@@ -65,7 +65,7 @@ namespace Engine.BaseAssets.Components
 
             pipeline.UpdateUniform("view", LightSpace);
 
-            RenderObjects(pipeline);
+            RenderObjects(pipeline, false);
         }
     }
 }

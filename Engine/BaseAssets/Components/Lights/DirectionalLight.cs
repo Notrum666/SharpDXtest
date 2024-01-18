@@ -11,7 +11,7 @@ namespace Engine.BaseAssets.Components
     public class DirectionalLight : Light
     {
         [SerializedField]
-        private int shadowSize = 2048;
+        private int shadowSize = 4096;
 
         public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 1);
         public static float[] CascadeFrustumDistances => cascadeFrustumDistances;
@@ -92,7 +92,7 @@ namespace Engine.BaseAssets.Components
             ShadowTexture = new Texture(shadowSize, shadowSize, null, Format.R32_Typeless, BindFlags.ShaderResource | BindFlags.DepthStencil, cascadeFrustumDistances.Length - 1);
         }
 
-        public override void RenderShadows()
+        public override void RenderShadows(Camera camera)
         {
             if (!ShaderPipeline.TryGetPipeline("depth_only", out ShaderPipeline pipeline))
                 return;
@@ -102,7 +102,7 @@ namespace Engine.BaseAssets.Components
             DeviceContext context = GraphicsCore.CurrentDevice.ImmediateContext;
             context.Rasterizer.SetViewport(new Viewport(0, 0, ShadowSize, ShadowSize, 0.0f, 1.0f));
 
-            Matrix4x4f[] lightSpaces = GetLightSpaces(Camera.Current);
+            Matrix4x4f[] lightSpaces = GetLightSpaces(camera);
             for (int i = 0; i < lightSpaces.Length; i++)
             {
                 DepthStencilView curDSV = ShadowTexture.GetView<DepthStencilView>(i);
@@ -111,7 +111,7 @@ namespace Engine.BaseAssets.Components
 
                 pipeline.UpdateUniform("view", lightSpaces[i]);
 
-                RenderObjects(pipeline);
+                RenderObjects(pipeline, false);
             }
         }
 

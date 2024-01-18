@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 using LinearAlgebra;
 
@@ -6,7 +7,9 @@ namespace Engine.BaseAssets.Components.Colliders
 {
     public class CubeCollider : MeshCollider
     {
+        [SerializedField]
         private Vector3 size;
+
         public Vector3 Size
         {
             get => size;
@@ -16,47 +19,48 @@ namespace Engine.BaseAssets.Components.Colliders
                     throw new ArgumentException("Size of collider in all dimensions should be positive!");
 
                 size = value;
-                calculateInertiaTensor();
-                buildCollider();
+                CalculateInertiaTensor();
+                BuildCollider();
             }
         }
+
+        public override void OnFieldChanged(FieldInfo fieldInfo)
+        {
+            base.OnFieldChanged(fieldInfo);
+
+            switch (fieldInfo.Name)
+            {
+                case nameof(size):
+                    Size = size;
+                    return;
+            }
+        }
+
+        internal override void OnDeserialized()
+        {
+            base.OnDeserialized();
+            Size = size;
+        }
+
         private Vector3 inertiaTensor;
         public override Vector3 InertiaTensor => inertiaTensor;
 
-        public CubeCollider()
-        {
-            Size = new Vector3(1.0, 1.0, 1.0);
-            Offset = Vector3.Zero;
-        }
-
-        public CubeCollider(Vector3 size)
-        {
-            Size = size;
-            Offset = Vector3.Zero;
-        }
-
-        public CubeCollider(Vector3 size, Vector3 offset)
-        {
-            Size = size;
-            Offset = offset;
-        }
-
-        private void calculateInertiaTensor()
+        private void CalculateInertiaTensor()
         {
             inertiaTensor = 1.0 / 12.0 * new Vector3(Size.y * Size.y + Size.z * Size.z,
                                                      Size.x * Size.x + Size.z * Size.z,
                                                      Size.x * Size.x + Size.y * Size.y);
         }
 
-        private void buildCollider()
+        private void BuildCollider()
         {
-            generateVertexes();
-            generateNormals();
-            buildEdges();
-            buildPolygons();
+            GenerateVertexes();
+            GenerateNormals();
+            BuildEdges();
+            BuildPolygons();
         }
 
-        private void generateVertexes()
+        private void GenerateVertexes()
         {
             vertices.Clear();
 
@@ -73,7 +77,7 @@ namespace Engine.BaseAssets.Components.Colliders
             vertices.Add(0.5 * new Vector3(Size.x, -Size.y, Size.z));
         }
 
-        private void generateNormals()
+        private void GenerateNormals()
         {
             normals.Clear();
 
@@ -93,7 +97,7 @@ namespace Engine.BaseAssets.Components.Colliders
             nonCollinearNormals.Add(Vector3.Right);
         }
 
-        private void buildPolygons()
+        private void BuildPolygons()
         {
             polygons.Clear();
 
@@ -107,7 +111,7 @@ namespace Engine.BaseAssets.Components.Colliders
             polygons.Add(new int[] { 4, 5, 7, 6 }); // Right
         }
 
-        private void buildEdges()
+        private void BuildEdges()
         {
             edges.Clear();
 

@@ -97,6 +97,9 @@ namespace Engine
         private readonly Action onSet;
         private readonly string propertyName;
 
+        /// <summary>
+        /// Equality comparison is strict: value CAN be equal to min or max
+        /// </summary>
         public Ranged(ref T value, T? min = null, T? max = null, Action onSet = null, [CallerMemberName] string propertyName = "")
         {
             this.value = ref value;

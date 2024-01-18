@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 using Engine.BaseAssets.Components.Particles;
@@ -18,14 +19,15 @@ namespace Engine.BaseAssets.Components
 {
     public sealed class ParticleSystem : BehaviourComponent
     {
-        public struct Particle
-        {
-            public Vector3f position;
-            public float energy;
-            public Vector3f velocity;
-        }
-
+        [SerializedField]
         private Material material = Material.Default;
+        [SerializedField]
+        private Vector2f size = new Vector2f(1.0f, 1.0f);
+        [SerializedField]
+        private int maxParticles = 1024;
+        [SerializedField]
+        private bool worldSpaceParticles;
+
         public Material Material
         {
             get => material;
@@ -36,13 +38,13 @@ namespace Engine.BaseAssets.Components
                 material = value;
             }
         }
-        private Vector2f size = new Vector2f(1.0f, 1.0f);
+
         public Vector2f Size
         {
             get => size;
             set => size = value;
         }
-        private int maxParticles = 1024;
+
         public int MaxParticles
         {
             get => maxParticles;
@@ -50,18 +52,27 @@ namespace Engine.BaseAssets.Components
             {
                 if (value <= 0)
                     throw new ArgumentOutOfRangeException("MaxParticles", "Value must be positive.");
-                value--;
-                value |= value >> 1;
-                value |= value >> 2;
-                value |= value >> 4;
-                value |= value >> 8;
-                value |= value >> 16;
-                maxParticles = value + 1;
+                maxParticles = RoundUpToPowerOfTwo(value);
             }
         }
+
+        public bool WorldSpaceParticles { get => worldSpaceParticles; set => worldSpaceParticles = value; }
+
+        public override void OnFieldChanged(FieldInfo fieldInfo)
+        {
+            base.OnFieldChanged(fieldInfo);
+
+            switch (fieldInfo.Name)
+            {
+                case nameof(maxParticles):
+                    MaxParticles = maxParticles;
+                    return;
+            }
+        }
+
+        public List<ParticleEffect> ParticleEffects { get; } = new List<ParticleEffect>();
         public int CurParticles { get; private set; } = 0;
-        public bool WorldSpaceParticles { get; set; } = false;
-        public List<ParticleEffect> ParticleEffects { get; private set; } = new List<ParticleEffect>();
+
         private ParticleEffect_UpdateEnergy energyUpdater;
 
         private Buffer particlesPool;
@@ -73,29 +84,10 @@ namespace Engine.BaseAssets.Components
 
         private int kernelsCount = 0;
 
-        public ParticleSystem()
-        {
-            counterRetrieveBuffer = new Buffer(GraphicsCore.CurrentDevice, sizeof(uint), ResourceUsage.Staging, BindFlags.None, CpuAccessFlags.Read, ResourceOptionFlags.None, 0);
-        }
-
-        public void Render()
-        {
-            GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(0, particlesPoolResourceView);
-            GraphicsCore.CurrentDevice.ImmediateContext.Draw(CurParticles, 0);
-        }
-
-        private int getParticlesAmount()
-        {
-            GraphicsCore.CurrentDevice.ImmediateContext.CopyStructureCount(counterRetrieveBuffer, 0, particlesPoolView);
-            DataStream stream;
-            GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(counterRetrieveBuffer, MapMode.Read, MapFlags.None, out stream);
-            uint amount = stream.Read<uint>();
-            GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(counterRetrieveBuffer, 0);
-            return (int)amount;
-        }
-
         protected override void OnInitialized()
         {
+            counterRetrieveBuffer = new Buffer(GraphicsCore.CurrentDevice, sizeof(uint), ResourceUsage.Staging, BindFlags.None, CpuAccessFlags.Read, ResourceOptionFlags.None, 0); // In case of error - move back to constructor
+
             kernelsCount = (int)Math.Ceiling(maxParticles / 64.0);
 
             int particleStructureSize = Marshal.SizeOf(typeof(Particle));
@@ -165,20 +157,36 @@ namespace Engine.BaseAssets.Components
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, particlesPoolView);
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(1, rngPoolView);
 
-            applyEffect(energyUpdater);
+            ApplyEffect(energyUpdater);
 
             foreach (ParticleEffect effect in ParticleEffects)
-                applyEffect(effect);
+                ApplyEffect(effect);
 
-            sortParticles();
+            SortParticles();
 
-            CurParticles = getParticlesAmount();
+            CurParticles = GetParticlesAmount();
 
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, null);
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(1, null);
         }
 
-        private void sortParticles()
+        public void Render()
+        {
+            GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(0, particlesPoolResourceView);
+            GraphicsCore.CurrentDevice.ImmediateContext.Draw(CurParticles, 0);
+        }
+
+        private int GetParticlesAmount()
+        {
+            GraphicsCore.CurrentDevice.ImmediateContext.CopyStructureCount(counterRetrieveBuffer, 0, particlesPoolView);
+            DataStream stream;
+            GraphicsCore.CurrentDevice.ImmediateContext.MapSubresource(counterRetrieveBuffer, MapMode.Read, MapFlags.None, out stream);
+            uint amount = stream.Read<uint>();
+            GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(counterRetrieveBuffer, 0);
+            return (int)amount;
+        }
+
+        private void SortParticles()
         {
             Shader sortShader = Shader.Create(@"BaseAssets\Shaders\Particles\particles_bitonic_sort_step.csh");
             sortShader.Use();
@@ -195,13 +203,31 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        private void applyEffect(ParticleEffect effect)
+        private void ApplyEffect(ParticleEffect effect)
         {
             effect.Use(this);
             effect.EffectShader.UpdateUniform("deltaTime", (float)Time.DeltaTime);
             effect.EffectShader.UpdateUniform("maxParticles", maxParticles);
             effect.EffectShader.UploadUpdatedUniforms();
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(kernelsCount, 1, 1);
+        }
+
+        private int RoundUpToPowerOfTwo(int value)
+        {
+            value--;
+            value |= value >> 1;
+            value |= value >> 2;
+            value |= value >> 4;
+            value |= value >> 8;
+            value |= value >> 16;
+            return value + 1;
+        }
+
+        private struct Particle
+        {
+            public Vector3f position;
+            public float energy;
+            public Vector3f velocity;
         }
     }
 }

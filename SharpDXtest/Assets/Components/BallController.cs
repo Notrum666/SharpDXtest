@@ -50,7 +50,7 @@ namespace SharpDXtest.Assets.Components
             base.FixedUpdate();
 
             Rigidbody rb = GameObject.GetComponent<Rigidbody>();
-            rb.addForce(new Vector3(0, 0, -9.8 * rb.Mass));
+            rb.AddForce(new Vector3(0, 0, -9.8 * rb.Mass));
 
             if (GameObject.Transform.Position.z < -10)
             {
@@ -60,15 +60,15 @@ namespace SharpDXtest.Assets.Components
             }
 
             if (InputManager.IsKeyDown(Key.W))
-                rb.addForce(CameraObject.Transform.Forward.projectOnFlat(Vector3.Up).normalized() * Force);
+                rb.AddForce(CameraObject.Transform.Forward.projectOnFlat(Vector3.Up).normalized() * Force);
             if (InputManager.IsKeyDown(Key.S))
-                rb.addForce(-CameraObject.Transform.Forward.projectOnFlat(Vector3.Up).normalized() * Force);
+                rb.AddForce(-CameraObject.Transform.Forward.projectOnFlat(Vector3.Up).normalized() * Force);
             if (InputManager.IsKeyDown(Key.A))
-                rb.addForce(-CameraObject.Transform.Right * Force);
+                rb.AddForce(-CameraObject.Transform.Right * Force);
             if (InputManager.IsKeyDown(Key.D))
-                rb.addForce(CameraObject.Transform.Right * Force);
+                rb.AddForce(CameraObject.Transform.Right * Force);
             if (InputManager.IsKeyPressed(Key.Space))
-                rb.addImpulse(Vector3.Up * 5);
+                rb.AddImpulse(Vector3.Up * 5);
         }
 
         private void OnCollisionBegin(Rigidbody sender, Collider col, Collider other)
@@ -91,7 +91,10 @@ namespace SharpDXtest.Assets.Components
             //other.gameObject.Destroy();
             //gameObject.transform.LocalScale = gameObject.transform.LocalScale + new Vector3(0.2, 0.2, 0.2);
 
-            (col as SphereCollider).Radius += 0.1;
+            if (col is SphereCollider sphereCollider)
+            {
+                sphereCollider.Radius.Set(sphereCollider.Radius + 0.1);
+            }
             CameraObject.GetComponent<CameraArm>().ArmLength += 0.3;
         }
     }

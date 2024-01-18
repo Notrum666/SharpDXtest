@@ -187,7 +187,7 @@ namespace Engine
                 if (!light.LocalEnabled)
                     continue;
 
-                light.RenderShadows();
+                light.RenderShadows(camera);
             }
         }
 

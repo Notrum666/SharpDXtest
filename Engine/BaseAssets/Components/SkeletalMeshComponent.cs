@@ -64,7 +64,7 @@ namespace Engine.BaseAssets.Components
             skeleton = model?.Skeleton;
         }
 
-        public override void Render()
+        public override void Render(bool withMaterials = true)
         {
             if (disposed)
                 throw new ObjectDisposedException(nameof(SkeletalMeshComponent));
@@ -73,7 +73,7 @@ namespace Engine.BaseAssets.Components
             bonesTransforms = curBonesTransforms;
             EnsureGPUBuffer(curBonesTransforms, invTransposeBonesTransform);
             Use(curBonesTransforms, invTransposeBonesTransform);
-            base.Render();
+            base.Render(withMaterials);
             GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(0, null);
             GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(1, null);
         }

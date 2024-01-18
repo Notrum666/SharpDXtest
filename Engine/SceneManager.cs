@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Engine.BaseAssets.Components;
+using Engine.BaseAssets.Components.Colliders;
 
 using LinearAlgebra;
 
@@ -21,7 +22,7 @@ namespace Engine
         {
             LoadSceneByName(Scene.CurrentScene?.Name ?? Game.StartingSceneName);
         }
-        
+
         public static void LoadSceneByPath(string path)
         {
             if (!Scenes.ContainsKey(path))

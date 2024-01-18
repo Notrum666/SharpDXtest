@@ -87,19 +87,22 @@ namespace Engine.BaseAssets.Components
             GameObject.Transform.Invalidated -= InvalidateBoundingSphereRadius;
         }
 
-        public virtual void Render()
+        public virtual void Render(bool withMaterials = true)
         {
             if (model is null)
                 return;
 
             for (int i = 0; i < model.Meshes.Count; ++i)
             {
-                Material curMaterial = Materials[i];
-                if (curMaterial is null)
-                    curMaterial = model.Meshes[i].DefaultMaterial;
-                if (curMaterial is null)
-                    curMaterial = Material.Default;
-                curMaterial.Use();
+                if (withMaterials)
+                {
+                    Material curMaterial = Materials[i];
+                    if (curMaterial is null)
+                        curMaterial = model.Meshes[i].DefaultMaterial;
+                    if (curMaterial is null)
+                        curMaterial = Material.Default;
+                    curMaterial.Use();
+                }
 
                 model.Meshes[i].Render();
             }
