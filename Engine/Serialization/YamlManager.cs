@@ -40,6 +40,7 @@ namespace Engine
         {
             SerializerBuilder builder = new SerializerBuilder();
             builder.EnsureRoundtrip();
+            builder.DisableAliases();
 
             builder.RegisterTagMappedClasses();
             builder.WithTypeConverter(GuidConverter, s => s.InsteadOf<YamlGuidConverter>());
