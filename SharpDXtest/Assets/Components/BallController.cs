@@ -91,7 +91,10 @@ namespace SharpDXtest.Assets.Components
             //other.gameObject.Destroy();
             //gameObject.transform.LocalScale = gameObject.transform.LocalScale + new Vector3(0.2, 0.2, 0.2);
 
-            (col as SphereCollider).Radius += 0.1;
+            if (col is SphereCollider sphereCollider)
+            {
+                sphereCollider.Radius.Set(sphereCollider.Radius + 0.1);
+            }
             CameraObject.GetComponent<CameraArm>().ArmLength += 0.3;
         }
     }
