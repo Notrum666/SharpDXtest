@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 
+using Engine.BaseAssets.Components;
 using Engine.Serialization;
 
 using YamlDotNet.Serialization.Callbacks;
@@ -18,6 +19,18 @@ namespace Engine.AssetsData
         protected sealed override void SetDefaultValues()
         {
             // TODO: Import/create default empty scene
+        }
+
+        public static SceneData FromScene(Scene scene)
+        {
+            SceneData sceneData = new SceneData();
+            foreach (GameObject gameObject in scene.GameObjects)
+            {
+                sceneData.SerializableObjects.Add(gameObject);
+                foreach (Component component in gameObject.Components)
+                    sceneData.SerializableObjects.Add(component);
+            }
+            return sceneData;
         }
 
         public sealed override void Serialize(BinaryWriter writer)

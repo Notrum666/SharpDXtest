@@ -202,7 +202,11 @@ namespace Editor
         private void UserControl_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Escape)
+            {
                 Keyboard.ClearFocus();
+
+                e.Handled = true;
+            }
         }
 
         private void UserControl_GotKeyboardFocus(object sender, RoutedEventArgs e)

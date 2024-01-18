@@ -105,5 +105,10 @@ namespace Editor
         {
             Keyboard.ClearFocus();
         }
+
+        private void SaveCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            ProjectViewModel.Current.SaveCurrentScene();
+        }
     }
 }

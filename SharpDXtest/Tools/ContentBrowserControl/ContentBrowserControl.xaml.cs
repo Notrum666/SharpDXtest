@@ -200,9 +200,12 @@ namespace Editor
                     if (dataContext is not ContentBrowserFolderViewModel && dataContext is not ContentBrowserAssetViewModel)
                         return;
 
-                    if (e.ClickCount == 2 && dataContext is ContentBrowserFolderViewModel folder)
+                    if (e.ClickCount == 2)
                     {
-                        SelectFolder(folder);
+                        if (dataContext is ContentBrowserFolderViewModel folder)
+                            SelectFolder(folder);
+                        if (dataContext is ContentBrowserAssetViewModel asset)
+                            asset.Open();
                         return;
                     }
 
@@ -249,6 +252,8 @@ namespace Editor
                     AssetsRegistry.DeleteAsset(Path.ChangeExtension(assetToDelete.AssetPath, null));
                 ((ContentBrowserFolderViewModel)listBox.DataContext).Refresh();
             }
+
+            e.Handled = true;
         }
 
         private void FolderItem_MouseMove(object sender, MouseEventArgs e)
@@ -377,6 +382,8 @@ namespace Editor
             {
                 AssetCreationViewModels.Clear();
                 FolderCreationViewModels.Clear();
+
+                e.Handled = true;
                 return;
             }
             if (e.Key == Key.Enter)
@@ -414,6 +421,8 @@ namespace Editor
                 FolderCreationViewModels.Clear();
 
                 folder.Refresh();
+
+                e.Handled = true;
 
                 return;
             }

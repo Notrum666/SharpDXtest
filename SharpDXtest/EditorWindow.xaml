@@ -15,6 +15,9 @@
         <this:BoolToVisibilityConverter x:Key="BoolToVisConv"/>
         <this:BoolToVisibilityConverter x:Key="InvBoolToVisConv" TrueValue="Hidden" FalseValue="Visible"/>
     </this:CustomWindowBase.Resources>
+    <this:CustomWindowBase.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Save" Executed="SaveCommand_Executed"/>
+    </this:CustomWindowBase.CommandBindings>
     <this:CustomWindowBase.Header>
         <Grid Background="#FF303030">
             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
