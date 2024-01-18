@@ -61,6 +61,17 @@ namespace Editor
             Subfolders.Clear();
             Assets.Clear();
 
+            if (!Directory.Exists(fullPath))
+            {
+                if (parent is null)
+                {
+                    Logger.Log(LogType.Error, "Content folder is lost, unable to refresh folder.");
+                    return;
+                }
+                parent.Refresh();
+                return;
+            }
+
             string[] directories;
             try
             {

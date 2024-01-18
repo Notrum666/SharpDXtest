@@ -18,9 +18,9 @@
     </UserControl.Resources>
     <Grid Background="{StaticResource BackgroundBrush}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="50" Width="1*"/>
+            <ColumnDefinition MinWidth="80" Width="4*"/>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="9*"/>
         </Grid.ColumnDefinitions>
         <TreeView Background="Transparent" BorderBrush="{StaticResource BorderBrush}"
                   Grid.Column="0" Margin="5,5,3,5" x:Name="FoldersTreeView"
@@ -33,12 +33,12 @@
                 <HierarchicalDataTemplate DataType="{x:Type local:ContentBrowserFolderViewModel}" 
                                           ItemsSource="{Binding Subfolders}">
                     <StackPanel Orientation="Horizontal">
-                        <Image Source="Icons/FolderIcon.png" Width="16" Height="16" Margin="0,0,5,0"/>
+                        <Image Source="Icons/FolderIcon.png" Width="16" Height="16" Margin="2,0,5,0"/>
                         <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="{Binding Name}"
-                                   AllowDrop="True" Drop="TreeViewFolder_Drop" 
+                                   AllowDrop="True" Drop="TreeViewFolder_Drop" Margin="0,0,5,0"
+                                   DragOver="TreeViewFolder_DragOver"
                                    MouseDown="TreeViewItem_MouseDown" MouseMove="TreeViewItem_MouseMove"/>
                     </StackPanel>
-                    
                 </HierarchicalDataTemplate>
             </TreeView.ItemTemplate>
         </TreeView>
@@ -56,13 +56,13 @@
             </StackPanel>
             <ListBox x:Name="SelectedFolderListBox" Grid.Row="1" DataContext="{Binding SelectedItem, ElementName=FoldersTreeView}"
                      d:DataContext="{d:DesignInstance Type={x:Type local:ContentBrowserFolderViewModel}, IsDesignTimeCreatable=False}"
-                     Margin="5" Drop="ListBox_Drop" KeyDown="ListBox_KeyDown"
+                     Margin="5" Drop="SelectedFolderListBox_Drop" KeyDown="SelectedFolderListBox_KeyDown"
                      Background="Transparent" BorderBrush="Transparent" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      ScrollViewer.VerticalScrollBarVisibility="Hidden"
                      PreviewMouseDown="ListBox_PreviewMouseButtonDown"
                      MouseLeftButtonUp="ListBox_MouseLeftButtonUp"
                      AllowDrop="{Binding SelectedItem, ElementName=FoldersTreeView, Converter={StaticResource ObjToBoolConv}}"
-                     Focusable="True">
+                     Focusable="True" DragOver="SelectedFolderListBox_DragOver">
                 <ListBox.CommandBindings>
                     <CommandBinding Command="ApplicationCommands.Paste" Executed="PasteCommand_Executed"/>
                     <CommandBinding Command="ApplicationCommands.Copy" Executed="CopyCommand_Executed"/>
@@ -74,14 +74,17 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Folder" Command="{Binding Data.StartFolderCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"/>
-                        <Separator/>
-                        <MenuItem Header="Scene" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
+                        <MenuItem Header="Refresh" Command="{Binding Data.RefreshCommand, Source={StaticResource ContentBrowserControlProxy}}"/>
+                        <MenuItem Header="Create...">
+                            <MenuItem Header="Folder" Command="{Binding Data.StartFolderCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"/>
+                            <Separator/>
+                            <MenuItem Header="Scene" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
                                   CommandParameter="{x:Type assets:SceneData}"/>
-                        <MenuItem Header="Material" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
+                            <MenuItem Header="Material" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
                                   CommandParameter="{x:Type assets:MaterialData}"/>
-                        <!--<MenuItem Header="Script" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
+                            <!--<MenuItem Header="Script" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
                                   CommandParameter="{x:Type assets:ScriptData}"/>-->
+                        </MenuItem>
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <ListBox.Resources>
@@ -91,7 +94,7 @@
                     
                     <DataTemplate DataType="{x:Type local:ContentBrowserFolderViewModel}">
                         <Grid Margin="5" MouseMove="FolderItem_MouseMove" AllowDrop="True"
-                              Drop="FolderItem_Drop"
+                              Drop="FolderItem_Drop" DragOver="FolderItem_DragOver"
                               Width="{Binding ItemsWidth, ElementName=ThisContentBrowser}"
                               Height="{Binding ItemsHeight, ElementName=ThisContentBrowser}">
                             <Grid.RowDefinitions>
@@ -106,8 +109,7 @@
                         </Grid>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type local:ContentBrowserAssetViewModel}">
-                        <Grid Margin="5" MouseMove="FolderItem_MouseMove" AllowDrop="True"
-                              Drop="FolderItem_Drop"
+                        <Grid Margin="5" MouseMove="FolderItem_MouseMove"
                               Width="{Binding ItemsWidth, ElementName=ThisContentBrowser}"
                               Height="{Binding ItemsHeight, ElementName=ThisContentBrowser}">
                             <Grid.RowDefinitions>
@@ -136,7 +138,7 @@
                                      FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Background="Transparent" BorderBrush="Transparent"
                                      LostFocus="ItemCreationTextBox_LostFocus" Loaded="FocusSelfOnLoad"
-                                     KeyDown="ItemCreationTextBox_KeyDown"/>
+                                     KeyDown="ItemCreationTextBox_KeyDown" CaretBrush="{StaticResource CaretBrush}"/>
                         </Grid>
                     </DataTemplate>
                     <DataTemplate DataType="{x:Type local:FolderCreationViewModel}">
@@ -153,7 +155,7 @@
                                      FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Background="Transparent" BorderBrush="Transparent"
                                      LostFocus="ItemCreationTextBox_LostFocus" Loaded="FocusSelfOnLoad"
-                                     KeyDown="ItemCreationTextBox_KeyDown"/>
+                                     KeyDown="ItemCreationTextBox_KeyDown" CaretBrush="{StaticResource CaretBrush}"/>
                         </Grid>
                     </DataTemplate>
                 </ListBox.Resources>

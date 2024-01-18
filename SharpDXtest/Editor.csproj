@@ -22,12 +22,15 @@
 	</PropertyGroup>
 	<PropertyGroup>
 		<StartupObject />
+		<ApplicationIcon>Icons\ObjectIcon.ico</ApplicationIcon>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Remove="Images\big-gear.png" />
+		<None Remove="Images\ObjectIcon.png" />
 		<None Remove="Resources\BaseAssets\Shaders\DeferredRender\deferred_geometry_skinned.vsh" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FileIcon.png" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
+		<None Remove="Tools\SceneOverviewControl\Icons\ObjectIcon.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Engine\Engine.csproj" />
@@ -49,13 +52,18 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Resource Include="Images\big-gear.png" />
+		<Resource Include="Images\ObjectIcon.png" />
 		<Resource Include="Tools\ContentBrowserControl\Icons\FileIcon.png" />
 		<Resource Include="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
+		<Resource Include="Tools\SceneOverviewControl\Icons\ObjectIcon.png" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Resources\**">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="Icons\ObjectIcon.ico" />
 	</ItemGroup>
 	<ItemGroup>
 		<Compile Update="Tools\InspectorControl\InspectorControl.xaml.cs">

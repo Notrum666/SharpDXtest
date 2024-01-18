@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 using Editor.AssetsImport;
 
@@ -10,8 +12,14 @@ using SharpDXtest;
 
 namespace Editor
 {
-    internal class EditorLayer : Layer
+    internal class EditorLayer : Layer, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         private const bool RecompileOnFocus = true; // TODO: move to settings?
 
         private static EditorLayer current = null;
@@ -46,10 +54,10 @@ namespace Editor
         {
             EngineCore.Init(Current, new EditorRuntimeLayer());
 
-            EngineCore.OnPaused += OnEnginePaused;
+            EngineCore.OnPaused += Current.OnEnginePaused;
             EngineCore.Run();
 
-            OnEnginePaused();
+            Current.OnEnginePaused();
         }
 
         public override void Init()
@@ -73,13 +81,34 @@ namespace Editor
             }
         }
 
+        #region EditorState
+
+        public GameObject SelectedGameObject
+        {
+            get => InspectedObject as GameObject;
+            set => InspectedObject = value;
+        }
+        private object inspectedObject;
+        public object InspectedObject
+        {
+            get => inspectedObject;
+            set
+            {
+                inspectedObject = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(SelectedGameObject));
+            }
+        }
+
+        #endregion
+
         #region Playmode
 
-        public static event Action OnPlaymodeEntered;
-        public static event Action OnPlaymodeExited;
+        public event Action OnPlaymodeEntered;
+        public event Action OnPlaymodeExited;
 
         /// <summary> True if in Play mode, false if in Edit mode </summary>
-        public static bool IsPlaying
+        public bool IsPlaying
         {
             get => isPlaying;
             set
@@ -91,14 +120,14 @@ namespace Editor
             }
         }
 
-        private static bool isPlaying = false;
-        private static bool desiredIsPlaying = false;
-        private static bool stepInProcess = false;
+        private bool isPlaying = false;
+        private bool desiredIsPlaying = false;
+        private bool stepInProcess = false;
 
         /// <summary>
         /// Starts EngineCore playing
         /// </summary>
-        public static void EnterPlaymode()
+        public void EnterPlaymode()
         {
             IsPlaying = true;
         }
@@ -106,12 +135,12 @@ namespace Editor
         /// <summary>
         /// Stops EngineCore playing and resets the scene
         /// </summary>
-        public static void ExitPlaymode()
+        public void ExitPlaymode()
         {
             IsPlaying = false;
         }
 
-        public static void ProcessStep()
+        public void ProcessStep()
         {
             if (IsPlaying && EngineCore.IsPaused)
                 stepInProcess = true;
@@ -137,7 +166,7 @@ namespace Editor
             }
         }
 
-        private static void OnEnginePaused()
+        private void OnEnginePaused()
         {
             if (desiredIsPlaying)
                 return;

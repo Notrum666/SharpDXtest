@@ -90,10 +90,7 @@ namespace Engine.BaseAssets.Components
         public virtual void Render(bool withMaterials = true)
         {
             if (model is null)
-            {
-                Logger.Log(LogType.Warning, GameObject.ToString() + ": trying to render MeshComponent with no mesh set");
                 return;
-            }
 
             for (int i = 0; i < model.Meshes.Count; ++i)
             {

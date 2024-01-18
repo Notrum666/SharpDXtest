@@ -99,6 +99,11 @@ namespace Engine
             cameraObj.AddComponent<SoundListener>();
             camera.MakeCurrent();
 
+            GameObject subObject1 = GameObject.Instantiate("SubObject1", cameraObj.Transform);
+            GameObject subObject2 = GameObject.Instantiate("SubObject2", cameraObj.Transform);
+            GameObject.Instantiate("SubObject3", subObject1.Transform);
+            GameObject.Instantiate("SubObject4", subObject2.Transform);
+
             GameObject gasVolumeObj = GameObject.Instantiate("GasVolume");
             Transform gasVolumeTransform = gasVolumeObj.GetComponent<Transform>();
             gasVolumeTransform.Position = new Vector3(0, 0, 60);
