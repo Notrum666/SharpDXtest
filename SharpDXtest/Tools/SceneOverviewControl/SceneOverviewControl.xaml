@@ -6,22 +6,38 @@
              xmlns:local="clr-namespace:Editor"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800" Tag="Scene" Width="800" Height="300"
+             d:DesignHeight="500" d:DesignWidth="300" Tag="Scene" Width="300" Height="500"
              Loaded="UserControl_Loaded" Unloaded="UserControl_Unloaded"
              Style="{StaticResource ToolControl}"
              d:DataContext="{d:DesignInstance Type=local:SceneOverviewControl, IsDesignTimeCreatable=False}">
     <UserControl.Resources>
         <local:BindingProxy x:Key="SceneOverviewControlProxy" Data="{Binding}"/>
     </UserControl.Resources>
-    <Grid Background="{StaticResource BackgroundBrush}">
-        <TreeView Background="Transparent" DataContext="{Binding SceneViewModel}"
+    <Grid Background="{StaticResource BackgroundBrush}" DataContext="{Binding SceneViewModel}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Background="#FF303030" VerticalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Scene" HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                       Foreground="{StaticResource ForegroundBrush}" FontSize="20"
+                       Margin="10,1,0,3"/>
+            <TextBlock Text="{Binding Name}" HorizontalAlignment="Left" VerticalAlignment="Center"
+                       Background="Transparent" Foreground="{StaticResource ForegroundBrush}"
+                       FontSize="20" Margin="10,1,10,3" Grid.Column="1"/>
+        </Grid>
+        <TreeView Background="Transparent"
                   ItemsSource="{Binding SubItems}"
                   MouseLeftButtonDown="SceneTreeView_MouseLeftButtonDown" 
                   MouseLeftButtonUp="SceneTreeView_MouseLeftButtonUp"
                   x:Name="SceneTreeView" AllowDrop="True"
                   KeyDown="SceneTreeView_KeyDown"
                   DragOver="SceneTreeView_DragOver"
-                  Drop="SceneTreeView_Drop"
+                  Drop="SceneTreeView_Drop" Grid.Row="1"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                   ScrollViewer.VerticalScrollBarVisibility="Hidden"
                   ItemContainerStyle="{StaticResource TreeViewItemStyle}">
