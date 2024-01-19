@@ -15,7 +15,7 @@ namespace TestProject
     {
         public override void Start()
         {
-            double result = 1.0 / 0.0;
+            throw new Exception("Test exception");
         }
     }
 }

@@ -423,8 +423,6 @@ SerializableObjects:
   transform: a68c03936c2a4c37a0288b700c2c53ed
   components:
   - a68c03936c2a4c37a0288b700c2c53ed
-  - d5b0959527cb42908a1ae86180cfa02a
-  - af694c3f0f2e458c8a364d6689908428
 - !Transform
   instanceId: a68c03936c2a4c37a0288b700c2c53ed
   gameObject: 7c9d805792354bec9ad23ad6986368ca
@@ -434,14 +432,6 @@ SerializableObjects:
     x: 1
     y: 1
     z: 1
-- !TestProjectComponent
-  instanceId: d5b0959527cb42908a1ae86180cfa02a
-  gameObject: 7c9d805792354bec9ad23ad6986368ca
-  localEnabled: true
-- !TestProjectComponent
-  instanceId: af694c3f0f2e458c8a364d6689908428
-  gameObject: 7c9d805792354bec9ad23ad6986368ca
-  localEnabled: true
 - !GameObject
   instanceId: 77b28f2b4d194a18a6b865d4445dbc01
   name: SOSI_PISOS

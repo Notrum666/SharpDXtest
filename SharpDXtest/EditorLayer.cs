@@ -130,7 +130,6 @@ namespace Editor
         }
         private bool desiredIsPlaying = false;
         private bool stepInProcess = false;
-        private bool notifyPlaymodeEntered = false;
 
         public bool IsEnginePaused
         {
@@ -167,14 +166,6 @@ namespace Editor
 
         public override void OnFrameEnded()
         {
-            // to delay event firing until next frame because CameraRenderControl can get null from Camera.Current
-            // TODO: rework CameraRenderControl camera selection to go off of actually Camera.Current being changed
-            if (notifyPlaymodeEntered)
-            {
-                OnPlaymodeEntered?.Invoke();
-                notifyPlaymodeEntered = false;
-            }
-
             if (desiredIsPlaying != isPlaying)
             {
                 isPlaying = desiredIsPlaying;
@@ -182,13 +173,15 @@ namespace Editor
 
                 if (isPlaying)
                 {
+                    ProjectViewModel.Current.SaveCurrentScene();
+                    OnPlaymodeEntered?.Invoke();
                     EngineCore.IsPaused = false;
-                    notifyPlaymodeEntered = true;
                 }
                 else
                 {
-                    EngineCore.IsPaused = true;
+                    SceneManager.ReloadScene();
                     OnPlaymodeExited?.Invoke();
+                    EngineCore.IsPaused = true;
                 }
 
                 return;
