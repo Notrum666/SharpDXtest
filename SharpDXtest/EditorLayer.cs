@@ -71,12 +71,13 @@ namespace Editor
         {
             AssetsRegistry.InitializeInFolder(ProjectViewModel.Current.FolderPath);
 
+            ScriptManager.Recompile();
+            AssetsRegistry.Refresh();
+
             ProjectViewModel.Current.ApplyProjectSettings();
             ProjectViewModel.Current.MonitorGameScenes();
 
-            ScriptManager.Recompile();
             ScriptManager.OnCodeRecompiled += SceneManager.ReloadScene;
-
         }
 
         public override void Update()

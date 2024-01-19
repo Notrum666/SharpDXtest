@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization;
-using Engine.BaseAssets.Components;
 using Engine.Serialization;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.ObjectFactories;
@@ -15,8 +14,8 @@ namespace Engine
 {
     public static class YamlManager
     {
-        private static ISerializer Serializer { get; }
-        private static IDeserializer Deserializer { get; }
+        private static ISerializer Serializer { get; set; }
+        private static IDeserializer Deserializer { get; set; }
 
         private static CustomObjectFactory ObjectFactory { get; }
         private static GuidConverter GuidConverter { get; }
@@ -32,6 +31,11 @@ namespace Engine
             SerializedObjectConverter = new SerializedObjectConverter();
             TypeConverter.RegisterTypeConverter<SerializableObject, SerializedObjectPromiseConverter>();
 
+            ReBuild();
+        }
+
+        public static void ReBuild()
+        {
             Serializer = BuildSerializer();
             Deserializer = BuildDeserializer();
         }
@@ -85,7 +89,7 @@ namespace Engine
                     YamlTagMappedAttribute tagMappedAttribute = type.GetCustomAttribute<YamlTagMappedAttribute>();
                     if (tagMappedAttribute != null)
                     {
-                        string tagName = tagMappedAttribute.TagName ?? type.Name;
+                        string tagName = tagMappedAttribute.TagName ?? type.Name; //TODO: AssemblyName?
                         builder.WithTagMapping($"!{tagName}", type);
                     }
                 }
