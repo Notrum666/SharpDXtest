@@ -19,7 +19,8 @@ namespace Engine.Layers
 
             CurrentScene.ProcessNewObjects();
 
-            InitializeGameObjects(); //Awake
+            foreach (GameObject obj in CurrentScene.GameObjects)
+                obj.Initialize();
         }
 
         public override void FixedUpdate()
@@ -57,27 +58,7 @@ namespace Engine.Layers
 
         public override void Update()
         {
-            if (CurrentScene == null)
-                return;
-
-            UpdateGameObjects();
-        }
-
-        public override void OnFrameEnded()
-        {
-            CurrentScene?.DestroyPendingObjects();
-            SceneManager.TryUnloadCurrentScene();
-        }
-
-        private void InitializeGameObjects()
-        {
-            foreach (GameObject obj in CurrentScene.GameObjects)
-                obj.Initialize();
-        }
-
-        private void UpdateGameObjects()
-        {
-            if (EngineCore.IsPaused)
+            if (CurrentScene == null || EngineCore.IsPaused)
                 return;
 
             foreach (GameObject obj in CurrentScene.GameObjects)
@@ -85,6 +66,12 @@ namespace Engine.Layers
                 if (obj.Enabled)
                     obj.Update();
             }
+        }
+
+        public override void OnFrameEnded()
+        {
+            CurrentScene?.DestroyPendingObjects();
+            SceneManager.TryUnloadCurrentScene();
         }
     }
 }
