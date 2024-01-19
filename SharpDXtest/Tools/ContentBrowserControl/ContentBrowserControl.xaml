@@ -51,7 +51,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                 <TextBlock Foreground="{StaticResource ForegroundBrush}" Text="Size: " VerticalAlignment="Center"
                            FontSize="20"/>
-                <Slider Minimum="80" Maximum="160" Width="100" VerticalAlignment="Center"
+                <Slider Minimum="40" Maximum="160" Width="100" VerticalAlignment="Center"
                         Value="{Binding ItemsWidth}"/>
             </StackPanel>
             <ListBox x:Name="SelectedFolderListBox" Grid.Row="1" DataContext="{Binding SelectedItem, ElementName=FoldersTreeView}"
