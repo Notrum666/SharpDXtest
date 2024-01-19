@@ -57,8 +57,6 @@ namespace Editor
 
             ContentFolderPath = Path.Combine(parentFolderPath, ContentFolderName);
             Directory.CreateDirectory(ContentFolderPath);
-
-            Refresh();
         }
 
         public static void Refresh()

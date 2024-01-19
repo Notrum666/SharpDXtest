@@ -90,7 +90,7 @@ namespace Engine
 
         internal void AddObject(GameObject newObject)
         {
-            if (CurrentScene == null || CurrentScene.gameObjects.Contains(newObject) || newObjects.Contains(newObject))
+            if (gameObjects.Contains(newObject) || newObjects.Contains(newObject))
                 return;
 
             newObjects.Add(newObject);

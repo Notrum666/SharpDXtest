@@ -5,120 +5,164 @@ TickPerSecond: 24
 Channels:
 - BoneName: Armature.001
   ScalingKeys:
-  - Scaling: &o0
+  - Scaling:
       x: 1
       y: 1
       z: 1
   - Time: 48
-    Scaling: *o0
+    Scaling:
+      x: 1
+      y: 1
+      z: 1
   RotationKeys:
-  - Rotation: &o1
+  - Rotation:
       w: 1
   - Time: 48
-    Rotation: *o1
+    Rotation:
+      w: 1
   PositionKeys:
   - {}
   - Time: 48
 - BoneName: Node_10
   ScalingKeys:
-  - Scaling: &o3
+  - Scaling:
       x: 0.99999964
       y: 1.0000002
       z: 1.0000005
   - Time: 48
-    Scaling: *o3
+    Scaling:
+      x: 0.99999964
+      y: 1.0000002
+      z: 1.0000005
   RotationKeys:
-  - Rotation: &o4
+  - Rotation:
       w: 0.0680895745754242
       x: -0.026573557406663895
       y: 0.3201442360877991
       z: 0.9445450305938721
   - Time: 48
-    Rotation: *o4
+    Rotation:
+      w: 0.0680895745754242
+      x: -0.026573557406663895
+      y: 0.3201442360877991
+      z: 0.9445450305938721
   PositionKeys:
-  - Position: &o5
+  - Position:
       x: -0.0023465191
       y: -0.066173345
       z: -0.02785684
   - Time: 48
-    Position: *o5
+    Position:
+      x: -0.0023465191
+      y: -0.066173345
+      z: -0.02785684
 - BoneName: Node_11
   ScalingKeys:
-  - Scaling: &o6
+  - Scaling:
       x: 1
       y: 1.0000002
       z: 1.0000001
   - Time: 48
-    Scaling: *o6
+    Scaling:
+      x: 1
+      y: 1.0000002
+      z: 1.0000001
   RotationKeys:
-  - Rotation: &o7
+  - Rotation:
       w: 0.7536707520484924
       x: -0.6572521924972534
       y: -0.00017969240434467793
       z: 0.00010425651998957619
   - Time: 48
-    Rotation: *o7
+    Rotation:
+      w: 0.7536707520484924
+      x: -0.6572521924972534
+      y: -0.00017969240434467793
+      z: 0.00010425651998957619
   PositionKeys:
-  - Position: &o8
+  - Position:
       x: -6.988273E-09
       y: 3.646221E-08
       z: -0.14541677
   - Time: 48
-    Position: *o8
+    Position:
+      x: -6.988273E-09
+      y: 3.646221E-08
+      z: -0.14541677
 - BoneName: Node_12
   ScalingKeys:
-  - Scaling: &o9
+  - Scaling:
       x: 1.0000001
       y: 0.9999998
       z: 0.9999999
   - Time: 48
-    Scaling: *o9
+    Scaling:
+      x: 1.0000001
+      y: 0.9999998
+      z: 0.9999999
   RotationKeys:
-  - Rotation: &o10
+  - Rotation:
       w: 0.7825371623039246
       x: 0.6226038932800293
       y: 1.677107866271399E-05
       z: 3.1922236303216778E-06
   - Time: 48
-    Rotation: *o10
+    Rotation:
+      w: 0.7825371623039246
+      x: 0.6226038932800293
+      y: 1.677107866271399E-05
+      z: 3.1922236303216778E-06
   PositionKeys:
-  - Position: &o11
+  - Position:
       x: 2.3107987E-09
       y: 0.250517
       z: -2.6646376E-08
   - Time: 48
-    Position: *o11
+    Position:
+      x: 2.3107987E-09
+      y: 0.250517
+      z: -2.6646376E-08
 - BoneName: Node_13
   ScalingKeys:
-  - Scaling: &o12
+  - Scaling:
       x: 1.0000001
       y: 0.9999998
       z: 1.0000002
   - Time: 48
-    Scaling: *o12
+    Scaling:
+      x: 1.0000001
+      y: 0.9999998
+      z: 1.0000002
   RotationKeys:
-  - Rotation: &o13
+  - Rotation:
       w: 0.6969161629676819
       x: 0.2964426577091217
       y: 0.03151031956076622
       z: 0.652255117893219
   - Time: 48
-    Rotation: *o13
+    Rotation:
+      w: 0.6969161629676819
+      x: 0.2964426577091217
+      y: 0.03151031956076622
+      z: 0.652255117893219
   PositionKeys:
-  - Position: &o14
+  - Position:
       x: -0.090987734
       y: 6.2614665E-05
       z: 6.5179775E-05
   - Time: 48
-    Position: *o14
+    Position:
+      x: -0.090987734
+      y: 6.2614665E-05
+      z: 6.5179775E-05
 - BoneName: Node_14
   ScalingKeys:
-  - Scaling: &o26
+  - Scaling:
       x: 0.9999999
       y: 0.9999992
       z: 0.9999995
   - Time: 1
-    Scaling: &o19
+    Scaling:
       x: 1
       y: 0.9999992
       z: 0.9999997
@@ -128,7 +172,7 @@ Channels:
       y: 0.9999992
       z: 0.99999964
   - Time: 3
-    Scaling: &o22
+    Scaling:
       x: 1
       y: 0.9999992
       z: 0.99999964
@@ -138,12 +182,12 @@ Channels:
       y: 0.99999917
       z: 0.9999996
   - Time: 5
-    Scaling: &o24
+    Scaling:
       x: 1.0000001
       y: 0.99999917
       z: 0.9999997
   - Time: 6
-    Scaling: &o15
+    Scaling:
       x: 0.99999994
       y: 0.9999992
       z: 0.99999964
@@ -153,22 +197,22 @@ Channels:
       y: 0.9999992
       z: 0.99999976
   - Time: 8
-    Scaling: &o16
+    Scaling:
       x: 1
       y: 0.99999917
       z: 0.9999997
   - Time: 9
-    Scaling: &o20
+    Scaling:
       x: 1.0000001
       y: 0.99999917
       z: 0.99999976
   - Time: 10
-    Scaling: &o23
+    Scaling:
       x: 0.99999994
       y: 0.9999992
       z: 0.9999996
   - Time: 11
-    Scaling: &o21
+    Scaling:
       x: 1.0000001
       y: 0.9999992
       z: 0.99999976
@@ -188,86 +232,152 @@ Channels:
       y: 0.9999992
       z: 0.9999998
   - Time: 20
-    Scaling: &o17
+    Scaling:
       x: 1
       y: 0.99999917
       z: 0.99999964
   - Time: 21
-    Scaling: *o15
+    Scaling:
+      x: 0.99999994
+      y: 0.9999992
+      z: 0.99999964
   - Time: 22
-    Scaling: &o18
+    Scaling:
       x: 0.99999994
       y: 0.99999917
       z: 0.9999995
   - Time: 23
-    Scaling: *o16
+    Scaling:
+      x: 1
+      y: 0.99999917
+      z: 0.9999997
   - Time: 24
-    Scaling: *o17
+    Scaling:
+      x: 1
+      y: 0.99999917
+      z: 0.99999964
   - Time: 25
-    Scaling: *o18
+    Scaling:
+      x: 0.99999994
+      y: 0.99999917
+      z: 0.9999995
   - Time: 26
-    Scaling: *o19
+    Scaling:
+      x: 1
+      y: 0.9999992
+      z: 0.9999997
   - Time: 27
-    Scaling: *o20
+    Scaling:
+      x: 1.0000001
+      y: 0.99999917
+      z: 0.99999976
   - Time: 28
-    Scaling: *o21
+    Scaling:
+      x: 1.0000001
+      y: 0.9999992
+      z: 0.99999976
   - Time: 29
-    Scaling: *o17
+    Scaling:
+      x: 1
+      y: 0.99999917
+      z: 0.99999964
   - Time: 30
     Scaling:
       x: 0.9999998
       y: 0.9999992
       z: 0.9999994
   - Time: 31
-    Scaling: *o17
+    Scaling:
+      x: 1
+      y: 0.99999917
+      z: 0.99999964
   - Time: 32
-    Scaling: *o22
+    Scaling:
+      x: 1
+      y: 0.9999992
+      z: 0.99999964
   - Time: 33
-    Scaling: *o23
+    Scaling:
+      x: 0.99999994
+      y: 0.9999992
+      z: 0.9999996
   - Time: 34
-    Scaling: *o17
+    Scaling:
+      x: 1
+      y: 0.99999917
+      z: 0.99999964
   - Time: 35
-    Scaling: *o19
+    Scaling:
+      x: 1
+      y: 0.9999992
+      z: 0.9999997
   - Time: 36
-    Scaling: *o19
+    Scaling:
+      x: 1
+      y: 0.9999992
+      z: 0.9999997
   - Time: 37
-    Scaling: *o22
+    Scaling:
+      x: 1
+      y: 0.9999992
+      z: 0.99999964
   - Time: 38
-    Scaling: *o24
+    Scaling:
+      x: 1.0000001
+      y: 0.99999917
+      z: 0.9999997
   - Time: 39
     Scaling:
       x: 0.99999994
       y: 0.99999917
       z: 0.9999997
   - Time: 40
-    Scaling: *o22
+    Scaling:
+      x: 1
+      y: 0.9999992
+      z: 0.99999964
   - Time: 41
-    Scaling: *o19
+    Scaling:
+      x: 1
+      y: 0.9999992
+      z: 0.9999997
   - Time: 42
-    Scaling: &o25
+    Scaling:
       x: 1
       y: 0.9999993
       z: 0.9999996
   - Time: 43
-    Scaling: *o15
+    Scaling:
+      x: 0.99999994
+      y: 0.9999992
+      z: 0.99999964
   - Time: 44
     Scaling:
       x: 0.9999998
       y: 0.99999917
       z: 0.99999946
   - Time: 45
-    Scaling: *o25
+    Scaling:
+      x: 1
+      y: 0.9999993
+      z: 0.9999996
   - Time: 46
     Scaling:
       x: 1
       y: 0.99999917
       z: 0.9999996
   - Time: 47
-    Scaling: *o19
+    Scaling:
+      x: 1
+      y: 0.9999992
+      z: 0.9999997
   - Time: 48
-    Scaling: *o26
+    Scaling:
+      x: 0.9999999
+      y: 0.9999992
+      z: 0.9999995
   RotationKeys:
-  - Rotation: &o27
+  - Rotation:
       w: -0.30632543563842773
       x: 0.0915527194738388
       y: -0.9312397837638855
@@ -525,417 +635,690 @@ Channels:
       y: -0.9321315884590149
       z: -0.17273001372814178
   - Time: 48
-    Rotation: *o27
+    Rotation:
+      w: -0.30632543563842773
+      x: 0.0915527194738388
+      y: -0.9312397837638855
+      z: -0.17485781013965607
   PositionKeys:
-  - Position: &o28
+  - Position:
       x: 9.313226E-08
       y: 0.24200809
       z: 4.0745363E-08
   - Time: 1
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 2
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 3
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 4
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 5
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 6
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 7
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 8
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 9
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 10
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 11
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 12
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 18
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 19
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 20
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 21
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 22
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 23
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 24
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 25
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 26
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 27
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 28
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 29
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 30
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 31
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 32
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 33
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 34
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 35
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 36
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 37
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 38
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 39
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 40
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 41
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 42
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 43
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 44
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 45
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 46
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 47
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
   - Time: 48
-    Position: *o28
+    Position:
+      x: 9.313226E-08
+      y: 0.24200809
+      z: 4.0745363E-08
 - BoneName: Node_15
   ScalingKeys:
-  - Scaling: &o29
+  - Scaling:
       x: 1.0000002
       y: 1.0000004
       z: 0.99999994
   - Time: 48
-    Scaling: *o29
+    Scaling:
+      x: 1.0000002
+      y: 1.0000004
+      z: 0.99999994
   RotationKeys:
-  - Rotation: &o30
+  - Rotation:
       w: 0.9613814353942871
       x: -0.058613844215869904
       y: 0.2637767791748047
       z: -0.05226856842637062
   - Time: 48
-    Rotation: *o30
+    Rotation:
+      w: 0.9613814353942871
+      x: -0.058613844215869904
+      y: 0.2637767791748047
+      z: -0.05226856842637062
   PositionKeys:
-  - Position: &o31
+  - Position:
       x: -2.4214387E-08
       y: 0.18779211
       z: -1.4528632E-07
   - Time: 48
-    Position: *o31
+    Position:
+      x: -2.4214387E-08
+      y: 0.18779211
+      z: -1.4528632E-07
 - BoneName: Node_16
   ScalingKeys:
-  - Scaling: &o32
+  - Scaling:
       x: 0.99999994
       y: 0.9999999
       z: 0.99999976
   - Time: 48
-    Scaling: *o32
+    Scaling:
+      x: 0.99999994
+      y: 0.9999999
+      z: 0.99999976
   RotationKeys:
-  - Rotation: &o33
+  - Rotation:
       w: -0.1038317158818245
       x: -0.6797327399253845
       y: -0.6896857023239136
       z: -0.22697150707244873
   - Time: 48
-    Rotation: *o33
+    Rotation:
+      w: -0.1038317158818245
+      x: -0.6797327399253845
+      y: -0.6896857023239136
+      z: -0.22697150707244873
   PositionKeys:
-  - Position: &o34
+  - Position:
       x: 0.09101359
       y: 1.4208841E-05
       z: 5.802943E-05
   - Time: 48
-    Position: *o34
+    Position:
+      x: 0.09101359
+      y: 1.4208841E-05
+      z: 5.802943E-05
 - BoneName: Node_17
   ScalingKeys:
-  - Scaling: &o35
+  - Scaling:
       x: 0.9999999
       y: 0.9999998
       z: 0.99999976
   - Time: 48
-    Scaling: *o35
+    Scaling:
+      x: 0.9999999
+      y: 0.9999998
+      z: 0.99999976
   RotationKeys:
-  - Rotation: &o36
+  - Rotation:
       w: 0.9588848352432251
       x: -0.013961046934127808
       y: -0.12937255203723907
       z: 0.2522057294845581
   - Time: 48
-    Rotation: *o36
+    Rotation:
+      w: 0.9588848352432251
+      x: -0.013961046934127808
+      y: -0.12937255203723907
+      z: 0.2522057294845581
   PositionKeys:
-  - Position: &o37
+  - Position:
       x: 1.44355E-08
       y: 0.24200907
       z: -8.419738E-08
   - Time: 48
-    Position: *o37
+    Position:
+      x: 1.44355E-08
+      y: 0.24200907
+      z: -8.419738E-08
 - BoneName: Node_18
   ScalingKeys:
-  - Scaling: &o38
+  - Scaling:
       x: 0.9999998
       y: 1
       z: 0.99999976
   - Time: 48
-    Scaling: *o38
+    Scaling:
+      x: 0.9999998
+      y: 1
+      z: 0.99999976
   RotationKeys:
-  - Rotation: &o39
+  - Rotation:
       w: 0.9959746599197388
       x: 0.006119259167462587
       y: -0.04232560470700264
       z: 0.07877583801746368
   - Time: 48
-    Rotation: *o39
+    Rotation:
+      w: 0.9959746599197388
+      x: 0.006119259167462587
+      y: -0.04232560470700264
+      z: 0.07877583801746368
   PositionKeys:
-  - Position: &o40
+  - Position:
       x: 1.071021E-08
       y: 0.18779145
       z: -3.3527613E-08
   - Time: 48
-    Position: *o40
+    Position:
+      x: 1.071021E-08
+      y: 0.18779145
+      z: -3.3527613E-08
 - BoneName: Node_19
   ScalingKeys:
-  - Scaling: &o41
+  - Scaling:
       x: 0.99999994
       y: 0.99999994
       z: 1
   - Time: 48
-    Scaling: *o41
+    Scaling:
+      x: 0.99999994
+      y: 0.99999994
+      z: 1
   RotationKeys:
-  - Rotation: &o42
+  - Rotation:
       w: 0.7507120370864868
       x: -0.6606295704841614
       y: 8.346162212546915E-05
       z: -7.110674778232351E-05
   - Time: 48
-    Rotation: *o42
+    Rotation:
+      w: 0.7507120370864868
+      x: -0.6606295704841614
+      y: 8.346162212546915E-05
+      z: -7.110674778232351E-05
   PositionKeys:
-  - Position: &o43
+  - Position:
       x: -7.164431E-09
       y: 7.0044734E-08
       z: -0.06483657
   - Time: 48
-    Position: *o43
+    Position:
+      x: -7.164431E-09
+      y: 7.0044734E-08
+      z: -0.06483657
 - BoneName: Node_2
   ScalingKeys:
-  - Scaling: &o44
+  - Scaling:
       x: 1
       y: 1.0000001
       z: 0.9999999
   - Time: 48
-    Scaling: *o44
+    Scaling:
+      x: 1
+      y: 1.0000001
+      z: 0.9999999
   RotationKeys:
-  - Rotation: &o45
+  - Rotation:
       w: 0.4814130663871765
       x: -0.5179530382156372
       y: 0.4814785420894623
       z: 0.5178267359733582
   - Time: 48
-    Rotation: *o45
+    Rotation:
+      w: 0.4814130663871765
+      x: -0.5179530382156372
+      y: 0.4814785420894623
+      z: 0.5178267359733582
   PositionKeys:
-  - Position: &o46
+  - Position:
       x: 1.862645E-08
       y: -0.6439972
       z: 0.020000115
   - Time: 48
-    Position: *o46
+    Position:
+      x: 1.862645E-08
+      y: -0.6439972
+      z: 0.020000115
 - BoneName: Node_20
   ScalingKeys:
-  - Scaling: &o47
+  - Scaling:
       x: 1.0000002
       y: 1.0000002
       z: 0.99999994
   - Time: 48
-    Scaling: *o47
+    Scaling:
+      x: 1.0000002
+      y: 1.0000002
+      z: 0.99999994
   RotationKeys:
-  - Rotation: &o48
+  - Rotation:
       w: -3.77569449483417E-07
       x: -2.553738340793643E-06
       y: -0.9996904730796814
       z: -0.024879666045308113
   - Time: 48
-    Rotation: *o48
+    Rotation:
+      w: -3.77569449483417E-07
+      x: -2.553738340793643E-06
+      y: -0.9996904730796814
+      z: -0.024879666045308113
   PositionKeys:
-  - Position: &o49
+  - Position:
       x: 3.3181777E-09
       y: 0.052039746
       z: 4.7330104E-09
   - Time: 48
-    Position: *o49
+    Position:
+      x: 3.3181777E-09
+      y: 0.052039746
+      z: 4.7330104E-09
 - BoneName: Node_3
   ScalingKeys:
-  - Scaling: &o50
+  - Scaling:
       x: 1
       y: 1.0000004
       z: 1.0000001
   - Time: 48
-    Scaling: *o50
+    Scaling:
+      x: 1
+      y: 1.0000004
+      z: 1.0000001
   RotationKeys:
-  - Rotation: &o51
+  - Rotation:
       w: 0.0733874961733818
       x: 0.06642697751522064
       y: 0.6115014553070068
       z: 0.7850272059440613
   - Time: 48
-    Rotation: *o51
+    Rotation:
+      w: 0.0733874961733818
+      x: 0.06642697751522064
+      y: 0.6115014553070068
+      z: 0.7850272059440613
   PositionKeys:
-  - Position: &o52
+  - Position:
       x: -0.068042025
       y: -0.028570212
       z: 0.0629497
   - Time: 48
-    Position: *o52
+    Position:
+      x: -0.068042025
+      y: -0.028570212
+      z: 0.0629497
 - BoneName: Node_4
   ScalingKeys:
-  - Scaling: &o53
+  - Scaling:
       x: 1
       y: 0.9999998
       z: 0.9999998
   - Time: 48
-    Scaling: *o53
+    Scaling:
+      x: 1
+      y: 0.9999998
+      z: 0.9999998
   RotationKeys:
-  - Rotation: &o54
+  - Rotation:
       w: 0.9683820009231567
       x: 0.21629108488559723
       y: 0.12430641800165176
       z: -0.0015752214239910245
   - Time: 48
-    Rotation: *o54
+    Rotation:
+      w: 0.9683820009231567
+      x: 0.21629108488559723
+      y: 0.12430641800165176
+      z: -0.0015752214239910245
   PositionKeys:
-  - Position: &o55
+  - Position:
       x: 5.2532414E-09
       y: 0.26611122
       z: -3.9115548E-08
   - Time: 48
-    Position: *o55
+    Position:
+      x: 5.2532414E-09
+      y: 0.26611122
+      z: -3.9115548E-08
 - BoneName: Node_5
   ScalingKeys:
-  - Scaling: &o56
+  - Scaling:
       x: 0.99999994
       y: 0.99999976
       z: 0.9999998
   - Time: 48
-    Scaling: *o56
+    Scaling:
+      x: 0.99999994
+      y: 0.99999976
+      z: 0.9999998
   RotationKeys:
-  - Rotation: &o57
+  - Rotation:
       w: 0.52992182970047
       x: 0.8472740650177002
       y: -0.029563991352915764
       z: 0.02086792141199112
   - Time: 48
-    Rotation: *o57
+    Rotation:
+      w: 0.52992182970047
+      x: 0.8472740650177002
+      y: -0.029563991352915764
+      z: 0.02086792141199112
   PositionKeys:
-  - Position: &o58
+  - Position:
       x: -7.799827E-09
       y: 0.27582514
       z: 2.514571E-08
   - Time: 48
-    Position: *o58
+    Position:
+      x: -7.799827E-09
+      y: 0.27582514
+      z: 2.514571E-08
 - BoneName: Node_6
   ScalingKeys:
-  - Scaling: &o59
+  - Scaling:
       x: 1.0000001
       y: 1.0000001
       z: 0.9999993
   - Time: 48
-    Scaling: *o59
+    Scaling:
+      x: 1.0000001
+      y: 1.0000001
+      z: 0.9999993
   RotationKeys:
-  - Rotation: &o60
+  - Rotation:
       w: -0.04041507467627525
       x: 0.037264350801706314
       y: 0.31931301951408386
       z: 0.9460535049438477
   - Time: 48
-    Rotation: *o60
+    Rotation:
+      w: -0.04041507467627525
+      x: 0.037264350801706314
+      y: 0.31931301951408386
+      z: 0.9460535049438477
   PositionKeys:
-  - Position: &o61
+  - Position:
       x: -0.0014584897
       y: -0.06619883
       z: -0.027856693
   - Time: 48
-    Position: *o61
+    Position:
+      x: -0.0014584897
+      y: -0.06619883
+      z: -0.027856693
 - BoneName: Node_7
   ScalingKeys:
-  - Scaling: &o62
+  - Scaling:
       x: 0.9999999
       y: 1.0000002
       z: 1.0000001
   - Time: 48
-    Scaling: *o62
+    Scaling:
+      x: 0.9999999
+      y: 1.0000002
+      z: 1.0000001
   RotationKeys:
-  - Rotation: &o63
+  - Rotation:
       w: -0.21388928592205048
       x: -0.24756982922554016
       y: 0.5775680541992188
       z: 0.7479142546653748
   - Time: 48
-    Rotation: *o63
+    Rotation:
+      w: -0.21388928592205048
+      x: -0.24756982922554016
+      y: 0.5775680541992188
+      z: 0.7479142546653748
   PositionKeys:
-  - Position: &o64
+  - Position:
       x: 0.06803667
       y: -0.028518643
       z: 0.06296286
   - Time: 48
-    Position: *o64
+    Position:
+      x: 0.06803667
+      y: -0.028518643
+      z: 0.06296286
 - BoneName: Node_8
   ScalingKeys:
-  - Scaling: &o65
+  - Scaling:
       x: 1
       y: 0.99999994
       z: 0.99999976
   - Time: 48
-    Scaling: *o65
+    Scaling:
+      x: 1
+      y: 0.99999994
+      z: 0.99999976
   RotationKeys:
-  - Rotation: &o66
+  - Rotation:
       w: 0.9189062714576721
       x: 0.2090279459953308
       y: -0.32988980412483215
       z: 0.05559927597641945
   - Time: 48
-    Rotation: *o66
+    Rotation:
+      w: 0.9189062714576721
+      x: 0.2090279459953308
+      y: -0.32988980412483215
+      z: 0.05559927597641945
   PositionKeys:
-  - Position: &o67
+  - Position:
       x: -3.7252903E-09
       y: 0.26611266
       z: -1.8626451E-08
   - Time: 48
-    Position: *o67
+    Position:
+      x: -3.7252903E-09
+      y: 0.26611266
+      z: -1.8626451E-08
 - BoneName: Node_9
   ScalingKeys:
-  - Scaling: &o68
+  - Scaling:
       x: 0.99999994
       y: 1.0000001
       z: 1
   - Time: 48
-    Scaling: *o68
+    Scaling:
+      x: 0.99999994
+      y: 1.0000001
+      z: 1
   RotationKeys:
-  - Rotation: &o69
+  - Rotation:
       w: 0.5303108096122742
       x: 0.8477395176887512
       y: -0.004254036117345095
       z: 0.00949185248464346
   - Time: 48
-    Rotation: *o69
+    Rotation:
+      w: 0.5303108096122742
+      x: 0.8477395176887512
+      y: -0.004254036117345095
+      z: 0.00949185248464346
   PositionKeys:
-  - Position: &o70
+  - Position:
       x: -5.9008016E-09
       y: 0.27582428
       z: -2.1711458E-08
   - Time: 48
-    Position: *o70
+    Position:
+      x: -5.9008016E-09
+      y: 0.27582428
+      z: -2.1711458E-08

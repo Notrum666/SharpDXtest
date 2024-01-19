@@ -1,23 +1,35 @@
 !SkeletonData
-InverseRootTransform: &o0
+InverseRootTransform:
   v00: 1
   v11: 1
   v22: 1
   v33: 1
 Bones:
 - Name: RootNode
-  Offset: *o0
+  Offset:
+    v00: 1
+    v11: 1
+    v22: 1
+    v33: 1
   ParentIndex: -1
   ChildIndices:
   - 1
   - 27
 - Name: Node_0
-  Offset: *o0
+  Offset:
+    v00: 1
+    v11: 1
+    v22: 1
+    v33: 1
   Index: 1
   ChildIndices:
   - 2
 - Name: Armature.001
-  Offset: *o0
+  Offset:
+    v00: 1
+    v11: 1
+    v22: 1
+    v33: 1
   Index: 2
   ParentIndex: 1
   ChildIndices:
@@ -122,7 +134,11 @@ Bones:
   ChildIndices:
   - 8
 - Name: Node_20_end
-  Offset: *o0
+  Offset:
+    v00: 1
+    v11: 1
+    v22: 1
+    v33: 1
   Index: 8
   ParentIndex: 7
 - Name: Node_16
@@ -183,7 +199,11 @@ Bones:
   ChildIndices:
   - 12
 - Name: Node_18_end
-  Offset: *o0
+  Offset:
+    v00: 1
+    v11: 1
+    v22: 1
+    v33: 1
   Index: 12
   ParentIndex: 11
 - Name: Node_13
@@ -244,7 +264,11 @@ Bones:
   ChildIndices:
   - 16
 - Name: Node_15_end
-  Offset: *o0
+  Offset:
+    v00: 1
+    v11: 1
+    v22: 1
+    v33: 1
   Index: 16
   ParentIndex: 15
 - Name: Node_7
@@ -324,7 +348,11 @@ Bones:
   ChildIndices:
   - 21
 - Name: Node_10_end
-  Offset: *o0
+  Offset:
+    v00: 1
+    v11: 1
+    v22: 1
+    v33: 1
   Index: 21
   ParentIndex: 20
 - Name: Node_3
@@ -404,9 +432,17 @@ Bones:
   ChildIndices:
   - 26
 - Name: Node_6_end
-  Offset: *o0
+  Offset:
+    v00: 1
+    v11: 1
+    v22: 1
+    v33: 1
   Index: 26
   ParentIndex: 25
 - Name: Cesium_Man.001
-  Offset: *o0
+  Offset:
+    v00: 1
+    v11: 1
+    v22: 1
+    v33: 1
   Index: 27

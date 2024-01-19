@@ -16,6 +16,8 @@ using Microsoft.CodeAnalysis.MSBuild;
 using Engine;
 
 using System.Diagnostics;
+using Engine.Serialization;
+using YamlDotNet.Serialization.Utilities;
 
 namespace Editor.AssetsImport
 {
@@ -84,6 +86,9 @@ namespace Editor.AssetsImport
             filesWatcher.EnableRaisingEvents = true;
 
             currentAssemblyContext.EnterContextualReflection();
+            TypeConverter.RegisterTypeConverter<SerializableObject, SerializedObjectPromiseConverter>();
+            YamlManager.ReBuild();
+
             OnCodeRecompiled?.Invoke();
 
             //Debug.WriteLine("==========");

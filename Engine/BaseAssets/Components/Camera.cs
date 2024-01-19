@@ -67,6 +67,11 @@ namespace Engine.BaseAssets.Components
             //BackgroundColor = Color.FromRgba(0xFFFFFFFF);
             Resize(1280, 720);
 
+        }
+
+        private protected override void InitializeInner()
+        {
+            base.InitializeInner();
             Cameras.Add(this);
         }
 

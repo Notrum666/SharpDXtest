@@ -69,6 +69,9 @@ namespace Engine.BaseAssets.Components
             if (disposed)
                 throw new ObjectDisposedException(nameof(SkeletalMeshComponent));
 
+            if (model is null)
+                return;
+
             UpdateAnimation(out List<Matrix4x4f> curBonesTransforms, out List<Matrix4x4f> invTransposeBonesTransform);
             bonesTransforms = curBonesTransforms;
             EnsureGPUBuffer(curBonesTransforms, invTransposeBonesTransform);
@@ -260,7 +263,7 @@ namespace Engine.BaseAssets.Components
             bonesTransformations = new List<Matrix4x4f>();
             inverseTransposeBonesTransformations = new List<Matrix4x4f>();
             // calculate transform matrices
-            if (skeleton.Bones.Count > 0)
+            if (skeleton?.Bones?.Count > 0)
             {
                 bonesTransformations = skeleton.Bones.Select(_ => Matrix4x4f.Identity).ToList();
                 inverseTransposeBonesTransformations = new List<Matrix4x4f>(bonesTransformations);

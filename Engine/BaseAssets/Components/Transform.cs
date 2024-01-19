@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Reflection;
+
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
@@ -31,7 +32,7 @@ namespace Engine.BaseAssets.Components
             add => invalidated += value;
             remove => invalidated -= value;
         }
-        private bool requiresCachedDataRecalculation;
+        private bool requiresCachedDataRecalculation = true;
 
         /// <summary>
         /// Calls <see cref="GameObject.DestroyImmediateInternal()">GameObject.DestroyImmediate()</see> <br/>
@@ -71,12 +72,6 @@ namespace Engine.BaseAssets.Components
 
         public void SetParent(Transform transform, bool keepRelative = true)
         {
-            if (Parent != null)
-            {
-                Parent.Invalidated -= InvalidateCachedData;
-                Parent.children.Remove(this);
-            }
-
             Transform tmp = transform;
             while (tmp != null)
             {
@@ -86,6 +81,12 @@ namespace Engine.BaseAssets.Components
                     return;
                 }
                 tmp = tmp.Parent;
+            }
+
+            if (Parent != null)
+            {
+                Parent.Invalidated -= InvalidateCachedData;
+                Parent.children.Remove(this);
             }
 
             if (keepRelative)
@@ -117,12 +118,12 @@ namespace Engine.BaseAssets.Components
         #region TransformData
 
         [SerializedField("Position")]
-        private Vector3 localPosition;
+        private Vector3 localPosition = Vector3.Zero;
         [DisplayOverrides(typeof(QuaternionToEulerDegreesConverter), true)]
         [SerializedField("Rotation")]
-        private Quaternion localRotation;
+        private Quaternion localRotation = Quaternion.Identity;
         [SerializedField("Scale")]
-        private Vector3 localScale;
+        private Vector3 localScale = new Vector3(1.0, 1.0, 1.0);
 
         public Vector3 LocalPosition
         {
@@ -261,14 +262,14 @@ namespace Engine.BaseAssets.Components
         public Vector3 Right => Rotation * Vector3.Right;
         public Vector3 Up => Rotation * Vector3.Up;
 
-        public Transform()
-        {
-            localPosition = Vector3.Zero;
-            localRotation = Quaternion.Identity;
-            localScale = new Vector3(1.0, 1.0, 1.0);
+        //public Transform()
+        //{
+        //    localPosition = Vector3.Zero;
+        //    localRotation = Quaternion.Identity;
+        //    localScale = new Vector3(1.0, 1.0, 1.0);
 
-            RecalculateCachedData();
-        }
+        //    RecalculateCachedData();
+        //}
 
         private void RecalculateCachedData()
         {

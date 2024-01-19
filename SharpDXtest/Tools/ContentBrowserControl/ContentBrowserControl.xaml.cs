@@ -30,7 +30,7 @@ namespace Editor
         public ObservableCollection<ContentBrowserFolderViewModel> RootFolderViewModels { get; } = new ObservableCollection<ContentBrowserFolderViewModel>();
         public ObservableCollection<AssetCreationViewModel> AssetCreationViewModels { get; } = new ObservableCollection<AssetCreationViewModel>();
         public ObservableCollection<FolderCreationViewModel> FolderCreationViewModels { get; } = new ObservableCollection<FolderCreationViewModel>();
-        private double itemsWidth = 100;
+        private double itemsWidth = 60;
         public double ItemsWidth
         {
             get => itemsWidth;

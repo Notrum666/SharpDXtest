@@ -10,9 +10,7 @@ namespace Editor.AssetsImport
 
         protected override void OnImportAsset(AssetImportContext importContext)
         {
-            AnimationData animationData = YamlManager.LoadFromStream<AnimationData>(importContext.DataStream);
-
-            importContext.AddMainAsset(animationData);
+            AssetsManager.SaveNativeAssetData<AnimationData>(importContext.AssetContentPath, importContext.MainGuid, importContext.DataStream);
         }
     }
 }
