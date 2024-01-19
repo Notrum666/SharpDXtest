@@ -138,8 +138,6 @@ namespace Editor
             UpdateTimer.Interval = TimeSpan.FromSeconds(0.1);
             UpdateTimer.Tick += UpdateTick;
             UpdateTimer.Start();
-
-            ScriptManager.OnCodeRecompiled += ReloadTypes;
         }
 
         private void UpdateTick(object sender, EventArgs e)
@@ -189,6 +187,8 @@ namespace Editor
                 });
             }
 
+            ScriptManager.OnCodeRecompiled += ReloadTypes;
+
             loaded = true;
 
             current = this;
@@ -199,6 +199,8 @@ namespace Editor
             // to prevent errors during xaml designer loading in visual studio
             if (!EngineCore.IsAlive)
                 return;
+
+            ScriptManager.OnCodeRecompiled -= ReloadTypes;
 
             current = null;
         }

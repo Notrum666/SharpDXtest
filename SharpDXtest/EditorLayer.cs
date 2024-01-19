@@ -170,6 +170,7 @@ namespace Editor
             {
                 isPlaying = desiredIsPlaying;
                 stepInProcess = false;
+                InspectedObject = null;
 
                 if (isPlaying)
                 {
