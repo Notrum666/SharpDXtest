@@ -9,7 +9,7 @@ namespace Engine.BaseAssets.Components.Colliders
     public sealed class SphereCollider : Collider
     {
         [SerializedField]
-        private double radius;
+        private double radius = 1;
 
         public Ranged<double> Radius => new Ranged<double>(ref radius, min: 0 + double.Epsilon, onSet: () =>
         {

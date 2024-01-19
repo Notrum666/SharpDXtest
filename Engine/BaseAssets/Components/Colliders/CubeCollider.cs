@@ -8,7 +8,7 @@ namespace Engine.BaseAssets.Components.Colliders
     public class CubeCollider : MeshCollider
     {
         [SerializedField]
-        private Vector3 size;
+        private Vector3 size = new Vector3(1, 1, 1);
 
         public Vector3 Size
         {

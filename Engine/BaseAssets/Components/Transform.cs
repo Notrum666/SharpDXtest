@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.Reflection;
+
 using LinearAlgebra;
 
 namespace Engine.BaseAssets.Components
@@ -71,12 +72,6 @@ namespace Engine.BaseAssets.Components
 
         public void SetParent(Transform transform, bool keepRelative = true)
         {
-            if (Parent != null)
-            {
-                Parent.Invalidated -= InvalidateCachedData;
-                Parent.children.Remove(this);
-            }
-
             Transform tmp = transform;
             while (tmp != null)
             {
@@ -86,6 +81,12 @@ namespace Engine.BaseAssets.Components
                     return;
                 }
                 tmp = tmp.Parent;
+            }
+
+            if (Parent != null)
+            {
+                Parent.Invalidated -= InvalidateCachedData;
+                Parent.children.Remove(this);
             }
 
             if (keepRelative)
