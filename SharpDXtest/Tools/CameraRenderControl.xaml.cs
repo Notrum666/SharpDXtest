@@ -133,6 +133,7 @@ namespace Editor
             if (ViewportType.HasFlag(ViewportType.GameView))
             {
                 CameraViewModel.SetCamera(Camera.Current);
+                ResizeCameraView();
                 updateTimer.Start();
             }
         }
@@ -143,13 +144,17 @@ namespace Editor
             {
                 updateTimer.Stop();
                 CameraViewModel.SetCamera(editorCamera);
+                ResizeCameraView();
             }
         }
         
         private void UpdateTick(object sender, EventArgs e)
         {
             if (ViewportType.HasFlag(ViewportType.GameView))
+            {
                 CameraViewModel.SetCamera(Camera.Current);
+                ResizeCameraView();
+            }
         }
 
         private static Camera CreateEditorCamera()
@@ -163,7 +168,6 @@ namespace Editor
             Camera camera = editorCamera.AddComponent<Camera>();
             camera.Near = 0.001;
             camera.Far = 500;
-            camera.OnResized += () => Logger.Log(LogType.Info, $"Editor camera was resized, new size: ({camera.Width}, {camera.Height}).");
 
             return camera;
         }
@@ -267,6 +271,11 @@ namespace Editor
         }
 
         private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            ResizeCameraView();
+        }
+
+        private void ResizeCameraView()
         {
             CameraViewModel.ResizeCamera((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }

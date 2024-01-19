@@ -23,11 +23,11 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private double fov = Math.PI / 2;
         [SerializedField]
-        private double aspect;
+        private double aspect = 1;
         [SerializedField]
-        private double near;
+        private double near = 0.001;
         [SerializedField]
-        private double far;
+        private double far = 500;
 
         private static Camera current = null;
         public static Camera Current
@@ -85,6 +85,9 @@ namespace Engine.BaseAssets.Components
 
         protected override void OnDestroy()
         {
+            if (Current == this)
+                Current = null;
+
             Cameras.Remove(this);
         }
 
