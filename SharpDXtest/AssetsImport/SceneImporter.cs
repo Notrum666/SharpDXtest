@@ -10,9 +10,7 @@ namespace Editor.AssetsImport
 
         protected override void OnImportAsset(AssetImportContext importContext)
         {
-            SceneData sceneData = YamlManager.LoadFromStream<SceneData>(importContext.DataStream);
-
-            importContext.AddMainAsset(sceneData);
+            AssetsManager.SaveNativeAssetData<SceneData>(importContext.AssetContentPath, importContext.MainGuid, importContext.DataStream);
         }
     }
 }

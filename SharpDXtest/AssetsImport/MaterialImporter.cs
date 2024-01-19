@@ -10,9 +10,7 @@ namespace Editor.AssetsImport
 
         protected override void OnImportAsset(AssetImportContext importContext)
         {
-            MaterialData materialData = YamlManager.LoadFromStream<MaterialData>(importContext.DataStream);
-
-            importContext.AddMainAsset(materialData);
+            AssetsManager.SaveNativeAssetData<MaterialData>(importContext.AssetContentPath, importContext.MainGuid, importContext.DataStream);
         }
     }
 }

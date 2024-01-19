@@ -10,9 +10,7 @@ namespace Editor.AssetsImport
 
         protected override void OnImportAsset(AssetImportContext importContext)
         {
-            SkeletonData skeletonData = YamlManager.LoadFromStream<SkeletonData>(importContext.DataStream);
-
-            importContext.AddMainAsset(skeletonData);
+            AssetsManager.SaveNativeAssetData<SkeletonData>(importContext.AssetContentPath, importContext.MainGuid, importContext.DataStream);
         }
     }
 }

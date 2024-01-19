@@ -11,6 +11,7 @@ namespace Editor.AssetsImport
     {
         public readonly string AssetSourcePath;
         public readonly string AssetContentPath;
+        public Guid MainGuid => assetMetaData?.Guid ?? Guid.Empty;
 
         public Stream DataStream;
 

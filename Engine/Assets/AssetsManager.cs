@@ -148,6 +148,19 @@ namespace Engine
             artifactDatabase.SaveArtifactData(contentAssetPath, guid, assetData.GetType());
         }
 
+        public static void SaveNativeAssetData<T>(string contentAssetPath, Guid guid, Stream assetData) where T : NativeAssetData
+        {
+            string artifactPath = GetArtifactFullPath(guid);
+
+            using FileStream fileStream = File.Open(artifactPath, FileMode.Create);
+            assetData.CopyTo(fileStream);
+
+            fileStream.Flush();
+            fileStream.Close();
+
+            artifactDatabase.SaveArtifactData(contentAssetPath, guid, typeof(T));
+        }
+
         /// <summary>
         /// Returns asset object of requested type with specified guid
         /// </summary>
