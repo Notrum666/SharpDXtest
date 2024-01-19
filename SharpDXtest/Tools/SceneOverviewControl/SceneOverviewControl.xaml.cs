@@ -79,7 +79,7 @@ namespace Editor
             SceneViewModel.Update();
             if (wasInvalidated && ObjectToSelect is not null)
             {
-                SelectObject(ObjectToSelect);
+                EditorLayer.Current.SelectedGameObject = ObjectToSelect;
                 ObjectToSelect = null;
             }
         }
