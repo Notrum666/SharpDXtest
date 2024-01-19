@@ -28,6 +28,9 @@ namespace Editor
 
         public void SetCamera(Camera newCamera)
         {
+            if (newCamera == camera)
+                return;
+            
             if (camera != null)
             {
                 D9Renderer.Unsubscribe(this);

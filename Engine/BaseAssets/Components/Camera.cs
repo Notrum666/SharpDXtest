@@ -19,6 +19,8 @@ namespace Engine.BaseAssets.Components
         #region ComponentLogic
 
         [SerializedField]
+        private bool makeCurrentOnStart;
+        [SerializedField]
         private double fov = Math.PI / 2;
         [SerializedField]
         private double aspect;
@@ -73,6 +75,12 @@ namespace Engine.BaseAssets.Components
         {
             base.InitializeInner();
             Cameras.Add(this);
+        }
+
+        public override void Start()
+        {
+            if (makeCurrentOnStart)
+                MakeCurrent();
         }
 
         protected override void OnDestroy()
