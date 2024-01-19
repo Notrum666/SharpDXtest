@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Threading;
 
 using Editor.AssetsImport;
@@ -78,15 +79,14 @@ namespace Editor
             ProjectViewModel.Current.MonitorGameScenes();
 
             ScriptManager.OnCodeRecompiled += SceneManager.ReloadScene;
+
+            Application.Current.Activated += Application_Activated;
         }
 
-        public override void Update()
+        private void Application_Activated(object sender, EventArgs e)
         {
-            if (ProjectViewModel.Current != null && RecompileOnFocus) //TODO: Use event subscription instead of Update
-            {
-                if (App.IsActive && !ScriptManager.IsCompilationRelevant)
-                    ScriptManager.Recompile();
-            }
+            if (ProjectViewModel.Current != null && RecompileOnFocus && !ScriptManager.IsCompilationRelevant)
+                ScriptManager.Recompile();
         }
 
         #region EditorState

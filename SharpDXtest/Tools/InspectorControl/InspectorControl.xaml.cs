@@ -187,6 +187,7 @@ namespace Editor
                 });
             }
 
+            ReloadTypes();
             ScriptManager.OnCodeRecompiled += ReloadTypes;
 
             loaded = true;

@@ -83,6 +83,10 @@ namespace Editor.AssetsImport
 
         public static void Recompile()
         {
+            Logger.Log(LogType.Info, "Recompiling...");
+
+            ProjectViewModel.Current.SaveCurrentScene();
+
             filesWatcher.EnableRaisingEvents = false;
             AssemblyLoadContext oldContext = currentAssemblyContext;
 
