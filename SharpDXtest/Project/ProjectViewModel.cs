@@ -76,11 +76,13 @@ namespace Editor
             filesWatcher.Filter = "*.scene";
             filesWatcher.NotifyFilter = NotifyFilters.CreationTime
                                         | NotifyFilters.DirectoryName
-                                        | NotifyFilters.FileName;
-                                        // | NotifyFilters.LastWrite;
+                                        | NotifyFilters.FileName
+                                        | NotifyFilters.LastWrite;
 
             filesWatcher.Path = AssetsRegistry.ContentFolderPath;
             filesWatcher.Changed += OnSceneFilesChanged;
+
+            filesWatcher.EnableRaisingEvents = true;
         }
 
         public void UpdateGameScenes()
