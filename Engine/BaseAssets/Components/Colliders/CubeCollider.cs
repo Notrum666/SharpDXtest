@@ -16,7 +16,10 @@ namespace Engine.BaseAssets.Components.Colliders
             set
             {
                 if (value.x <= 0 || value.y <= 0 || value.z <= 0)
-                    throw new ArgumentException("Size of collider in all dimensions should be positive!");
+                {
+                    Logger.Log(LogType.Warning, "CubeCollider size must be positive.");
+                    return;
+                }
 
                 size = value;
                 CalculateInertiaTensor();

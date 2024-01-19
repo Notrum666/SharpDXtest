@@ -87,10 +87,11 @@ namespace Engine.BaseAssets.Components
 
         public void Resize(int width, int height)
         {
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException(nameof(width));
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException(nameof(height));
+            if (width <= 0 || height <= 0)
+            {
+                Logger.Log(LogType.Error, $"Tried to resize Camera to invalid size, size must be positive, but ({width}, {height}) were given.");
+                return;
+            }
 
             if (width == targetWidth && height == targetHeight)
                 return;

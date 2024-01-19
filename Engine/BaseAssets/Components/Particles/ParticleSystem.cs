@@ -34,7 +34,10 @@ namespace Engine.BaseAssets.Components
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("Material", "Material can't be null.");
+                {
+                    Logger.Log(LogType.Error, "Material of ParticleSystem can't be null");
+                    return;
+                }
                 material = value;
             }
         }
@@ -51,7 +54,10 @@ namespace Engine.BaseAssets.Components
             set
             {
                 if (value <= 0)
-                    throw new ArgumentOutOfRangeException("MaxParticles", "Value must be positive.");
+                {
+                    Logger.Log(LogType.Error, "MaxParticles must be positive");
+                    return;
+                }
                 maxParticles = RoundUpToPowerOfTwo(value);
             }
         }

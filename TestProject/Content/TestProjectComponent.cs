@@ -15,24 +15,7 @@ namespace TestProject
     {
         public override void Start()
         {
-            //try
-            //{
-            //    GraphicsCore.ViewportPanel.Dispatcher.Invoke(() =>
-            //    {
-            //        var control = new UserControlTest();
-            //        Grid grid = (Grid)control.Content;
-            //        TextBlock textBlock = (TextBlock)grid.Children[0];
-            //        textBlock.Text = "SOSI_PISOS";
-            //        GraphicsCore.ViewportPanel.Children.Add( control );
-            //        Debug.WriteLine($"control = {control}");
-            //    });
-            //    
-            //}
-            //catch (Exception ex)
-            //{
-            //    Debug.WriteLine(ex.Message);
-            //    throw;
-            //}
+            double result = 1.0 / 0.0;
         }
     }
 }

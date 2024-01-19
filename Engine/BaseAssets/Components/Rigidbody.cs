@@ -206,7 +206,7 @@ namespace Engine.BaseAssets.Components
             List<Collider> colliders = GameObject.GetComponents<Collider>().Where(coll => coll.Enabled).ToList();
             if (!colliders.Any())
             {
-                inertiaTensor = new Vector3(1.0, 1.0, 1.0);
+                InertiaTensor = new Vector3(1.0, 1.0, 1.0);
                 return;
             }
 
@@ -214,7 +214,11 @@ namespace Engine.BaseAssets.Components
             foreach (Collider collider in colliders)
                 massSum += collider.MassPart;
             if (massSum == 0.0)
-                throw new Exception("At least one collider must have positive mass part");
+            {
+                Logger.Log(LogType.Error, "At least one collider must have positive mass part");
+                InertiaTensor = new Vector3(1.0, 1.0, 1.0);
+                return;
+            }
 
             Vector3 result = new Vector3();
             foreach (Collider collider in colliders)

@@ -20,7 +20,10 @@ namespace Engine.BaseAssets.Components
             set
             {
                 if (value < 0 || value > 1)
-                    throw new ArgumentOutOfRangeException("Friction value must be in range from 0 to 1.");
+                {
+                    Logger.Log(LogType.Error, "Friction coefficient must be in range from 0 to 1");
+                    return;
+                }
                 friction = value;
             }
         }
@@ -32,7 +35,10 @@ namespace Engine.BaseAssets.Components
             set
             {
                 if (value < 0 || value > 1)
-                    throw new ArgumentOutOfRangeException("Bounciness value must be in range from 0 to 1.");
+                {
+                    Logger.Log(LogType.Error, "Bounciness coefficient must be in range from 0 to 1");
+                    return;
+                }
                 bounciness = value;
             }
         }
@@ -72,7 +78,7 @@ namespace Engine.BaseAssets.Components
                 case CombineMode.GeometryAverage:
                     return Math.Sqrt(Friction * material.Friction);
                 default:
-                    throw new NotImplementedException($"{FrictionCombineMode} friction combine mode doesn't implemented!");
+                    throw new NotImplementedException($"{FrictionCombineMode} friction combine mode is not implemented");
             }
         }
 
@@ -91,7 +97,7 @@ namespace Engine.BaseAssets.Components
                 case CombineMode.GeometryAverage:
                     return Math.Sqrt(Bounciness * material.Bounciness);
                 default:
-                    throw new NotImplementedException($"{BouncinessCombineMode} bounciness combine mode doesn't implemented!");
+                    throw new NotImplementedException($"{BouncinessCombineMode} bounciness combine mode is not implemented");
             }
         }
     }

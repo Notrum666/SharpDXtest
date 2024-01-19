@@ -108,7 +108,12 @@ namespace Engine.BaseAssets.Components.Colliders
         protected override void GetBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest)
         {
             if (globalVertexes.Count == 0)
-                throw new Exception("No vertexes present in this collider.");
+            {
+                Logger.Log(LogType.Error, "Tried to get boundary points of collider with no vertices");
+                hindmost = Vector3.Zero;
+                furthest = Vector3.Zero;
+                return;
+            }
 
             hindmost = Vector3.Zero;
             furthest = Vector3.Zero;

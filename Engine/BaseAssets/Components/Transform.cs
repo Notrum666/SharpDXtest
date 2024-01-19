@@ -153,7 +153,10 @@ namespace Engine.BaseAssets.Components
                 if (Math.Abs(value.x) <= Constants.Epsilon ||
                     Math.Abs(value.y) <= Constants.Epsilon ||
                     Math.Abs(value.z) <= Constants.Epsilon)
-                    throw new ArgumentOutOfRangeException(nameof(LocalScale), "Scale can't be zero in any direction.");
+                {
+                    Logger.Log(LogType.Warning, "Scale must be non-zero");
+                    return;
+                }
                 localScale = value;
                 InvalidateCachedData();
             }
