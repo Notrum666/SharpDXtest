@@ -19,13 +19,15 @@ namespace Engine.BaseAssets.Components
         #region ComponentLogic
 
         [SerializedField]
+        private bool makeCurrentOnStart;
+        [SerializedField]
         private double fov = Math.PI / 2;
         [SerializedField]
-        private double aspect;
+        private double aspect = 1;
         [SerializedField]
-        private double near;
+        private double near = 0.001;
         [SerializedField]
-        private double far;
+        private double far = 500;
 
         private static Camera current = null;
         public static Camera Current
@@ -75,8 +77,17 @@ namespace Engine.BaseAssets.Components
             Cameras.Add(this);
         }
 
+        public override void Start()
+        {
+            if (makeCurrentOnStart)
+                MakeCurrent();
+        }
+
         protected override void OnDestroy()
         {
+            if (Current == this)
+                Current = null;
+
             Cameras.Remove(this);
         }
 
@@ -87,10 +98,11 @@ namespace Engine.BaseAssets.Components
 
         public void Resize(int width, int height)
         {
-            if (width <= 0)
-                throw new ArgumentOutOfRangeException(nameof(width));
-            if (height <= 0)
-                throw new ArgumentOutOfRangeException(nameof(height));
+            if (width <= 0 || height <= 0)
+            {
+                Logger.Log(LogType.Error, $"Tried to resize Camera to invalid size, size must be positive, but ({width}, {height}) were given.");
+                return;
+            }
 
             if (width == targetWidth && height == targetHeight)
                 return;

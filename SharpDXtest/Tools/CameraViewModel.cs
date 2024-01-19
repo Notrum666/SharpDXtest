@@ -28,9 +28,14 @@ namespace Editor
 
         public void SetCamera(Camera newCamera)
         {
+            if (newCamera == camera)
+                return;
+            
             if (camera != null)
             {
+                camera.OnResized -= LogResize;
                 D9Renderer.Unsubscribe(this);
+                camera = null;
             }
             EngineCore.OnFrameEnded -= GameCore_OnFrameEnded;
             FPS = -1;
@@ -38,19 +43,26 @@ namespace Editor
             camera = newCamera;
             if (camera != null)
             {
+                camera.OnResized += LogResize;
                 D9Renderer.Subscribe(this);
                 EngineCore.OnFrameEnded += GameCore_OnFrameEnded;
             }
         }
 
+        private void LogResize()
+        {
+            Logger.Log(LogType.Info, $"{camera.GameObject.Name} was resized, new size: ({camera.Width}, {camera.Height}).");
+        }
+
         public void Render(D3DImage targetImage)
         {
-            if (D9Renderer is not { IsInitialized: true })
+            D9CameraRenderer cached = D9Renderer;
+            if (cached is not { IsInitialized: true })
                 return;
 
             targetImage.Lock();
 
-            targetImage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, D9Renderer.D9SurfaceNativePointer);
+            targetImage.SetBackBuffer(D3DResourceType.IDirect3DSurface9, cached.D9SurfaceNativePointer);
             targetImage.AddDirtyRect(new Int32Rect(0, 0, (int)targetImage.Width, (int)targetImage.Height));
 
             targetImage.Unlock();

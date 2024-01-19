@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Engine.Serialization;
@@ -34,19 +35,19 @@ namespace Engine
             ReBuild();
         }
 
-        public static void ReBuild()
+        public static void ReBuild(List<Assembly> targetAssemblies = null)
         {
-            Serializer = BuildSerializer();
-            Deserializer = BuildDeserializer();
+            Serializer = BuildSerializer(targetAssemblies);
+            Deserializer = BuildDeserializer(targetAssemblies);
         }
 
-        private static ISerializer BuildSerializer()
+        private static ISerializer BuildSerializer(List<Assembly> targetAssemblies)
         {
             SerializerBuilder builder = new SerializerBuilder();
             builder.EnsureRoundtrip();
             builder.DisableAliases();
 
-            builder.RegisterTagMappedClasses();
+            builder.RegisterTagMappedClasses(targetAssemblies);
             builder.WithTypeConverter(GuidConverter, s => s.InsteadOf<YamlGuidConverter>());
             builder.WithTypeConverter(BaseAssetConverter);
 
@@ -59,11 +60,11 @@ namespace Engine
             return builder.Build();
         }
 
-        private static IDeserializer BuildDeserializer()
+        private static IDeserializer BuildDeserializer(List<Assembly> targetAssemblies)
         {
             DeserializerBuilder builder = new DeserializerBuilder();
 
-            builder.RegisterTagMappedClasses();
+            builder.RegisterTagMappedClasses(targetAssemblies);
             builder.WithObjectFactory(ObjectFactory);
             builder.WithTypeConverter(GuidConverter, s => s.InsteadOf<YamlGuidConverter>());
             builder.WithTypeConverter(BaseAssetConverter);
@@ -78,9 +79,9 @@ namespace Engine
             return builder.Build();
         }
 
-        private static BuilderSkeleton<T> RegisterTagMappedClasses<T>(this BuilderSkeleton<T> builder) where T : BuilderSkeleton<T>
+        private static BuilderSkeleton<T> RegisterTagMappedClasses<T>(this BuilderSkeleton<T> builder, List<Assembly> targetAssemblies) where T : BuilderSkeleton<T>
         {
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            List<Assembly> assemblies = targetAssemblies ?? AppDomain.CurrentDomain.GetAssemblies().ToList();
 
             foreach (Assembly assembly in assemblies)
             {
@@ -89,7 +90,7 @@ namespace Engine
                     YamlTagMappedAttribute tagMappedAttribute = type.GetCustomAttribute<YamlTagMappedAttribute>();
                     if (tagMappedAttribute != null)
                     {
-                        string tagName = tagMappedAttribute.TagName ?? type.Name; //TODO: AssemblyName?
+                        string tagName = tagMappedAttribute.TagName ?? type.Name;
                         builder.WithTagMapping($"!{tagName}", type);
                     }
                 }

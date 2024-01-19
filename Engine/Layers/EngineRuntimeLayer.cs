@@ -1,5 +1,6 @@
 ﻿using Engine.BaseAssets.Components;
 
+using System;
 using System.Collections.Generic;
 
 namespace Engine.Layers
@@ -20,7 +21,16 @@ namespace Engine.Layers
             CurrentScene.ProcessNewObjects();
 
             foreach (GameObject obj in CurrentScene.GameObjects)
-                obj.Initialize();
+            {
+                try
+                {
+                    obj.Initialize();
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(LogType.Error, $"Error during GameObject initialization, GameObject name: {obj.Name}, error: {e.Message}");
+                }
+            }
         }
 
         public override void FixedUpdate()
@@ -31,7 +41,14 @@ namespace Engine.Layers
             foreach (GameObject obj in CurrentScene.GameObjects)
             {
                 if (obj.Enabled)
-                    obj.FixedUpdate();
+                    try
+                    {
+                        obj.FixedUpdate();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log(LogType.Error, $"Error during GameObject's FixedUpdate, GameObject name: {obj.Name}, error: {e.Message}");
+                    }
             }
 
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
@@ -45,7 +62,15 @@ namespace Engine.Layers
                     foreach (Collider collider in CurrentScene.GameObjects[i].GetComponents<Collider>())
                         collider.UpdateData();
                     foreach (Rigidbody otherRigidbody in rigidbodies)
-                        rigidbody.SolveCollisionWith(otherRigidbody);
+                        try
+                        {
+                            rigidbody.SolveCollisionWith(otherRigidbody);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Log(LogType.Error, $"Error during collision solving for GameObjects {rigidbody.GameObject.Name} and " +
+                                $"{otherRigidbody.GameObject.Name}, error: {e.Message}");
+                        }
                     rigidbodies.Add(rigidbody);
                 }
             }
@@ -64,7 +89,14 @@ namespace Engine.Layers
             foreach (GameObject obj in CurrentScene.GameObjects)
             {
                 if (obj.Enabled)
-                    obj.Update();
+                    try
+                    {
+                        obj.Update();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log(LogType.Error, $"Error during GameObject's Update, GameObject name: {obj.Name}, error: {e.Message}");
+                    }
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 using Engine;
 using Engine.BaseAssets.Components;
@@ -14,7 +15,13 @@ namespace Editor
             obj =>
             {
                 Target.AddComponent((Type)obj);
-                Reload();
+            }
+        );
+        private RelayCommand removeComponentCommand;
+        public RelayCommand RemoveComponentCommand => removeComponentCommand ??= new RelayCommand(
+            obj =>
+            {
+                ((Component)obj).Destroy();
             }
         );
 
@@ -61,8 +68,11 @@ namespace Editor
         {
             OnPropertyChanged(nameof(Name));
             OnPropertyChanged(nameof(Enabled));
-            foreach (ObjectViewModel viewModel in ComponentsViewModels)
-                viewModel.Update();
+            if (!target.Components.SequenceEqual(ComponentsViewModels.Select(c => c.Target)))
+                Reload();
+            else
+                foreach (ObjectViewModel viewModel in ComponentsViewModels)
+                    viewModel.Update();
         }
     }
 }

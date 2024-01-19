@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Windows;
 using System.Windows.Threading;
 
 using Editor.AssetsImport;
@@ -78,15 +79,14 @@ namespace Editor
             ProjectViewModel.Current.MonitorGameScenes();
 
             ScriptManager.OnCodeRecompiled += SceneManager.ReloadScene;
+
+            Application.Current.Activated += Application_Activated;
         }
 
-        public override void Update()
+        private void Application_Activated(object sender, EventArgs e)
         {
-            if (ProjectViewModel.Current != null && RecompileOnFocus) //TODO: Use event subscription instead of Update
-            {
-                if (App.IsActive && !ScriptManager.IsCompilationRelevant)
-                    ScriptManager.Recompile();
-            }
+            if (ProjectViewModel.Current != null && RecompileOnFocus && !ScriptManager.IsCompilationRelevant)
+                ScriptManager.Recompile();
         }
 
         #region EditorState
@@ -130,7 +130,6 @@ namespace Editor
         }
         private bool desiredIsPlaying = false;
         private bool stepInProcess = false;
-        private bool notifyPlaymodeEntered = false;
 
         public bool IsEnginePaused
         {
@@ -167,28 +166,23 @@ namespace Editor
 
         public override void OnFrameEnded()
         {
-            // to delay event firing until next frame because CameraRenderControl can get null from Camera.Current
-            // TODO: rework CameraRenderControl camera selection to go off of actually Camera.Current being changed
-            if (notifyPlaymodeEntered)
-            {
-                OnPlaymodeEntered?.Invoke();
-                notifyPlaymodeEntered = false;
-            }
-
             if (desiredIsPlaying != isPlaying)
             {
                 isPlaying = desiredIsPlaying;
                 stepInProcess = false;
+                InspectedObject = null;
 
                 if (isPlaying)
                 {
+                    ProjectViewModel.Current.SaveCurrentScene();
+                    OnPlaymodeEntered?.Invoke();
                     EngineCore.IsPaused = false;
-                    notifyPlaymodeEntered = true;
                 }
                 else
                 {
-                    EngineCore.IsPaused = true;
+                    SceneManager.ReloadScene();
                     OnPlaymodeExited?.Invoke();
+                    EngineCore.IsPaused = true;
                 }
 
                 return;

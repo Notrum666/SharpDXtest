@@ -13,7 +13,10 @@ namespace Engine.BaseAssets.Components
             set
             {
                 if (gameObject != null)
-                    throw new Exception("gameObject can be set only once.");
+                {
+                    Logger.Log(LogType.Warning, "Tried to set GameObject of Component multiple times.");
+                    return;
+                }
                 gameObject = value;
             }
         }

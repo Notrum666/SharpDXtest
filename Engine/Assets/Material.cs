@@ -16,7 +16,10 @@ namespace Engine
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("Albedo", "Texture can't be null.");
+                {
+                    Logger.Log(LogType.Error, "Material's texture 'Albedo' can't be null");
+                    return;
+                }
                 albedo = value;
             }
         }
@@ -27,7 +30,10 @@ namespace Engine
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("Normal", "Texture can't be null.");
+                {
+                    Logger.Log(LogType.Error, "Material's texture 'Normal' can't be null");
+                    return;
+                }
                 normal = value;
             }
         }
@@ -38,7 +44,10 @@ namespace Engine
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("Metallic", "Texture can't be null.");
+                {
+                    Logger.Log(LogType.Error, "Material's texture 'Metallic' can't be null");
+                    return;
+                }
                 metallic = value;
             }
         }
@@ -49,7 +58,10 @@ namespace Engine
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("Roughness", "Texture can't be null.");
+                {
+                    Logger.Log(LogType.Error, "Material's texture 'Roughness' can't be null");
+                    return;
+                }
                 roughness = value;
             }
         }
@@ -60,7 +72,10 @@ namespace Engine
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("AmbientOcclusion", "Texture can't be null.");
+                {
+                    Logger.Log(LogType.Error, "Material's texture 'Emissive' can't be null");
+                    return;
+                }
                 ambientOcclusion = value;
             }
         }
@@ -71,7 +86,10 @@ namespace Engine
             set
             {
                 if (value == null)
-                    throw new ArgumentNullException("Emissive", "Texture can't be null.");
+                {
+                    Logger.Log(LogType.Error, "Material's texture 'Emissive' can't be null");
+                    return;
+                }
                 emissive = value;
             }
         }

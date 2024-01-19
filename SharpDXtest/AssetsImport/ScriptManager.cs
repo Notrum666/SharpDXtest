@@ -18,6 +18,7 @@ using Engine;
 using System.Diagnostics;
 using Engine.Serialization;
 using YamlDotNet.Serialization.Utilities;
+using LinearAlgebra;
 
 namespace Editor.AssetsImport
 {
@@ -67,8 +68,25 @@ namespace Editor.AssetsImport
             filesWatcher.Changed += OnFilesChanged;
         }
 
+        public static List<Assembly> GetRelevantAssemblies()
+        {
+            Assembly algebraAssembly = typeof(Constants).Assembly;
+            Assembly engineAssembly = typeof(EngineCore).Assembly;
+            Assembly editorAssembly = typeof(ScriptManager).Assembly;
+
+            List<Assembly> assemblies = new List<Assembly>() { algebraAssembly, engineAssembly, editorAssembly };
+            if (currentAssemblyContext != null)
+                assemblies.AddRange(currentAssemblyContext.Assemblies);
+
+            return assemblies;
+        }
+
         public static void Recompile()
         {
+            Logger.Log(LogType.Info, "Recompiling...");
+
+            ProjectViewModel.Current.SaveCurrentScene();
+
             filesWatcher.EnableRaisingEvents = false;
             AssemblyLoadContext oldContext = currentAssemblyContext;
 
@@ -86,8 +104,7 @@ namespace Editor.AssetsImport
             filesWatcher.EnableRaisingEvents = true;
 
             currentAssemblyContext.EnterContextualReflection();
-            TypeConverter.RegisterTypeConverter<SerializableObject, SerializedObjectPromiseConverter>();
-            YamlManager.ReBuild();
+            YamlManager.ReBuild(GetRelevantAssemblies());
 
             OnCodeRecompiled?.Invoke();
 

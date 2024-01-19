@@ -130,7 +130,9 @@
                                                             HorizontalAlignment="Stretch"
                                                             VerticalAlignment="Stretch"
                                                             Style="{StaticResource InspectorButton}"
-                                                            Visibility="{Binding Target, Converter={StaticResource TransfToVisConv}}">
+                                                            Visibility="{Binding Target, Converter={StaticResource TransfToVisConv}}"
+                                                            Command="{Binding ElementName=GameObjectHostGrid, Path=DataContext.RemoveComponentCommand}"
+                                                            CommandParameter="{Binding Target}">
                                                         <TextBlock Text="remove" 
                                                                    Margin="4,-2,4,0" FontSize="14"
                                                                    HorizontalAlignment="Center"/>

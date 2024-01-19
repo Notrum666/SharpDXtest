@@ -194,7 +194,10 @@ namespace Engine
         internal static void RenderScene(Camera camera)
         {
             if (camera == null)
-                throw new ArgumentNullException(nameof(camera));
+            {
+                Logger.Log(LogType.Warning, "Tried to render scene with null given as Camera");
+                return;
+            }
 
             camera.PreRenderUpdate();
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.BackBuffer.RenderTargetTexture.GetView<RenderTargetView>(), camera.BackgroundColor);

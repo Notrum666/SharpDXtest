@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 using Engine;
 using Engine.BaseAssets.Components;
@@ -63,6 +64,7 @@ namespace Editor
         private EditorCameraController editorCameraController => editorCamera?.GameObject?.GetComponent<EditorCameraController>();
         private static int editorCamerasCount = 0;
 
+        private DispatcherTimer updateTimer;
         // private int framesCount = 0;
         // private double timeCounter = 0.0;
         // private bool keyboardFocused = false;
@@ -79,6 +81,10 @@ namespace Editor
             CameraViewModel = new CameraViewModel();
 
             DataContext = this;
+            
+            updateTimer = new DispatcherTimer();
+            updateTimer.Interval = TimeSpan.FromSeconds(0.1);
+            updateTimer.Tick += UpdateTick;
         }
 
         ~CameraRenderControl()
@@ -127,6 +133,8 @@ namespace Editor
             if (ViewportType.HasFlag(ViewportType.GameView))
             {
                 CameraViewModel.SetCamera(Camera.Current);
+                ResizeCameraView();
+                updateTimer.Start();
             }
         }
 
@@ -134,7 +142,18 @@ namespace Editor
         {
             if (ViewportType.HasFlag(ViewportType.EditorView))
             {
+                updateTimer.Stop();
                 CameraViewModel.SetCamera(editorCamera);
+                ResizeCameraView();
+            }
+        }
+        
+        private void UpdateTick(object sender, EventArgs e)
+        {
+            if (ViewportType.HasFlag(ViewportType.GameView))
+            {
+                CameraViewModel.SetCamera(Camera.Current);
+                ResizeCameraView();
             }
         }
 
@@ -149,7 +168,6 @@ namespace Editor
             Camera camera = editorCamera.AddComponent<Camera>();
             camera.Near = 0.001;
             camera.Far = 500;
-            camera.OnResized += () => Logger.Log(LogType.Info, $"Editor camera was resized, new size: ({camera.Width}, {camera.Height}).");
 
             return camera;
         }
@@ -253,6 +271,11 @@ namespace Editor
         }
 
         private void RenderControl_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            ResizeCameraView();
+        }
+
+        private void ResizeCameraView()
         {
             CameraViewModel.ResizeCamera((int)RenderControl.ActualWidth, (int)RenderControl.ActualHeight);
         }
