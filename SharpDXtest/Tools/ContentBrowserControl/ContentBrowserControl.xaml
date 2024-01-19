@@ -14,6 +14,8 @@
              d:DataContext="{d:DesignInstance {x:Type local:ContentBrowserControl}}">
     <UserControl.Resources>
         <local:ObjectToBoolConverter x:Key="ObjToBoolConv"/>
+        <local:SizeToFontSizeConverter x:Key="FontSizeConv" Denominator="5"/>
+
         <local:BindingProxy x:Key="ContentBrowserControlProxy" Data="{Binding}"/>
     </UserControl.Resources>
     <Grid Background="{StaticResource BackgroundBrush}">
@@ -104,7 +106,9 @@
                             <Image Source="/Tools/ContentBrowserControl/Icons/FolderIcon.png"
                                    Stretch="Uniform"/>
                             <TextBlock Text="{Binding Name}" Grid.Row="1" Foreground="{StaticResource ForegroundBrush}"
-                                       FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center" TextWrapping="Wrap"
+                                       FontSize="{Binding ItemsWidth, ElementName=ThisContentBrowser,
+                                Converter={StaticResource FontSizeConv}}" Margin="0,-2,0,-2"
+                                       HorizontalAlignment="Stretch" TextAlignment="Center" TextWrapping="Wrap"
                                        ToolTip="{Binding Name}"/>
                         </Grid>
                     </DataTemplate>
@@ -119,7 +123,9 @@
                             <Image Source="/Tools/ContentBrowserControl/Icons/FileIcon.png"
                                    Stretch="Uniform"/>
                             <TextBlock Text="{Binding Name}" Grid.Row="1" Foreground="{StaticResource ForegroundBrush}"
-                                       FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center" TextWrapping="Wrap"
+                                       FontSize="{Binding ItemsWidth, ElementName=ThisContentBrowser,
+                                Converter={StaticResource FontSizeConv}}" Margin="0,-2,0,-2"
+                                       HorizontalAlignment="Stretch" TextAlignment="Center" TextWrapping="Wrap"
                                        ToolTip="{Binding Name}"/>
                         </Grid>
                     </DataTemplate>
@@ -135,7 +141,9 @@
                             <Image Source="/Tools/ContentBrowserControl/Icons/FileIcon.png"
                                    Stretch="Uniform"/>
                             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Foreground="{StaticResource ForegroundBrush}"
-                                     FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                     FontSize="{Binding ItemsWidth, ElementName=ThisContentBrowser,
+                                Converter={StaticResource FontSizeConv}}" Margin="0,-2,0,-2"
+                                     HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Background="Transparent" BorderBrush="Transparent"
                                      LostFocus="ItemCreationTextBox_LostFocus" Loaded="FocusSelfOnLoad"
                                      KeyDown="ItemCreationTextBox_KeyDown" CaretBrush="{StaticResource CaretBrush}"/>
@@ -152,7 +160,9 @@
                             <Image Source="/Tools/ContentBrowserControl/Icons/FolderIcon.png"
                                    Stretch="Uniform"/>
                             <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Grid.Row="1" Foreground="{StaticResource ForegroundBrush}"
-                                     FontSize="12" HorizontalAlignment="Stretch" TextAlignment="Center"
+                                     FontSize="{Binding ItemsWidth, ElementName=ThisContentBrowser,
+                                Converter={StaticResource FontSizeConv}}" Margin="0,-2,0,-2"
+                                     HorizontalAlignment="Stretch" TextAlignment="Center"
                                      Background="Transparent" BorderBrush="Transparent"
                                      LostFocus="ItemCreationTextBox_LostFocus" Loaded="FocusSelfOnLoad"
                                      KeyDown="ItemCreationTextBox_KeyDown" CaretBrush="{StaticResource CaretBrush}"/>
