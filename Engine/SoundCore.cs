@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Engine.BaseAssets.Components;
 
@@ -95,6 +96,7 @@ namespace Engine
 
             EngineCore.OnPaused += OnPaused;
             EngineCore.OnResumed += OnResumed;
+            SceneManager.OnSceneUnloading += _ => ClearPlayingSounds();
         }
 
         private static void OnPaused()
@@ -115,6 +117,17 @@ namespace Engine
                     sound.voice.Start(1);
             }
             device.CommitChanges(1);
+        }
+
+        private static void ClearPlayingSounds()
+        {
+            List<PlayingSound> sounds = playingSounds.ToList();
+
+            playingSounds.Clear();
+            foreach (PlayingSound playingSound in sounds)
+            {
+                playingSound.Dispose();
+            }
         }
 
         public static PlayingSound PlayFrom(Sound sound, SoundSource source)
