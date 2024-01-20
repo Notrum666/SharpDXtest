@@ -23,7 +23,14 @@ namespace Engine.BaseAssets.Components
 
         private protected override void InitializeInner()
         {
-            OnInitialized();
+            try
+            {
+                OnInitialized();
+            }
+            catch (Exception e)
+            {
+                Logger.Log(LogType.Error, $"OnInitialized() error, GameObject: {GameObject?.Name}, error: {e.Message}");
+            }
         }
 
         /// <summary>
@@ -31,7 +38,14 @@ namespace Engine.BaseAssets.Components
         /// </summary>
         private protected override void DestroyImmediateInternal()
         {
-            OnDestroy();
+            try
+            {
+                OnDestroy();
+            }
+            catch (Exception e)
+            {
+                Logger.Log(LogType.Error, $"OnDestroy() error, GameObject: {GameObject?.Name}, error: {e.Message}");
+            }
             gameObject.RemoveComponent(this);
             gameObject = null;
         }

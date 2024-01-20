@@ -1,3 +1,5 @@
+using System;
+
 namespace Engine.BaseAssets.Components
 {
     public abstract class BehaviourComponent : Component
@@ -22,18 +24,29 @@ namespace Engine.BaseAssets.Components
         internal void Update(bool gameObjectPendingDestroy)
         {
             if (gameObjectPendingDestroy || PendingDestroy)
-            {
-                OnDestroy();
                 return;
-            }
 
             if (!started )
             {
                 started = true;
-                Start();
+                try
+                {
+                    Start();
+                }
+                catch (Exception e)
+                {
+                    Logger.Log(LogType.Error, $"Start() error, GameObject: {GameObject?.Name}, error: {e.Message}");
+                }
             }
 
-            Update();
+            try
+            {
+                Update();
+            }
+            catch (Exception e)
+            {
+                Logger.Log(LogType.Error, $"Update() error, GameObject: {GameObject?.Name}, error: {e.Message}");
+            }
         }
     }
 }

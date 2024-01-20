@@ -21,16 +21,7 @@ namespace Engine.Layers
             CurrentScene.ProcessNewObjects();
 
             foreach (GameObject obj in CurrentScene.GameObjects)
-            {
-                try
-                {
-                    obj.Initialize();
-                }
-                catch (Exception e)
-                {
-                    Logger.Log(LogType.Error, $"Error during GameObject initialization, GameObject name: {obj.Name}, error: {e.Message}");
-                }
-            }
+                obj.Initialize();
         }
 
         public override void FixedUpdate()
@@ -39,17 +30,8 @@ namespace Engine.Layers
                 return;
 
             foreach (GameObject obj in CurrentScene.GameObjects)
-            {
                 if (obj.Enabled)
-                    try
-                    {
-                        obj.FixedUpdate();
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log(LogType.Error, $"Error during GameObject's FixedUpdate, GameObject name: {obj.Name}, error: {e.Message}");
-                    }
-            }
+                    obj.FixedUpdate();
 
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
             for (int i = 0; i < CurrentScene.GameObjects.Count; i++)
@@ -87,17 +69,8 @@ namespace Engine.Layers
                 return;
 
             foreach (GameObject obj in CurrentScene.GameObjects)
-            {
                 if (obj.Enabled)
-                    try
-                    {
-                        obj.Update();
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Log(LogType.Error, $"Error during GameObject's Update, GameObject name: {obj.Name}, error: {e.Message}");
-                    }
-            }
+                    obj.Update();
         }
 
         public override void OnFrameEnded()

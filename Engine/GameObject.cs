@@ -171,7 +171,14 @@ namespace Engine
             foreach (Component component in components)
             {
                 if (component is BehaviourComponent { LocalEnabled: true } comp)
-                    comp.FixedUpdate();
+                    try
+                    {
+                        comp.FixedUpdate();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log(LogType.Error, $"FixedUpdate() error, GameObject: {Name}, error: {e.Message}");
+                    }
             }
         }
     }
