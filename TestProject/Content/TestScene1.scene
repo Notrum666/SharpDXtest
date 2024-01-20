@@ -135,7 +135,7 @@ SerializableObjects:
   localEnabled: true
   model: d88264040dea43d48fbf829f466928b4
   materials:
-  - 7c65173ae04c46ccbfe45658e147bd49
+  - 49c198095d7248098c2e9853b359062e
 - !Rigidbody
   instanceId: d7d42d063857409bb2ac60ba1ddd8c2f
   gameObject: 1e7e7916514146108ac366da15db5579
@@ -445,6 +445,7 @@ SerializableObjects:
   instanceId: 8a91f31984424f78a8ecd8fbcfb49cdf
   gameObject: 7c9d805792354bec9ad23ad6986368ca
   localEnabled: true
+  SoundToPlay: 5c37ac8597b04f3f900bcf817499d4a9
 - !GameObject
   instanceId: 77b28f2b4d194a18a6b865d4445dbc01
   name: SOSI_PISOS
