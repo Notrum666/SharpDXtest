@@ -61,7 +61,7 @@ namespace Editor
         public CameraViewModel CameraViewModel { get; }
 
         private Camera editorCamera;
-        private EditorCameraController editorCameraController => editorCamera?.GameObject?.GetComponent<EditorCameraController>();
+        private EditorCameraController EditorCameraController => editorCamera?.GameObject?.GetComponent<EditorCameraController>();
         private static int editorCamerasCount = 0;
 
         private DispatcherTimer updateTimer;
@@ -199,22 +199,31 @@ namespace Editor
             e.Handled = true;
             Focus();
 
-            if (e.RightButton == MouseButtonState.Pressed)
+            if (editorCamera != null && !EditorLayer.Current.IsPlaying)
             {
-                CursorMode = CursorMode.HiddenAndLocked;
-                return;
-            }
+                if (e.RightButton == MouseButtonState.Pressed)
+                {
+                    CursorMode = CursorMode.HiddenAndLocked;
+                    EditorCameraController.LocalEnabled = true;
+                    return;
+                }
 
-            if (e.LeftButton == MouseButtonState.Pressed && editorCamera != null && !EditorLayer.Current.IsPlaying)
-                HandlePicking((int)e.GetPosition(RenderControl).X, (int)e.GetPosition(RenderControl).Y);
+                if (e.LeftButton == MouseButtonState.Pressed)
+                    HandlePicking((int)e.GetPosition(RenderControl).X, (int)e.GetPosition(RenderControl).Y);
+            }
         }
 
         private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
 
-            if (e.RightButton == MouseButtonState.Released)
-                CursorMode = CursorMode.Normal;
+            if (editorCamera != null)
+            {
+                if (e.RightButton == MouseButtonState.Released && !EditorLayer.Current.IsPlaying)
+                    CursorMode = CursorMode.Normal;
+
+                EditorCameraController.LocalEnabled = false;
+            }
         }
 
         private void UserControl_KeyDown(object sender, KeyEventArgs e)
@@ -230,13 +239,11 @@ namespace Editor
         private void UserControl_GotKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = cursorMode == CursorMode.Normal ? Cursors.Arrow : Cursors.None;
-            editorCameraController.LocalEnabled = true;
         }
 
         private void UserControl_LostKeyboardFocus(object sender, RoutedEventArgs e)
         {
             Cursor = Cursors.Arrow;
-            editorCameraController.LocalEnabled = false;
         }
 
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
