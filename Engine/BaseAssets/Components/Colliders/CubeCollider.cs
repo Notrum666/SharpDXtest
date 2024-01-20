@@ -39,10 +39,10 @@ namespace Engine.BaseAssets.Components.Colliders
             }
         }
 
-        internal override void OnDeserialized()
+        private protected override void InitializeInner()
         {
-            base.OnDeserialized();
             Size = size;
+            base.InitializeInner();
         }
 
         private Vector3 inertiaTensor;
