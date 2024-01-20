@@ -81,7 +81,8 @@ namespace Editor
                 }
             }
 
-            ImportFolder(ContentFolderPath);
+            AssetsManager.SanitizeDatabase(guidToPathMap.Values.Select(GetContentAssetPath).ToHashSet());
+            ImportFolder(ContentFolderPath, true);
         }
 
         public static bool TryGetAssetPath(Guid guid, out string assetPath)

@@ -81,6 +81,12 @@ namespace Engine.BaseAssets.Components
             GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(1, null);
         }
 
+        public override void Update()
+        {
+            base.Update();
+            animationCurrentTime += (float)Time.DeltaTime;
+        }
+
         public override void OnFieldChanged(FieldInfo fieldInfo)
         {
             base.OnFieldChanged(fieldInfo);
@@ -271,7 +277,6 @@ namespace Engine.BaseAssets.Components
                 inverseTransposeBonesTransformations = new List<Matrix4x4f>(bonesTransformations);
                 if (animation is not null)
                 {
-                    animationCurrentTime += (float)Time.DeltaTime;
                     float ticksPerSecond = (float)(animation.TickPerSecond != 0 ? animation.TickPerSecond : 25.0f);
                     float timeInTicks = animationCurrentTime * ticksPerSecond;
                     float animationTime = timeInTicks % animation.DurationInTicks;
