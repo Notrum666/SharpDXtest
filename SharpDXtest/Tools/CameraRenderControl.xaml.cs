@@ -108,6 +108,9 @@ namespace Editor
 
         private void OnPlaymodeEntered()
         {
+            if (ViewportType.HasFlag(ViewportType.EditorView))
+                EditorCameraController.LocalEnabled = false;
+
             if (ViewportType.HasFlag(ViewportType.GameView))
             {
                 CameraViewModel.SetCamera(Camera.Current);
@@ -120,6 +123,7 @@ namespace Editor
         {
             if (ViewportType.HasFlag(ViewportType.EditorView))
             {
+                EditorCameraController.LocalEnabled = true;
                 updateTimer.Stop();
                 CameraViewModel.SetCamera(editorCamera);
                 ResizeCameraView();
@@ -141,7 +145,7 @@ namespace Editor
 
             GameObject editorCamera = EditorScene.Instantiate($"Editor_camera_{editorCamerasCount}");
             editorCamera.Transform.Position = new Vector3(0, -10, 5);
-            editorCamera.AddComponent<EditorCameraController>().LocalEnabled = false;
+            editorCamera.AddComponent<EditorCameraController>();
 
             Camera camera = editorCamera.AddComponent<Camera>();
             camera.Near = 0.001;
@@ -159,9 +163,8 @@ namespace Editor
 
             EditorLayer.Current.OnPlaymodeEntered -= OnPlaymodeEntered;
             EditorLayer.Current.OnPlaymodeExited -= OnPlaymodeExited;
-
-            if (GraphicsCore.ViewportPanel.Parent is null)
-                GameInterfaceHost.Children.Clear();
+            
+            GameInterfaceHost.Children.Clear();
         }
 
         private void OnRender(object sender, EventArgs e)
@@ -179,12 +182,6 @@ namespace Editor
 
             if (editorCamera != null && !EditorLayer.Current.IsPlaying)
             {
-                if (e.RightButton == MouseButtonState.Pressed)
-                {
-                    EditorCameraController.Enable();
-                    return;
-                }
-
                 if (e.LeftButton == MouseButtonState.Pressed)
                     HandlePicking((int)e.GetPosition(RenderControl).X, (int)e.GetPosition(RenderControl).Y);
             }
@@ -193,11 +190,6 @@ namespace Editor
         private void UserControl_MouseUp(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
-
-            if (editorCamera != null && EditorCameraController.LocalEnabled)
-            {
-                EditorCameraController.Disable();
-            }
         }
 
         private void UserControl_KeyDown(object sender, KeyEventArgs e)

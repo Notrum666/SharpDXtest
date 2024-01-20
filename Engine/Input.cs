@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Input;
 
 using LinearAlgebra;
-
-//using SharpDX.DirectInput;
 
 namespace Engine
 {
@@ -32,9 +31,7 @@ namespace Engine
         //private static KeyboardState keyboardState;
         //private static KeyboardState prevFixedKeyboardState;
         //private static KeyboardState fixedKeyboardState;
-        private static SharpDX.DirectInput.MouseState prevMouseState;
         private static SharpDX.DirectInput.MouseState mouseState;
-        private static SharpDX.DirectInput.MouseState prevFixedMouseState;
         private static SharpDX.DirectInput.MouseState fixedMouseState;
         private static Vector2 mouseDelta;
         private static Vector2 nextMouseDelta;
@@ -54,6 +51,8 @@ namespace Engine
         private static Dictionary<MouseButton, bool> prevMouseButtonStates = new Dictionary<MouseButton, bool>();
         private static Dictionary<MouseButton, bool> mouseButtonStates = new Dictionary<MouseButton, bool>();
         private static Dictionary<MouseButton, bool> nextMouseButtonStates = new Dictionary<MouseButton, bool>();
+
+        internal static bool isMouseDirectlyOverViewport { get; set; } = false;
 
         internal static void Init()
         {
@@ -83,15 +82,14 @@ namespace Engine
 
         internal static void Update()
         {
-            prevMouseButtonStates = mouseButtonStates;
-            mouseButtonStates = nextMouseButtonStates;
+            prevMouseButtonStates = new Dictionary<MouseButton, bool>(mouseButtonStates);
+            mouseButtonStates = new Dictionary<MouseButton, bool>(nextMouseButtonStates);
 
-            prevKeysStates = keysStates;
-            keysStates = nextKeysStates;
+            prevKeysStates = new Dictionary<Key, bool>(keysStates);
+            keysStates = new Dictionary<Key, bool>(nextKeysStates);
             //prevKeyboardState = keyboardState;
             //keyboardState = keyboard.GetCurrentState();
             //
-            prevMouseState = mouseState;
             mouseState = mouse.GetCurrentState();
             
             Vector2 mouseDeltaFromLastState = new Vector2(mouseState.X, mouseState.Y);
@@ -104,15 +102,14 @@ namespace Engine
 
         internal static void FixedUpdate()
         {
-            prevFixedMouseButtonStates = fixedMouseButtonStates;
-            fixedMouseButtonStates = nextMouseButtonStates;
+            prevFixedMouseButtonStates = new Dictionary<MouseButton, bool>(fixedMouseButtonStates);
+            fixedMouseButtonStates = new Dictionary<MouseButton, bool>(nextMouseButtonStates);
 
-            prevFixedKeysStates = fixedKeysStates;
-            fixedKeysStates = nextKeysStates;
+            prevFixedKeysStates = new Dictionary<Key, bool>(fixedKeysStates);
+            fixedKeysStates = new Dictionary<Key, bool>(nextKeysStates);
             //prevFixedKeyboardState = fixedKeyboardState;
             //fixedKeyboardState = keyboard.GetCurrentState();
             //
-            prevFixedMouseState = fixedMouseState;
             fixedMouseState = mouse.GetCurrentState();
             
             Vector2 mouseDeltaFromLastState = new Vector2(fixedMouseState.X, fixedMouseState.Y);
@@ -201,7 +198,7 @@ namespace Engine
 
         public static Vector2 GetMouseDelta()
         {
-            if (Mouse.DirectlyOver != GraphicsCore.ViewportPanel || InputMode == InputMode.UIOnly)
+            if (!isMouseDirectlyOverViewport || InputMode == InputMode.UIOnly)
                 return Vector2.Zero;
             if (Time.IsFixed)
                 return fixedMouseDelta;
@@ -210,8 +207,40 @@ namespace Engine
 
         public static Vector2 GetMousePos()
         {
-            Point point = Mouse.GetPosition(GraphicsCore.ViewportPanel);
+            System.Windows.Point point = Mouse.GetPosition(GraphicsCore.ViewportPanel);
             return new Vector2(point.X, point.Y);
         }
+
+        private static CursorState cursorState = CursorState.Default;
+        public static CursorState CursorState
+        {
+            get => cursorState;
+            set
+            {
+                if (value == cursorState)
+                    return;
+
+                cursorState = value;
+
+                if (cursorState.HasFlag(CursorState.Hidden))
+                    GraphicsCore.ViewportPanel.Dispatcher.Invoke(System.Windows.Forms.Cursor.Hide);
+                else
+                    GraphicsCore.ViewportPanel.Dispatcher.Invoke(System.Windows.Forms.Cursor.Show);
+
+                if (cursorState.HasFlag(CursorState.Locked))
+                    System.Windows.Forms.Cursor.Clip = new Rectangle(System.Windows.Forms.Cursor.Position, System.Drawing.Size.Empty);
+                else
+                    System.Windows.Forms.Cursor.Clip = Rectangle.Empty;
+            }
+        }
+    }
+
+    [Flags]
+    public enum CursorState
+    {
+        Default = 0,
+        Hidden = 1 << 0,
+        Locked = 1 << 1,
+        HiddenAndLocked = Hidden | Locked
     }
 }

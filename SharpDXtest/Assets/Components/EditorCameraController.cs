@@ -40,25 +40,19 @@ namespace SharpDXtest.Assets.Components
             UpdateInput();
         }
 
-        public void Enable()
-        {
-            InputManager.CursorState = CursorState.Default;
-            LocalEnabled = true;
-        }
-
-        public void Disable()
-        {
-            LocalEnabled = false;
-            InputManager.CursorState = CursorState.Default;
-        }
-
         private void UpdateInput()
         {
-            if (!Input.IsMouseButtonDown(MouseButton.Right))
+            if (Input.IsMouseButtonReleased(MouseButton.Right))
+            {
+                Input.CursorState = CursorState.Default;
                 return;
             }
 
-            InputManager.CursorState = CursorState.Hidden | CursorState.Locked;
+            if (!Input.IsMouseButtonDown(MouseButton.Right))
+                return;
+
+            if (Input.IsMouseButtonPressed(MouseButton.Right))
+                Input.CursorState = CursorState.HiddenAndLocked;
 
             if (Input.IsKeyDown(Key.A))
                 targetVelocity -= GameObject.Transform.Right;

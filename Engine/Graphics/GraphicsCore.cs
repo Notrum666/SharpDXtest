@@ -63,6 +63,7 @@ namespace Engine
 
             ViewportPanel = new ViewportControl();
             ViewportPanel.Focusable = true;
+            ViewportPanel.Background = System.Windows.Media.Brushes.Transparent;
 
             SceneManager.OnSceneUnloading += ClearViewportPanel;
         }

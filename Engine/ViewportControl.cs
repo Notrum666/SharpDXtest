@@ -21,11 +21,17 @@ namespace Engine
         {
             Focusable = true;
         }
+        protected override void OnIsMouseDirectlyOverChanged(DependencyPropertyChangedEventArgs e)
+        {
+            base.OnIsMouseDirectlyOverChanged(e);
+            Input.isMouseDirectlyOverViewport = (bool)e.NewValue;
+        }
         protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
         {
             base.OnPreviewMouseDown(e);
             if (Input.InputMode == InputMode.GameOnly)
                 e.Handled = true;
+            Focus();
         }
         protected override void OnPreviewMouseUp(MouseButtonEventArgs e)
         {
