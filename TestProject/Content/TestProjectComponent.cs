@@ -13,11 +13,11 @@ namespace TestProject
 {
     public class TestProjectComponent : BehaviourComponent
     {
+        [SerializedField]
+        private Sound SoundToPlay = null;
         public override void Start()
         {
-            Logger.Log(LogType.Warning, "Test warning");
-            Logger.Log(LogType.Warning, "Test warning2");
-            throw new Exception("Test exception");
+            SoundCore.Play(SoundToPlay);
         }
     }
 }

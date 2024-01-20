@@ -86,6 +86,8 @@ namespace Engine.BaseAssets.Components
             base.OnFieldChanged(fieldInfo);
             if (fieldInfo.Name == nameof(model))
                 RefreshSkeletonSlots();
+            if (fieldInfo.Name == nameof(animation))
+                Animation = animation;
         }
 
         private void EnsureGPUBuffer(List<Matrix4x4f> bonesTransformations, List<Matrix4x4f> inverseTransposeBonesTransformations)
@@ -269,7 +271,7 @@ namespace Engine.BaseAssets.Components
                 inverseTransposeBonesTransformations = new List<Matrix4x4f>(bonesTransformations);
                 if (animation is not null)
                 {
-                    animationCurrentTime += EngineCore.IsPaused ? 0 : (float)Time.DeltaTime;
+                    animationCurrentTime += (float)Time.DeltaTime;
                     float ticksPerSecond = (float)(animation.TickPerSecond != 0 ? animation.TickPerSecond : 25.0f);
                     float timeInTicks = animationCurrentTime * ticksPerSecond;
                     float animationTime = timeInTicks % animation.DurationInTicks;

@@ -9,6 +9,6 @@ ExportedAssets:
     Item2: skeleton
   : 9836b872fc004181ac1e3af387d2033b
 ImportSettings: !ModelImportSettings
-  SkeletonOverride: e4ab59fe793a4439a154f7afb3cebefb
+  SkeletonOverride: 9836b872fc004181ac1e3af387d2033b
   MeshMaterialsOverride:
     Cube_Cube_0: 37783489987243f5b6f22ad9fb4b82c7
