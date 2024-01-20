@@ -15,16 +15,11 @@ using LinearAlgebra;
 
 using SharpDXtest.Assets.Components;
 
-using Point = System.Drawing.Point;
-
 namespace Editor
 {
     public partial class CameraRenderControl : UserControl, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
-
-        private Point cursorLockPoint;
-        private CursorMode cursorMode;
 
         public ObservableCollection<AspectRatio> AspectRatios { get; set; } = new ObservableCollection<AspectRatio>
         {
@@ -41,20 +36,6 @@ namespace Editor
         };
 
         public AspectRatio SelectedAspectRatio { get; set; } = new AspectRatio();
-        public CursorMode CursorMode
-        {
-            get => cursorMode;
-            set
-            {
-                cursorMode = value;
-                if (IsKeyboardFocused)
-                    Cursor = value == CursorMode.Normal ? Cursors.Arrow : Cursors.None;
-                if (value == CursorMode.HiddenAndLocked)
-                    cursorLockPoint = System.Windows.Forms.Cursor.Position;
-
-                OnPropertyChanged();
-            }
-        }
 
         private bool loaded = false;
         private ViewportType ViewportType { get; }
@@ -65,17 +46,12 @@ namespace Editor
         private static int editorCamerasCount = 0;
 
         private DispatcherTimer updateTimer;
-        // private int framesCount = 0;
-        // private double timeCounter = 0.0;
-        // private bool keyboardFocused = false;
 
         public CameraRenderControl() : this(ViewportType.Both) { }
 
         public CameraRenderControl(ViewportType type)
         {
             InitializeComponent();
-
-            CursorMode = CursorMode.Normal;
 
             ViewportType = type;
             CameraViewModel = new CameraViewModel();
@@ -193,9 +169,6 @@ namespace Editor
             if (!IsVisible)
                 return;
 
-            if (cursorMode == CursorMode.HiddenAndLocked && IsKeyboardFocused)
-                System.Windows.Forms.Cursor.Position = cursorLockPoint;
-
             CameraViewModel?.Render(D3DImage);
         }
 
@@ -208,8 +181,7 @@ namespace Editor
             {
                 if (e.RightButton == MouseButtonState.Pressed)
                 {
-                    CursorMode = CursorMode.HiddenAndLocked;
-                    EditorCameraController.LocalEnabled = true;
+                    EditorCameraController.Enable();
                     return;
                 }
 
@@ -222,12 +194,9 @@ namespace Editor
         {
             e.Handled = true;
 
-            if (editorCamera != null)
+            if (editorCamera != null && EditorCameraController.LocalEnabled)
             {
-                if (e.RightButton == MouseButtonState.Released && !EditorLayer.Current.IsPlaying)
-                    CursorMode = CursorMode.Normal;
-
-                EditorCameraController.LocalEnabled = false;
+                EditorCameraController.Disable();
             }
         }
 
@@ -239,16 +208,6 @@ namespace Editor
 
                 e.Handled = true;
             }
-        }
-
-        private void UserControl_GotKeyboardFocus(object sender, RoutedEventArgs e)
-        {
-            Cursor = cursorMode == CursorMode.Normal ? Cursors.Arrow : Cursors.None;
-        }
-
-        private void UserControl_LostKeyboardFocus(object sender, RoutedEventArgs e)
-        {
-            Cursor = Cursors.Arrow;
         }
 
         private void UserControl_SizeChanged(object sender, SizeChangedEventArgs e)
