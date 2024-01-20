@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -37,7 +38,8 @@ namespace Editor
         private RelayCommand recompileCommand;
 
         public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
-            _ => { ScriptManager.Recompile(); }
+            _ => { Task.Run(ScriptManager.Recompile); },
+            _ => !EditorLayer.Current.IsPlaying
         );
 
         private RelayCommand playCommand;

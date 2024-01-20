@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -85,8 +86,8 @@ namespace Editor
 
         private void Application_Activated(object sender, EventArgs e)
         {
-            if (ProjectViewModel.Current != null && RecompileOnFocus && !ScriptManager.IsCompilationRelevant)
-                ScriptManager.Recompile();
+            if (ProjectViewModel.Current != null && RecompileOnFocus && !ScriptManager.IsCompilationRelevant && !isPlaying)
+                Task.Run(ScriptManager.Recompile);
         }
 
         #region EditorState
@@ -120,7 +121,7 @@ namespace Editor
         public bool IsPlaying
         {
             get => isPlaying;
-            set
+            private set
             {
                 if (isPlaying == value)
                     return;
@@ -146,6 +147,8 @@ namespace Editor
         /// </summary>
         public void EnterPlaymode()
         {
+            if (ScriptManager.IsRecompiling)
+                return;
             IsPlaying = true;
         }
 
@@ -154,6 +157,8 @@ namespace Editor
         /// </summary>
         public void ExitPlaymode()
         {
+            if (ScriptManager.IsRecompiling)
+                return;
             IsPlaying = false;
         }
 

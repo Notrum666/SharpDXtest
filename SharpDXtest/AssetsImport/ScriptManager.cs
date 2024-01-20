@@ -28,6 +28,7 @@ namespace Editor.AssetsImport
 
         public static bool IsCompilationRelevant { get; private set; }
         public static event Action OnCodeRecompiled;
+        public static bool IsRecompiling { get; private set; }
 
         internal static ReadOnlyDictionary<string, List<Type>> FilesToTypesMap { get; }
 
@@ -83,6 +84,8 @@ namespace Editor.AssetsImport
 
         public static void Recompile()
         {
+            IsRecompiling = true;
+
             Logger.Log(LogType.Info, "Recompiling...");
 
             ProjectViewModel.Current.SaveCurrentScene();
@@ -105,6 +108,8 @@ namespace Editor.AssetsImport
 
             currentAssemblyContext.EnterContextualReflection();
             YamlManager.ReBuild(GetRelevantAssemblies());
+
+            IsRecompiling = false;
 
             OnCodeRecompiled?.Invoke();
 
