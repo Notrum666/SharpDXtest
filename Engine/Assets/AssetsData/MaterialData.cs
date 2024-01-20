@@ -47,7 +47,7 @@ namespace Engine.AssetsData
             //    TexturesGuids[textureType] = Guid.Empty;
             //}
         }
-        
+
         public sealed override void Serialize(BinaryWriter writer)
         {
             YamlManager.SaveToStream(writer.BaseStream, this);
@@ -60,23 +60,23 @@ namespace Engine.AssetsData
 
         public override Material ToRealAsset(BaseAsset targetAsset = null)
         {
-            Material material = Material.CreateDefault();
+            Material material = targetAsset as Material ?? new Material();
 
-            if (Albedo == Guid.Empty && BaseColor != null)
-                material.Albedo = new Texture(64, 64, BaseColor?.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource);
-            else
-                if (Albedo != Guid.Empty)
+            if (Albedo.NotEmpty())
                 material.Albedo = AssetsManager.LoadAssetByGuid<Texture>(Albedo);
-            if (Normal != Guid.Empty)
-                material.Normal = AssetsManager.LoadAssetByGuid<Texture>(Normal);
-            if (Metallic != Guid.Empty)
-                material.Metallic = AssetsManager.LoadAssetByGuid<Texture>(Metallic);
-            if (Roughness != Guid.Empty)
-                material.Roughness = AssetsManager.LoadAssetByGuid<Texture>(Roughness);
-            if (AmbientOcclusion != Guid.Empty)
-                material.AmbientOcclusion = AssetsManager.LoadAssetByGuid<Texture>(AmbientOcclusion);
-            if (Emissive != Guid.Empty)
-                material.Emissive = AssetsManager.LoadAssetByGuid<Texture>(Emissive);
+            else
+            {
+                if (BaseColor == null)
+                    material.Albedo = Material.Default.Albedo;
+                else if (BaseColor != material.BaseColor)
+                    material.Albedo = new Texture(64, 64, BaseColor?.GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource);
+            }
+
+            material.Normal = Normal.NotEmpty() ? AssetsManager.LoadAssetByGuid<Texture>(Normal) : Material.Default.Normal;
+            material.Metallic = Metallic.NotEmpty() ? AssetsManager.LoadAssetByGuid<Texture>(Metallic) : Material.Default.Metallic;
+            material.Roughness = Roughness.NotEmpty() ? AssetsManager.LoadAssetByGuid<Texture>(Roughness) : Material.Default.Roughness;
+            material.AmbientOcclusion = AmbientOcclusion.NotEmpty() ? AssetsManager.LoadAssetByGuid<Texture>(AmbientOcclusion) : Material.Default.AmbientOcclusion;
+            material.Emissive = Emissive.NotEmpty() ? AssetsManager.LoadAssetByGuid<Texture>(Emissive) : Material.Default.Emissive;
 
             return material;
         }
@@ -125,12 +125,12 @@ namespace Engine.AssetsData
         public bool IsDefault()
         {
             return BaseColor == null &&
-                Albedo == Guid.Empty &&
-                Normal == Guid.Empty &&
-                Emissive == Guid.Empty &&
-                Metallic == Guid.Empty &&
-                Roughness == Guid.Empty &&
-                AmbientOcclusion == Guid.Empty;
+                   Albedo == Guid.Empty &&
+                   Normal == Guid.Empty &&
+                   Emissive == Guid.Empty &&
+                   Metallic == Guid.Empty &&
+                   Roughness == Guid.Empty &&
+                   AmbientOcclusion == Guid.Empty;
         }
 
         private void LoadTextureToMaterial(Material material, MaterialTextureType textureType, Guid guid)

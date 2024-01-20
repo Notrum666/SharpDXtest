@@ -9,6 +9,8 @@ namespace Engine
 {
     public class Material : BaseAsset
     {
+        internal Vector4f? BaseColor { get; set; }
+
         private Texture albedo;
         public Texture Albedo
         {
@@ -102,6 +104,7 @@ namespace Engine
         {
             return new Material
             {
+                BaseColor = null,
                 albedo = new Texture(64, 64, new Vector4f(1.0f, 1.0f, 1.0f, 1.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource),
                 normal = new Texture(64, 64, new Vector4f(0.5f, 0.5f, 1.0f, 0.0f).GetBytes(), Format.R32G32B32A32_Float, BindFlags.ShaderResource),
                 metallic = new Texture(64, 64, 0.1f.GetBytes(), Format.R32_Typeless, BindFlags.ShaderResource),
