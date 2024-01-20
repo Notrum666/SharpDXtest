@@ -18,7 +18,7 @@ namespace Engine.AssetsData
         {
             throw new NotImplementedException();
         }
-        
+
         public sealed override void Serialize(BinaryWriter writer)
         {
             YamlManager.SaveToStream(writer.BaseStream, this);
@@ -31,7 +31,7 @@ namespace Engine.AssetsData
 
         public override SkeletalAnimation ToRealAsset(BaseAsset targetAsset = null)
         {
-            SkeletalAnimation animation = new SkeletalAnimation();
+            SkeletalAnimation animation = targetAsset as SkeletalAnimation ?? new SkeletalAnimation();
 
             animation.Name = Name;
             animation.DurationInTicks = DurationInTicks;

@@ -32,7 +32,7 @@ namespace Engine.AssetsData
 
         public override Skeleton ToRealAsset(BaseAsset targetAsset = null)
         {
-            Skeleton skeleton = new Skeleton();
+            Skeleton skeleton = targetAsset as Skeleton ?? new Skeleton();
 
             skeleton.Bones = Bones;
             skeleton.InverseRootTransform = InverseRootTransform;

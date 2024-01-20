@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 using Engine.Assets;
 
@@ -44,15 +45,15 @@ namespace Engine.AssetsData
 
         public override Model ToRealAsset(BaseAsset targetAsset = null)
         {
-            Model model = new Model();
+            Model model = targetAsset as Model ?? new Model();
 
-            if (SkeletonGuid != Guid.Empty)
-                model.Skeleton = AssetsManager.LoadAssetByGuid<Skeleton>(SkeletonGuid);
+            model.Meshes.ClearWithAction(x => x.Dispose());
 
+            model.Skeleton = SkeletonGuid.NotEmpty() ? AssetsManager.LoadAssetByGuid<Skeleton>(SkeletonGuid) : null;
             foreach (MeshData meshData in Meshes)
             {
                 Mesh mesh = new Mesh();
-                mesh.DefaultMaterial = AssetsManager.LoadAssetByGuid<Material>(meshData.Material);
+                mesh.DefaultMaterial = meshData.Material.NotEmpty() ? AssetsManager.LoadAssetByGuid<Material>(meshData.Material) : null;
 
                 foreach (VertexData vertexData in meshData.Vertices)
                 {

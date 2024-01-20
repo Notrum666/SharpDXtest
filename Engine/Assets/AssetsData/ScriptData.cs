@@ -24,8 +24,9 @@ namespace Engine.AssetsData
 
         public override ScriptAsset ToRealAsset(BaseAsset targetAsset = null)
         {
+            ScriptAsset scriptAsset = targetAsset as ScriptAsset ?? new ScriptAsset();
             Type componentType = ClassTypes.FirstOrDefault(t => t.IsSubclassOf(typeof(Component)));
-            return new ScriptAsset(componentType);
+            return scriptAsset.UpdateType(componentType);
         }
     }
 }

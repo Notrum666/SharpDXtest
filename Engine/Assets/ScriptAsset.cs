@@ -4,11 +4,12 @@ namespace Engine
 {
     public class ScriptAsset : BaseAsset
     {
-        public readonly Type ComponentType;
+        public Type ComponentType { get; private set; }
 
-        public ScriptAsset(Type componentType)
+        internal ScriptAsset UpdateType(Type componentType)
         {
             ComponentType = componentType;
+            return this;
         }
     }
 }

@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+
 using SharpDX;
 using SharpDX.D3DCompiler;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+
 using Buffer = SharpDX.Direct3D11.Buffer;
 using MapFlags = SharpDX.Direct3D11.MapFlags;
 
@@ -118,6 +120,11 @@ namespace Engine
         internal void AddBuffer(ShaderBuffer shaderBuffer)
         {
             buffers.Add(shaderBuffer);
+        }
+
+        internal void ClearBuffers()
+        {
+            buffers.ClearWithAction(x => x.Buffer.Dispose());
         }
 
         public class ShaderBuffer
