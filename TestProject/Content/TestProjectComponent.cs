@@ -15,6 +15,7 @@ namespace TestProject
     {
         public override void Start()
         {
+            Logger.Log(LogType.Warning, "Test warning");
             throw new Exception("Test exception");
         }
     }
