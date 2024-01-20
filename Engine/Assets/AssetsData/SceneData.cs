@@ -43,8 +43,11 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Scene ToRealAsset()
+        public override Scene ToRealAsset(BaseAsset targetAsset = null)
         {
+            if (targetAsset != null)
+                Logger.Log(LogType.Warning, "Tried to update Scene asset, but it is not allowed, cause asset is not cacheable");
+
             Scene scene = new Scene();
 
             foreach (SerializableObject serializableObject in SerializableObjects)

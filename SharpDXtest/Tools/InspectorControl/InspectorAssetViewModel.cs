@@ -65,7 +65,12 @@ namespace Editor
         }
         public void Save()
         {
+            string assetPath = filePath;
+            if (Path.GetExtension(assetPath) == AssetMeta.MetaExtension)
+                assetPath = Path.ChangeExtension(assetPath, null);
+
             YamlManager.SaveObjectToFile(filePath, fileObject);
+            AssetsRegistry.ImportAsset(assetPath);
         }
     }
 }

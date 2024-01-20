@@ -135,7 +135,7 @@ SerializableObjects:
   localEnabled: true
   model: d88264040dea43d48fbf829f466928b4
   materials:
-  - 37783489987243f5b6f22ad9fb4b82c7
+  - 7c65173ae04c46ccbfe45658e147bd49
 - !Rigidbody
   instanceId: d7d42d063857409bb2ac60ba1ddd8c2f
   gameObject: 1e7e7916514146108ac366da15db5579
@@ -420,8 +420,8 @@ SerializableObjects:
   localEnabled: true
   brightness: 0.3
   Color:
-    x: 0.2
-    y: 0.3
+    x: 1
+    y: 1
     z: 1
   shadowSize: 4096
 - !GameObject

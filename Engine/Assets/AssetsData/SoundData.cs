@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+
 using SharpDX;
 using SharpDX.Multimedia;
 using SharpDX.XAudio2;
@@ -65,14 +66,16 @@ namespace Engine.AssetsData
             DecodedPacketsInfo = reader.ReadBytes(packetsLength);
         }
 
-        public override Sound ToRealAsset()
+        public override Sound ToRealAsset(BaseAsset targetAsset = null)
         {
+            Sound sound = targetAsset as Sound ?? new Sound();
+
             using DataStream dataStream = DataStream.Create(AudioDataBuffer, true, false);
             AudioBuffer audioBuffer = new AudioBuffer(dataStream);
             WaveFormat waveFormat = WaveFormat.MarshalFrom(FormatBuffer);
             uint[] packetsInfo = MemoryMarshal.Cast<byte, uint>(DecodedPacketsInfo.AsSpan()).ToArray();
 
-            return new Sound(audioBuffer, waveFormat, packetsInfo);
+            return sound.UpdateSound(audioBuffer, waveFormat, packetsInfo);
         }
     }
 }

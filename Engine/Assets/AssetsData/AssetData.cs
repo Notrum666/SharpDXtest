@@ -8,14 +8,14 @@ namespace Engine.AssetsData
         public abstract void Serialize(BinaryWriter writer);
         public abstract void Deserialize(BinaryReader reader);
 
-        public virtual BaseAsset ToRealAsset()
+        public virtual BaseAsset ToRealAsset(BaseAsset targetAsset = null)
         {
             return null;
         }
 
-        public BaseAsset ToRealAsset(Guid guid)
+        public BaseAsset ToRealAsset(Guid guid, BaseAsset targetAsset = null)
         {
-            return ToRealAsset()?.WithGuid(guid);
+            return ToRealAsset(targetAsset)?.WithGuid(guid);
         }
     }
 

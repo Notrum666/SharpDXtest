@@ -5,7 +5,7 @@ namespace LinearAlgebra
     /// <summary>
     /// 4-dimensional vector with single precision
     /// </summary>
-    public struct Vector4f
+    public struct Vector4f : IEquatable<Vector4f>
     {
         /// <summary>
         /// Returns new zero vector
@@ -239,6 +239,31 @@ namespace LinearAlgebra
         public string ToString(string format)
         {
             return "(" + x.ToString(format) + ", " + y.ToString(format) + ", " + z.ToString(format) + ", " + w.ToString(format) + ")";
+        }
+
+        public static bool operator ==(Vector4f lhs, Vector4f rhs)
+        {
+            return lhs.Equals(rhs);
+        }
+
+        public static bool operator !=(Vector4f lhs, Vector4f rhs)
+        {
+            return !lhs.Equals(rhs);
+        }
+
+        public bool Equals(Vector4f other)
+        {
+            return x.Equals(other.x) && y.Equals(other.y) && z.Equals(other.z) && w.Equals(other.w);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Vector4f other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(x, y, z, w);
         }
     }
 }

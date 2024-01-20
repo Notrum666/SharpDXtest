@@ -11,11 +11,14 @@ namespace Engine
 
         private bool disposed = false;
 
-        public Sound(AudioBuffer buffer, WaveFormat format, uint[] decodedPacketsInfo)
+        public Sound UpdateSound(AudioBuffer buffer, WaveFormat format, uint[] decodedPacketsInfo)
         {
+            Buffer?.Stream?.Dispose();
+
             Buffer = buffer;
             Format = format;
             DecodedPacketsInfo = decodedPacketsInfo;
+            return this;
         }
 
         protected override void Dispose(bool disposing)

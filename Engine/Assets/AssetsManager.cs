@@ -142,10 +142,21 @@ namespace Engine
             return asset;
         }
 
+        private static void UpdateAssetCachedValue(Guid guid, Type assetDataType)
+        {
+            if (!TryGetCachedAsset(guid, out BaseAsset asset))
+                return;
+
+            AssetData artifact = LoadArtifact(guid, assetDataType);
+            artifact?.ToRealAsset(guid, asset);
+        }
+
         public static void SaveAssetData(string contentAssetPath, Guid guid, AssetData assetData)
         {
             SaveArtifact(guid, assetData);
             artifactDatabase.SaveArtifactData(contentAssetPath, guid, assetData.GetType());
+
+            UpdateAssetCachedValue(guid, assetData.GetType());
         }
 
         public static void SaveNativeAssetData<T>(string contentAssetPath, Guid guid, Stream assetData) where T : NativeAssetData
@@ -159,6 +170,7 @@ namespace Engine
             fileStream.Close();
 
             artifactDatabase.SaveArtifactData(contentAssetPath, guid, typeof(T));
+            UpdateAssetCachedValue(guid, typeof(T));
         }
 
         /// <summary>

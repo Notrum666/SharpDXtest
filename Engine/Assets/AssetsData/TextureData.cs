@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Media.Imaging;
 using SharpDX;
 using SharpDX.Direct3D11;
@@ -59,8 +60,10 @@ namespace Engine.AssetsData
             PixelBuffer = reader.ReadBytes(bufferLength);
         }
 
-        public override Texture ToRealAsset()
+        public override Texture ToRealAsset(BaseAsset targetAsset = null)
         {
+            Texture texture = targetAsset as Texture ?? new Texture(); 
+            
             Texture2DDescription description = new Texture2DDescription()
             {
                 Width = PixelWidth,
@@ -75,11 +78,19 @@ namespace Engine.AssetsData
                 OptionFlags = ResourceOptionFlags.Shared
             };
 
-            GCHandle handle = GCHandle.Alloc(PixelBuffer, GCHandleType.Pinned);
-            DataRectangle dataRectangle = new DataRectangle(handle.AddrOfPinnedObject(), PixelWidth * PixelFormat.SizeOfInBytes());
-            handle.Free();
+            int strideLength = PixelWidth * PixelFormat.SizeOfInBytes();
+            int bytesCount = PixelHeight * strideLength;
 
-            return new Texture(description, dataRectangle);
+            nint dataPtr = Marshal.AllocHGlobal(bytesCount);
+
+            using (MemoryStream stream = new MemoryStream(PixelBuffer))
+            {
+                PngBitmapDecoder decoder = new PngBitmapDecoder(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+                decoder.Frames[0].CopyPixels(Int32Rect.Empty, dataPtr, bytesCount, strideLength);
+            }
+
+            DataRectangle dataRectangle = new DataRectangle(dataPtr, strideLength);
+            return texture.UpdateTexture(description, dataRectangle);
         }
     }
 }

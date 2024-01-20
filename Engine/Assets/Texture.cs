@@ -7,10 +7,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media.Imaging;
+
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+
 using Rectangle = System.Drawing.Rectangle;
 
 namespace Engine
@@ -77,11 +79,7 @@ namespace Engine
 
         #endregion
 
-        public Texture(Texture2DDescription description, DataRectangle dataRectangle)
-        {
-            texture = new Texture2D(GraphicsCore.CurrentDevice, description, dataRectangle);
-            GenerateViews();
-        }
+        public Texture() { }
 
         public Texture(int width, int height, IEnumerable<byte>? defaultDataPerPixel, Format textureFormat, BindFlags usage, int arraySize = 1, int mipLevels = 1)
         {
@@ -145,6 +143,16 @@ namespace Engine
                 Marshal.FreeHGlobal(dataPtr);
 
             GenerateViews();
+        }
+
+        public Texture UpdateTexture(Texture2DDescription description, DataRectangle dataRectangle)
+        {
+            texture?.Dispose();
+            viewsCollectons.Clear();
+
+            texture = new Texture2D(GraphicsCore.CurrentDevice, description, dataRectangle);
+            GenerateViews();
+            return this;
         }
 
         protected override void Dispose(bool disposing)

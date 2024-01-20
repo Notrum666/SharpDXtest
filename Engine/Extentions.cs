@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine
@@ -21,6 +23,7 @@ namespace Engine
             Marshal.FreeHGlobal(ptr);
             return array;
         }
+
         public static T To<T>(this byte[] data, int offset = 0) where T : struct
         {
             int size = Marshal.SizeOf<T>();
@@ -31,5 +34,20 @@ namespace Engine
             return obj;
         }
 
+        public static bool NotEmpty(this Guid guid)
+        {
+            return guid != Guid.Empty;
+        }
+
+        public static void ClearWithAction<T>(this List<T> list, Action<T> action)
+        {
+            List<T> temp = list.ToList();
+            list.Clear();
+            foreach (T value in temp)
+            {
+                action?.Invoke(value);
+            }
+            temp.Clear();
+        }
     }
 }
