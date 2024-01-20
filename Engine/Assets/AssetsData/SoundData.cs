@@ -39,7 +39,7 @@ namespace Engine.AssetsData
 
         public void SetDecodedPacketsInfo(uint[] packetsInfo)
         {
-            DecodedPacketsInfo = MemoryMarshal.Cast<uint, byte>(packetsInfo.AsSpan()).ToArray();
+            DecodedPacketsInfo = packetsInfo == null ? null : MemoryMarshal.Cast<uint, byte>(packetsInfo.AsSpan()).ToArray();
         }
 
         public override void Serialize(BinaryWriter writer)
@@ -50,8 +50,13 @@ namespace Engine.AssetsData
             writer.Write(FormatBuffer.Length);
             writer.Write(FormatBuffer);
 
-            writer.Write(DecodedPacketsInfo.Length);
-            writer.Write(DecodedPacketsInfo);
+            if (DecodedPacketsInfo != null)
+            {
+                writer.Write(DecodedPacketsInfo.Length);
+                writer.Write(DecodedPacketsInfo);
+            }
+            else
+                writer.Write(-1);
         }
 
         public override void Deserialize(BinaryReader reader)
@@ -63,17 +68,20 @@ namespace Engine.AssetsData
             FormatBuffer = reader.ReadBytes(formatLength);
 
             int packetsLength = reader.ReadInt32();
-            DecodedPacketsInfo = reader.ReadBytes(packetsLength);
+            if (packetsLength >= 0)
+                DecodedPacketsInfo = reader.ReadBytes(packetsLength);
+            else
+                DecodedPacketsInfo = null;
         }
 
         public override Sound ToRealAsset(BaseAsset targetAsset = null)
         {
             Sound sound = targetAsset as Sound ?? new Sound();
 
-            using DataStream dataStream = DataStream.Create(AudioDataBuffer, true, false);
+            DataStream dataStream = DataStream.Create(AudioDataBuffer, true, true);
             AudioBuffer audioBuffer = new AudioBuffer(dataStream);
             WaveFormat waveFormat = WaveFormat.MarshalFrom(FormatBuffer);
-            uint[] packetsInfo = MemoryMarshal.Cast<byte, uint>(DecodedPacketsInfo.AsSpan()).ToArray();
+            uint[] packetsInfo = DecodedPacketsInfo == null ? null : MemoryMarshal.Cast<byte, uint>(DecodedPacketsInfo.AsSpan()).ToArray();
 
             return sound.UpdateSound(audioBuffer, waveFormat, packetsInfo);
         }
