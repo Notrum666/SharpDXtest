@@ -15,7 +15,7 @@ using System.Windows.Shapes;
 
 namespace Engine
 {
-    public class ViewportControl : Panel
+    public class ViewportControl : Grid
     {
         public ViewportControl()
         {
