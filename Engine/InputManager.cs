@@ -1,4 +1,8 @@
-﻿using LinearAlgebra;
+﻿using System;
+using System.Drawing;
+using System.Windows.Forms;
+
+using LinearAlgebra;
 
 using SharpDX.DirectInput;
 
@@ -137,5 +141,36 @@ namespace Engine
                 return fixedMouseDelta;
             return mouseDelta;
         }
+
+        private static CursorState cursorState = CursorState.Default;
+        public static CursorState CursorState
+        {
+            get => cursorState;
+            set
+            {
+                if (value == cursorState)
+                    return;
+
+                cursorState = value;
+
+                if (cursorState.HasFlag(CursorState.Hidden))
+                    Cursor.Hide();
+                else
+                    Cursor.Show();
+
+                if (cursorState.HasFlag(CursorState.Locked))
+                    Cursor.Clip = new Rectangle(Cursor.Position, Size.Empty);
+                else
+                    Cursor.Clip = Rectangle.Empty;
+            }
+        }
+    }
+
+    [Flags]
+    public enum CursorState
+    {
+        Default = 0,
+        Hidden = 1 << 0,
+        Locked = 1 << 1,
     }
 }

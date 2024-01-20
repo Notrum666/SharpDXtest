@@ -10,8 +10,6 @@
              Loaded="UserControl_Loaded" Unloaded="UserControl_Unloaded"
              MouseDown="UserControl_MouseDown" MouseUp="UserControl_MouseUp"
              KeyDown="UserControl_KeyDown"
-             GotKeyboardFocus="UserControl_GotKeyboardFocus"
-             LostKeyboardFocus="UserControl_LostKeyboardFocus"
              SizeChanged="UserControl_SizeChanged"
              Style="{StaticResource ToolControl}">
     <UserControl.Resources>
