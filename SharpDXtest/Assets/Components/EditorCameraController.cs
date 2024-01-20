@@ -3,9 +3,9 @@
 using Engine;
 using Engine.BaseAssets.Components;
 
-using LinearAlgebra;
+using System.Windows.Input;
 
-using SharpDX.DirectInput;
+using LinearAlgebra;
 
 namespace SharpDXtest.Assets.Components
 {
@@ -42,32 +42,32 @@ namespace SharpDXtest.Assets.Components
 
         private void UpdateInput()
         {
-            if (!InputManager.IsMouseButtonDown(1))
+            if (!Input.IsMouseButtonDown(MouseButton.Right))
                 return;
 
-            if (InputManager.IsKeyDown(Key.A))
+            if (Input.IsKeyDown(Key.A))
                 targetVelocity -= GameObject.Transform.Right;
-            if (InputManager.IsKeyDown(Key.D))
+            if (Input.IsKeyDown(Key.D))
                 targetVelocity += GameObject.Transform.Right;
-            if (InputManager.IsKeyDown(Key.S))
+            if (Input.IsKeyDown(Key.S))
                 targetVelocity -= GameObject.Transform.Forward;
-            if (InputManager.IsKeyDown(Key.W))
+            if (Input.IsKeyDown(Key.W))
                 targetVelocity += GameObject.Transform.Forward;
-            if (InputManager.IsKeyDown(Key.C))
+            if (Input.IsKeyDown(Key.C))
                 targetVelocity -= GameObject.Transform.Up;
-            if (InputManager.IsKeyDown(Key.Space))
+            if (Input.IsKeyDown(Key.Space))
                 targetVelocity += GameObject.Transform.Up;
 
             curMaxSpeed = maxSpeed;
-            if (InputManager.IsKeyDown(Key.LeftShift))
+            if (Input.IsKeyDown(Key.LeftShift))
                 curMaxSpeed *= 5;
-            if (InputManager.IsKeyDown(Key.LeftControl))
+            if (Input.IsKeyDown(Key.LeftCtrl))
                 curMaxSpeed /= 5;
 
             if (!targetVelocity.isZero())
                 targetVelocity = targetVelocity.normalized() * curMaxSpeed;
 
-            Vector2 mouseDelta = InputManager.GetMouseDelta() / 750;
+            Vector2 mouseDelta = Input.GetMouseDelta() / 750;
 
             if (!mouseDelta.isZero())
                 // faster

@@ -33,7 +33,7 @@ namespace Engine
         public static Device CurrentDevice { get; private set; }
         public static SharpDX.Direct3D9.Device D9Device { get; private set; }
 
-        public static Panel ViewportPanel { get; set; }
+        public static ViewportControl ViewportPanel { get; private set; }
 
         public static Sampler ShadowsSampler => shadowsSampler;
 
@@ -60,6 +60,9 @@ namespace Engine
 
             sampler = Sampler.Default;
             shadowsSampler = Sampler.DefaultShadows;
+
+            ViewportPanel = new ViewportControl();
+            ViewportPanel.Focusable = true;
 
             SceneManager.OnSceneUnloading += ClearViewportPanel;
         }

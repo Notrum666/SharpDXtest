@@ -118,9 +118,11 @@ namespace Editor
                     CameraViewModel.SetCamera(editorCamera);
                 }
 
-                GraphicsCore.ViewportPanel = GameInterface;
                 loaded = true;
             }
+
+            if (GraphicsCore.ViewportPanel.Parent is null)
+                GameInterfaceHost.Children.Add(GraphicsCore.ViewportPanel);
 
             if (editorCamera != null)
                 editorCamera.LocalEnabled = true;
@@ -181,6 +183,9 @@ namespace Editor
 
             EditorLayer.Current.OnPlaymodeEntered -= OnPlaymodeEntered;
             EditorLayer.Current.OnPlaymodeExited -= OnPlaymodeExited;
+
+            if (GraphicsCore.ViewportPanel.Parent is null)
+                GameInterfaceHost.Children.Clear();
         }
 
         private void OnRender(object sender, EventArgs e)
