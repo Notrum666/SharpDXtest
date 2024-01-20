@@ -231,17 +231,18 @@ namespace Editor
 
         #region FolderOperations //Import, Create, Copy, Move, Rename, Delete
 
-        public static void ImportFolder(string folderPath)
+        public static void ImportFolder(string folderPath, bool recursive = true)
         {
             if (!Path.Exists(folderPath))
                 return;
             Logger.Log(LogType.Info, $"Folder import at {folderPath}");
 
-            foreach (PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
-            {
-                if (!pathInfo.IsDirectory)
-                    ImportAsset(pathInfo.FullPath);
-            }
+            if (recursive)
+                foreach (PathInfo pathInfo in EnumeratePathInfoEntries(folderPath, "*", true))
+                {
+                    if (!pathInfo.IsDirectory)
+                        ImportAsset(pathInfo.FullPath);
+                }
         }
 
         public static void CreateFolder(string parentFolderPath, string newFolderName)

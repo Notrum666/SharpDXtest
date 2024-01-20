@@ -12,6 +12,7 @@ namespace Editor
         public RelayCommand SaveCommand => saveCommand ??= new RelayCommand(
             _ =>
             {
+                InspectorControl.Current.Focus();
                 inspectorAssetViewModel.Save();
             }
         );

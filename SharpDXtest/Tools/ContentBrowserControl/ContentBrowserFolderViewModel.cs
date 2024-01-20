@@ -56,6 +56,11 @@ namespace Editor
 
             Refresh();
         }
+        public void Reimport(bool recursive)
+        {
+            AssetsRegistry.ImportFolder(fullPath, recursive);
+            Refresh();
+        }
         public void Refresh()
         {
             Subfolders.Clear();

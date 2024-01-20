@@ -76,7 +76,6 @@
                 </ListBox.ItemsPanel>
                 <ListBox.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Header="Refresh" Command="{Binding Data.RefreshCommand, Source={StaticResource ContentBrowserControlProxy}}"/>
                         <MenuItem Header="Create...">
                             <MenuItem Header="Folder" Command="{Binding Data.StartFolderCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"/>
                             <Separator/>
@@ -87,6 +86,9 @@
                             <!--<MenuItem Header="Script" Command="{Binding Data.StartAssetCreationCommand, Source={StaticResource ContentBrowserControlProxy}}"
                                   CommandParameter="{x:Type assets:ScriptData}"/>-->
                         </MenuItem>
+                        <MenuItem Header="Refresh" Command="{Binding Data.RefreshCommand, Source={StaticResource ContentBrowserControlProxy}}"/>
+                        <MenuItem Header="Reimport(Folder)" Command="{Binding Data.ReimportCommand, Source={StaticResource ContentBrowserControlProxy}}"/>
+                        <MenuItem Header="Reimport(Recursive)" Command="{Binding Data.ReimportRecursiveCommand, Source={StaticResource ContentBrowserControlProxy}}"/>
                     </ContextMenu>
                 </ListBox.ContextMenu>
                 <ListBox.Resources>

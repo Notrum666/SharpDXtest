@@ -26,6 +26,10 @@ namespace Editor
         public RelayCommand StartAssetCreationCommand => startAssetCreationCommand ??= new RelayCommand(obj => AssetCreationViewModels.Add(new AssetCreationViewModel((Type)obj)));
         private RelayCommand refreshCommand;
         public RelayCommand RefreshCommand => refreshCommand ??= new RelayCommand(_ => ((ContentBrowserFolderViewModel)SelectedFolderListBox.DataContext).Refresh());
+        private RelayCommand reimportCommand;
+        public RelayCommand ReimportCommand => reimportCommand ??= new RelayCommand(_ => ((ContentBrowserFolderViewModel)SelectedFolderListBox.DataContext).Reimport(false));
+        private RelayCommand reimportRecursiveCommand;
+        public RelayCommand ReimportRecursiveCommand => reimportRecursiveCommand ??= new RelayCommand(_ => ((ContentBrowserFolderViewModel)SelectedFolderListBox.DataContext).Reimport(true));
         public event PropertyChangedEventHandler PropertyChanged;
         public ObservableCollection<ContentBrowserFolderViewModel> RootFolderViewModels { get; } = new ObservableCollection<ContentBrowserFolderViewModel>();
         public ObservableCollection<AssetCreationViewModel> AssetCreationViewModels { get; } = new ObservableCollection<AssetCreationViewModel>();
