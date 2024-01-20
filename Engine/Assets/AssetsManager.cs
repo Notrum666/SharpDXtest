@@ -283,6 +283,11 @@ namespace Engine
             string artifactPath = GetArtifactFullPath(guids.First());
             return File.GetLastWriteTimeUtc(artifactPath);
         }
+
+        public static void SanitizeDatabase(HashSet<string> contentFiles)
+        {
+            artifactDatabase.Sanitize(contentFiles);
+        }
     }
 
     public class ArtifactDatabase
@@ -321,6 +326,21 @@ namespace Engine
         private void Save()
         {
             YamlManager.SaveToFile(filePath, this);
+        }
+
+        internal void Sanitize(HashSet<string> contentFiles)
+        {
+            foreach (string assetPath in pathToGuidsMap.Keys)
+            {
+                if (contentFiles.Contains(assetPath))
+                    continue;
+
+                foreach (Guid guid in pathToGuidsMap[assetPath])
+                {
+                    guidToDataTypeMap.Remove(guid);
+                }
+                pathToGuidsMap.Remove(assetPath);
+            }
         }
 
         internal void SaveArtifactData(string contentAssetPath, Guid guid, Type assetDataType)
