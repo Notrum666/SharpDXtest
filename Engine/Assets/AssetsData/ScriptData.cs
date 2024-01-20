@@ -22,7 +22,7 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override ScriptAsset ToRealAsset()
+        public override ScriptAsset ToRealAsset(BaseAsset targetAsset = null)
         {
             Type componentType = ClassTypes.FirstOrDefault(t => t.IsSubclassOf(typeof(Component)));
             return new ScriptAsset(componentType);

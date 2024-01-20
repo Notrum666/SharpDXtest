@@ -26,7 +26,7 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Shader ToRealAsset()
+        public override Shader ToRealAsset(BaseAsset targetAsset = null)
         {
             Shader shader = Shader.Create(ShaderType, Bytecode);
 

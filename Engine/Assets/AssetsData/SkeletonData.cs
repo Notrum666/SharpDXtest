@@ -30,7 +30,7 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Skeleton ToRealAsset()
+        public override Skeleton ToRealAsset(BaseAsset targetAsset = null)
         {
             Skeleton skeleton = new Skeleton();
 

@@ -42,7 +42,7 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Model ToRealAsset()
+        public override Model ToRealAsset(BaseAsset targetAsset = null)
         {
             Model model = new Model();
 

@@ -43,7 +43,7 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Scene ToRealAsset()
+        public override Scene ToRealAsset(BaseAsset targetAsset = null)
         {
             Scene scene = new Scene();
 

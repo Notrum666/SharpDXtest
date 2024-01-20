@@ -65,7 +65,7 @@ namespace Engine.AssetsData
             DecodedPacketsInfo = reader.ReadBytes(packetsLength);
         }
 
-        public override Sound ToRealAsset()
+        public override Sound ToRealAsset(BaseAsset targetAsset = null)
         {
             using DataStream dataStream = DataStream.Create(AudioDataBuffer, true, false);
             AudioBuffer audioBuffer = new AudioBuffer(dataStream);

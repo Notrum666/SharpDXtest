@@ -60,8 +60,10 @@ namespace Engine.AssetsData
             PixelBuffer = reader.ReadBytes(bufferLength);
         }
 
-        public override Texture ToRealAsset()
+        public override Texture ToRealAsset(BaseAsset targetAsset = null)
         {
+            Texture texture = targetAsset as Texture ?? new Texture(); 
+            
             Texture2DDescription description = new Texture2DDescription()
             {
                 Width = PixelWidth,
@@ -88,7 +90,7 @@ namespace Engine.AssetsData
             }
 
             DataRectangle dataRectangle = new DataRectangle(dataPtr, strideLength);
-            return new Texture(description, dataRectangle);
+            return texture.UpdateTexture(description, dataRectangle);
         }
     }
 }

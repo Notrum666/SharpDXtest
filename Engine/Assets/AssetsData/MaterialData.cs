@@ -58,7 +58,7 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override Material ToRealAsset()
+        public override Material ToRealAsset(BaseAsset targetAsset = null)
         {
             Material material = Material.CreateDefault();
 

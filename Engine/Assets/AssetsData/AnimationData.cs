@@ -29,7 +29,7 @@ namespace Engine.AssetsData
             YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
-        public override SkeletalAnimation ToRealAsset()
+        public override SkeletalAnimation ToRealAsset(BaseAsset targetAsset = null)
         {
             SkeletalAnimation animation = new SkeletalAnimation();
 
