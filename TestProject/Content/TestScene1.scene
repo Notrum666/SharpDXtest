@@ -9,6 +9,7 @@ SerializableObjects:
   - 59f04aed325e476489f53e6d26e5abec
   - 6b924668a775401b95018aec49a8df73
   - fcddbe1bc3ac4a6ba258605ea8d9ad9b
+  - cbdc012266f74dbaaefe736dbca0e57a
 - !Transform
   instanceId: 59f04aed325e476489f53e6d26e5abec
   gameObject: 64188becf7b044f0b30c6552b6b29fef
@@ -16,11 +17,11 @@ SerializableObjects:
   - dec4b28b0073421b89a63466ee06e19f
   - 5906581a3a934ada9a4ba011cb16f6f6
   Position:
-    x: 3
-    y: 3
+    x: 5
     z: 5
   Rotation:
-    w: 1
+    w: 0.7071067811865476
+    z: 0.7071067811865476
   Scale:
     x: 1
     y: 1
@@ -38,6 +39,10 @@ SerializableObjects:
   aspect: 1
   near: 0.001
   far: 500
+- !EditorCameraController
+  instanceId: cbdc012266f74dbaaefe736dbca0e57a
+  gameObject: 64188becf7b044f0b30c6552b6b29fef
+  localEnabled: true
 - !GameObject
   instanceId: 46acbbbc291b49019885f8d382ccd31f
   name: SubObject1
@@ -250,6 +255,7 @@ SerializableObjects:
     z: 1
   linearDrag: 0.05
   angularDrag: 0.05
+  isStatic: true
 - !SphereCollider
   instanceId: 8b55371ce5314ee4a060563de8a7b09b
   gameObject: c8f3ad50439543649b0caa948c6e1ecd

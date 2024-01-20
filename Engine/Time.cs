@@ -9,7 +9,6 @@ namespace Engine
         public static double DeltaTime => IsFixed ? FixedDeltaTime : deltaTime;
         public static double FixedDeltaTime { get; private set; } = 1.0 / 60.0;
         public static double TotalTime { get; private set; }
-        public static double TimeScale { get; set; } = 1;
 
         private static Stopwatch updateWatch;
 
@@ -23,7 +22,7 @@ namespace Engine
 
         public static void Update()
         {
-            deltaTime = updateWatch.Elapsed.TotalSeconds * TimeScale;
+            deltaTime = updateWatch.Elapsed.TotalSeconds;
             updateWatch.Restart();
 
             TotalTime += DeltaTime;

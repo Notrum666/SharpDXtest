@@ -16,7 +16,7 @@ namespace Engine.BaseAssets.Components
         public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 1);
         public static float[] CascadeFrustumDistances => cascadeFrustumDistances;
 
-        private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.1f, 0.3f, 1.0f };
+        private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.02f, 0.1f, 1.0f };
 
         private Matrix4x4f getLightSpaceForFrustumSlice(Matrix4x4f frustumToView, float fromZ, float toZ, float lightSpaceDepthScale)
         {
