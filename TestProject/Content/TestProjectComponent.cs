@@ -18,6 +18,12 @@ namespace TestProject
         public override void Start()
         {
             SoundCore.Play(SoundToPlay);
+
+            GraphicsCore.ViewportPanel.Dispatcher.Invoke(() =>
+            {
+                Logger.Log(LogType.Info, "Show userControl");
+                GraphicsCore.ViewportPanel.Children.Add(new UserControlTest());
+            });
         }
     }
 }

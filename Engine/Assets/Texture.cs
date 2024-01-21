@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 using SharpDX;
@@ -14,12 +15,15 @@ using SharpDX.Direct3D11;
 using SharpDX.DXGI;
 
 using Rectangle = System.Drawing.Rectangle;
+using ImagingPixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace Engine
 {
     public class Texture : BaseAsset
     {
         public Texture2D texture { get; private set; }
+        public ImageSource Source { get; private set; }
+
         private List<IResourceViewCollection> viewsCollectons = new List<IResourceViewCollection>();
 
         private bool disposed = false;
@@ -38,11 +42,11 @@ namespace Engine
             Bitmap bmp = new Bitmap(
                 source.PixelWidth,
                 source.PixelHeight,
-                PixelFormat.Format32bppPArgb);
+                ImagingPixelFormat.Format32bppPArgb);
             BitmapData data = bmp.LockBits(
                 new System.Drawing.Rectangle(System.Drawing.Point.Empty, bmp.Size),
                 ImageLockMode.WriteOnly,
-                PixelFormat.Format32bppPArgb);
+                ImagingPixelFormat.Format32bppPArgb);
             source.CopyPixels(
                 Int32Rect.Empty,
                 data.Scan0,
@@ -54,9 +58,9 @@ namespace Engine
 
         public Texture(Bitmap image, bool applyGammaCorrection = true)
         {
-            if (image.PixelFormat != PixelFormat.Format32bppArgb)
-                image = image.Clone(new Rectangle(0, 0, image.Width, image.Height), PixelFormat.Format32bppArgb);
-            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+            if (image.PixelFormat != ImagingPixelFormat.Format32bppArgb)
+                image = image.Clone(new Rectangle(0, 0, image.Width, image.Height), ImagingPixelFormat.Format32bppArgb);
+            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, ImagingPixelFormat.Format32bppArgb);
 
             texture = new Texture2D(GraphicsCore.CurrentDevice, new Texture2DDescription()
             {
@@ -145,7 +149,20 @@ namespace Engine
             GenerateViews();
         }
 
-        public Texture UpdateTexture(Texture2DDescription description, DataRectangle dataRectangle)
+        public Texture WithBitmapSource(Texture2DDescription description, BitmapSource bitmapSource)
+        {
+            int strideLength = description.Width * description.Format.SizeOfInBytes();
+            int bytesCount = description.Height * strideLength;
+            nint dataPtr = Marshal.AllocHGlobal(bytesCount);
+
+            bitmapSource.CopyPixels(Int32Rect.Empty, dataPtr, bytesCount, strideLength);
+            DataRectangle dataRectangle = new DataRectangle(dataPtr, strideLength);
+
+            Source = bitmapSource;
+            return WithRawData(description, dataRectangle);
+        }
+
+        public Texture WithRawData(Texture2DDescription description, DataRectangle dataRectangle)
         {
             texture?.Dispose();
             viewsCollectons.Clear();
@@ -162,7 +179,8 @@ namespace Engine
 
             if (disposing)
             {
-                texture.Dispose();
+                texture?.Dispose();
+                Source = null;
             }
             disposed = true;
 
