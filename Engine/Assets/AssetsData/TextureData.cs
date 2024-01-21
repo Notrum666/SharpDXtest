@@ -78,19 +78,11 @@ namespace Engine.AssetsData
                 OptionFlags = ResourceOptionFlags.Shared
             };
 
-            int strideLength = PixelWidth * PixelFormat.SizeOfInBytes();
-            int bytesCount = PixelHeight * strideLength;
+            using MemoryStream stream = new MemoryStream(PixelBuffer);
+            PngBitmapDecoder decoder = new PngBitmapDecoder(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
+            BitmapFrame frame = decoder.Frames[0];
 
-            nint dataPtr = Marshal.AllocHGlobal(bytesCount);
-
-            using (MemoryStream stream = new MemoryStream(PixelBuffer))
-            {
-                PngBitmapDecoder decoder = new PngBitmapDecoder(stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.Default);
-                decoder.Frames[0].CopyPixels(Int32Rect.Empty, dataPtr, bytesCount, strideLength);
-            }
-
-            DataRectangle dataRectangle = new DataRectangle(dataPtr, strideLength);
-            return texture.UpdateTexture(description, dataRectangle);
+            return texture.WithBitmapSource(description, frame);
         }
     }
 }
