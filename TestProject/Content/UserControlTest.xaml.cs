@@ -25,11 +25,5 @@ namespace TestProject
         {
             InitializeComponent();
         }
-
-        private void UserControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            Texture shapes = AssetsManager.LoadAssetAtPath<Texture>("shapes.png");
-            TestImage.Source = shapes.Source;
-        }
     }
 }
