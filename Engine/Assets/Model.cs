@@ -63,22 +63,22 @@ namespace Engine
 
             for (int i = 0; i < Indices.Count / 3; i++)
             {
-                Vector3f edge1 = Vertices[i * 3 + 1].v - Vertices[i * 3 + 0].v;
-                Vector3f edge2 = Vertices[i * 3 + 2].v - Vertices[i * 3 + 0].v;
-                Vector2f UVedge1 = Vertices[i * 3 + 1].t - Vertices[i * 3 + 0].t;
-                Vector2f UVedge2 = Vertices[i * 3 + 2].t - Vertices[i * 3 + 0].t;
+                Vector3f edge1 = Vertices[Indices[i * 3 + 1]].v - Vertices[Indices[i * 3 + 0]].v;
+                Vector3f edge2 = Vertices[Indices[i * 3 + 2]].v - Vertices[Indices[i * 3 + 0]].v;
+                Vector2f UVedge1 = Vertices[Indices[i * 3 + 1]].t - Vertices[Indices[i * 3 + 0]].t;
+                Vector2f UVedge2 = Vertices[Indices[i * 3 + 2]].t - Vertices[Indices[i * 3 + 0]].t;
                 Vector3f tx = ((edge1 * UVedge2.y - edge2 * UVedge1.y) / (UVedge1.x * UVedge2.y - UVedge1.y * UVedge2.x)).normalized();
-                PrimitiveVertex vertex0 = Vertices[i * 3 + 0];
-                PrimitiveVertex vertex1 = Vertices[i * 3 + 1];
-                PrimitiveVertex vertex2 = Vertices[i * 3 + 2];
+                PrimitiveVertex vertex0 = Vertices[Indices[i * 3 + 0]];
+                PrimitiveVertex vertex1 = Vertices[Indices[i * 3 + 1]];
+                PrimitiveVertex vertex2 = Vertices[Indices[i * 3 + 2]];
 
                 vertex0.tx = new Vector3f(tx.x, tx.y, tx.z);
                 vertex1.tx = new Vector3f(tx.x, tx.y, tx.z);
                 vertex2.tx = new Vector3f(tx.x, tx.y, tx.z);
 
-                Vertices[i * 3 + 0] = vertex0;
-                Vertices[i * 3 + 1] = vertex1;
-                Vertices[i * 3 + 2] = vertex2;
+                Vertices[Indices[i * 3 + 0]] = vertex0;
+                Vertices[Indices[i * 3 + 1]] = vertex1;
+                Vertices[Indices[i * 3 + 2]] = vertex2;
             }
 
             vertexBuffer = Buffer.Create(GraphicsCore.CurrentDevice, BindFlags.VertexBuffer, Vertices.ToArray());
