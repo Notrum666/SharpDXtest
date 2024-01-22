@@ -16,7 +16,7 @@ namespace Editor.AssetsImport
     [AssetImporter("fbx", "dae", "obj")]
     public class ModelImporter : AssetImporter
     {
-        public override int LatestVersion => 2;
+        public override int LatestVersion => 3;
 
         private Scene aiCurrentScene; // external Assimp data -> ai* prefix
         private ModelData currentModelData;
@@ -35,6 +35,7 @@ namespace Editor.AssetsImport
         protected override void OnImportAsset(AssetImportContext importContext)
         {
             AssimpContext aiAssimpContext = new AssimpContext();
+            aiAssimpContext.SetConfig(new Assimp.Configs.SortByPrimitiveTypeConfig(PrimitiveType.Point | PrimitiveType.Line));
             // assimpContext.SetConfig(new Assimp.Configs.MaxBoneCountConfig(72));
             // assimpContext.SetConfig(new Assimp.Configs.VertexBoneWeightLimitConfig(4));
 
@@ -42,6 +43,7 @@ namespace Editor.AssetsImport
                                                 | PostProcessSteps.FlipWindingOrder
                                                 | PostProcessSteps.MakeLeftHanded
                                                 | PostProcessSteps.Triangulate
+                                                | PostProcessSteps.SortByPrimitiveType
                                                 // | PostProcessSteps.PreTransformVertices
                                                 | PostProcessSteps.GenerateNormals
                                                 // | PostProcessSteps.FixInFacingNormals
