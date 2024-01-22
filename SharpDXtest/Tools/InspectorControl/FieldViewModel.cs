@@ -4,8 +4,6 @@ using System.Reflection;
 
 using Engine;
 
-using Windows.UI.Text;
-
 namespace Editor
 {
     public class FieldViewModel : ViewModelBase

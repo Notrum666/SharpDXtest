@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net7.0-windows10.0.17763.0</TargetFramework>
+		<TargetFramework>net8.0-windows</TargetFramework>
 		<OutputType>Library</OutputType>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseWindowsForms>true</UseWindowsForms>
@@ -28,21 +28,21 @@
 		<UseVSHostingProcess>true</UseVSHostingProcess>
 	</PropertyGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\LinearAlgebra\LinearAlgebra.csproj"/>
+		<ProjectReference Include="..\LinearAlgebra\LinearAlgebra.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Lib.Harmony" Version="2.2.2"/>
-		<PackageReference Include="AssimpNet" Version="5.0.0-beta1"/>
-		<PackageReference Include="Microsoft.CSharp" Version="4.7.0"/>
-		<PackageReference Include="SharpDX" Version="4.2.0"/>
-		<PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0"/>
-		<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0"/>
-		<PackageReference Include="SharpDX.Direct3D9" Version="4.2.0"/>
-		<PackageReference Include="SharpDX.DirectInput" Version="4.2.0"/>
-		<PackageReference Include="SharpDX.DXGI" Version="4.2.0"/>
-		<PackageReference Include="SharpDX.Mathematics" Version="4.2.0"/>
-		<PackageReference Include="SharpDX.XAudio2" Version="4.2.0"/>
-		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0"/>
-		<PackageReference Include="YamlDotNet" Version="13.7.1"/>
+		<PackageReference Include="Lib.Harmony" Version="2.2.2" />
+		<PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="SharpDX" Version="4.2.0" />
+		<PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Direct3D9" Version="4.2.0" />
+		<PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
+		<PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
+		<PackageReference Include="SharpDX.XAudio2" Version="4.2.0" />
+		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+		<PackageReference Include="YamlDotNet" Version="13.7.1" />
 	</ItemGroup>
 </Project>

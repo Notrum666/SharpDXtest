@@ -79,12 +79,12 @@ namespace Engine
         public LogType Type { get; }
         public DateTime DateTime { get; }
         public string Message { get; }
-        public Exception? Exception { get; }
+        public Exception Exception { get; }
 
         public LogMessage(LogType type, DateTime dateTime, string message)
             : this(type, dateTime, message, null) { }
 
-        public LogMessage(LogType type, DateTime dateTime, string message, Exception? exception)
+        public LogMessage(LogType type, DateTime dateTime, string message, Exception exception)
         {
             Type = type;
             DateTime = dateTime;

@@ -71,6 +71,8 @@ namespace Engine.Layers
             foreach (GameObject obj in CurrentScene.GameObjects)
                 if (obj.Enabled)
                     obj.Update();
+
+            Coroutine.Update();
         }
 
         public override void OnFrameEnded()

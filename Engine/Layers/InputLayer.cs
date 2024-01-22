@@ -7,17 +7,17 @@
 
         public override void Init()
         {
-            InputManager.Init();
+            Input.Init();
         }
 
         public override void FixedUpdate()
         {
-            InputManager.FixedUpdate();
+            Input.FixedUpdate();
         }
 
         public override void Update()
         {
-            InputManager.Update();
+            Input.Update();
         }
     }
 }

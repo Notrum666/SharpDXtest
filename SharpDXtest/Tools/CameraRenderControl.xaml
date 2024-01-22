@@ -37,7 +37,7 @@
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1" x:Name="RenderControlHost" Background="{StaticResource CameraRenderControlBackgroundBrush}">
-            <Grid x:Name="GameInterface" Panel.ZIndex="20"/>
+            <Grid x:Name="GameInterfaceHost" Panel.ZIndex="20"/>
             <Image x:Name="RenderControl" HorizontalAlignment="Stretch"
                    VerticalAlignment="Stretch" Stretch="Fill" SizeChanged="RenderControl_SizeChanged">
                 <Image.Source>
