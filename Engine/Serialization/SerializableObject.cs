@@ -11,7 +11,7 @@ namespace Engine
     public class SerializableObject : INotifyFieldChanged //TODO: Add cache
     {
         [SerializedField]
-        private readonly Guid instanceId;
+        private Guid instanceId;
 
         public Guid InstanceId => instanceId;
 
@@ -20,6 +20,11 @@ namespace Engine
         protected SerializableObject()
         {
             instanceId = Guid.NewGuid();
+        }
+
+        internal void MakeNewGuid()
+        {
+            instanceId = new Guid();
         }
 
         /// <summary>
