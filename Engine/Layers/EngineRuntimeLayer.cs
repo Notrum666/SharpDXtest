@@ -43,7 +43,7 @@ namespace Engine.Layers
                 if (!CurrentScene.GameObjects[i].Enabled)
                     continue;
 
-                IEnumerable<Collider> curColliders = CurrentScene.GameObjects[i].GetComponents<Collider>();
+                IEnumerable<Collider> curColliders = CurrentScene.GameObjects[i].GetComponents<Collider>().Where(c => c.LocalEnabled);
                 if (curColliders.Count() == 0)
                     continue;
                 allColliders.AddRange(curColliders);
@@ -51,7 +51,7 @@ namespace Engine.Layers
                     collider.UpdateData();
 
                 Rigidbody rigidbody = CurrentScene.GameObjects[i].GetComponent<Rigidbody>();
-                if (rigidbody != null)
+                if (rigidbody is not null && rigidbody.LocalEnabled)
                 {
                     foreach (Rigidbody otherRigidbody in rigidbodies)
                         try
