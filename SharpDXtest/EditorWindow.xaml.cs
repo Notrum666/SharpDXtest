@@ -49,8 +49,8 @@ namespace Editor
         public RelayCommand CreatePrefabCommand => savePrefabCommand ??= new RelayCommand(
             _ =>
             {
-                PrefabData newPrefabData =  PrefabData.FromGameObject(Scene.CurrentScene.GameObjects[0]);
-                AssetsRegistry.CreateAsset("testPrefab", AssetsRegistry.ContentFolderName, newPrefabData);
+                PrefabData newPrefabData = PrefabData.FromGameObject(Scene.CurrentScene.GameObjects[0]);
+                AssetsRegistry.CreateAsset("testPrefab", AssetsRegistry.ContentFolderPath, newPrefabData);
             }
         );
         
@@ -59,7 +59,7 @@ namespace Editor
         public RelayCommand LoadPrefabCommand => loadPrefabCommand ??= new RelayCommand(
             _ =>
             {
-                Prefab prefab = AssetsManager.LoadAssetAtPath<Prefab>("testPrefab");
+                Prefab prefab = AssetsManager.LoadAssetAtPath<Prefab>("testPrefab.prefab");
                 prefab.Instantiate();
             }
         );

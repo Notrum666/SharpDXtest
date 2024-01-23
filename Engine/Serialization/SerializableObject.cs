@@ -24,7 +24,7 @@ namespace Engine
 
         internal void MakeNewGuid()
         {
-            instanceId = new Guid();
+            instanceId = Guid.NewGuid();
         }
 
         /// <summary>

@@ -29,7 +29,7 @@ namespace Engine.AssetsData
             Stack<Transform> stack = new Stack<Transform>();
             stack.Push(rootObject.Transform);
 
-            while (stack.Count > 1)
+            while (stack.Count > 0)
             {
                 Transform transform = stack.Pop();
                 foreach (Transform child in transform.Children)

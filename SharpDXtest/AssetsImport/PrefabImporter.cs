@@ -3,7 +3,7 @@ using Engine.AssetsData;
 
 namespace Editor.AssetsImport
 {
-    [AssetImporter("scene")]
+    [AssetImporter("prefab")]
     public class PrefabImporter : AssetImporter
     {
         public override int LatestVersion => 1;

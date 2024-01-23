@@ -36,7 +36,7 @@
                     </MenuItem>
                     <MenuItem Header="Prefab">
                         <MenuItem Header="Save prefab at 0" Command="{Binding Path=CreatePrefabCommand}" />
-                        <MenuItem Header="Save prefab at 0" Command="{Binding Path=LoadPrefabCommand}" />
+                        <MenuItem Header="Load prefab at 0" Command="{Binding Path=LoadPrefabCommand}" />
                     </MenuItem>
                 </Menu>
             </StackPanel>
