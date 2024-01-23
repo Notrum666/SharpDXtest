@@ -32,8 +32,17 @@
 		<None Remove="Images\StepIcon.png" />
 		<None Remove="Images\StopIcon.png" />
 		<None Remove="Resources\BaseAssets\Shaders\DeferredRender\deferred_geometry_skinned.vsh" />
+		<None Remove="Tools\ContentBrowserControl\Icons\BoxIcon.png" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FileIcon.png" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
+		<None Remove="Tools\ContentBrowserControl\Icons\MaterialIcon.png" />
+		<None Remove="Tools\ContentBrowserControl\Icons\ModelIcon.png" />
+		<None Remove="Tools\ContentBrowserControl\Icons\SceneIcon.png" />
+		<None Remove="Tools\ContentBrowserControl\Icons\ScriptIcon.png" />
+		<None Remove="Tools\ContentBrowserControl\Icons\SkeletalAnimationIcon.png" />
+		<None Remove="Tools\ContentBrowserControl\Icons\SkeletonIcon.png" />
+		<None Remove="Tools\ContentBrowserControl\Icons\SoundIcon.png" />
+		<None Remove="Tools\ContentBrowserControl\Icons\TextureIcon.png" />
 		<None Remove="Tools\SceneOverviewControl\Icons\ObjectIcon.png" />
 	</ItemGroup>
 	<ItemGroup>
@@ -61,8 +70,17 @@
 		<Resource Include="Images\ResumeIcon.png" />
 		<Resource Include="Images\StepIcon.png" />
 		<Resource Include="Images\StopIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\BoxIcon.png" />
 		<Resource Include="Tools\ContentBrowserControl\Icons\FileIcon.png" />
 		<Resource Include="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\MaterialIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\ModelIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\SceneIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\ScriptIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\SkeletalAnimationIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\SkeletonIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\SoundIcon.png" />
+		<Resource Include="Tools\ContentBrowserControl\Icons\TextureIcon.png" />
 		<Resource Include="Tools\SceneOverviewControl\Icons\ObjectIcon.png" />
 	</ItemGroup>
 	<ItemGroup>

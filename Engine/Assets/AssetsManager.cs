@@ -77,11 +77,18 @@ namespace Engine
             Logger.Log(LogType.Warning, $"No AssetData subtype registered for Asset type \"{assetType.Name}\"");
             return false;
         }
+        public static bool TryGetAssetDataTypeByGuid(Guid guid, out Type dataType)
+        {
+            if (!artifactDatabase.TryGetArtifactType(guid, out dataType))
+                return false;
+
+            return dataType is not null;
+        }
 
         public static bool TryGetAssetTypeByGuid(Guid guid, out Type assetType)
         {
             assetType = null;
-            if (!artifactDatabase.TryGetArtifactType(guid, out Type dataType))
+            if (!TryGetAssetDataTypeByGuid(guid, out Type dataType))
                 return false;
 
             assetType = typeToDataTypeMap.FirstOrDefault(p => p.Value == dataType, new KeyValuePair<Type, Type>(null, null)).Key;
