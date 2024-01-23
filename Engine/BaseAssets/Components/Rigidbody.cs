@@ -308,13 +308,22 @@ namespace Engine.BaseAssets.Components
 
         #region Collision
 
-        public delegate void CollisionEvent(Rigidbody sender, Collider col, Collider other);
-        public event CollisionEvent OnCollisionBegin;
-        public event CollisionEvent OnCollision;
-        public event CollisionEvent OnCollisionEnd;
+        public delegate void RigidbodyCollisionEvent(Rigidbody sender, Collider col, Collider other);
+        /// <summary>
+        /// Called when collision begins (when there is collision on current frame, but no collision on previous frame)
+        /// </summary>
+        public event RigidbodyCollisionEvent OnCollisionBegin;
+        /// <summary>
+        /// Called while collision stays (when there is collision on current frame and collision on previous frame)
+        /// </summary>
+        public event RigidbodyCollisionEvent OnCollision;
+        /// <summary>
+        /// Called after collision ends (when there is no collision on current frame, but there is collision on previous frame)
+        /// </summary>
+        public event RigidbodyCollisionEvent OnCollisionEnd;
 
-        private List<KeyValuePair<Collider, Collider>> prevCollidingPairs = new List<KeyValuePair<Collider, Collider>>(); //TODO: Change to tuples
-        private List<KeyValuePair<Collider, Collider>> collidingPairs = new List<KeyValuePair<Collider, Collider>>(); //TODO: Change to tuples
+        private HashSet<KeyValuePair<Collider, Collider>> prevCollidingPairs = new HashSet<KeyValuePair<Collider, Collider>>();
+        private HashSet<KeyValuePair<Collider, Collider>> collidingPairs = new HashSet<KeyValuePair<Collider, Collider>>();
 
         public void SolveCollisionWith(Rigidbody otherRigidbody)
         {
@@ -322,21 +331,24 @@ namespace Engine.BaseAssets.Components
                 return;
 
             IEnumerable<Collider> colliders = GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
-            List<Collider> otherColliders = otherRigidbody.GameObject.GetComponents<Collider>().Where(coll => coll.Enabled).ToList();
+            IEnumerable<Collider> otherColliders = otherRigidbody.GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
 
             foreach (Collider collider in colliders)
             {
                 foreach (Collider otherCollider in otherColliders)
                 {
-                    Vector3? _collisionExitVector; //TODO: whut?
+                    Vector3? _collisionExitVector;
                     Vector3? _collisionExitNormal;
                     Vector3? _colliderEndPoint;
                     if (!collider.GetCollisionExitVector(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
                         continue;
 
-                    Vector3 collisionExitVector = (Vector3)_collisionExitVector;
-                    Vector3 collisionExitNormal = (Vector3)_collisionExitNormal;
-                    Vector3 colliderEndPoint = (Vector3)_colliderEndPoint;
+                    if (collider.IsTrigger || otherCollider.IsTrigger)
+                        continue;
+
+                    Vector3 collisionExitVector = (Vector3)_collisionExitVector!;
+                    Vector3 collisionExitNormal = (Vector3)_collisionExitNormal!;
+                    Vector3 colliderEndPoint = (Vector3)_colliderEndPoint!;
                     collisionExitNormal.normalize();
 
                     collidingPairs.Add(new KeyValuePair<Collider, Collider>(collider, otherCollider));
@@ -454,7 +466,7 @@ namespace Engine.BaseAssets.Components
                 OnCollision?.Invoke(this, pair.Key, pair.Value);
             }
 
-            prevCollidingPairs = new List<KeyValuePair<Collider, Collider>>(collidingPairs);
+            prevCollidingPairs = new HashSet<KeyValuePair<Collider, Collider>>(collidingPairs);
             collidingPairs.Clear();
         }
 

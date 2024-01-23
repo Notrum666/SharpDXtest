@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Engine.Layers
 {
@@ -34,15 +36,23 @@ namespace Engine.Layers
                     obj.FixedUpdate();
 
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
+            List<Collider> allColliders = new List<Collider>();
+            List<Collider> hangingColliders = new List<Collider>();
             for (int i = 0; i < CurrentScene.GameObjects.Count; i++)
             {
                 if (!CurrentScene.GameObjects[i].Enabled)
                     continue;
+
+                IEnumerable<Collider> curColliders = CurrentScene.GameObjects[i].GetComponents<Collider>();
+                if (curColliders.Count() == 0)
+                    continue;
+                allColliders.AddRange(curColliders);
+                foreach (Collider collider in curColliders)
+                    collider.UpdateData();
+
                 Rigidbody rigidbody = CurrentScene.GameObjects[i].GetComponent<Rigidbody>();
                 if (rigidbody != null)
                 {
-                    foreach (Collider collider in CurrentScene.GameObjects[i].GetComponents<Collider>())
-                        collider.UpdateData();
                     foreach (Rigidbody otherRigidbody in rigidbodies)
                         try
                         {
@@ -55,9 +65,20 @@ namespace Engine.Layers
                         }
                     rigidbodies.Add(rigidbody);
                 }
+                else
+                {
+                    foreach (Collider collider in curColliders)
+                        foreach (Collider other in hangingColliders)
+                            if (!collider.IsTrigger || !other.IsTrigger)
+                                collider.GetCollisionExitVector(other, out _, out _, out _);
+                    hangingColliders.AddRange(curColliders);
+                }
             }
             foreach (Rigidbody rb in rigidbodies)
                 rb.UpdateCollidingPairs();
+            foreach (Collider col in allColliders)
+                col.UpdateCollidingColliders();
+
 
             foreach (Rigidbody rigidbody in rigidbodies)
                 rigidbody.ApplyChanges();

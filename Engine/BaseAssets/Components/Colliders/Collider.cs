@@ -17,6 +17,43 @@ namespace Engine.BaseAssets.Components
         protected double massPart = 1.0;
         [SerializedField]
         protected Vector3 offset;
+        [SerializedField]
+        private bool isTrigger = false;
+        public bool IsTrigger
+        {
+            get => isTrigger;
+            set => isTrigger = value;
+        }
+
+        public delegate void ColliderEvent(Collider sender, Collider other);
+        /// <summary>
+        /// Called when collision begins (when there is collision on current frame, but no collision on previous frame)
+        /// </summary>
+        public event ColliderEvent OnCollisionBegin;
+        /// <summary>
+        /// Called while collision stays (when there is collision on current frame and collision on previous frame)
+        /// </summary>
+        public event ColliderEvent OnCollision;
+        /// <summary>
+        /// Called after collision ends (when there is no collision on current frame, but there is collision on previous frame)
+        /// </summary>
+        public event ColliderEvent OnCollisionEnd;
+
+        /// <summary>
+        /// Called when other collider enters the trigger (when there is intersection on current frame, but no intersection on previous frame)
+        /// </summary>
+        public event ColliderEvent OnTriggerEnter;
+        /// <summary>
+        /// Called while other collider stays in the trigger (when there is intersection on current frame and intersection on previous frame)
+        /// </summary>
+        public event ColliderEvent OnTriggerStay;
+        /// <summary>
+        /// Called after other collider leaves the trigger (when there is no intersection on current frame, but there is an intersection on previous frame)
+        /// </summary>
+        public event ColliderEvent OnTriggerExit;
+
+        private HashSet<Collider> prevCollidingColliders = new HashSet<Collider>();
+        private HashSet<Collider> collidingColliders = new HashSet<Collider>();
 
         public Ranged<double> MassPart => new Ranged<double>(ref massPart, min: 0);
         public Vector3 Offset
@@ -66,10 +103,58 @@ namespace Engine.BaseAssets.Components
             GlobalCenter = GameObject.Transform.Model.TransformPoint(Offset);
         }
 
+        internal void UpdateCollidingColliders()
+        {
+            if (IsTrigger)
+            {
+                foreach (Collider col in prevCollidingColliders)
+                {
+                    if (!collidingColliders.Contains(col))
+                        OnTriggerExit?.Invoke(this, col);
+                }
+                foreach (Collider col in collidingColliders)
+                {
+                    if (!prevCollidingColliders.Contains(col))
+                        OnTriggerEnter?.Invoke(this, col);
+                    OnTriggerStay?.Invoke(this, col);
+                }
+            }
+            else
+            {
+                foreach (Collider col in prevCollidingColliders)
+                {
+                    if (!collidingColliders.Contains(col))
+                        OnCollisionEnd?.Invoke(this, col);
+                }
+                foreach (Collider col in collidingColliders)
+                {
+                    if (!prevCollidingColliders.Contains(col))
+                        OnCollisionBegin?.Invoke(this, col);
+                    OnCollision?.Invoke(this, col);
+                }
+            }
+
+            prevCollidingColliders = new HashSet<Collider>(collidingColliders);
+            collidingColliders.Clear();
+        }
+
         public bool GetCollisionExitVector(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
-            return GetCollisionExitVector_SAT(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
-            //return GetCollisionExitVector_GJK_EPA(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+            if (isTrigger && other.isTrigger)
+            {
+                collisionExitVector = Vector3.Zero;
+                exitDirectionVector = Vector3.Zero;
+                colliderEndPoint = Vector3.Zero;
+                return false;
+            }
+            bool result = GetCollisionExitVector_SAT(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+            //bool result = GetCollisionExitVector_GJK_EPA(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
+            if (result)
+            {
+                collidingColliders.Add(other);
+                other.collidingColliders.Add(this);
+            }
+            return result;
         }
 
         public static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
