@@ -7,6 +7,8 @@ using System.Windows.Input;
 using Editor.AssetsImport;
 
 using Engine;
+using Engine.Assets;
+using Engine.AssetsData;
 
 namespace Editor
 {
@@ -40,6 +42,26 @@ namespace Editor
         public RelayCommand RecompileCommand => recompileCommand ??= new RelayCommand(
             _ => { Task.Run(ScriptManager.Recompile); },
             _ => !EditorLayer.Current.IsPlaying
+        );
+        
+        private RelayCommand savePrefabCommand;
+
+        public RelayCommand CreatePrefabCommand => savePrefabCommand ??= new RelayCommand(
+            _ =>
+            {
+                PrefabData newPrefabData =  PrefabData.FromGameObject(Scene.CurrentScene.GameObjects[0]);
+                AssetsRegistry.CreateAsset("testPrefab", AssetsRegistry.ContentFolderName, newPrefabData);
+            }
+        );
+        
+        private RelayCommand loadPrefabCommand;
+
+        public RelayCommand LoadPrefabCommand => loadPrefabCommand ??= new RelayCommand(
+            _ =>
+            {
+                Prefab prefab = AssetsManager.LoadAssetAtPath<Prefab>("testPrefab");
+                prefab.Instantiate();
+            }
         );
 
         private RelayCommand playCommand;

@@ -34,6 +34,10 @@
                     <MenuItem Header="Scripting">
                         <MenuItem Header="Recompile All" Command="{Binding Path=RecompileCommand}"/>
                     </MenuItem>
+                    <MenuItem Header="Prefab">
+                        <MenuItem Header="Save prefab at 0" Command="{Binding Path=CreatePrefabCommand}" />
+                        <MenuItem Header="Save prefab at 0" Command="{Binding Path=LoadPrefabCommand}" />
+                    </MenuItem>
                 </Menu>
             </StackPanel>
             <Grid HorizontalAlignment="Center">
