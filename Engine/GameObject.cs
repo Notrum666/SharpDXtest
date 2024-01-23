@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Reflection;
-
+using System.Text;
+using Engine.Assets;
+using Engine.AssetsData;
 using Engine.BaseAssets.Components;
 
 namespace Engine
@@ -45,6 +48,27 @@ namespace Engine
             gameObject.Transform.SetParent(parent);
 
             return gameObject;
+        }
+
+        public void Duplicate()
+        {
+            PrefabData prefabData = PrefabData.FromGameObject(this);
+            using MemoryStream stream = new MemoryStream();
+
+            using (BinaryWriter binaryWriter = new BinaryWriter(stream, Encoding.UTF8, true))
+            {
+                prefabData.Serialize(binaryWriter);
+                binaryWriter.Close();
+                stream.Position = 0;
+            }
+            using (BinaryReader binaryReader = new BinaryReader(stream, Encoding.UTF8, false))
+            {
+                prefabData = new PrefabData();
+                prefabData.Deserialize(binaryReader);
+            }
+
+            Prefab prefab = prefabData.ToRealAsset();
+            prefab.Instantiate(transform.Parent);
         }
 
         private protected override void InitializeInner()

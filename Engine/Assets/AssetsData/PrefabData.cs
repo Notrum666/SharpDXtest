@@ -16,6 +16,7 @@ namespace Engine.AssetsData
 
         // TODO: Add total objects count for inspector
         public readonly List<SerializableObject> SerializableObjects = new List<SerializableObject>();
+        public int rootTransformIndex = -1;
 
         protected sealed override void SetDefaultValues()
         {
@@ -28,17 +29,21 @@ namespace Engine.AssetsData
 
             Stack<Transform> stack = new Stack<Transform>();
             stack.Push(rootObject.Transform);
-
+            
             while (stack.Count > 0)
             {
                 Transform transform = stack.Pop();
                 foreach (Transform child in transform.Children)
                     stack.Push(child);
-
                 GameObject gameObject = transform.GameObject;
+
                 prefabData.SerializableObjects.Add(gameObject);
                 foreach (Component component in gameObject.Components)
+                {
                     prefabData.SerializableObjects.Add(component);
+                    if (component == rootObject.Transform)
+                        prefabData.rootTransformIndex = prefabData.SerializableObjects.Count - 1;
+                }
             }
 
             return prefabData;
@@ -67,8 +72,7 @@ namespace Engine.AssetsData
                 if (serializableObject is GameObject gameObject)
                     prefab.AddObject(gameObject);
             }
-            prefab.SetRootTransform(SerializableObjects[0] as Transform); //Cross fingers
-            // prefab.ProcessNewObjects();
+            prefab.SetRootTransform(SerializableObjects[rootTransformIndex] as Transform); //Cross fingers
 
             return prefab;
         }
