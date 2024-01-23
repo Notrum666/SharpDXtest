@@ -36,6 +36,10 @@ namespace Editor
                 ContentBrowserControl.Current.Refresh();
             }
         );
+        private RelayCommand duplicateGameObjectCommand;
+        public RelayCommand DuplicateGameObjectCommand => duplicateGameObjectCommand ??= new RelayCommand(
+            _ => GameObject.Duplicate()
+        );
         public ObservableCollection<GameObjectTreeViewModel> Children { get; } = new ObservableCollection<GameObjectTreeViewModel>();
         public ObservableCollection<GameObjectCreationTreeViewModel> GameObjectCreationTreeViewModels { get; } = new ObservableCollection<GameObjectCreationTreeViewModel>();
         public CompositeCollection SubItems { get; }
