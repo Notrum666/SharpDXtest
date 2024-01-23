@@ -307,14 +307,12 @@ namespace Editor
             if (obj is GameObject gameObject)
             {
                 gameObject.Transform.SetParent(target.Transform);
-                Refresh();
                 e.Handled = true;
                 return;
             }
             if (obj is ContentBrowserAssetViewModel assetViewModel && assetViewModel.AssociatedAssetDataType == typeof(PrefabData))
             {
                 AssetsManager.LoadAssetByGuid<Prefab>(assetViewModel.AssetMeta.Guid).Instantiate(target.Transform);
-                Refresh();
                 e.Handled = true;
                 return;
             }
