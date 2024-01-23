@@ -105,7 +105,7 @@ namespace Editor
                     Assets.Add(assetViewModel);
 
                     foreach ((Type type, string name) subAsset in assetViewModel.AssetMeta.SubAssets.Keys)
-                        Assets.Add(new ContentBrowserAssetViewModel() { Name = subAsset.name });
+                        Assets.Add(new ContentBrowserAssetViewModel(subAsset.name, subAsset.type));
                 }
             }
         }
