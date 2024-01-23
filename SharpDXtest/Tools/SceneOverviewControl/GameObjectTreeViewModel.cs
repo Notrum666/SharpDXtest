@@ -11,6 +11,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 
 using Engine;
+using Engine.AssetsData;
 using Engine.BaseAssets.Components;
 
 namespace Editor
@@ -27,6 +28,18 @@ namespace Editor
             GameObjectCreationTreeViewModels.Add(newViewModel);
             SceneOverviewControl.Current.SceneTreeView.UpdateLayout();
         });
+        private RelayCommand createPrefabCommand;
+        public RelayCommand CreatePrefabCommand => createPrefabCommand ??= new RelayCommand(
+            _ =>
+            {
+                AssetsRegistry.CreateAsset(GameObject.Name, AssetsRegistry.ContentFolderPath, PrefabData.FromGameObject(GameObject));
+                ContentBrowserControl.Current.Refresh();
+            }
+        );
+        private RelayCommand duplicateGameObjectCommand;
+        public RelayCommand DuplicateGameObjectCommand => duplicateGameObjectCommand ??= new RelayCommand(
+            _ => GameObject.Duplicate()
+        );
         public ObservableCollection<GameObjectTreeViewModel> Children { get; } = new ObservableCollection<GameObjectTreeViewModel>();
         public ObservableCollection<GameObjectCreationTreeViewModel> GameObjectCreationTreeViewModels { get; } = new ObservableCollection<GameObjectCreationTreeViewModel>();
         public CompositeCollection SubItems { get; }

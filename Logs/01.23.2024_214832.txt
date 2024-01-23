@@ -1,0 +1,1 @@
+01.23.2024 21:48:32: Info: Initialize ProjectsManager in folder = C:\Users\Notrum666\AppData\Roaming\SharpDxEditor
