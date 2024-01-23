@@ -13,6 +13,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 
 using Engine;
+using Engine.Assets;
+using Engine.AssetsData;
 using Engine.BaseAssets.Components;
 
 namespace Editor
@@ -282,38 +284,76 @@ namespace Editor
         private void GameObjectTreeViewModel_DragOver(object sender, DragEventArgs e)
         {
             e.Handled = true;
-            e.Effects = e.Data.GetData(DataFormats.Serializable) is GameObject ? DragDropEffects.Move : DragDropEffects.None;
+            object data = e.Data.GetData(DataFormats.Serializable);
+            if (data is GameObject)
+            {
+                e.Effects = DragDropEffects.Move;
+                return;
+            }
+            if (data is ContentBrowserAssetViewModel assetViewModel && assetViewModel.AssociatedAssetDataType == typeof(PrefabData))
+            {
+                e.Effects = DragDropEffects.Copy;
+                return;
+            }
+            e.Effects = DragDropEffects.None;
         }
 
         private void GameObjectTreeViewModel_Drop(object sender, DragEventArgs e)
         {
-            GameObject obj = e.Data.GetData(DataFormats.Serializable) as GameObject;
             GameObject target = ((GameObjectTreeViewModel)((FrameworkElement)sender).DataContext).GameObject;
-            if (obj is null || target is null)
+            if (target is null)
                 return;
-
-            obj.Transform.SetParent(target.Transform);
-            Refresh();
-
-            e.Handled = true;
+            object obj = e.Data.GetData(DataFormats.Serializable);
+            if (obj is GameObject gameObject)
+            {
+                gameObject.Transform.SetParent(target.Transform);
+                Refresh();
+                e.Handled = true;
+                return;
+            }
+            if (obj is ContentBrowserAssetViewModel assetViewModel && assetViewModel.AssociatedAssetDataType == typeof(PrefabData))
+            {
+                AssetsManager.LoadAssetByGuid<Prefab>(assetViewModel.AssetMeta.Guid).Instantiate(target.Transform);
+                Refresh();
+                e.Handled = true;
+                return;
+            }
         }
 
         private void SceneTreeView_DragOver(object sender, DragEventArgs e)
         {
             e.Handled = true;
-            e.Effects = e.Data.GetData(DataFormats.Serializable) is GameObject ? DragDropEffects.Move : DragDropEffects.None;
+            object data = e.Data.GetData(DataFormats.Serializable);
+            if (data is GameObject)
+            {
+                e.Effects = DragDropEffects.Move;
+                return;
+            }
+            if (data is ContentBrowserAssetViewModel assetViewModel && assetViewModel.AssociatedAssetDataType == typeof(PrefabData))
+            {
+                e.Effects = DragDropEffects.Copy;
+                return;
+            }
+            e.Effects = DragDropEffects.None;
         }
 
         private void SceneTreeView_Drop(object sender, DragEventArgs e)
         {
-            GameObject obj = e.Data.GetData(DataFormats.Serializable) as GameObject;
-            if (obj is null)
+            object obj = e.Data.GetData(DataFormats.Serializable);
+            if (obj is GameObject gameObject)
+            {
+                gameObject.Transform.SetParent(null);
+                Refresh();
+                e.Handled = true;
                 return;
-
-            obj.Transform.SetParent(null);
-            Refresh();
-
-            e.Handled = true;
+            }
+            if (obj is ContentBrowserAssetViewModel assetViewModel && assetViewModel.AssociatedAssetDataType == typeof(PrefabData))
+            {
+                AssetsManager.LoadAssetByGuid<Prefab>(assetViewModel.AssetMeta.Guid).Instantiate();
+                Refresh();
+                e.Handled = true;
+                return;
+            }
         }
     }
 }

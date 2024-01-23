@@ -59,6 +59,7 @@
                                 <MenuItem Header="Refresh" Command="{Binding Data.RefreshCommand, 
                                     Source={StaticResource SceneOverviewControlProxy}}"/>
                                 <MenuItem Header="New GameObject" Command="{Binding StartGameObjectCreationCommand}"/>
+                                <MenuItem Header="Create Prefab" Command="{Binding CreatePrefabCommand}"/>
                             </ContextMenu>
                         </StackPanel.ContextMenu>
                         <Image Source="Icons/ObjectIcon.png" Width="20" Height="20" Margin="2,0,5,0"
