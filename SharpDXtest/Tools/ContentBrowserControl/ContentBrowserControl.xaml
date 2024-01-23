@@ -15,6 +15,8 @@
     <UserControl.Resources>
         <local:ObjectToBoolConverter x:Key="ObjToBoolConv"/>
         <local:SizeToFontSizeConverter x:Key="FontSizeConv" Denominator="5"/>
+        <local:IconSelector x:Key="AssetIconSelector"/>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisConv"/>
 
         <local:BindingProxy x:Key="ContentBrowserControlProxy" Data="{Binding}"/>
     </UserControl.Resources>
@@ -122,8 +124,22 @@
                                 <RowDefinition Height="5*"/>
                                 <RowDefinition Height="2*"/>
                             </Grid.RowDefinitions>
-                            <Image Source="/Tools/ContentBrowserControl/Icons/FileIcon.png"
-                                   Stretch="Uniform"/>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="3*"/>
+                                    <RowDefinition Height="5*"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="5*"/>
+                                    <ColumnDefinition Width="3*"/>
+                                </Grid.ColumnDefinitions>
+                                <Image Source="Icons/BoxIcon.png" Grid.Column="1" RenderOptions.BitmapScalingMode="HighQuality"
+                                       Visibility="{Binding IsSubAsset, Converter={StaticResource BoolToVisConv}}"
+                                       Panel.ZIndex="1"/>
+                                <Image Source="{Binding AssociatedAssetDataType, Converter={StaticResource AssetIconSelector}}"
+                                   Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"
+                                       Grid.RowSpan="2" Grid.ColumnSpan="2"/>
+                            </Grid>
                             <TextBlock Text="{Binding Name}" Grid.Row="1" Foreground="{StaticResource ForegroundBrush}"
                                        FontSize="{Binding ItemsWidth, ElementName=ThisContentBrowser,
                                 Converter={StaticResource FontSizeConv}}" Margin="0,-2,0,-2"

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-using Engine;
+using Engine.AssetsData;
 
 namespace Editor
 {
@@ -18,12 +18,28 @@ namespace Editor
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return new Uri(value switch
-            {
-                ContentBrowserFolderViewModel _ => "\\Tools\\ContentBrowserControl\\Icons\\FolderIcon.png",
-                ContentBrowserAssetViewModel _ => "\\Tools\\ContentBrowserControl\\Icons\\FileIcon.png",
-                _ => "\\Tools\\ContentBrowserControl\\Icons\\FileIcon.png"
-            }, UriKind.Relative);
+            Type t = value as Type;
+            string path;
+            if (t == typeof(ModelData))
+                path = "Icons\\ModelIcon.png";
+            else if (t == typeof(SkeletonData))
+                path = "Icons\\SkeletonIcon.png";
+            else if (t == typeof(AnimationData))
+                path = "Icons\\SkeletalAnimationIcon.png";
+            else if (t == typeof(TextureData))
+                path = "Icons\\TextureIcon.png";
+            else if (t == typeof(SceneData))
+                path = "Icons\\SceneIcon.png";
+            else if (t == typeof(ScriptData))
+                path = "Icons\\ScriptIcon.png";
+            else if (t == typeof(SoundData))
+                path = "Icons\\SoundIcon.png";
+            else if (t == typeof(MaterialData))
+                path = "Icons\\MaterialIcon.png";
+            else
+                path = "Icons\\FileIcon.png";
+
+            return new Uri(path, UriKind.Relative);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
