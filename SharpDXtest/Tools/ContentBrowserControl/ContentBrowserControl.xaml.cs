@@ -270,7 +270,7 @@ namespace Editor
             if (isGrabbed && (e.GetPosition(this) - localGrabPos).LengthSquared >= DragThreshold * DragThreshold)
             {
                 object dataContext = ((FrameworkElement)sender).DataContext;
-                DragDropEffects effects = DragDropEffects.Move;
+                DragDropEffects effects = DragDropEffects.Move | DragDropEffects.Copy;
                 if (dataContext is ContentBrowserAssetViewModel)
                     effects |= DragDropEffects.Link;
                 DragDrop.DoDragDrop(this, new DataObject(DataFormats.Serializable, dataContext), effects);

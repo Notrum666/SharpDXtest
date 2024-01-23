@@ -7,6 +7,8 @@ using System.Windows.Input;
 using Editor.AssetsImport;
 
 using Engine;
+using Engine.Assets;
+using Engine.AssetsData;
 
 namespace Editor
 {
