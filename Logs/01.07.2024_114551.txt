@@ -1,2 +1,0 @@
-01.07.2024 11:45:51: Info: Initialize ProjectsManager in folder = 
-01.07.2024 11:45:51: Info: Initialize ProjectsManager in folder = 
