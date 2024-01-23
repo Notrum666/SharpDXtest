@@ -44,7 +44,7 @@ namespace Engine
 
             FileInfo fileInfo = new FileInfo(path);
             string parentFolderName = fileInfo.DirectoryName ?? string.Empty;
-            string fileName = fileInfo.Name;
+            string fileName = Path.GetFileNameWithoutExtension(fileInfo.Name);
             string extension = fileInfo.Extension;
 
             Match regexMatch = FileNameIndexRegex().Match(fileName);
