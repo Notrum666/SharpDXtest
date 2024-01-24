@@ -18,7 +18,7 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         protected Vector3 offset;
         [SerializedField]
-        private bool isTrigger = false;
+        protected bool isTrigger = false;
         public bool IsTrigger
         {
             get => isTrigger;
@@ -98,7 +98,7 @@ namespace Engine.BaseAssets.Components
         protected abstract List<Vector3> GetVertexesOnPlane(Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal, double epsilon);
         protected abstract void GetBoundaryPointsInDirection(Vector3 direction, out Vector3 hindmost, out Vector3 furthest);
 
-        public virtual void UpdateData()
+        internal virtual void UpdateData()
         {
             GlobalCenter = GameObject.Transform.Model.TransformPoint(Offset);
         }
@@ -138,15 +138,8 @@ namespace Engine.BaseAssets.Components
             collidingColliders.Clear();
         }
 
-        public bool GetCollisionExitVector(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
+        private bool GetCollisionExitVector(Collider other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint)
         {
-            if (isTrigger && other.isTrigger)
-            {
-                collisionExitVector = Vector3.Zero;
-                exitDirectionVector = Vector3.Zero;
-                colliderEndPoint = Vector3.Zero;
-                return false;
-            }
             bool result = GetCollisionExitVector_SAT(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
             //bool result = GetCollisionExitVector_GJK_EPA(other, out collisionExitVector, out exitDirectionVector, out colliderEndPoint);
             if (result)
@@ -157,7 +150,28 @@ namespace Engine.BaseAssets.Components
             return result;
         }
 
-        public static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
+        internal void ResolveInteractionWith(Collider other)
+        {
+            if (!LocalEnabled || !other.LocalEnabled)
+                return;
+
+            Rigidbody rigidbody = GameObject.GetComponent<Rigidbody>();
+            Rigidbody otherRigidbody = other.GameObject.GetComponent<Rigidbody>();
+
+            if ((rigidbody is null || !rigidbody.LocalEnabled) && (otherRigidbody is null || !otherRigidbody.LocalEnabled))
+                return;
+
+            if (!GetCollisionExitVector(other, out Vector3? collisionExitVector, out Vector3? exitDirectionVector, out Vector3? colliderEndPoint))
+                return;
+
+            if (rigidbody is null || !rigidbody.LocalEnabled || otherRigidbody is null || !otherRigidbody.LocalEnabled ||
+                rigidbody.IsStatic && otherRigidbody.IsStatic)
+                return;
+
+            rigidbody.ReactToCollision(otherRigidbody, this, other, (Vector3)collisionExitVector!, (Vector3)exitDirectionVector!, (Vector3)colliderEndPoint!);
+        }
+
+        internal static Vector3 GetAverageCollisionPoint(Collider collider1, Collider collider2, Vector3 collisionPlanePoint, Vector3 collisionPlaneNormal)
         {
             Vector3 point = GetAverageCollisionPointWithEpsilon(collider1, collider2, collisionPlanePoint, collisionPlaneNormal, Constants.FloatEpsilon);
             return point;

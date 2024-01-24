@@ -37,7 +37,6 @@ namespace Engine.Layers
 
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
             List<Collider> allColliders = new List<Collider>();
-            List<Collider> hangingColliders = new List<Collider>();
             for (int i = 0; i < CurrentScene.GameObjects.Count; i++)
             {
                 if (!CurrentScene.GameObjects[i].Enabled)
@@ -46,33 +45,19 @@ namespace Engine.Layers
                 IEnumerable<Collider> curColliders = CurrentScene.GameObjects[i].GetComponents<Collider>().Where(c => c.LocalEnabled);
                 if (curColliders.Count() == 0)
                     continue;
-                allColliders.AddRange(curColliders);
+
+                Rigidbody rb;
+                if ((rb = CurrentScene.GameObjects[i].GetComponent<Rigidbody>()) is not null)
+                    rigidbodies.Add(rb);
+
                 foreach (Collider collider in curColliders)
                     collider.UpdateData();
 
-                Rigidbody rigidbody = CurrentScene.GameObjects[i].GetComponent<Rigidbody>();
-                if (rigidbody is not null && rigidbody.LocalEnabled)
-                {
-                    foreach (Rigidbody otherRigidbody in rigidbodies)
-                        try
-                        {
-                            rigidbody.SolveCollisionWith(otherRigidbody);
-                        }
-                        catch (Exception e)
-                        {
-                            Logger.Log(LogType.Error, $"Error during collision solving for GameObjects {rigidbody.GameObject.Name} and " +
-                                $"{otherRigidbody.GameObject.Name}, error: {e.Message}");
-                        }
-                    rigidbodies.Add(rigidbody);
-                }
-                else
-                {
-                    foreach (Collider collider in curColliders)
-                        foreach (Collider other in hangingColliders)
-                            if (!collider.IsTrigger || !other.IsTrigger)
-                                collider.GetCollisionExitVector(other, out _, out _, out _);
-                    hangingColliders.AddRange(curColliders);
-                }
+                foreach (Collider collider in curColliders)
+                    foreach (Collider other in allColliders)
+                        collider.ResolveInteractionWith(other);
+
+                allColliders.AddRange(curColliders);
             }
             foreach (Rigidbody rb in rigidbodies)
                 rb.UpdateCollidingPairs();

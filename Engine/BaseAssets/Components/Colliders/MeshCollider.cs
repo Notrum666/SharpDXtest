@@ -69,7 +69,7 @@ namespace Engine.BaseAssets.Components.Colliders
         private List<Vector3> globalNormals = new List<Vector3>();
         private List<Vector3> globalNonCollinearNormals = new List<Vector3>();
 
-        public override void UpdateData()
+        internal override void UpdateData()
         {
             base.UpdateData();
 
