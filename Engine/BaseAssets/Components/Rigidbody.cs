@@ -16,6 +16,7 @@ namespace Engine.BaseAssets.Components
         Z = 1 << 3,
     }
 
+    [UniqueComponent]
     public sealed class Rigidbody : BehaviourComponent
     {
         public static Vector3 GravitationalAcceleration = new Vector3(0, 0, -9.8);
@@ -129,6 +130,8 @@ namespace Engine.BaseAssets.Components
             RecalculateInverseMass();
             RecalculateInverseGlobalInertiaTensor();
         }
+
+        
 
         #endregion ComponentData
 
@@ -308,135 +311,123 @@ namespace Engine.BaseAssets.Components
 
         #region Collision
 
-        public delegate void CollisionEvent(Rigidbody sender, Collider col, Collider other);
-        public event CollisionEvent OnCollisionBegin;
-        public event CollisionEvent OnCollision;
-        public event CollisionEvent OnCollisionEnd;
+        public delegate void RigidbodyCollisionEvent(Rigidbody sender, Collider col, Collider other);
+        /// <summary>
+        /// Called when collision begins (when there is collision on current frame, but no collision on previous frame)
+        /// </summary>
+        public event RigidbodyCollisionEvent OnCollisionBegin;
+        /// <summary>
+        /// Called while collision stays (when there is collision on current frame and collision on previous frame)
+        /// </summary>
+        public event RigidbodyCollisionEvent OnCollision;
+        /// <summary>
+        /// Called after collision ends (when there is no collision on current frame, but there is collision on previous frame)
+        /// </summary>
+        public event RigidbodyCollisionEvent OnCollisionEnd;
 
-        private List<KeyValuePair<Collider, Collider>> prevCollidingPairs = new List<KeyValuePair<Collider, Collider>>(); //TODO: Change to tuples
-        private List<KeyValuePair<Collider, Collider>> collidingPairs = new List<KeyValuePair<Collider, Collider>>(); //TODO: Change to tuples
+        private HashSet<KeyValuePair<Collider, Collider>> prevCollidingPairs = new HashSet<KeyValuePair<Collider, Collider>>();
+        private HashSet<KeyValuePair<Collider, Collider>> collidingPairs = new HashSet<KeyValuePair<Collider, Collider>>();
 
-        public void SolveCollisionWith(Rigidbody otherRigidbody)
+        internal void ReactToCollision(Rigidbody otherRigidbody, Collider col, Collider otherCol, Vector3 collisionExitVector, Vector3 collisionExitNormal, Vector3 colliderEndPoint)
         {
-            if (!Enabled || !otherRigidbody.Enabled || IsStatic && otherRigidbody.IsStatic)
-                return;
+            collisionExitNormal.normalize();
 
-            IEnumerable<Collider> colliders = GameObject.GetComponents<Collider>().Where(coll => coll.Enabled);
-            List<Collider> otherColliders = otherRigidbody.GameObject.GetComponents<Collider>().Where(coll => coll.Enabled).ToList();
+            collidingPairs.Add(new KeyValuePair<Collider, Collider>(col, otherCol));
+            otherRigidbody.collidingPairs.Add(new KeyValuePair<Collider, Collider>(otherCol, col));
 
-            foreach (Collider collider in colliders)
+            Vector3 moveVector, otherMoveVector;
+            if (IsStatic)
             {
-                foreach (Collider otherCollider in otherColliders)
+                moveVector = Vector3.Zero;
+                otherMoveVector = -collisionExitVector;
+            }
+            else
+            {
+                if (otherRigidbody.IsStatic)
                 {
-                    Vector3? _collisionExitVector; //TODO: whut?
-                    Vector3? _collisionExitNormal;
-                    Vector3? _colliderEndPoint;
-                    if (!collider.GetCollisionExitVector(otherCollider, out _collisionExitVector, out _collisionExitNormal, out _colliderEndPoint))
-                        continue;
-
-                    Vector3 collisionExitVector = (Vector3)_collisionExitVector;
-                    Vector3 collisionExitNormal = (Vector3)_collisionExitNormal;
-                    Vector3 colliderEndPoint = (Vector3)_colliderEndPoint;
-                    collisionExitNormal.normalize();
-
-                    collidingPairs.Add(new KeyValuePair<Collider, Collider>(collider, otherCollider));
-                    otherRigidbody.collidingPairs.Add(new KeyValuePair<Collider, Collider>(otherCollider, collider));
-
-                    Vector3 moveVector, otherMoveVector;
-                    if (IsStatic)
-                    {
-                        moveVector = Vector3.Zero;
-                        otherMoveVector = -collisionExitVector;
-                    }
-                    else
-                    {
-                        if (otherRigidbody.IsStatic)
-                        {
-                            moveVector = collisionExitVector;
-                            otherMoveVector = Vector3.Zero;
-                            colliderEndPoint += moveVector;
-                        }
-                        else
-                        {
-                            double totalMass = mass + otherRigidbody.mass;
-                            moveVector = collisionExitVector * otherRigidbody.mass / totalMass;
-                            otherMoveVector = -collisionExitVector * mass / totalMass;
-                            colliderEndPoint += moveVector;
-                        }
-                    }
-
-                    if (!moveVector.isZero())
-                    {
-                        GameObject.Transform.Position += moveVector;
-                        collider.UpdateData();
-                    }
-                    if (!otherMoveVector.isZero())
-                    {
-                        otherRigidbody.GameObject.Transform.Position += otherMoveVector;
-                        otherCollider.UpdateData();
-                    }
-
-                    Vector3 collisionPoint = Collider.GetAverageCollisionPoint(collider, otherCollider, colliderEndPoint, collisionExitNormal);
-                    if (double.IsNaN(collisionPoint.x) || double.IsNaN(collisionPoint.y) || double.IsNaN(collisionPoint.z))
-                    {
-                        if (!moveVector.isZero())
-                        {
-                            GameObject.Transform.Position -= moveVector;
-                            collisionExitVectors.Add(moveVector);
-                            collider.UpdateData();
-                        }
-                        if (!otherMoveVector.isZero())
-                        {
-                            otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
-                            otherRigidbody.collisionExitVectors.Add(otherMoveVector);
-                            otherCollider.UpdateData();
-                        }
-                        return;
-                    }
-
-                    Vector3 r1 = collisionPoint - GameObject.Transform.Position;
-                    Vector3 r2 = collisionPoint - otherRigidbody.GameObject.Transform.Position;
-                    Vector3 vp = Velocity + AngularVelocity % r1;
-                    Vector3 othervp = otherRigidbody.Velocity + otherRigidbody.AngularVelocity % r2;
-                    Vector3 dvn = vp.projectOnVector(collisionExitNormal) - othervp.projectOnVector(collisionExitNormal);
-                    Vector3 dvf = vp.projectOnFlat(collisionExitNormal) - othervp.projectOnFlat(collisionExitNormal);
-                    double bounciness = Material.GetComdinedBouncinessWith(otherRigidbody.Material);
-                    double friction = Material.GetCombinedFrictionWith(otherRigidbody.Material);
-
-                    Func<Vector3, Vector3> func = (F) => F * (inverseMass + otherRigidbody.inverseMass) +
-                                                         inverseGlobalInertiaTensor * (r1 % F) % r1 +
-                                                         otherRigidbody.inverseGlobalInertiaTensor * (r2 % F) % r2 +
-                                                         dvn * (1 + bounciness) + dvf * friction;
-
-                    Vector3 impulse = NewtonIteration(func, Vector3.Zero);
-
-                    AddImpulseAtPoint(impulse, collisionPoint);
-
-                    bounciness = otherRigidbody.Material.GetComdinedBouncinessWith(Material);
-                    friction = otherRigidbody.Material.GetCombinedFrictionWith(Material);
-
-                    func = (F) => F * (inverseMass + otherRigidbody.inverseMass) +
-                                  inverseGlobalInertiaTensor * (r1 % F) % r1 +
-                                  otherRigidbody.inverseGlobalInertiaTensor * (r2 % F) % r2 +
-                                  dvn * (1 + bounciness) + dvf * friction;
-
-                    impulse = NewtonIteration(func, Vector3.Zero);
-
-                    otherRigidbody.AddImpulseAtPoint(-impulse, collisionPoint);
-
-                    if (!moveVector.isZero())
-                    {
-                        GameObject.Transform.Position -= moveVector;
-                        collisionExitVectors.Add(moveVector);
-                        collider.UpdateData();
-                    }
-                    if (!otherMoveVector.isZero())
-                    {
-                        otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
-                        otherRigidbody.collisionExitVectors.Add(otherMoveVector);
-                        otherCollider.UpdateData();
-                    }
+                    moveVector = collisionExitVector;
+                    otherMoveVector = Vector3.Zero;
+                    colliderEndPoint += moveVector;
                 }
+                else
+                {
+                    double totalMass = mass + otherRigidbody.mass;
+                    moveVector = collisionExitVector * otherRigidbody.mass / totalMass;
+                    otherMoveVector = -collisionExitVector * mass / totalMass;
+                    colliderEndPoint += moveVector;
+                }
+            }
+
+            if (!moveVector.isZero())
+            {
+                GameObject.Transform.Position += moveVector;
+                col.UpdateData();
+            }
+            if (!otherMoveVector.isZero())
+            {
+                otherRigidbody.GameObject.Transform.Position += otherMoveVector;
+                otherCol.UpdateData();
+            }
+
+            Vector3 collisionPoint = Collider.GetAverageCollisionPoint(col, otherCol, colliderEndPoint, collisionExitNormal);
+            if (double.IsNaN(collisionPoint.x) || double.IsNaN(collisionPoint.y) || double.IsNaN(collisionPoint.z))
+            {
+                if (!moveVector.isZero())
+                {
+                    GameObject.Transform.Position -= moveVector;
+                    collisionExitVectors.Add(moveVector);
+                    col.UpdateData();
+                }
+                if (!otherMoveVector.isZero())
+                {
+                    otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
+                    otherRigidbody.collisionExitVectors.Add(otherMoveVector);
+                    otherCol.UpdateData();
+                }
+                return;
+            }
+
+            Vector3 r1 = collisionPoint - GameObject.Transform.Position;
+            Vector3 r2 = collisionPoint - otherRigidbody.GameObject.Transform.Position;
+            Vector3 vp = Velocity + AngularVelocity % r1;
+            Vector3 othervp = otherRigidbody.Velocity + otherRigidbody.AngularVelocity % r2;
+            Vector3 dvn = vp.projectOnVector(collisionExitNormal) - othervp.projectOnVector(collisionExitNormal);
+            Vector3 dvf = vp.projectOnFlat(collisionExitNormal) - othervp.projectOnFlat(collisionExitNormal);
+            double bounciness = Material.GetComdinedBouncinessWith(otherRigidbody.Material);
+            double friction = Material.GetCombinedFrictionWith(otherRigidbody.Material);
+
+            Func<Vector3, Vector3> func = (F) => F * (inverseMass + otherRigidbody.inverseMass) +
+                                                 inverseGlobalInertiaTensor * (r1 % F) % r1 +
+                                                 otherRigidbody.inverseGlobalInertiaTensor * (r2 % F) % r2 +
+                                                 dvn * (1 + bounciness) + dvf * friction;
+
+            Vector3 impulse = NewtonIteration(func, Vector3.Zero);
+
+            AddImpulseAtPoint(impulse, collisionPoint);
+
+            bounciness = otherRigidbody.Material.GetComdinedBouncinessWith(Material);
+            friction = otherRigidbody.Material.GetCombinedFrictionWith(Material);
+
+            func = (F) => F * (inverseMass + otherRigidbody.inverseMass) +
+                          inverseGlobalInertiaTensor * (r1 % F) % r1 +
+                          otherRigidbody.inverseGlobalInertiaTensor * (r2 % F) % r2 +
+                          dvn * (1 + bounciness) + dvf * friction;
+
+            impulse = NewtonIteration(func, Vector3.Zero);
+
+            otherRigidbody.AddImpulseAtPoint(-impulse, collisionPoint);
+
+            if (!moveVector.isZero())
+            {
+                GameObject.Transform.Position -= moveVector;
+                collisionExitVectors.Add(moveVector);
+                col.UpdateData();
+            }
+            if (!otherMoveVector.isZero())
+            {
+                otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
+                otherRigidbody.collisionExitVectors.Add(otherMoveVector);
+                otherCol.UpdateData();
             }
         }
 
@@ -454,7 +445,7 @@ namespace Engine.BaseAssets.Components
                 OnCollision?.Invoke(this, pair.Key, pair.Value);
             }
 
-            prevCollidingPairs = new List<KeyValuePair<Collider, Collider>>(collidingPairs);
+            prevCollidingPairs = new HashSet<KeyValuePair<Collider, Collider>>(collidingPairs);
             collidingPairs.Clear();
         }
 

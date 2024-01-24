@@ -10,6 +10,8 @@ SerializableObjects:
   - 6b924668a775401b95018aec49a8df73
   - fcddbe1bc3ac4a6ba258605ea8d9ad9b
   - cbdc012266f74dbaaefe736dbca0e57a
+  - c27fac357c2348ca86535de0644aaa03
+  - 6220d43783424d4f824e68e55c226cae
 - !Transform
   instanceId: 59f04aed325e476489f53e6d26e5abec
   gameObject: 64188becf7b044f0b30c6552b6b29fef
@@ -17,11 +19,14 @@ SerializableObjects:
   - dec4b28b0073421b89a63466ee06e19f
   - 5906581a3a934ada9a4ba011cb16f6f6
   Position:
-    x: 5
-    z: 5
+    x: 5.80545097587541
+    y: 0.07720858260996102
+    z: 6.231384340314732
   Rotation:
-    w: 0.7071067811865476
-    z: 0.7071067811865476
+    w: 0.6812417274996105
+    x: -0.18414590423540633
+    y: -0.18488396495787404
+    z: 0.683972158913012
   Scale:
     x: 1
     y: 1
@@ -36,11 +41,22 @@ SerializableObjects:
   localEnabled: true
   makeCurrentOnStart: true
   fov: 1.5707963267948966
-  aspect: 1
+  aspect: 1.8271028037383177
   near: 0.001
   far: 500
 - !EditorCameraController
   instanceId: cbdc012266f74dbaaefe736dbca0e57a
+  gameObject: 64188becf7b044f0b30c6552b6b29fef
+  localEnabled: true
+- !SphereCollider
+  instanceId: c27fac357c2348ca86535de0644aaa03
+  gameObject: 64188becf7b044f0b30c6552b6b29fef
+  localEnabled: true
+  massPart: 1
+  isTrigger: true
+  radius: 0.5
+- !TriggerLogger
+  instanceId: 6220d43783424d4f824e68e55c226cae
   gameObject: 64188becf7b044f0b30c6552b6b29fef
   localEnabled: true
 - !GameObject
@@ -171,7 +187,8 @@ SerializableObjects:
   - 3adbdebb08a04c08834a171001210554
   - edef0c88536e43e7b1197d184a14a8ae
   - ac8d3fa465934c1cb102b1017476f537
-  - 36cbd0fe584a492ca068f33fe3052fdf
+  - 3018f784814249afb78c23719c280d79
+  - 785f37a5e89d4f27b5f8e9b3faf8387e
 - !Transform
   instanceId: 3adbdebb08a04c08834a171001210554
   gameObject: befaa81660524ec1af4738df04228a19
@@ -206,13 +223,19 @@ SerializableObjects:
     z: 1
   linearDrag: 0.05
   angularDrag: 0.05
-  isStatic: true
-- !MeshCollider
-  instanceId: 36cbd0fe584a492ca068f33fe3052fdf
+- !CubeCollider
+  instanceId: 3018f784814249afb78c23719c280d79
   gameObject: befaa81660524ec1af4738df04228a19
   localEnabled: true
   massPart: 1
-  model: fb30335d004f4cd29348efbfb3794681
+  size:
+    x: 2
+    y: 2
+    z: 2
+- !TriggerLogger
+  instanceId: 785f37a5e89d4f27b5f8e9b3faf8387e
+  gameObject: befaa81660524ec1af4738df04228a19
+  localEnabled: true
 - !GameObject
   instanceId: c8f3ad50439543649b0caa948c6e1ecd
   name: CesiumMan1
@@ -244,15 +267,16 @@ SerializableObjects:
   - 63cd27d1108343bcb0fb0db518df0486
   skeleton: 4c3628c4e1744549a700cb788ea0ed34
   animation: ca81c1f849814306a6cfe6e83d2f24fc
+  animationCurrentTime: 25.435097
 - !Rigidbody
   instanceId: b3de7cbfbf9e4832af0ac5e8b07b78d8
   gameObject: c8f3ad50439543649b0caa948c6e1ecd
   localEnabled: true
   mass: 1
   inertiaTensor:
-    x: 1
-    y: 1
-    z: 1
+    x: 0.144
+    y: 0.144
+    z: 0.144
   linearDrag: 0.05
   angularDrag: 0.05
   isStatic: true
@@ -303,6 +327,7 @@ SerializableObjects:
   materials:
   - 63cd27d1108343bcb0fb0db518df0486
   skeleton: 4c3628c4e1744549a700cb788ea0ed34
+  animationCurrentTime: 25.435097
 - !GameObject
   instanceId: 24472099f60040abb4ac63823e2f50d4
   name: PointLight1
@@ -430,28 +455,6 @@ SerializableObjects:
     y: 1
     z: 1
   shadowSize: 4096
-- !GameObject
-  instanceId: 7c9d805792354bec9ad23ad6986368ca
-  name: CustomScript
-  localEnabled: true
-  transform: a68c03936c2a4c37a0288b700c2c53ed
-  components:
-  - a68c03936c2a4c37a0288b700c2c53ed
-  - 8a91f31984424f78a8ecd8fbcfb49cdf
-- !Transform
-  instanceId: a68c03936c2a4c37a0288b700c2c53ed
-  gameObject: 7c9d805792354bec9ad23ad6986368ca
-  Rotation:
-    w: 1
-  Scale:
-    x: 1
-    y: 1
-    z: 1
-- !TestProjectComponent
-  instanceId: 8a91f31984424f78a8ecd8fbcfb49cdf
-  gameObject: 7c9d805792354bec9ad23ad6986368ca
-  localEnabled: true
-  SoundToPlay: 5c37ac8597b04f3f900bcf817499d4a9
 - !GameObject
   instanceId: 77b28f2b4d194a18a6b865d4445dbc01
   name: SOSI_PISOS
