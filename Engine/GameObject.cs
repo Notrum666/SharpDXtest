@@ -50,7 +50,7 @@ namespace Engine
             return gameObject;
         }
 
-        public void Duplicate()
+        public GameObject Duplicate()
         {
             PrefabData prefabData = PrefabData.FromGameObject(this);
             using MemoryStream stream = new MemoryStream();
@@ -68,7 +68,8 @@ namespace Engine
             }
 
             Prefab prefab = prefabData.ToRealAsset();
-            prefab.Instantiate(transform.Parent);
+            
+            return prefab.Instantiate(transform.Parent);
         }
 
         private protected override void InitializeInner()
