@@ -48,6 +48,9 @@ namespace Engine.BaseAssets.Components
         [SerializedField]
         private bool freezeRotationZ = false;
 
+        [SerializedField]
+        private bool useGravity = true;
+
         public Ranged<double> Mass => new Ranged<double>(ref mass, min: 0 + double.Epsilon, onSet: RecalculateInverseMass);
         public Vector3 Velocity { get => velocity; set => velocity = value; }
         public Vector3 AngularVelocity { get => angularVelocity; set => angularVelocity = value; }
@@ -153,7 +156,8 @@ namespace Engine.BaseAssets.Components
 
         public override void FixedUpdate()
         {
-            AddForce(GravitationalAcceleration * mass);
+            if (useGravity)
+                AddForce(GravitationalAcceleration * mass);
             RecalculateInertiaTensor();
 
             Transform t = GameObject.Transform;

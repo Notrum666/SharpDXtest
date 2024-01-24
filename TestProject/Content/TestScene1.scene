@@ -169,6 +169,7 @@ SerializableObjects:
   linearDrag: 0.05
   angularDrag: 0.05
   isStatic: true
+  useGravity: true
 - !CubeCollider
   instanceId: 1495140c98d44a56be9f406d4b618995
   gameObject: 1e7e7916514146108ac366da15db5579
@@ -280,6 +281,7 @@ SerializableObjects:
   linearDrag: 0.05
   angularDrag: 0.05
   isStatic: true
+  useGravity: true
 - !SphereCollider
   instanceId: 8b55371ce5314ee4a060563de8a7b09b
   gameObject: c8f3ad50439543649b0caa948c6e1ecd
@@ -319,6 +321,7 @@ SerializableObjects:
     z: 1
   linearDrag: 0.05
   angularDrag: 0.05
+  useGravity: true
 - !SkeletalMeshComponent
   instanceId: ab7c68e755594aafbbc0d71bdf62be14
   gameObject: adf9c9a3e4084a6f83f67a7447fd8cd0
