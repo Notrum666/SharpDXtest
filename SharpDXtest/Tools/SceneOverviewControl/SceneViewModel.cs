@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -79,7 +80,7 @@ namespace Editor
             invalidated = false;
             GameObjectViewModels.Clear();
             if (scene is not null)
-                foreach (GameObject gameObject in scene.GameObjects)
+                foreach (GameObject gameObject in scene.GameObjects.ToImmutableList())
                     if (gameObject.Transform.Parent is null)
                         GameObjectViewModels.Add(new GameObjectTreeViewModel(gameObject));
         }
