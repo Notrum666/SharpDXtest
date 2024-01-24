@@ -49,7 +49,7 @@ namespace Engine.BaseAssets.Components
         private bool freezeRotationZ = false;
 
         [SerializedField]
-        private bool useGravity = true;
+        private bool ignoreGravity = false;
 
         public Ranged<double> Mass => new Ranged<double>(ref mass, min: 0 + double.Epsilon, onSet: RecalculateInverseMass);
         public Vector3 Velocity { get => velocity; set => velocity = value; }
@@ -156,7 +156,7 @@ namespace Engine.BaseAssets.Components
 
         public override void FixedUpdate()
         {
-            if (useGravity)
+            if (!ignoreGravity)
                 AddForce(GravitationalAcceleration * mass);
             RecalculateInertiaTensor();
 

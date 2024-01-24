@@ -169,7 +169,6 @@ SerializableObjects:
   linearDrag: 0.05
   angularDrag: 0.05
   isStatic: true
-  useGravity: true
 - !CubeCollider
   instanceId: 1495140c98d44a56be9f406d4b618995
   gameObject: 1e7e7916514146108ac366da15db5579
@@ -224,6 +223,7 @@ SerializableObjects:
     z: 1
   linearDrag: 0.05
   angularDrag: 0.05
+  ignoreGravity: true
 - !CubeCollider
   instanceId: 3018f784814249afb78c23719c280d79
   gameObject: befaa81660524ec1af4738df04228a19
@@ -281,7 +281,6 @@ SerializableObjects:
   linearDrag: 0.05
   angularDrag: 0.05
   isStatic: true
-  useGravity: true
 - !SphereCollider
   instanceId: 8b55371ce5314ee4a060563de8a7b09b
   gameObject: c8f3ad50439543649b0caa948c6e1ecd
@@ -321,7 +320,6 @@ SerializableObjects:
     z: 1
   linearDrag: 0.05
   angularDrag: 0.05
-  useGravity: true
 - !SkeletalMeshComponent
   instanceId: ab7c68e755594aafbbc0d71bdf62be14
   gameObject: adf9c9a3e4084a6f83f67a7447fd8cd0
@@ -458,100 +456,3 @@ SerializableObjects:
     y: 1
     z: 1
   shadowSize: 4096
-- !GameObject
-  instanceId: 77b28f2b4d194a18a6b865d4445dbc01
-  name: SOSI_PISOS
-  localEnabled: true
-  transform: 121a26153ba34425b1a876ebe74254f0
-  components:
-  - 121a26153ba34425b1a876ebe74254f0
-  - 7d8cb3570158438c95c578b3d11c6781
-  - 01ef48c27b12473f81c3134234a67e9b
-- !Transform
-  instanceId: 121a26153ba34425b1a876ebe74254f0
-  gameObject: 77b28f2b4d194a18a6b865d4445dbc01
-  children:
-  - b985582bb5c94c5f86aa71acbcdc8f4d
-  - 86a4de7cb6bd48c3b36fe7b9bc6587bf
-  Position:
-    y: 4
-    z: 3
-  Rotation:
-    w: 0.9238795325112867
-    y: -0.3826834323650898
-  Scale:
-    x: 1
-    y: 1
-    z: 4
-- !MeshComponent
-  instanceId: 7d8cb3570158438c95c578b3d11c6781
-  gameObject: 77b28f2b4d194a18a6b865d4445dbc01
-  localEnabled: true
-  model: d88264040dea43d48fbf829f466928b4
-  materials:
-  - 37783489987243f5b6f22ad9fb4b82c7
-- !MeshComponent
-  instanceId: 01ef48c27b12473f81c3134234a67e9b
-  gameObject: 77b28f2b4d194a18a6b865d4445dbc01
-  localEnabled: true
-  model: d88264040dea43d48fbf829f466928b4
-  materials:
-  - 37783489987243f5b6f22ad9fb4b82c7
-- !GameObject
-  instanceId: 5c89aaf815f94611ad1885bddf4ddb8b
-  name: LeftEgg
-  localEnabled: true
-  transform: b985582bb5c94c5f86aa71acbcdc8f4d
-  components:
-  - b985582bb5c94c5f86aa71acbcdc8f4d
-  - caa16e7ed22c4b12af1b086a772c5346
-- !Transform
-  instanceId: b985582bb5c94c5f86aa71acbcdc8f4d
-  gameObject: 5c89aaf815f94611ad1885bddf4ddb8b
-  parent: 121a26153ba34425b1a876ebe74254f0
-  Position:
-    x: -0.75
-    y: 0.6
-    z: -0.4
-  Rotation:
-    w: 1
-  Scale:
-    x: 1
-    y: 1
-    z: 0.25
-- !MeshComponent
-  instanceId: caa16e7ed22c4b12af1b086a772c5346
-  gameObject: 5c89aaf815f94611ad1885bddf4ddb8b
-  localEnabled: true
-  model: d88264040dea43d48fbf829f466928b4
-  materials:
-  - 37783489987243f5b6f22ad9fb4b82c7
-- !GameObject
-  instanceId: 8b3d7b5a74e746e08bb1803441082984
-  name: RightEgg
-  localEnabled: true
-  transform: 86a4de7cb6bd48c3b36fe7b9bc6587bf
-  components:
-  - 86a4de7cb6bd48c3b36fe7b9bc6587bf
-  - 9b8b77db645c494db7ec8ae864a5f0b9
-- !Transform
-  instanceId: 86a4de7cb6bd48c3b36fe7b9bc6587bf
-  gameObject: 8b3d7b5a74e746e08bb1803441082984
-  parent: 121a26153ba34425b1a876ebe74254f0
-  Position:
-    x: -0.75
-    y: -0.6
-    z: -0.4
-  Rotation:
-    w: 1
-  Scale:
-    x: 1
-    y: 1
-    z: 0.25
-- !MeshComponent
-  instanceId: 9b8b77db645c494db7ec8ae864a5f0b9
-  gameObject: 8b3d7b5a74e746e08bb1803441082984
-  localEnabled: true
-  model: d88264040dea43d48fbf829f466928b4
-  materials:
-  - 37783489987243f5b6f22ad9fb4b82c7
