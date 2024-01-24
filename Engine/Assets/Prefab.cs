@@ -34,7 +34,7 @@ namespace Engine.Assets
             }
         }
 
-        public void Instantiate(Transform parentTransform = null)
+        public GameObject Instantiate(Transform parentTransform = null)
         {
             MakeNewGuids();
 
@@ -49,6 +49,7 @@ namespace Engine.Assets
 
             if (parentTransform != null)
                 rootTransform.SetParent(parentTransform);
+            return rootTransform.GameObject;
         }
     }
 }
