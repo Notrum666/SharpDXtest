@@ -166,13 +166,15 @@ namespace Engine
                     i--;
                     continue;
                 }
-                if (CurrentListener != null && playingSounds[i].source != null)
+                
+                Emitter source = playingSounds[i].source;
+                if (CurrentListener != null && source != null)
                 {
-                    DspSettings settings = device3d.Calculate(CurrentListener.Listener, playingSounds[i].source, CalculateFlags.Matrix |
-                                                                                                                 CalculateFlags.Doppler /*|
-                                                                                                                 CalculateFlags.Reverb*/, 2, 8);
+                    DspSettings settings = device3d.Calculate(CurrentListener.Listener, source, CalculateFlags.Matrix |
+                                                                                                CalculateFlags.Doppler /*|
+                                                                                                CalculateFlags.Reverb*/, source.ChannelCount, 8);
                     playingSounds[i].voice.SetFrequencyRatio(settings.DopplerFactor);
-                    playingSounds[i].voice.SetOutputMatrix(2, 8, settings.MatrixCoefficients);
+                    playingSounds[i].voice.SetOutputMatrix(source.ChannelCount, 8, settings.MatrixCoefficients);
                 }
             }
         }

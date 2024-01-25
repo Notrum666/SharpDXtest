@@ -15,8 +15,9 @@ namespace Engine.BaseAssets.Components
             Source.CurveDistanceScaler = float.MinValue;
         }
 
-        public void play(Sound sound)
+        public void Play(Sound sound)
         {
+            Source.ChannelCount = sound.Format.Channels;
             SoundCore.PlayFrom(sound, this);
         }
 
