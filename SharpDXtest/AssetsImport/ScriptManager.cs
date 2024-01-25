@@ -158,9 +158,13 @@ namespace Editor.AssetsImport
                 if (!success || string.IsNullOrEmpty(csProject.OutputFilePath))
                     continue;
 
+                string pdbFilePath = Path.ChangeExtension(csProject.OutputFilePath, "pdb");
+
                 using FileStream asmFile = File.OpenRead(csProject.OutputFilePath);
-                Assembly asm = assemblyContext.LoadFromStream(asmFile);
+                using FileStream pdbFile = File.OpenRead(pdbFilePath);
+                Assembly asm = assemblyContext.LoadFromStream(asmFile, pdbFile);
                 asmFile.Close();
+                pdbFile.Close();
 
                 foreach (string file in filesToTypeNamesMap.Keys)
                 {
