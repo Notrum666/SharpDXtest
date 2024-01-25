@@ -26,13 +26,18 @@ namespace Engine.BaseAssets.Components
             }
         }
 
-        public static T[] GetCached<T>() where T : Component
+        public static List<T> GetCached<T>() where T : Component
         {
-            Type type = typeof(T);
+            return GetCached(typeof(T)).OfType<T>().ToList();
+        }
+
+        [ProfileMe]
+        public static IEnumerable<Component> GetCached(Type type)
+        {
             if (!Cache.TryGetValue(type, out HashSet<Component> value))
                 return [];
 
-            return Array.ConvertAll(value.ToArray(), item => (T)item);
+            return value.Where(x => x.GameObject.Enabled);
         }
 
         private protected override void InitializeInner()
