@@ -70,6 +70,8 @@ namespace Engine
 
             foreach (MethodInfo method in methodsToPatch)
                 harmony.Patch(method, new HarmonyMethod(profilerPrefix), new HarmonyMethod(profilerPostfix));
+
+            Logger.Log(LogType.Info, "Patched");
         }
 
         private static void StartProfiling(out ProfilingResult __state, MethodInfo __originalMethod)
@@ -127,7 +129,10 @@ namespace Engine
             file.WriteLine($"\"ph\": \"X\",");
             file.WriteLine($"\"ts\": {result.StartMilliseconds * 1000},");
             file.WriteLine($"\"dur\": {result.DeltaMilliseconds * 1000},");
-            file.WriteLine($"\"args\": {{ \"ticks\": {result.DeltaTicks} }}");
+            file.WriteLine($"\"args\": {{");
+            file.WriteLine($" \"ticks\": {result.DeltaTicks}");
+            //file.WriteLine($" \"stackTrace\": \"{result.StackTrace.ToString().ReplaceLineEndings(" | ")}\"");
+            file.WriteLine($"}}");
 
             file.Write("}");
         }
