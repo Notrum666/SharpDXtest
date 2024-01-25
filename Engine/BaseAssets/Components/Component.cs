@@ -6,6 +6,7 @@ namespace Engine.BaseAssets.Components
 {
     public abstract class Component : SerializableObject
     {
+        protected virtual Type CacheType => typeof(Component);
         public static Dictionary<Type, HashSet<Component>> Cache { get; } = new Dictionary<Type, HashSet<Component>>();
 
         [SerializedField]
@@ -39,9 +40,8 @@ namespace Engine.BaseAssets.Components
             try
             {
                 OnInitialized();
-                Type type = GetType();
-                if (!Cache.TryGetValue(type, out HashSet<Component> value))
-                    value = Cache[type] = new HashSet<Component>();
+                if (!Cache.TryGetValue(CacheType, out HashSet<Component> value))
+                    Cache[CacheType] = value = new HashSet<Component>();
                 value.Add(this);
             }
             catch (Exception e)
@@ -55,8 +55,7 @@ namespace Engine.BaseAssets.Components
         /// </summary>
         private protected override void DestroyImmediateInternal()
         {
-            Type type = GetType();
-            if (Cache.TryGetValue(type, out HashSet<Component> value))
+            if (Cache.TryGetValue(CacheType, out HashSet<Component> value))
                 value.Remove(this);
 
             try

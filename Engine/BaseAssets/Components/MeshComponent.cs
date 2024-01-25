@@ -10,6 +10,8 @@ namespace Engine.BaseAssets.Components
 {
     public class MeshComponent : BehaviourComponent
     {
+        protected override Type CacheType => typeof(MeshComponent);
+
         [SerializedField]
         protected Model model = null;
         [SerializedField]
