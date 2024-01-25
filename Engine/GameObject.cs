@@ -69,7 +69,7 @@ namespace Engine
 
             Prefab prefab = prefabData.ToRealAsset();
             
-            return prefab.Instantiate(transform.Parent);
+            return prefab.NewInstantiate(transform.Parent);
         }
 
         private protected override void InitializeInner()

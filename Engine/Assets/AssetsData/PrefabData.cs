@@ -9,14 +9,17 @@ using YamlDotNet.Serialization.Callbacks;
 
 namespace Engine.AssetsData
 {
-    [AssetData<Prefab>]
+    [AssetData<Prefab>][YamlTagMapped("OldPrefabData")]
     public class PrefabData : NativeAssetData
     {
         public sealed override string FileExtension => ".prefab";
 
+        public string Data;
+        
+
         // TODO: Add total objects count for inspector
-        public readonly List<SerializableObject> SerializableObjects = new List<SerializableObject>();
-        public int rootTransformIndex = -1;
+        // public readonly List<SerializableObject> SerializableObjects = new List<SerializableObject>();
+        // public int rootTransformIndex = -1;
 
         protected sealed override void SetDefaultValues()
         {
@@ -27,6 +30,7 @@ namespace Engine.AssetsData
         {
             PrefabData prefabData = new PrefabData();
 
+            PrefabContainer prefabContainer = new PrefabContainer();
             Stack<Transform> stack = new Stack<Transform>();
             stack.Push(rootObject.Transform);
             
@@ -37,26 +41,32 @@ namespace Engine.AssetsData
                     stack.Push(child);
                 GameObject gameObject = transform.GameObject;
 
-                prefabData.SerializableObjects.Add(gameObject);
+                prefabContainer.SerializableObjects.Add(gameObject);
                 foreach (Component component in gameObject.Components)
                 {
-                    prefabData.SerializableObjects.Add(component);
+                    prefabContainer.SerializableObjects.Add(component);
                     if (component == rootObject.Transform)
-                        prefabData.rootTransformIndex = prefabData.SerializableObjects.Count - 1;
+                        prefabContainer.rootTransformIndex = prefabContainer.SerializableObjects.Count - 1;
                 }
             }
 
+            using StringWriter stringWriter = new StringWriter();
+            
+            prefabData.Data = YamlManager.SaveToString(prefabContainer);
+            
             return prefabData;
         }
 
         public sealed override void Serialize(BinaryWriter writer)
         {
-            YamlManager.SaveToStream(writer.BaseStream, this);
+            writer.Write(Data);
+            // YamlManager.SaveToStream(writer.BaseStream, this);
         }
 
         public sealed override void Deserialize(BinaryReader reader)
         {
-            YamlManager.LoadFromStream(reader.BaseStream, this);
+            Data = reader.ReadString();
+            // YamlManager.LoadFromStream(reader.BaseStream, this);
         }
 
         public override Prefab ToRealAsset(BaseAsset targetAsset = null)
@@ -65,22 +75,23 @@ namespace Engine.AssetsData
                 Logger.Log(LogType.Warning, "Tried to update Scene asset, but it is not allowed, cause asset is not cacheable");
 
             Prefab prefab = new Prefab();
+            prefab.SetPrefabData(this);
 
-            foreach (SerializableObject serializableObject in SerializableObjects)
-            {
-                serializableObject.OnDeserialized();
-                if (serializableObject is GameObject gameObject)
-                    prefab.AddObject(gameObject);
-            }
-            prefab.SetRootTransform(SerializableObjects[rootTransformIndex] as Transform); //Cross fingers
+            // foreach (SerializableObject serializableObject in SerializableObjects)
+            // {
+            //     serializableObject.OnDeserialized();
+            //     if (serializableObject is GameObject gameObject)
+            //         prefab.AddObject(gameObject);
+            // }
+            // prefab.SetRootTransform(SerializableObjects[rootTransformIndex] as Transform); //Cross fingers
 
             return prefab;
         }
 
-        public void AddObject(SerializableObject serializableObject)
-        {
-            SerializableObjects.Add(serializableObject);
-        }
+        // public void AddObject(SerializableObject serializableObject)
+        // {
+        //     SerializableObjects.Add(serializableObject);
+        // }
 
         [OnDeserialized]
         private void OnDeserialized()

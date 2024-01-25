@@ -127,6 +127,11 @@ namespace Engine
             using FileStream fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.Read);
             SaveObjectToStream(fileStream, obj);
         }
+        
+        public static T LoadFromString<T>(string data)
+        {
+            return Deserializer.Deserialize<T>(data);
+        }
 
         public static object LoadFromStream(Stream stream, Type type)
         {
