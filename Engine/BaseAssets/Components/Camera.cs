@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 
+using Engine.BaseAssets.Components.Postprocessing;
 using Engine.Graphics;
 
 using LinearAlgebra;
@@ -216,6 +217,8 @@ namespace Engine.BaseAssets.Components
         private int targetWidth;
         private int targetHeight;
         internal bool NeedsToBeResized { get; private set; }
+
+        public List<PostProcessEffect> PostProcessEffects { get; private set; } = new List<PostProcessEffect>();
 
         /// <summary>
         /// Resizes Camera and recreates buffers if needed. <br/>

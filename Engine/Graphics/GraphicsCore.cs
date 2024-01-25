@@ -48,8 +48,6 @@ namespace Engine
 
         private static Query synchQuery;
 
-        private static PostProcessEffect_Bloom bloomEffect;
-
 #if GraphicsDebugging
         private static SharpDX.DXGI.SwapChain swapChain;
 #endif
@@ -432,8 +430,8 @@ namespace Engine
 
         private static void PrePostProcessingPass(Camera camera)
         {
-            bloomEffect ??= new PostProcessEffect_Bloom();
-            bloomEffect.Process(camera.ColorBuffer);
+            foreach (PostProcessEffect effect in camera.PostProcessEffects)
+                effect.Process(camera.ColorBuffer);
         }
 
         private static void GammaCorrectionPass(Camera camera)
