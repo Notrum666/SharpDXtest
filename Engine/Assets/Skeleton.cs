@@ -1,10 +1,5 @@
-﻿using Engine.AssetsData;
-using LinearAlgebra;
-using SharpDX.Direct3D11;
+﻿using LinearAlgebra;
 using System.Collections.Generic;
-using System;
-using SharpDX;
-using Assimp;
 
 namespace Engine
 {

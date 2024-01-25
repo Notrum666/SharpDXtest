@@ -233,6 +233,8 @@ SerializableObjects:
   components:
   - 63bac9e8b7164c7aac94481c41b5fb0e
   - 55bfef7a89164e8f996d363869ab01dc
+  - 8e56c4328de94b3aab4715db63b5642d
+  - 57db977b5f9f43919c234c5d1a39e693
 - !Transform
   instanceId: 63bac9e8b7164c7aac94481c41b5fb0e
   gameObject: c8f3ad50439543649b0caa948c6e1ecd
@@ -253,8 +255,15 @@ SerializableObjects:
   materials:
   - 63cd27d1108343bcb0fb0db518df0486
   skeleton: 4c3628c4e1744549a700cb788ea0ed34
-  animation: ca81c1f849814306a6cfe6e83d2f24fc
-  animationCurrentTime: 25.435097
+  animation: 85bc35e8bc604c80aeb5eeaf9b0bb891
+- !AgentComponent
+  instanceId: 8e56c4328de94b3aab4715db63b5642d
+  gameObject: c8f3ad50439543649b0caa948c6e1ecd
+  localEnabled: true
+- !ComponentAgent
+  instanceId: 57db977b5f9f43919c234c5d1a39e693
+  gameObject: c8f3ad50439543649b0caa948c6e1ecd
+  localEnabled: true
 - !GameObject
   instanceId: adf9c9a3e4084a6f83f67a7447fd8cd0
   name: CesiumMan2
