@@ -137,7 +137,7 @@ namespace Editor
                 if (SubFieldsViewModels is null)
                     SubFieldsViewModels = new ObservableCollection<FieldViewModel>();
 
-                Type underlyingType = Nullable.GetUnderlyingType(targetField.FieldType);
+                Type underlyingType = Nullable.GetUnderlyingType(TargetType);
                 GenerateSubFieldsForType(underlyingType ?? TargetType);
             }
 

@@ -1,5 +1,8 @@
 using Engine;
 using Engine.BaseAssets.Components;
+
+using LinearAlgebra;
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -14,36 +17,17 @@ using System.Windows.Markup;
 
 namespace TestProject
 {
-    public class TestProjectComponent : BehaviourComponent, INotifyPropertyChanged
+    public class TestProjectComponent : BehaviourComponent
     {
-        private string text = "";
-        public string Text
-        {
-            get => text;
-            set
-            {
-                text = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName]string property = "")
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
-        }
+        [SerializedField]
+        private Vector3[] array = new Vector3[6];
         public override void Start()
         {
-            GraphicsCore.ViewportPanel.Dispatcher.Invoke(() =>
-            {
-                UserControlTest userControlTest = new UserControlTest();
-                GraphicsCore.ViewportPanel.Children.Add(userControlTest);
-                userControlTest.DataContext = this;
-            });
+
         }
         public override void Update()
         {
-            Text = Time.DeltaTime.ToString();
+
         }
     }
 }

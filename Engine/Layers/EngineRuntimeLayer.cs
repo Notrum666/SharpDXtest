@@ -55,7 +55,16 @@ namespace Engine.Layers
 
                 foreach (Collider collider in curColliders)
                     foreach (Collider other in allColliders)
-                        collider.ResolveInteractionWith(other);
+                    {
+                        try
+                        {
+                            collider.ResolveInteractionWith(other);
+                        }
+                        catch (Exception e)
+                        {
+                            Logger.Log(LogType.Error, $"Error during collision resolving: {e.Message}");
+                        }
+                    }
 
                 allColliders.AddRange(curColliders);
             }
