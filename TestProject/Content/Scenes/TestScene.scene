@@ -1,0 +1,166 @@
+!SceneData
+SerializableObjects:
+- !GameObject
+  instanceId: d12fece40c6c4de2a68b68c59b9dd2ff
+  name: ' bullet'
+  localEnabled: true
+  transform: b2cfaa4f040c43d9874f60e7d9944b86
+  components:
+  - b2cfaa4f040c43d9874f60e7d9944b86
+  - fd82a7b52e0348c48fa8d3eee0e46295
+  - 0273d79bd736496d8500f22111cba510
+  - b2b1f39d69634b08a5a1ceb241112d77
+- !Transform
+  instanceId: b2cfaa4f040c43d9874f60e7d9944b86
+  gameObject: d12fece40c6c4de2a68b68c59b9dd2ff
+  Position:
+    z: 5
+  Rotation:
+    w: 1
+    z: 1.1102230246251565E-16
+  Scale:
+    x: 0.2
+    y: 0.2
+    z: 0.2
+- !MeshComponent
+  instanceId: fd82a7b52e0348c48fa8d3eee0e46295
+  gameObject: d12fece40c6c4de2a68b68c59b9dd2ff
+  localEnabled: true
+  model: d88264040dea43d48fbf829f466928b4
+  materials:
+  - 37783489987243f5b6f22ad9fb4b82c7
+- !CubeCollider
+  instanceId: 0273d79bd736496d8500f22111cba510
+  gameObject: d12fece40c6c4de2a68b68c59b9dd2ff
+  localEnabled: true
+  massPart: 1
+  size:
+    x: 1
+    y: 1
+    z: 1
+- !Rigidbody
+  instanceId: b2b1f39d69634b08a5a1ceb241112d77
+  gameObject: d12fece40c6c4de2a68b68c59b9dd2ff
+  localEnabled: true
+  mass: 1
+  inertiaTensor:
+    x: 1
+    y: 1
+    z: 1
+  linearDrag: 0.05
+  angularDrag: 0.05
+- !GameObject
+  instanceId: ef8dbc3885014fc8ae920157b8d5ea5d
+  name: Camera
+  localEnabled: true
+  transform: 38a6c77ce0d14068974f462b196812d6
+  components:
+  - 38a6c77ce0d14068974f462b196812d6
+  - 5ab688db803e4be4805c0bd68992db91
+  - 449dbac6a3394a3b87c9d3a7f294b6d6
+  - 2b96509018fb46da88a4f4e0cb6ef41b
+- !Transform
+  instanceId: 38a6c77ce0d14068974f462b196812d6
+  gameObject: ef8dbc3885014fc8ae920157b8d5ea5d
+  Position:
+    y: -3
+    z: 3
+  Rotation:
+    w: 1
+  Scale:
+    x: 1
+    y: 1
+    z: 1
+- !Camera
+  instanceId: 5ab688db803e4be4805c0bd68992db91
+  gameObject: ef8dbc3885014fc8ae920157b8d5ea5d
+  localEnabled: true
+  makeCurrentOnStart: true
+  fov: 1.5707963267948966
+  aspect: 1
+  near: 0.001
+  far: 500
+- !EditorCameraController
+  instanceId: 449dbac6a3394a3b87c9d3a7f294b6d6
+  gameObject: ef8dbc3885014fc8ae920157b8d5ea5d
+  localEnabled: true
+- !ProjectileSpawner
+  instanceId: 2b96509018fb46da88a4f4e0cb6ef41b
+  gameObject: ef8dbc3885014fc8ae920157b8d5ea5d
+  localEnabled: true
+  projectile: 3082c41d984743cda9d29adb2a903307
+- !GameObject
+  instanceId: 01090660e022422182c9220585bd9708
+  name: Plane
+  localEnabled: true
+  transform: 16e93332ff3a46e4804267019c27d270
+  components:
+  - 16e93332ff3a46e4804267019c27d270
+  - fc0fb278c9444b72a6bea361a537254b
+  - 80113400450b4404aeecd6aa29ced8e3
+  - 35935035b3f54df1b4e9e1b53f45a473
+- !Transform
+  instanceId: 16e93332ff3a46e4804267019c27d270
+  gameObject: 01090660e022422182c9220585bd9708
+  Rotation:
+    w: 1
+  Scale:
+    x: 50
+    y: 50
+    z: 1
+- !MeshComponent
+  instanceId: fc0fb278c9444b72a6bea361a537254b
+  gameObject: 01090660e022422182c9220585bd9708
+  localEnabled: true
+  model: d88264040dea43d48fbf829f466928b4
+  materials:
+  - 37783489987243f5b6f22ad9fb4b82c7
+- !Rigidbody
+  instanceId: 80113400450b4404aeecd6aa29ced8e3
+  gameObject: 01090660e022422182c9220585bd9708
+  localEnabled: true
+  mass: 1
+  inertiaTensor:
+    x: 1
+    y: 1
+    z: 1
+  linearDrag: 0.05
+  angularDrag: 0.05
+  isStatic: true
+- !CubeCollider
+  instanceId: 35935035b3f54df1b4e9e1b53f45a473
+  gameObject: 01090660e022422182c9220585bd9708
+  localEnabled: true
+  massPart: 1
+  size:
+    x: 1
+    y: 1
+    z: 1
+- !GameObject
+  instanceId: 3aeca04176da4d52a27a49d559c52011
+  name: Light
+  localEnabled: true
+  transform: 894df7c3d7964dc99d60384038f7baf7
+  components:
+  - 894df7c3d7964dc99d60384038f7baf7
+  - de82853b0d844ef4b6bf75667d66e845
+- !Transform
+  instanceId: 894df7c3d7964dc99d60384038f7baf7
+  gameObject: 3aeca04176da4d52a27a49d559c52011
+  Rotation:
+    w: 0.766044443118978
+    x: -0.6427876096865393
+  Scale:
+    x: 1
+    y: 1
+    z: 1
+- !DirectionalLight
+  instanceId: de82853b0d844ef4b6bf75667d66e845
+  gameObject: 3aeca04176da4d52a27a49d559c52011
+  localEnabled: true
+  brightness: 1
+  Color:
+    x: 1
+    y: 1
+    z: 1
+  shadowSize: 4096
