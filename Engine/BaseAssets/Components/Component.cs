@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.BaseAssets.Components
 {
     public abstract class Component : SerializableObject
     {
+        public static Dictionary<Type, HashSet<Component>> Cache { get; } = new Dictionary<Type, HashSet<Component>>();
+
         [SerializedField]
         private GameObject gameObject = null;
 
@@ -21,11 +25,24 @@ namespace Engine.BaseAssets.Components
             }
         }
 
+        public static T[] GetCached<T>() where T : Component
+        {
+            Type type = typeof(T);
+            if (!Cache.TryGetValue(type, out HashSet<Component> value))
+                return [];
+
+            return Array.ConvertAll(value.ToArray(), item => (T)item);
+        }
+
         private protected override void InitializeInner()
         {
             try
             {
                 OnInitialized();
+                Type type = GetType();
+                if (!Cache.TryGetValue(type, out HashSet<Component> value))
+                    value = Cache[type] = new HashSet<Component>();
+                value.Add(this);
             }
             catch (Exception e)
             {
@@ -38,6 +55,10 @@ namespace Engine.BaseAssets.Components
         /// </summary>
         private protected override void DestroyImmediateInternal()
         {
+            Type type = GetType();
+            if (Cache.TryGetValue(type, out HashSet<Component> value))
+                value.Remove(this);
+
             try
             {
                 OnDestroy();

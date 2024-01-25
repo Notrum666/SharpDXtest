@@ -186,7 +186,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.State = frontCullingRasterizer;
             CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
 
-            foreach (Light light in Scene.FindComponentsOfType<Light>())
+            foreach (Light light in Component.GetCached<Light>())
             {
                 if (!light.LocalEnabled)
                     continue;
@@ -251,7 +251,7 @@ namespace Engine
 #endif
             CurrentDevice.ImmediateContext.ClearDepthStencilView(camera.DepthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
 
-            IEnumerable<MeshComponent> meshes = Scene.FindComponentsOfType<MeshComponent>().Where(m => m.LocalEnabled);
+            IEnumerable<MeshComponent> meshes = Component.GetCached<MeshComponent>().Where(m => m.Enabled);
             if (ShaderPipeline.TryGetPipeline("deferred_geometry", out ShaderPipeline pipeline))
             {
                 pipeline.Use();
@@ -314,7 +314,7 @@ namespace Engine
 
                 pipeline.UpdateUniform("size", new Vector2f(0.1f, 0.1f));
 
-                foreach (ParticleSystem particleSystem in Scene.FindComponentsOfType<ParticleSystem>())
+                foreach (ParticleSystem particleSystem in Component.GetCached<ParticleSystem>())
                 {
                     if (!particleSystem.LocalEnabled)
                         continue;
@@ -339,7 +339,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(new Viewport(0, 0, camera.BackBuffer.Width, camera.BackBuffer.Height, 0.0f, 1.0f));
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.RadianceBuffer.GetView<RenderTargetView>());
 
-            foreach (Light light in Scene.FindComponentsOfType<Light>())
+            foreach (Light light in Component.GetCached<Light>())
             {
                 if (!light.LocalEnabled)
                     continue;
@@ -396,7 +396,7 @@ namespace Engine
             pipeline.UpdateUniform("cam_farDivFarMinusNear", (float)(camera.Far / (camera.Far - camera.Near)));
             pipeline.UpdateUniform("invScreenSize", new Vector2f(1.0f / viewport.Width, 1.0f / viewport.Height));
 
-            foreach (GasVolume volume in Scene.FindComponentsOfType<GasVolume>())
+            foreach (GasVolume volume in Component.GetCached<GasVolume>())
             {
                 if (!volume.LocalEnabled)
                     continue;

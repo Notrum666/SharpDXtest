@@ -23,7 +23,7 @@ namespace Engine.BaseAssets.Components
 
         protected void RenderObjects(ShaderPipeline pipeline, bool withMaterial = true)
         {
-            foreach (MeshComponent meshComponent in Scene.FindComponentsOfType<MeshComponent>())
+            foreach (MeshComponent meshComponent in Component.GetCached<MeshComponent>())
             {
                 if (!meshComponent.LocalEnabled)
                     continue;
