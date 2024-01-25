@@ -225,6 +225,13 @@ SerializableObjects:
   instanceId: ccf4991900944d2e9c54e0ee7117fa55
   gameObject: befaa81660524ec1af4738df04228a19
   localEnabled: true
+  array:
+  - {}
+  - {}
+  - {}
+  - {}
+  - {}
+  - {}
 - !GameObject
   instanceId: c8f3ad50439543649b0caa948c6e1ecd
   name: CesiumMan1
