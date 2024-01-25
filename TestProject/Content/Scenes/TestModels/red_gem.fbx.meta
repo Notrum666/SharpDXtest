@@ -1,0 +1,14 @@
+ImporterVersion: 3
+Guid: fda325f1b30747f4b413a0b61396d134
+SubAssets:
+  ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: Material.001
+  : 6844182bcbfa43f181c48670c71dd84c
+ExportedAssets:
+  ? Item1: Engine.AssetsData.SkeletonData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: skeleton
+  : 8982ea588b9442b78577da2e80a0bd5c
+ImportSettings: !ModelImportSettings
+  SkeletonOverride: 8982ea588b9442b78577da2e80a0bd5c
+  MeshMaterialsOverride:
+    Cone_Cone_0: 6844182bcbfa43f181c48670c71dd84c
