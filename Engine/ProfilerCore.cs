@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
 using HarmonyLib;
 
 namespace Engine
@@ -27,7 +26,7 @@ namespace Engine
             foreach (Assembly assembly in assemblies)
             {
                 IEnumerable<MethodInfo> profiledMethods = assembly.GetTypes()
-                    .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                    .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
                     .Where(m => m.GetCustomAttribute<ProfileMeAttribute>() != null);
                 methodsToPatch.AddRange(profiledMethods);
             }

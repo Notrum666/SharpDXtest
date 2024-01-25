@@ -7,7 +7,7 @@
 
         public override void Init()
         {
-            ProfilerCore.Init();
+            //ProfilerCore.Init();
         }
 
         public override void Update()

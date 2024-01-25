@@ -44,6 +44,22 @@ namespace Editor
             _ => !EditorLayer.Current.IsPlaying
         );
 
+        private RelayCommand patchCommand;
+
+        public RelayCommand PatchCommand => patchCommand ??= new RelayCommand(
+            _ => { Task.Run(ProfilerCore.Init); },
+            _ => !EditorLayer.Current.IsPlaying
+        );
+
+        private RelayCommand dumpCommand;
+
+        public RelayCommand DumpCommand => dumpCommand ??= new RelayCommand(
+            _ => {
+                var folder = ProjectViewModel.Current.FolderPath;
+                ProfilerCore.DumpProfiler(folder, "profile.json");
+            }
+        );
+
         private RelayCommand playCommand;
 
         public RelayCommand PlayCommand => playCommand ??= new RelayCommand(

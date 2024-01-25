@@ -50,7 +50,7 @@
 		<ProjectReference Include="..\LinearAlgebra\LinearAlgebra.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Lib.Harmony" Version="2.2.2" />
+		<PackageReference Include="Lib.Harmony" Version="2.3.0-prerelease.5" />
 		<PackageReference Include="Microsoft.Build.Locator" Version="1.6.10" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.0-2.final" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.9.0-2.final" />

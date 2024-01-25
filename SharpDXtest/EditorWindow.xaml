@@ -33,6 +33,8 @@
                     </MenuItem>
                     <MenuItem Header="Scripting">
                         <MenuItem Header="Recompile All" Command="{Binding Path=RecompileCommand}"/>
+                        <MenuItem Header="Patch" Command="{Binding Path=PatchCommand}"/>
+                        <MenuItem Header="Dump" Command="{Binding Path=DumpCommand}"/>
                     </MenuItem>
                 </Menu>
             </StackPanel>
