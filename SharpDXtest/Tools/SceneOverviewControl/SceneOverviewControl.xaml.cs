@@ -312,7 +312,7 @@ namespace Editor
             }
             if (obj is ContentBrowserAssetViewModel assetViewModel && assetViewModel.AssociatedAssetDataType == typeof(PrefabData))
             {
-                AssetsManager.LoadAssetByGuid<Prefab>(assetViewModel.AssetMeta.Guid).NewInstantiate(target.Transform);
+                AssetsManager.LoadAssetByGuid<Prefab>(assetViewModel.AssetMeta.Guid).Instantiate(target.Transform);
                 e.Handled = true;
                 return;
             }
@@ -347,7 +347,7 @@ namespace Editor
             }
             if (obj is ContentBrowserAssetViewModel assetViewModel && assetViewModel.AssociatedAssetDataType == typeof(PrefabData))
             {
-                AssetsManager.LoadAssetByGuid<Prefab>(assetViewModel.AssetMeta.Guid).NewInstantiate();
+                AssetsManager.LoadAssetByGuid<Prefab>(assetViewModel.AssetMeta.Guid).Instantiate();
                 Refresh();
                 e.Handled = true;
                 return;

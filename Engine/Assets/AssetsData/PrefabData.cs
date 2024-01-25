@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
-
+using System.Text;
 using Engine.Assets;
 using Engine.BaseAssets.Components;
 using Engine.Serialization;
@@ -15,11 +15,6 @@ namespace Engine.AssetsData
         public sealed override string FileExtension => ".prefab";
 
         public string Data;
-        
-
-        // TODO: Add total objects count for inspector
-        // public readonly List<SerializableObject> SerializableObjects = new List<SerializableObject>();
-        // public int rootTransformIndex = -1;
 
         protected sealed override void SetDefaultValues()
         {
@@ -59,14 +54,18 @@ namespace Engine.AssetsData
 
         public sealed override void Serialize(BinaryWriter writer)
         {
-            writer.Write(Data);
-            // YamlManager.SaveToStream(writer.BaseStream, this);
+            var sw = new StreamWriter(writer.BaseStream, Encoding.UTF8);
+            sw.Write(Data);
+            sw.Flush();
         }
 
         public sealed override void Deserialize(BinaryReader reader)
         {
-            Data = reader.ReadString();
-            // YamlManager.LoadFromStream(reader.BaseStream, this);
+            reader.BaseStream.Position = 0;
+            using (StreamReader streamReader = new StreamReader(reader.BaseStream, Encoding.UTF8))
+            {
+                Data = streamReader.ReadToEnd();
+            }
         }
 
         public override Prefab ToRealAsset(BaseAsset targetAsset = null)
@@ -77,26 +76,7 @@ namespace Engine.AssetsData
             Prefab prefab = new Prefab();
             prefab.SetPrefabData(this);
 
-            // foreach (SerializableObject serializableObject in SerializableObjects)
-            // {
-            //     serializableObject.OnDeserialized();
-            //     if (serializableObject is GameObject gameObject)
-            //         prefab.AddObject(gameObject);
-            // }
-            // prefab.SetRootTransform(SerializableObjects[rootTransformIndex] as Transform); //Cross fingers
-
             return prefab;
-        }
-
-        // public void AddObject(SerializableObject serializableObject)
-        // {
-        //     SerializableObjects.Add(serializableObject);
-        // }
-
-        [OnDeserialized]
-        private void OnDeserialized()
-        {
-            SerializedObjectPromise.InjectSerializedObjects();
         }
     }
 }
