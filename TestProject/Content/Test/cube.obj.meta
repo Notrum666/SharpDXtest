@@ -7,6 +7,11 @@ SubAssets:
   ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     Item2: cube
   : e22ae1eb081d4319b195acaa1013b76b
+ExportedAssets:
+  ? Item1: Engine.AssetsData.SkeletonData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: skeleton
+  : 693f06d4347a41fc81be2f3a019b454e
 ImportSettings: !ModelImportSettings
+  SkeletonOverride: 693f06d4347a41fc81be2f3a019b454e
   MeshMaterialsOverride:
     cube_cube_0: e22ae1eb081d4319b195acaa1013b76b
