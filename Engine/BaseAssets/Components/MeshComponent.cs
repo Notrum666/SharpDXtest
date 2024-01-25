@@ -96,7 +96,7 @@ namespace Engine.BaseAssets.Components
             {
                 if (withMaterials)
                 {
-                    Material curMaterial = Materials[i];
+                    Material curMaterial = Materials.ElementAtOrDefault(i);
                     if (curMaterial is null)
                         curMaterial = model.Meshes[i].DefaultMaterial;
                     if (curMaterial is null)

@@ -105,9 +105,22 @@ namespace Editor.AssetsImport
         public Guid? GetExternalAssetGuid<T>(string relativeFilePath) where T : AssetData
         {
             string sourceAssetFolder = Path.GetDirectoryName(AssetSourcePath)!;
-            string externalFilePath = Path.Combine(sourceAssetFolder, relativeFilePath);
+            string localFilePath = Path.Combine(sourceAssetFolder, relativeFilePath);
 
-            return AssetsRegistry.ImportAsset(externalFilePath);
+            if (Path.Exists(localFilePath))
+                return AssetsRegistry.ImportAsset(localFilePath);
+
+            string fullExternalPath = Path.GetFullPath(relativeFilePath);
+            if (!Path.Exists(fullExternalPath))
+            {
+                Logger.Log(LogType.Warning, $"Asset \"{AssetContentPath}\" expected extra file at \"{fullExternalPath}\", but found none.");
+                return null;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(localFilePath)!);
+            File.Copy(fullExternalPath, localFilePath);
+            Logger.Log(LogType.Warning, $"Asset \"{AssetContentPath}\" copied extra file from \"{fullExternalPath}\", to \"{localFilePath}\"");
+            return AssetsRegistry.ImportAsset(localFilePath);
         }
 
         public T GetImportSettings<T>() where T : AssetImporter.BaseImportSettings
