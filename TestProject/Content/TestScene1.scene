@@ -180,7 +180,6 @@ SerializableObjects:
   - ac8d3fa465934c1cb102b1017476f537
   - 3018f784814249afb78c23719c280d79
   - ccf4991900944d2e9c54e0ee7117fa55
-  - 11f2528f4e5d4320bfcd015b7c7d7342
 - !Transform
   instanceId: 3adbdebb08a04c08834a171001210554
   gameObject: befaa81660524ec1af4738df04228a19
@@ -226,18 +225,6 @@ SerializableObjects:
   instanceId: ccf4991900944d2e9c54e0ee7117fa55
   gameObject: befaa81660524ec1af4738df04228a19
   localEnabled: true
-- !GasVolume
-  instanceId: 11f2528f4e5d4320bfcd015b7c7d7342
-  gameObject: befaa81660524ec1af4738df04228a19
-  localEnabled: true
-  size:
-    x: 50
-    y: 50
-    z: 20
-  lightDirection:
-    x: 1
-  absorptionCoef: 0.1
-  scatteringCoef: 0.1
 - !GameObject
   instanceId: c8f3ad50439543649b0caa948c6e1ecd
   name: CesiumMan1
@@ -246,8 +233,6 @@ SerializableObjects:
   components:
   - 63bac9e8b7164c7aac94481c41b5fb0e
   - 55bfef7a89164e8f996d363869ab01dc
-  - b3de7cbfbf9e4832af0ac5e8b07b78d8
-  - 8b55371ce5314ee4a060563de8a7b09b
 - !Transform
   instanceId: 63bac9e8b7164c7aac94481c41b5fb0e
   gameObject: c8f3ad50439543649b0caa948c6e1ecd
@@ -270,24 +255,6 @@ SerializableObjects:
   skeleton: 4c3628c4e1744549a700cb788ea0ed34
   animation: ca81c1f849814306a6cfe6e83d2f24fc
   animationCurrentTime: 25.435097
-- !Rigidbody
-  instanceId: b3de7cbfbf9e4832af0ac5e8b07b78d8
-  gameObject: c8f3ad50439543649b0caa948c6e1ecd
-  localEnabled: true
-  mass: 1
-  inertiaTensor:
-    x: 0.144
-    y: 0.144
-    z: 0.144
-  linearDrag: 0.05
-  angularDrag: 0.05
-  isStatic: true
-- !SphereCollider
-  instanceId: 8b55371ce5314ee4a060563de8a7b09b
-  gameObject: c8f3ad50439543649b0caa948c6e1ecd
-  localEnabled: true
-  massPart: 1
-  radius: 0.6
 - !GameObject
   instanceId: adf9c9a3e4084a6f83f67a7447fd8cd0
   name: CesiumMan2
@@ -459,3 +426,42 @@ SerializableObjects:
     y: 1
     z: 1
   shadowSize: 4096
+- !GameObject
+  instanceId: 1fdccac104ae48dbbb2648eaffedf697
+  name: NewGameObject
+  localEnabled: true
+  transform: fedf250849924c2191960cbc51f25c3d
+  components:
+  - fedf250849924c2191960cbc51f25c3d
+  - 0930d0381454479887867a96db7f335d
+  - c54087db700045fe8b8dc10729819f04
+- !Transform
+  instanceId: fedf250849924c2191960cbc51f25c3d
+  gameObject: 1fdccac104ae48dbbb2648eaffedf697
+  Rotation:
+    w: 1
+  Scale:
+    x: 1
+    y: 1
+    z: 1
+- !CubeCollider
+  instanceId: 0930d0381454479887867a96db7f335d
+  gameObject: 1fdccac104ae48dbbb2648eaffedf697
+  localEnabled: true
+  massPart: 1
+  size:
+    x: 10
+    y: 10
+    z: 1
+- !Rigidbody
+  instanceId: c54087db700045fe8b8dc10729819f04
+  gameObject: 1fdccac104ae48dbbb2648eaffedf697
+  localEnabled: true
+  mass: 1
+  inertiaTensor:
+    x: 1
+    y: 1
+    z: 1
+  linearDrag: 0.05
+  angularDrag: 0.05
+  isStatic: true

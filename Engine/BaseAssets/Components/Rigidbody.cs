@@ -339,6 +339,9 @@ namespace Engine.BaseAssets.Components
 
         internal void ReactToCollision(Rigidbody otherRigidbody, Collider col, Collider otherCol, Vector3 collisionExitVector, Vector3 collisionExitNormal, Vector3 colliderEndPoint)
         {
+            if (collisionExitVector.isZero())
+                return;
+
             collisionExitNormal.normalize();
 
             collidingPairs.Add(new KeyValuePair<Collider, Collider>(col, otherCol));
@@ -426,18 +429,18 @@ namespace Engine.BaseAssets.Components
 
             otherRigidbody.AddImpulseAtPoint(-impulse, collisionPoint);
 
-            if (!moveVector.isZero())
-            {
-                GameObject.Transform.Position -= moveVector;
-                collisionExitVectors.Add(moveVector);
-                col.UpdateData();
-            }
-            if (!otherMoveVector.isZero())
-            {
-                otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
-                otherRigidbody.collisionExitVectors.Add(otherMoveVector);
-                otherCol.UpdateData();
-            }
+            //if (!moveVector.isZero())
+            //{
+            //    GameObject.Transform.Position -= moveVector;
+            //    collisionExitVectors.Add(moveVector);
+            //    col.UpdateData();
+            //}
+            //if (!otherMoveVector.isZero())
+            //{
+            //    otherRigidbody.GameObject.Transform.Position -= otherMoveVector;
+            //    otherRigidbody.collisionExitVectors.Add(otherMoveVector);
+            //    otherCol.UpdateData();
+            //}
         }
 
         internal void UpdateCollidingPairs()
