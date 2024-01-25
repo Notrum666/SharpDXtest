@@ -18,24 +18,81 @@ namespace Engine.BaseAssets.Components
             get => size;
             set
             {
+                if (value.x <= Constants.Epsilon ||
+                    value.y <= Constants.Epsilon ||
+                    value.z <= Constants.Epsilon)
+                {
+                    Logger.Log(LogType.Warning, "Size must be positive");
+                    return;
+                }
                 size = value;
                 GenerateVertices();
             }
         }
-        public double AbsorptionCoef { get; set; } = 0.0;
-        public double ScatteringCoef { get; set; } = 0.03;
+        [SerializedField]
+        private Vector3f lightDirection = -Vector3f.Up;
+        public Vector3f LightDirection
+        {
+            get => lightDirection;
+            set
+            {
+                if (value.isZero())
+                {
+                    Logger.Log(LogType.Warning, "LightDirection must be non-zero");
+                    return;
+                }
+                lightDirection = value;
+            }
+        }
+        [SerializedField]
+        private double absorptionCoef = 0.0;
+        public double AbsorptionCoef
+        {
+            get => absorptionCoef;
+            set
+            {
+                if (value < 0.0 || value > 1.0)
+                {
+                    Logger.Log(LogType.Warning, "AbsorptionCoef must be in range of 0 to 1");
+                    return;
+                }
+                absorptionCoef = value;
+            }
+        }
+        [SerializedField]
+        private double scatteringCoef = 0.03;
+        public double ScatteringCoef
+        {
+            get => scatteringCoef;
+            set
+            {
+                if (value < 0.0 || value > 1.0)
+                {
+                    Logger.Log(LogType.Warning, "ScatteringCoef must be in range of 0 to 1");
+                    return;
+                }
+                scatteringCoef = value;
+            }
+        }
         private Buffer vertexBuffer;
         private VertexBufferBinding vertexBufferBinding;
         private Buffer indexBuffer;
 
-        public GasVolume()
+        protected override void OnInitialized()
         {
-            Size = new Vector3f(1.0f, 1.0f, 1.0f);
+            GenerateVertices();
         }
         
         public override void OnFieldChanged(FieldInfo fieldInfo)
         {
-            GenerateVertices();
+            if (fieldInfo.Name == nameof(size))
+                Size = size;
+            if (fieldInfo.Name == nameof(scatteringCoef))
+                ScatteringCoef = scatteringCoef;
+            if (fieldInfo.Name == nameof(absorptionCoef))
+                AbsorptionCoef = absorptionCoef;
+            if (fieldInfo.Name == nameof(lightDirection))
+                LightDirection = lightDirection;
         }
 
         public void Render()

@@ -416,7 +416,10 @@ namespace Engine
                 //pipeline.UpdateUniform("ambientLight", new Vector3f(0.001f, 0.001f, 0.001f));
                 pipeline.UpdateUniform("ambientLight", new Vector3f(0.5f, 0.5f, 0.5f));
 
-                Vector3f lightDir = new Vector3f(0.0f, 0.0f, -1.0f);
+                Vector3f lightDir = volume.LightDirection;
+                if (lightDir.isZero())
+                    lightDir = -Vector3f.Up;
+                lightDir.normalize();
                 pipeline.UpdateUniform("negLightDir", -lightDir);
                 pipeline.UpdateUniform("invNegLightDir", -1.0f / lightDir);
                 pipeline.UpdateUniform("lightIntensity", new Vector3f(5.0f, 5.0f, 5.0f));

@@ -180,6 +180,7 @@ SerializableObjects:
   - ac8d3fa465934c1cb102b1017476f537
   - 3018f784814249afb78c23719c280d79
   - ccf4991900944d2e9c54e0ee7117fa55
+  - 11f2528f4e5d4320bfcd015b7c7d7342
 - !Transform
   instanceId: 3adbdebb08a04c08834a171001210554
   gameObject: befaa81660524ec1af4738df04228a19
@@ -225,13 +226,18 @@ SerializableObjects:
   instanceId: ccf4991900944d2e9c54e0ee7117fa55
   gameObject: befaa81660524ec1af4738df04228a19
   localEnabled: true
-  array:
-  - {}
-  - {}
-  - {}
-  - {}
-  - {}
-  - {}
+- !GasVolume
+  instanceId: 11f2528f4e5d4320bfcd015b7c7d7342
+  gameObject: befaa81660524ec1af4738df04228a19
+  localEnabled: true
+  size:
+    x: 50
+    y: 50
+    z: 20
+  lightDirection:
+    x: 1
+  absorptionCoef: 0.1
+  scatteringCoef: 0.1
 - !GameObject
   instanceId: c8f3ad50439543649b0caa948c6e1ecd
   name: CesiumMan1
