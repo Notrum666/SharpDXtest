@@ -51,9 +51,9 @@ float SampleDensity(float3 location)
 {
     //float x = length(location * float3(0.02f, 0.02f, 0.05f));
     //return max(0.0f, 1.0f - x * x) * 1.0f;
-    //return 1.0f;
-    float plane = (sin(location.x * 0.4f) + sin(location.y * 0.4f)) * 2.0f;
-    return min(1.0f, max(0.0f, (plane + 5.0f - location.z) * 0.5f));
+    return 1.0f;
+    //float plane = (sin(location.x * 0.4f) + sin(location.y * 0.4f)) * 2.0f;
+    //return min(1.0f, max(0.0f, (plane + 5.0f - location.z) * 0.5f));
     //return 10.0f * (location.z + 5.0f <= plane);
 }
 

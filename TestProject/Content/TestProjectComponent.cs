@@ -20,7 +20,7 @@ namespace TestProject
     public class TestProjectComponent : BehaviourComponent
     {
         [SerializedField]
-        private Vector3[] array = new Vector3[6];
+        private GameObject obj = null;
         public override void Start()
         {
 

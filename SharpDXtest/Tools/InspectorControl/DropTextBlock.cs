@@ -29,32 +29,44 @@ namespace Editor
             if (fieldViewModel is null)
                 return;
 
-            ContentBrowserAssetViewModel data = e.Data.GetData(DataFormats.Serializable) as ContentBrowserAssetViewModel;
-            if (data is null)
-                return;
+            object dataObj = e.Data.GetData(DataFormats.Serializable);
 
-            if (!AssetsManager.TryGetAssetTypeByGuid(data.AssetGuid, out Type type))
+            if (dataObj is null)
                 return;
-
-            if (fieldViewModel.TargetType == typeof(Guid))
+            
+            ContentBrowserAssetViewModel asset = dataObj as ContentBrowserAssetViewModel;
+            if (asset is not null)
             {
-                Type expectedType;
-                if ((expectedType = fieldViewModel.TargetField.GetCustomAttribute<GuidExpectedTypeAttribute>()?.ExpectedType) is null)
+                if (!AssetsManager.TryGetAssetTypeByGuid(asset.AssetGuid, out Type type))
+                    return;
+
+                if (fieldViewModel.TargetType == typeof(Guid))
                 {
-                    Logger.Log(LogType.Warning, "No expected type found for Guid field " + fieldViewModel.DisplayName);
+                    Type expectedType;
+                    if ((expectedType = fieldViewModel.TargetField.GetCustomAttribute<GuidExpectedTypeAttribute>()?.ExpectedType) is null)
+                    {
+                        Logger.Log(LogType.Warning, "No expected type found for Guid field " + fieldViewModel.DisplayName);
+                        return;
+                    }
+                    if (!expectedType.IsAssignableFrom(type))
+                        return;
+
+                    fieldViewModel.Value = asset.AssetGuid;
                     return;
                 }
-                if (!expectedType.IsAssignableFrom(type))
+
+                if (!type.IsAssignableTo(fieldViewModel.TargetType))
                     return;
 
-                fieldViewModel.Value = data.AssetGuid;
+                fieldViewModel.Value = AssetsManager.LoadAssetByGuid(asset.AssetGuid);
+
                 return;
             }
 
-            if (!type.IsAssignableTo(fieldViewModel.TargetType))
+            if (!dataObj.GetType().IsAssignableTo(fieldViewModel.TargetType))
                 return;
 
-            fieldViewModel.Value = AssetsManager.LoadAssetByGuid(data.AssetGuid);
+            fieldViewModel.Value = dataObj;
         }
 
         protected override void OnDragOver(DragEventArgs e)
@@ -69,29 +81,41 @@ namespace Editor
             if (fieldViewModel is null)
                 return;
 
-            ContentBrowserAssetViewModel data = e.Data.GetData(DataFormats.Serializable) as ContentBrowserAssetViewModel;
-            if (data is null)
+            object dataObj = e.Data.GetData(DataFormats.Serializable);
+
+            if (dataObj is null)
                 return;
 
-            if (!AssetsManager.TryGetAssetTypeByGuid(data.AssetGuid, out Type type))
-                return;
-
-            if (fieldViewModel.TargetType == typeof(Guid))
+            ContentBrowserAssetViewModel asset = dataObj as ContentBrowserAssetViewModel;
+            if (asset is not null)
             {
-                Type expectedType;
-                if ((expectedType = fieldViewModel.TargetField.GetCustomAttribute<GuidExpectedTypeAttribute>()?.ExpectedType) is null)
+                if (!AssetsManager.TryGetAssetTypeByGuid(asset.AssetGuid, out Type type))
+                    return;
+
+                if (fieldViewModel.TargetType == typeof(Guid))
                 {
-                    Logger.Log(LogType.Warning, "No expected type found for Guid field " + fieldViewModel.DisplayName);
+                    Type expectedType;
+                    if ((expectedType = fieldViewModel.TargetField.GetCustomAttribute<GuidExpectedTypeAttribute>()?.ExpectedType) is null)
+                    {
+                        Logger.Log(LogType.Warning, "No expected type found for Guid field " + fieldViewModel.DisplayName);
+                        return;
+                    }
+                    if (!expectedType.IsAssignableFrom(type))
+                        return;
+
+                    e.Effects = DragDropEffects.Link;
                     return;
                 }
-                if (!expectedType.IsAssignableFrom(type))
+
+                if (!type.IsAssignableTo(fieldViewModel.TargetType))
                     return;
 
                 e.Effects = DragDropEffects.Link;
+
                 return;
             }
 
-            if (!type.IsAssignableTo(fieldViewModel.TargetType))
+            if (!dataObj.GetType().IsAssignableTo(fieldViewModel.TargetType))
                 return;
 
             e.Effects = DragDropEffects.Link;
