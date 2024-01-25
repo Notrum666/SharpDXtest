@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using Engine;
 
 namespace Engine.BaseAssets.Components
@@ -9,15 +10,30 @@ namespace Engine.BaseAssets.Components
         public Dictionary<string, Action<object>> Actions = new Dictionary<string, Action<object>>();
         private List<AgentKnowledge> knowledges = new List<AgentKnowledge>();
 
-        protected override void OnInitialized()
+        public override void Start()
         {
-            base.OnInitialized();
+            base.Start();
 
-            /// TODO: fill knowledges
+            Coroutine.Start(Method);
         }
 
-        public override void Update()
+        public IEnumerator Method()
         {
+            while (!false)
+            {
+                Tick();
+                yield return new WaitForSeconds(0.1);
+            }
+        }
+
+        private void Tick()
+        {
+            knowledges.Clear();
+            AgentComponent[] components = Scene.FindComponentsOfType<AgentComponent>();
+            foreach (AgentComponent component in components)
+                knowledges.Add(new AgentKnowledge { ObjectType = "Enemy", PropertyName = "location", ObjectValue = (object)GameObject.Transform.Position });
+            knowledges.Add(new AgentKnowledge { ObjectType = "Player", PropertyName = "location", ObjectValue = (object)GameObject.Transform.Position });
+
             ActionRefund refund = InferenceEngine.GetAction(knowledges);
             double t = (Time.TotalTime - (int)Time.TotalTime);
             if (t < 0.5 && Actions.ContainsKey("attack"))
