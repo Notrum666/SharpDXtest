@@ -7,7 +7,7 @@ namespace Engine
         private static double deltaTime;
         public static bool IsFixed { get; private set; }
         public static double DeltaTime => IsFixed ? FixedDeltaTime : deltaTime;
-        public static double FixedDeltaTime { get; private set; } = 1.0 / 60.0;
+        public static double FixedDeltaTime { get; private set; } = 1.0 / 20.0;
         public static double TotalTime { get; private set; }
 
         private static Stopwatch updateWatch;
