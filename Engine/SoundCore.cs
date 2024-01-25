@@ -92,7 +92,7 @@ namespace Engine
             device = new XAudio2();
             device3d = new X3DAudio(Speakers.FrontLeft | Speakers.FrontRight | Speakers.FrontCenter | Speakers.LowFrequency |
                                     Speakers.BackLeft | Speakers.BackRight | Speakers.SideLeft | Speakers.SideRight);
-            masteringVoice = new MasteringVoice(device, XAudio2.DefaultChannels, 44100);
+            masteringVoice = new MasteringVoice(device, 8, 44100);
 
             EngineCore.OnPaused += OnPaused;
             EngineCore.OnResumed += OnResumed;
@@ -166,13 +166,15 @@ namespace Engine
                     i--;
                     continue;
                 }
-                if (CurrentListener != null && playingSounds[i].source != null)
+                if (CurrentListener != null && playingSounds[i].source is {} emitter)
                 {
-                    DspSettings settings = device3d.Calculate(CurrentListener.Listener, playingSounds[i].source, CalculateFlags.Matrix |
+                    DspSettings settings = device3d.Calculate(CurrentListener.Listener, emitter, CalculateFlags.Matrix |
                                                                                                                  CalculateFlags.Doppler /*|
                                                                                                                  CalculateFlags.Reverb*/, 2, 8);
-                    playingSounds[i].voice.SetFrequencyRatio(settings.DopplerFactor);
-                    playingSounds[i].voice.SetOutputMatrix(2, 8, settings.MatrixCoefficients);
+
+                    playingSounds[i].voice.SetFrequencyRatio(settings.DopplerFactor, 2);
+                    playingSounds[i].voice.SetOutputMatrix(2, 8, settings.MatrixCoefficients, 2);
+                    device.CommitChanges(2);
                 }
             }
         }

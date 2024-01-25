@@ -78,7 +78,7 @@ namespace Engine.AssetsData
         {
             Sound sound = targetAsset as Sound ?? new Sound();
 
-            DataStream dataStream = DataStream.Create(AudioDataBuffer, true, true);
+            DataStream dataStream = DataStream.Create(AudioDataBuffer, true, true, pinBuffer: true);
             AudioBuffer audioBuffer = new AudioBuffer(dataStream);
             WaveFormat waveFormat = WaveFormat.MarshalFrom(FormatBuffer);
             uint[] packetsInfo = DecodedPacketsInfo == null ? null : MemoryMarshal.Cast<byte, uint>(DecodedPacketsInfo.AsSpan()).ToArray();
