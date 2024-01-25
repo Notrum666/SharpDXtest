@@ -34,20 +34,21 @@ namespace Engine.Layers
             foreach (GameObject obj in CurrentScene.GameObjects)
                 if (obj.Enabled)
                     obj.FixedUpdate();
-
+            
+            var gameObjects = CurrentScene.GameObjects.ToArray();
             List<Rigidbody> rigidbodies = new List<Rigidbody>();
             List<Collider> allColliders = new List<Collider>();
-            for (int i = 0; i < CurrentScene.GameObjects.Count; i++)
+            for (int i = 0; i < gameObjects.Length; i++)
             {
-                if (!CurrentScene.GameObjects[i].Enabled)
+                if (!gameObjects[i].Enabled)
                     continue;
 
-                IEnumerable<Collider> curColliders = CurrentScene.GameObjects[i].GetComponents<Collider>().Where(c => c.LocalEnabled);
+                IEnumerable<Collider> curColliders = gameObjects[i].GetComponents<Collider>().Where(c => c.LocalEnabled).ToList();
                 if (curColliders.Count() == 0)
                     continue;
 
-                Rigidbody rb;
-                if ((rb = CurrentScene.GameObjects[i].GetComponent<Rigidbody>()) is not null)
+                Rigidbody rb = null;
+                if ((rb = gameObjects[i].GetComponent<Rigidbody>()) is not null)
                     rigidbodies.Add(rb);
 
                 foreach (Collider collider in curColliders)
@@ -58,7 +59,7 @@ namespace Engine.Layers
                     {
                         try
                         {
-                            collider.ResolveInteractionWith(other);
+                            collider.ResolveInteractionWith(other, rb);
                         }
                         catch (Exception e)
                         {

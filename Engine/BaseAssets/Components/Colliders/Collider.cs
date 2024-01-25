@@ -150,12 +150,11 @@ namespace Engine.BaseAssets.Components
             return result;
         }
 
-        internal void ResolveInteractionWith(Collider other)
+        internal void ResolveInteractionWith(Collider other, Rigidbody rigidbody)
         {
             if (!LocalEnabled || !other.LocalEnabled)
                 return;
 
-            Rigidbody rigidbody = GameObject.GetComponent<Rigidbody>();
             Rigidbody otherRigidbody = other.GameObject.GetComponent<Rigidbody>();
 
             if ((rigidbody is null || !rigidbody.LocalEnabled) && (otherRigidbody is null || !otherRigidbody.LocalEnabled))
