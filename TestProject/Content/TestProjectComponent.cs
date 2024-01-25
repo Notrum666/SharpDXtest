@@ -14,27 +14,9 @@ namespace TestProject
 {
     public class TestProjectComponent : BehaviourComponent
     {
-        [SerializedField]
-        private Sound SoundToPlay = null;
         public override void Start()
         {
-            SoundCore.Play(SoundToPlay);
-
-            GraphicsCore.ViewportPanel.Dispatcher.Invoke(() =>
-            {
-                Logger.Log(LogType.Info, "Show userControl");
-                GraphicsCore.ViewportPanel.Children.Add(new UserControlTest());
-            });
-
-            Coroutine.Start(SomeMethod);
-        }
-        private IEnumerator SomeMethod()
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                Logger.Log(LogType.Info, $"Log {i}");
-                yield return new WaitForSeconds(1.0);
-            }
+            GameObject.GetComponent<Rigidbody>().Material = new PhysicalMaterial(0.0, 1.0, CombineMode.Maximum, CombineMode.Maximum);
         }
     }
 }

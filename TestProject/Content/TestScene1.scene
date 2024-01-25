@@ -11,7 +11,6 @@ SerializableObjects:
   - fcddbe1bc3ac4a6ba258605ea8d9ad9b
   - cbdc012266f74dbaaefe736dbca0e57a
   - c27fac357c2348ca86535de0644aaa03
-  - 6220d43783424d4f824e68e55c226cae
 - !Transform
   instanceId: 59f04aed325e476489f53e6d26e5abec
   gameObject: 64188becf7b044f0b30c6552b6b29fef
@@ -19,14 +18,11 @@ SerializableObjects:
   - dec4b28b0073421b89a63466ee06e19f
   - 5906581a3a934ada9a4ba011cb16f6f6
   Position:
-    x: 5.80545097587541
-    y: 0.07720858260996102
-    z: 6.231384340314732
+    y: -5
+    z: 3
   Rotation:
-    w: 0.6812417274996105
-    x: -0.18414590423540633
-    y: -0.18488396495787404
-    z: 0.683972158913012
+    w: 0.984807753012208
+    x: -0.17364817766693033
   Scale:
     x: 1
     y: 1
@@ -53,12 +49,7 @@ SerializableObjects:
   gameObject: 64188becf7b044f0b30c6552b6b29fef
   localEnabled: true
   massPart: 1
-  isTrigger: true
   radius: 0.5
-- !TriggerLogger
-  instanceId: 6220d43783424d4f824e68e55c226cae
-  gameObject: 64188becf7b044f0b30c6552b6b29fef
-  localEnabled: true
 - !GameObject
   instanceId: 46acbbbc291b49019885f8d382ccd31f
   name: SubObject1
@@ -149,7 +140,7 @@ SerializableObjects:
   Scale:
     x: 50
     y: 50
-    z: 0.5
+    z: 1
 - !MeshComponent
   instanceId: 86a9d43e52434e9dac801a082559b56f
   gameObject: 1e7e7916514146108ac366da15db5579
@@ -188,21 +179,18 @@ SerializableObjects:
   - edef0c88536e43e7b1197d184a14a8ae
   - ac8d3fa465934c1cb102b1017476f537
   - 3018f784814249afb78c23719c280d79
-  - 785f37a5e89d4f27b5f8e9b3faf8387e
+  - ccf4991900944d2e9c54e0ee7117fa55
 - !Transform
   instanceId: 3adbdebb08a04c08834a171001210554
   gameObject: befaa81660524ec1af4738df04228a19
   Position:
-    z: 3
+    z: 4
   Rotation:
-    w: 0.8446231986207332
-    x: 0.4619397662556435
-    y: 0.1913417161825449
-    z: 0.1913417161825449
+    w: 1
   Scale:
     x: 1
     y: 1
-    z: 2
+    z: 1
 - !MeshComponent
   instanceId: edef0c88536e43e7b1197d184a14a8ae
   gameObject: befaa81660524ec1af4738df04228a19
@@ -223,18 +211,18 @@ SerializableObjects:
     z: 1
   linearDrag: 0.05
   angularDrag: 0.05
-  ignoreGravity: true
 - !CubeCollider
   instanceId: 3018f784814249afb78c23719c280d79
   gameObject: befaa81660524ec1af4738df04228a19
   localEnabled: true
   massPart: 1
+  isTrigger: true
   size:
     x: 2
     y: 2
     z: 2
-- !TriggerLogger
-  instanceId: 785f37a5e89d4f27b5f8e9b3faf8387e
+- !TestProjectComponent
+  instanceId: ccf4991900944d2e9c54e0ee7117fa55
   gameObject: befaa81660524ec1af4738df04228a19
   localEnabled: true
 - !GameObject
@@ -342,6 +330,7 @@ SerializableObjects:
   gameObject: 24472099f60040abb4ac63823e2f50d4
   Position:
     x: 5
+    y: 5
     z: 3
   Rotation:
     w: 1
@@ -358,7 +347,7 @@ SerializableObjects:
     x: 1
     y: 1
     z: 1
-  radius: 10
+  radius: 20
   intensity: 0.4
 - !GameObject
   instanceId: a34479262b8443e1a747fe76fce7c48f
@@ -373,6 +362,7 @@ SerializableObjects:
   gameObject: a34479262b8443e1a747fe76fce7c48f
   Position:
     x: -5
+    y: -5
     z: 3
   Rotation:
     w: 1
@@ -389,7 +379,7 @@ SerializableObjects:
     x: 1
     y: 1
     z: 1
-  radius: 10
+  radius: 20
   intensity: 0.4
 - !GameObject
   instanceId: f2642d4be0004e6d87f8dd9e34be0eac

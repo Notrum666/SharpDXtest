@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows.Data;
@@ -104,8 +105,8 @@ namespace Editor
 
                     Assets.Add(assetViewModel);
 
-                    foreach ((Type type, string name) subAsset in assetViewModel.AssetMeta.SubAssets.Keys)
-                        Assets.Add(new ContentBrowserAssetViewModel(subAsset.name, subAsset.type));
+                    foreach (KeyValuePair<(Type type, string name), Guid> subAsset in assetViewModel.AssetMeta.SubAssets)
+                        Assets.Add(new ContentBrowserAssetViewModel(subAsset.Key.name, subAsset.Key.type, subAsset.Value));
                 }
             }
         }

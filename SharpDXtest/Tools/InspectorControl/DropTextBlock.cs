@@ -33,7 +33,7 @@ namespace Editor
             if (data is null)
                 return;
 
-            if (!AssetsManager.TryGetAssetTypeByGuid(data.AssetMeta.Guid, out Type type))
+            if (!AssetsManager.TryGetAssetTypeByGuid(data.AssetGuid, out Type type))
                 return;
 
             if (fieldViewModel.TargetType == typeof(Guid))
@@ -47,14 +47,14 @@ namespace Editor
                 if (!expectedType.IsAssignableFrom(type))
                     return;
 
-                fieldViewModel.Value = data.AssetMeta.Guid;
+                fieldViewModel.Value = data.AssetGuid;
                 return;
             }
 
             if (!type.IsAssignableTo(fieldViewModel.TargetType))
                 return;
 
-            fieldViewModel.Value = AssetsManager.LoadAssetByGuid(data.AssetMeta.Guid);
+            fieldViewModel.Value = AssetsManager.LoadAssetByGuid(data.AssetGuid);
         }
 
         protected override void OnDragOver(DragEventArgs e)
@@ -73,7 +73,7 @@ namespace Editor
             if (data is null)
                 return;
 
-            if (!AssetsManager.TryGetAssetTypeByGuid(data.AssetMeta.Guid, out Type type))
+            if (!AssetsManager.TryGetAssetTypeByGuid(data.AssetGuid, out Type type))
                 return;
 
             if (fieldViewModel.TargetType == typeof(Guid))

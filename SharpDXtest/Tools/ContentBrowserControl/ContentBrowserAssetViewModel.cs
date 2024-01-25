@@ -14,6 +14,8 @@ namespace Editor
         public bool IsSubAsset => string.IsNullOrWhiteSpace(assetPath);
         private string assetPath;
         public string AssetPath => assetPath;
+        private Guid assetGuid = Guid.Empty;
+        public Guid AssetGuid => assetGuid;
         private AssetMeta assetMeta = null;
         public AssetMeta AssetMeta => assetMeta;
         private Type associatedAssetDataType = null;
@@ -26,10 +28,11 @@ namespace Editor
             if (associatedAssetDataType.IsSameOrSubclassOf(typeof(SceneData)))
                 SceneManager.LoadSceneByPath(Path.ChangeExtension(Path.GetRelativePath(AssetsRegistry.ContentFolderPath, assetPath), null));
         }
-        public ContentBrowserAssetViewModel(string name, Type dataType)
+        public ContentBrowserAssetViewModel(string name, Type dataType, Guid assetGuid)
         {
             this.name = name;
             associatedAssetDataType = dataType;
+            this.assetGuid = assetGuid;
         }
         public ContentBrowserAssetViewModel(string pathToMeta)
         {
@@ -38,6 +41,7 @@ namespace Editor
             try
             {
                 assetMeta = YamlManager.LoadFromFile<AssetMeta>(pathToMeta);
+                assetGuid = assetMeta.Guid;
             }
             catch
             {
