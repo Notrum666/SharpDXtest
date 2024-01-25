@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Numerics;
 using System.Text;
 using System.Windows.Documents;
 
@@ -17,7 +18,12 @@ namespace Engine
 
         public static ActionRefund GetAction(List<AgentKnowledge> knowledges)
         {
-            return new ActionRefund();
+            return new ActionRefund()
+            {
+                ObjectType = "Agent",
+                ActionName = "location",
+                ObjectValue = Vector3.Zero
+            };
         }
     }
     public class AgentKnowledge
