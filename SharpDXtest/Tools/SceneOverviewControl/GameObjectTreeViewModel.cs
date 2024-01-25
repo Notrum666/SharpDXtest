@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -67,7 +68,7 @@ namespace Editor
             };
 
             GameObject = gameObject;
-            foreach (Transform transform in gameObject.Transform.Children)
+            foreach (Transform transform in gameObject.Transform.Children.ToImmutableList())
                 Children.Add(new GameObjectTreeViewModel(transform.GameObject, this));
             Parent = parent;
             Name = gameObject.Name;

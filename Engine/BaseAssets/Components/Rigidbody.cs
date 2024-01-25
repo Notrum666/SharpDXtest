@@ -50,6 +50,11 @@ namespace Engine.BaseAssets.Components
 
         [SerializedField]
         private bool ignoreGravity = false;
+        public bool IgnoreGravity
+        {
+            get => ignoreGravity;
+            set => ignoreGravity = value;
+        }
 
         public Ranged<double> Mass => new Ranged<double>(ref mass, min: 0 + double.Epsilon, onSet: RecalculateInverseMass);
         public Vector3 Velocity { get => velocity; set => velocity = value; }
