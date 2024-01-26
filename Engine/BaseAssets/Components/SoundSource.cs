@@ -41,10 +41,10 @@ namespace Engine.BaseAssets.Components
             Source.CurveDistanceScaler = 0f;
         }
 
-        public void play(Sound sound)
+        public PlayingSound Play(Sound sound)
         {
             Source.CurveDistanceScaler = volume;
-            SoundCore.PlayFrom(sound, this);
+            return SoundCore.PlayFrom(sound, this);
         }
 
         public override void Update()
