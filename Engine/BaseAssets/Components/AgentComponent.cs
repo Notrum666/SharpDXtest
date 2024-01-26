@@ -30,9 +30,12 @@ namespace Engine.BaseAssets.Components
         {
             knowledges.Clear();
             AgentComponent[] components = Scene.FindComponentsOfType<AgentComponent>();
+            Camera[] componentsCamera = Scene.FindComponentsOfType<Camera>();
             foreach (AgentComponent component in components)
-                knowledges.Add(new AgentKnowledge { ObjectType = "Enemy", PropertyName = "location", ObjectValue = (object)GameObject.Transform.Position });
-            knowledges.Add(new AgentKnowledge { ObjectType = "Player", PropertyName = "location", ObjectValue = (object)GameObject.Transform.Position });
+                knowledges.Add(new AgentKnowledge { ObjectType = "Enemy", PropertyName = "location", ObjectValue = component.GameObject.Transform.Position});
+            foreach (Camera component in componentsCamera)
+                knowledges.Add(new AgentKnowledge { ObjectType = "Player", PropertyName = "location", ObjectValue = component.GameObject.Transform.Position });
+            knowledges.Add(new AgentKnowledge { ObjectType = "Agent", PropertyName = "location", ObjectValue = GameObject.Transform.Position });
 
             ActionRefund refund = InferenceEngine.GetAction(knowledges);
             double t = (Time.TotalTime - (int)Time.TotalTime);
