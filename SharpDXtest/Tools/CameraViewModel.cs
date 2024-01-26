@@ -28,7 +28,7 @@ namespace Editor
 
         public void SetCamera(Camera newCamera)
         {
-            if (newCamera == camera)
+            if (newCamera == camera && newCamera?.GameObject == camera?.GameObject)
                 return;
             
             if (camera != null)

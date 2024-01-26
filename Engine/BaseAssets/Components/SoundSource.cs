@@ -1,23 +1,50 @@
 ﻿using LinearAlgebra;
 
 using SharpDX.X3DAudio;
+using System.Reflection;
 
 namespace Engine.BaseAssets.Components
 {
     public sealed class SoundSource : BehaviourComponent
     {
+        [SerializedField]
+        float volume = 0f;
+
+        public float Volume
+        {
+            get => volume;
+            set
+            {
+                volume = value;
+                if (Source != null)
+                {
+                    Source.CurveDistanceScaler = volume;
+                }
+            }
+        }
+
+        public override void OnFieldChanged(FieldInfo fieldInfo)
+        {
+            base.OnFieldChanged(fieldInfo);
+            if (fieldInfo.Name == nameof(volume))
+            {
+                Volume = volume;
+            }
+        }
+
         public Emitter Source { get; private set; }
 
         public SoundSource()
         {
             Source = new Emitter();
             Source.ChannelCount = 1;
-            Source.CurveDistanceScaler = float.MinValue;
+            Source.CurveDistanceScaler = 0f;
         }
 
-        public void play(Sound sound)
+        public PlayingSound Play(Sound sound)
         {
-            SoundCore.PlayFrom(sound, this);
+            Source.CurveDistanceScaler = volume;
+            return SoundCore.PlayFrom(sound, this);
         }
 
         public override void Update()

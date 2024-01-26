@@ -14,7 +14,7 @@ SerializableObjects:
   instanceId: b2cfaa4f040c43d9874f60e7d9944b86
   gameObject: d12fece40c6c4de2a68b68c59b9dd2ff
   Position:
-    z: 5
+    z: 0.6
   Rotation:
     w: 1
     z: 1.1102230246251565E-16
@@ -43,10 +43,12 @@ SerializableObjects:
   gameObject: d12fece40c6c4de2a68b68c59b9dd2ff
   localEnabled: true
   mass: 1
+  velocity:
+    z: -0.3269391159393273
   inertiaTensor:
-    x: 1
-    y: 1
-    z: 1
+    x: 0.16666666666666666
+    y: 0.16666666666666666
+    z: 0.16666666666666666
   linearDrag: 0.05
   angularDrag: 0.05
 - !GameObject
@@ -59,14 +61,19 @@ SerializableObjects:
   - 5ab688db803e4be4805c0bd68992db91
   - 449dbac6a3394a3b87c9d3a7f294b6d6
   - 2b96509018fb46da88a4f4e0cb6ef41b
+  - 72438cda6746405daf1db2cac8b5bfb9
 - !Transform
   instanceId: 38a6c77ce0d14068974f462b196812d6
   gameObject: ef8dbc3885014fc8ae920157b8d5ea5d
   Position:
-    y: -3
-    z: 3
+    x: -2.0353943440304505
+    y: -4.945405629588573
+    z: 4.128929696681773
   Rotation:
-    w: 1
+    w: 0.9028329526287258
+    x: -0.17425691755819786
+    y: 0.07449766354934308
+    z: -0.38597575630667136
   Scale:
     x: 1
     y: 1
@@ -77,7 +84,7 @@ SerializableObjects:
   localEnabled: true
   makeCurrentOnStart: true
   fov: 1.5707963267948966
-  aspect: 1
+  aspect: 1.875216637781629
   near: 0.001
   far: 500
 - !EditorCameraController
@@ -89,6 +96,10 @@ SerializableObjects:
   gameObject: ef8dbc3885014fc8ae920157b8d5ea5d
   localEnabled: true
   projectile: 3082c41d984743cda9d29adb2a903307
+- !SoundListener
+  instanceId: 72438cda6746405daf1db2cac8b5bfb9
+  gameObject: ef8dbc3885014fc8ae920157b8d5ea5d
+  localEnabled: true
 - !GameObject
   instanceId: 01090660e022422182c9220585bd9708
   name: Plane
@@ -121,9 +132,9 @@ SerializableObjects:
   localEnabled: true
   mass: 1
   inertiaTensor:
-    x: 1
-    y: 1
-    z: 1
+    x: 0.16666666666666666
+    y: 0.16666666666666666
+    z: 0.16666666666666666
   linearDrag: 0.05
   angularDrag: 0.05
   isStatic: true
@@ -144,6 +155,8 @@ SerializableObjects:
   components:
   - 894df7c3d7964dc99d60384038f7baf7
   - de82853b0d844ef4b6bf75667d66e845
+  - f0812e7fab01471c9d088d95a73f4de2
+  - b7c89d1957684ca3be38b20cb9354023
 - !Transform
   instanceId: 894df7c3d7964dc99d60384038f7baf7
   gameObject: 3aeca04176da4d52a27a49d559c52011
@@ -164,3 +177,12 @@ SerializableObjects:
     y: 1
     z: 1
   shadowSize: 4096
+- !SoundSource
+  instanceId: f0812e7fab01471c9d088d95a73f4de2
+  gameObject: 3aeca04176da4d52a27a49d559c52011
+  localEnabled: true
+  volume: 1
+- !TestProjectComponent
+  instanceId: b7c89d1957684ca3be38b20cb9354023
+  gameObject: 3aeca04176da4d52a27a49d559c52011
+  localEnabled: true
