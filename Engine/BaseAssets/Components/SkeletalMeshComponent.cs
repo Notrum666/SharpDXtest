@@ -44,6 +44,8 @@ namespace Engine.BaseAssets.Components
             get => animation;
             set
             {
+                if (animation == value)
+                    return;
                 animation = value;
                 animationCurrentTime = 0;
             }

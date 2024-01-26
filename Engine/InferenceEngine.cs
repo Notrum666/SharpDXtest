@@ -71,20 +71,15 @@ namespace Engine
                     string propertyType = condition.Item2;
                     var agentMemoryEntry = agentMemory.Find(entry => entry.ObjectType == "Agent" && entry.PropertyName == propertyType);
                     if (agentMemoryEntry.ObjectValue.GetType() == typeof(int))
-                    {
                         if (agentMemoryEntry == null || !condition.Item1(agentMemoryEntry.ObjectValue.ToString(), (int)agentMemoryEntry.ObjectValue))
                         {
                             allConditionsMet = false;
                             break;
                         }
-                    }
-                    
                 }
 
                 if (allConditionsMet)
-                {
                     possibleActions.Add(rule.Item2);
-                }
             }
 
             if (possibleActions.Count > 0)

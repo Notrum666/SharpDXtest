@@ -434,7 +434,6 @@ SerializableObjects:
     x: 1
     y: 1
     z: 1
-  shadowSize: 4096
 - !GameObject
   instanceId: 1fdccac104ae48dbbb2648eaffedf697
   name: NewGameObject
