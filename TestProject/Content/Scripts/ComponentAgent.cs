@@ -74,7 +74,7 @@ namespace TestProject.Content.Scripts
             delta *= movementSpeed * Time.DeltaTime;
             GameObject.Transform.Position += new Vector3(delta.x, delta.y, 0);
 
-            SkeletalAnimation run = AssetsManager.LoadAssetByGuid<SkeletalAnimation>(new Guid("a8050a9b33b84327885c9ec5e63bba43"));
+            SkeletalAnimation run = AssetsManager.LoadAssetAtPath<SkeletalAnimation>("Models\\cesium_man_Animation\\Armature_001_Anim_8_Armature_001.anim");
             if (run is not null)
                 GameObject.GetComponent<SkeletalMeshComponent>().Animation = run;
 
@@ -107,7 +107,7 @@ namespace TestProject.Content.Scripts
             delta *= movementSpeed * Time.DeltaTime;
             GameObject.Transform.Position -= new Vector3(delta.x, delta.y, 0);
 
-            SkeletalAnimation run = AssetsManager.LoadAssetByGuid<SkeletalAnimation>(new Guid("7c0cdc5adc4b45afbb09930ba55989c1"));
+            SkeletalAnimation run = AssetsManager.LoadAssetAtPath<SkeletalAnimation>("Models\\cesium_man_Animation\\Armature_001_Anim_15_Armature_001.anim");
             if (run is not null)
                 GameObject.GetComponent<SkeletalMeshComponent>().Animation = run;
         }
