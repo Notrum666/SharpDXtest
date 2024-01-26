@@ -44,19 +44,19 @@ namespace Engine
                 GameObject gameObject = meshComponent.GameObject;
 
                 // TODO: skeletal animations are not taken into account, something should be done about it
-                if (bonesTransforms is null && !IsIntersectBoundingSphere(ray, meshComponent))
-                    continue;
+                //if (bonesTransforms is null && !IsIntersectBoundingSphere(ray, meshComponent))
+                //    continue;
 
-                Vector3 localOrigin = gameObject.Transform.View.TransformPoint(ray.Origin);
-                Vector3 localDirection = gameObject.Transform.View.TransformDirection(ray.Direction).normalized();
+                Vector3 localOrigin = ray.Origin; //gameObject.Transform.View.TransformPoint(ray.Origin);
+                Vector3 localDirection = ray.Direction.normalized();// gameObject.Transform.View.TransformDirection(ray.Direction).normalized();
 
                 foreach (Mesh mesh in model.Meshes)
                 {
                     for (int i = 0; i < mesh.Indices.Count; i += 3)
                     {
-                        Vector3 v0 = mesh.Vertices[mesh.Indices[i + 0]].v;
-                        Vector3 v1 = mesh.Vertices[mesh.Indices[i + 1]].v;
-                        Vector3 v2 = mesh.Vertices[mesh.Indices[i + 2]].v;
+                        Vector3 v0 = gameObject.Transform.Model.TransformPoint(mesh.Vertices[mesh.Indices[i + 0]].v);
+                        Vector3 v1 = gameObject.Transform.Model.TransformPoint(mesh.Vertices[mesh.Indices[i + 1]].v);
+                        Vector3 v2 = gameObject.Transform.Model.TransformPoint(mesh.Vertices[mesh.Indices[i + 2]].v);
 
                         if (bonesTransforms is not null)
                         {
