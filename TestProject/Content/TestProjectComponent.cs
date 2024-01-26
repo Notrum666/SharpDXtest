@@ -23,11 +23,16 @@ namespace TestProject
         private GameObject obj = null;
         public override void Start()
         {
-
+            var sound = AssetsManager.LoadAssetAtPath<Sound>(@"Sounds\HarvestTime.wav");
+            GameObject.GetComponent<SoundSource>()?.Play(sound);
+            //SoundCore.Play(sound);
         }
         public override void Update()
         {
-
+            if (Input.IsKeyPressed(System.Windows.Input.Key.R))
+            {
+                SceneManager.LoadSceneByPath(@"Scenes\TestScene.scene");
+            }
         }
     }
 }

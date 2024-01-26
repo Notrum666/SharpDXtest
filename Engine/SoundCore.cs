@@ -14,6 +14,7 @@ namespace Engine
     {
         public SourceVoice voice;
         public Emitter source;
+        public readonly int ChannelCount;
 
         private bool isFinished = false;
         public bool IsFinished => isFinished;
@@ -40,10 +41,11 @@ namespace Engine
 
         private bool disposed;
 
-        public PlayingSound(SourceVoice voice, Emitter source = null)
+        public PlayingSound(SourceVoice voice, int channelCount, Emitter source = null)
         {
             this.voice = voice;
             voice.BufferEnd += onBufferEnd;
+            ChannelCount = channelCount;
             this.source = source;
         }
 
@@ -143,7 +145,7 @@ namespace Engine
             //source.GetOutputMatrix(masteringVoice, 2, 8, volumes);
             //source.SetEffectChain(new EffectDescriptor(new Reverb(device), 2));
             //source.SetEffectParameters<ReverbParameters>(0, new ReverbParameters() { RoomSize = 1f, Diffusion = 0f });
-            PlayingSound playingSound = new PlayingSound(voice, source == null ? null : source.Source);
+            PlayingSound playingSound = new PlayingSound(voice, sound.Format.Channels, source == null ? null : source.Source);
             playingSounds.Add(playingSound);
             voice.SubmitSourceBuffer(sound.Buffer, sound.DecodedPacketsInfo);
             voice.Start();
@@ -160,20 +162,21 @@ namespace Engine
         {
             for (int i = 0; i < playingSounds.Count; i++)
             {
-                if (playingSounds[i].IsFinished)
+                PlayingSound sound = playingSounds[i];
+                if (sound.IsFinished)
                 {
                     playingSounds.RemoveAt(i);
                     i--;
                     continue;
                 }
-                if (CurrentListener != null && playingSounds[i].source is {} emitter)
+                if (CurrentListener != null && sound.source is {} emitter)
                 {
                     DspSettings settings = device3d.Calculate(CurrentListener.Listener, emitter, CalculateFlags.Matrix |
                                                                                                                  CalculateFlags.Doppler /*|
-                                                                                                                 CalculateFlags.Reverb*/, 2, 8);
+                                                                                                                 CalculateFlags.Reverb*/, sound.ChannelCount, 8);
 
-                    playingSounds[i].voice.SetFrequencyRatio(settings.DopplerFactor, 2);
-                    playingSounds[i].voice.SetOutputMatrix(2, 8, settings.MatrixCoefficients, 2);
+                    sound.voice.SetFrequencyRatio(settings.DopplerFactor, 2);
+                    sound.voice.SetOutputMatrix(sound.ChannelCount, 8, settings.MatrixCoefficients, 2);
                     device.CommitChanges(2);
                 }
             }
