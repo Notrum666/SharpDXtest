@@ -14,21 +14,29 @@ namespace TestProject.Content.Scripts
 
             var ac = GameObject.GetComponent<AgentComponent>();
             ac.Actions.Add("attack", Attack);
-            ac.Actions.Add("forward", Forward);
+            ac.Actions.Add("retreat", Forward);
+            ac.Actions.Add("CollectGold", Gold);
         }
 
         private void Attack(object Data)
         {
             Logger.Log(LogType.Info, "Attack");
 
-            GameObject.Transform.Position += new Vector3(0, 0, (double)Data);
+            //GameObject.Transform.Position += new Vector3(0, 0, (double)Data);
+        }
+
+        private void Gold(object Data)
+        {
+            Logger.Log(LogType.Info, "Gold");
+
+            //GameObject.Transform.Position += new Vector3(0, 0, (double)Data);
         }
 
         private void Forward(object Data)
         {
             Logger.Log(LogType.Info, "Forward");
 
-            GameObject.Transform.Position -= new Vector3(0, 0, (double)Data);
+            GameObject.Transform.Position -= (Vector3)Data);
         }
     }
 }
