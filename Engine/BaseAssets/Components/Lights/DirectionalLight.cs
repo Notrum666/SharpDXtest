@@ -10,13 +10,19 @@ namespace Engine.BaseAssets.Components
 {
     public class DirectionalLight : Light
     {
-        [SerializedField]
-        private int shadowSize = 4096;
+        private const int shadowSize = 1024;
 
-        public Ranged<int> ShadowSize => new Ranged<int>(ref shadowSize, 1);
+        [SerializedField]
+        private bool doNotCastShadows = false;
+        public bool DoNotCastShadows
+        {
+            get => doNotCastShadows;
+            set => doNotCastShadows = value;
+        }
+
         public static float[] CascadeFrustumDistances => cascadeFrustumDistances;
 
-        private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.02f, 0.1f, 1.0f };
+        private static readonly float[] cascadeFrustumDistances = { 0.0f, 0.015f, 0.08f, 0.6f };
 
         private Matrix4x4f getLightSpaceForFrustumSlice(Matrix4x4f frustumToView, float fromZ, float toZ, float lightSpaceDepthScale)
         {
@@ -97,10 +103,18 @@ namespace Engine.BaseAssets.Components
             if (!ShaderPipeline.TryGetPipeline("depth_only", out ShaderPipeline pipeline))
                 return;
 
+            DeviceContext context = GraphicsCore.CurrentDevice.ImmediateContext;
+
+            if (doNotCastShadows)
+            {
+                for (int i = 0; i < cascadeFrustumDistances.Length - 1; i++)
+                    context.ClearDepthStencilView(ShadowTexture.GetView<DepthStencilView>(i), DepthStencilClearFlags.Depth, 1.0f, 0);
+                return;
+            }
+
             pipeline.Use();
 
-            DeviceContext context = GraphicsCore.CurrentDevice.ImmediateContext;
-            context.Rasterizer.SetViewport(new Viewport(0, 0, ShadowSize, ShadowSize, 0.0f, 1.0f));
+            context.Rasterizer.SetViewport(new Viewport(0, 0, shadowSize, shadowSize, 0.0f, 1.0f));
 
             Matrix4x4f[] lightSpaces = GetLightSpaces(camera);
             for (int i = 0; i < lightSpaces.Length; i++)
@@ -108,9 +122,9 @@ namespace Engine.BaseAssets.Components
                 DepthStencilView curDSV = ShadowTexture.GetView<DepthStencilView>(i);
                 context.OutputMerger.SetTargets(curDSV, renderTargetView: null);
                 context.ClearDepthStencilView(curDSV, DepthStencilClearFlags.Depth, 1.0f, 0);
-
+            
                 pipeline.UpdateUniform("view", lightSpaces[i]);
-
+            
                 RenderObjects(pipeline, false);
             }
         }
@@ -139,7 +153,7 @@ namespace Engine.BaseAssets.Components
                 pipeline.UpdateUniform("directionalLight.cascadesDepths[" + i.ToString() + "]", cascadeDepths[i]);
             pipeline.UpdateUniform("directionalLight.cascadesCount", lightSpaces.Length);
 
-            pipeline.UpdateUniform("directionalLight.shadowMapSize", new Vector2f(ShadowSize, ShadowSize));
+            pipeline.UpdateUniform("directionalLight.shadowMapSize", new Vector2f(shadowSize, shadowSize));
 
             pipeline.UploadUpdatedUniforms();
 
