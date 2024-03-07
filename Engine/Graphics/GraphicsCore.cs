@@ -175,7 +175,6 @@ namespace Engine
             synchQuery = new Query(CurrentDevice, new QueryDescription() { Type = QueryType.Event, Flags = QueryFlags.None });
         }
 
-        //TODO: Separate into light classes
         public static void RenderShadows(Camera camera)
         {
             if (Scene.CurrentScene == null)
