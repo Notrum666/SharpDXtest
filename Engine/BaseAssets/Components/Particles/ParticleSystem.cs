@@ -194,6 +194,7 @@ namespace Engine.BaseAssets.Components
 
         private void SortParticles()
         {
+            // TODO: definitely a bad idea
             Shader sortShader = Shader.Create(@"BaseAssets\Shaders\Particles\particles_bitonic_sort_step.csh");
             sortShader.Use();
             sortShader.UpdateUniform("maxParticles", maxParticles);
