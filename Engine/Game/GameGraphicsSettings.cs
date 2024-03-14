@@ -86,10 +86,10 @@ namespace Engine
                         }
                     },
                     {
-                        "volume", new List<string>()
+                        "FEM_gas_volume", new List<string>()
                         {
-                            @"BaseAssets\Shaders\VolumetricRender\volume.vsh",
-                            @"BaseAssets\Shaders\VolumetricRender\volume.fsh"
+                            @"BaseAssets\Shaders\Volumetric\FEM_gas_volume.vsh",
+                            @"BaseAssets\Shaders\Volumetric\FEM_gas_volume.fsh"
                         }
                     },
                 }

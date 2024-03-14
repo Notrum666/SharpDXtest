@@ -19,6 +19,7 @@
 		<DebugSymbols>true</DebugSymbols>
 		<OutputPath>bin\GraphicsDebug\</OutputPath>
 		<UseVSHostingProcess>true</UseVSHostingProcess>
+		<DefineConstants>TRACE;DEBUG;GraphicsDebugging</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup>
 		<StartupObject />
@@ -32,6 +33,11 @@
 		<None Remove="Images\StepIcon.png" />
 		<None Remove="Images\StopIcon.png" />
 		<None Remove="Resources\BaseAssets\Shaders\DeferredRender\deferred_geometry_skinned.vsh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_octree_initialization.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_octree_subdivision.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_tetrahedralization.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_vertices_fetching.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_vertices_generation.csh" />
 		<None Remove="Tools\ContentBrowserControl\Icons\BoxIcon.png" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FileIcon.png" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FolderIcon.png" />

@@ -5,6 +5,8 @@ using System.Windows;
 
 using Editor;
 
+using LinearAlgebra;
+
 namespace SharpDXtest
 {
     /// <summary>
@@ -39,6 +41,9 @@ namespace SharpDXtest
                 Shutdown();
                 return;
             }
+
+            // re-copy base assets to current project folder
+            ProjectsManager.RecopyBaseAssets();
 
             EditorWindow editorWindow = new EditorWindow();
             ShutdownMode = ShutdownMode.OnMainWindowClose;

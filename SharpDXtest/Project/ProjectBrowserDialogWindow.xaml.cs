@@ -2,6 +2,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 
 using Engine;
@@ -105,6 +107,13 @@ namespace Editor
 
                 projectTemplates.Add(template);
             }
+
+            Loaded += (object sender, RoutedEventArgs e) =>
+            {
+                ProjectData proj = ProjectsManager.Projects.FirstOrDefault(p => p.ProjectName == "TestProject", null);
+                if (proj is not null)
+                    OpenProjectCommand.Execute(proj);
+            };
         }
 
 

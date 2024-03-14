@@ -77,6 +77,13 @@ namespace Editor
             return projectData;
         }
 
+        public static void RecopyBaseAssets()
+        {
+            string baseAssetsPath = Path.Combine(EditorLayer.Current.ResourcesFolderPath, BaseAssetsFolderName);
+            string projectContentPath = Path.Combine(ProjectViewModel.Current.FolderPath, AssetsRegistry.ContentFolderName);
+            CopyFolder(baseAssetsPath, Path.Combine(projectContentPath, BaseAssetsFolderName));
+        }
+
         internal static bool TryAddProject(string projectFile, out ProjectData newProjectData)
         {
             if (!Path.Exists(projectFile))

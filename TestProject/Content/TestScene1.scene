@@ -425,7 +425,6 @@ SerializableObjects:
     x: 1
     y: 1
     z: 1
-  shadowSize: 4096
 - !GameObject
   instanceId: 1fdccac104ae48dbbb2648eaffedf697
   name: NewGameObject
@@ -465,3 +464,33 @@ SerializableObjects:
   linearDrag: 0.05
   angularDrag: 0.05
   isStatic: true
+- !GameObject
+  instanceId: b976b693c79646119acd05696ae44dac
+  name: Volume
+  localEnabled: true
+  transform: fb73d21bd4fa460f814142f3b3cdb6e8
+  components:
+  - fb73d21bd4fa460f814142f3b3cdb6e8
+  - 82b882901d81448eb46ae779eb550502
+- !Transform
+  instanceId: fb73d21bd4fa460f814142f3b3cdb6e8
+  gameObject: b976b693c79646119acd05696ae44dac
+  Position:
+    z: 10
+  Rotation:
+    w: 1
+  Scale:
+    x: 1
+    y: 1
+    z: 1
+- !FEMGasVolume
+  instanceId: 82b882901d81448eb46ae779eb550502
+  gameObject: b976b693c79646119acd05696ae44dac
+  localEnabled: true
+  size:
+    x: 40
+    y: 40
+    z: 20
+  lightDirection:
+    z: -1
+  scatteringCoef: 0.03

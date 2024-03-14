@@ -81,7 +81,7 @@ namespace Engine
                     {
                         Width = 1,
                         Height = 1,
-                        Format = Format.B8G8R8A8_UNorm,
+                        Format = SharpDX.DXGI.Format.B8G8R8A8_UNorm,
                         RefreshRate = new SharpDX.DXGI.Rational(60, 1),
                         Scaling = SharpDX.DXGI.DisplayModeScaling.Unspecified,
                         ScanlineOrdering = SharpDX.DXGI.DisplayModeScanlineOrder.Unspecified
@@ -239,12 +239,12 @@ namespace Engine
 
             CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.WorldPos.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
 #if GraphicsDebugging
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.albedo.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.normal.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.metallic.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.roughness.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.ambientOcclusion.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
-            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.emission.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.Albedo.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.Normal.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.Metallic.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.Roughness.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.AmbientOcclusion.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
+            CurrentDevice.ImmediateContext.ClearRenderTargetView(camera.GBuffer.Emission.GetView<RenderTargetView>(), new RawColor4(0.0f, 0.0f, 0.0f, 0.0f));
 #endif
             CurrentDevice.ImmediateContext.ClearDepthStencilView(camera.DepthBuffer.GetView<DepthStencilView>(), DepthStencilClearFlags.Depth, 1.0f, 0);
 
@@ -380,7 +380,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.Rasterizer.SetViewport(viewport);
             CurrentDevice.ImmediateContext.OutputMerger.SetTargets(null, renderTargetView: camera.ColorBuffer.GetView<RenderTargetView>());
 
-            if (!ShaderPipeline.TryGetPipeline("volume", out ShaderPipeline pipeline))
+            if (!ShaderPipeline.TryGetPipeline("FEM_gas_volume", out ShaderPipeline pipeline))
                 return;
 
             pipeline.Use();
@@ -393,7 +393,7 @@ namespace Engine
             pipeline.UpdateUniform("cam_farDivFarMinusNear", (float)(camera.Far / (camera.Far - camera.Near)));
             pipeline.UpdateUniform("invScreenSize", new Vector2f(1.0f / viewport.Width, 1.0f / viewport.Height));
 
-            foreach (GasVolume volume in Scene.FindComponentsOfType<GasVolume>())
+            foreach (FEMGasVolume volume in Scene.FindComponentsOfType<FEMGasVolume>())
             {
                 if (!volume.LocalEnabled)
                     continue;
@@ -411,6 +411,8 @@ namespace Engine
                 pipeline.UpdateUniform("absorptionCoef", (float)volume.AbsorptionCoef);
                 pipeline.UpdateUniform("scatteringCoef", (float)volume.ScatteringCoef);
                 pipeline.UpdateUniform("halfSize", (Vector3f)(volume.Size * 0.5f));
+
+                pipeline.UpdateUniform("invHalfSize", (Vector3f)(1.0f / halfSize));
 
                 //pipeline.UpdateUniform("ambientLight", new Vector3f(0.001f, 0.001f, 0.001f));
                 pipeline.UpdateUniform("ambientLight", new Vector3f(0.5f, 0.5f, 0.5f));
