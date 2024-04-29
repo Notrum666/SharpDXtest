@@ -19,6 +19,8 @@ struct MeshVertex
 {
     float3 position;
     float density;
+    float3 velocity;
+    float nextDensity;
 };
 
 struct Tetrahedron

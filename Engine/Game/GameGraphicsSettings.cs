@@ -92,6 +92,20 @@ namespace Engine
                             @"BaseAssets\Shaders\Volumetric\FEM_gas_volume.fsh"
                         }
                     },
+                    {
+                        "FEM_gas_volume_octree", new List<string>()
+                        {
+                            @"BaseAssets\Shaders\Volumetric\FEM_gas_volume_octree.vsh",
+                            @"BaseAssets\Shaders\Volumetric\FEM_gas_volume_debug.fsh"
+                        }
+                    },
+                    {
+                        "FEM_gas_volume_tetrahedrons", new List<string>()
+                        {
+                            @"BaseAssets\Shaders\Volumetric\FEM_gas_volume_tetrahedrons.vsh",
+                            @"BaseAssets\Shaders\Volumetric\FEM_gas_volume_debug.fsh"
+                        }
+                    },
                 }
             };
         }

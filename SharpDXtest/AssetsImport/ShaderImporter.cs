@@ -51,7 +51,7 @@ namespace Editor.AssetsImport
 
             ShaderFlags shaderFlags = ShaderFlags.None;
 #if GraphicsDebugging
-            shaderFlags |= ShaderFlags.Debug | ShaderFlags.SkipOptimization;
+            shaderFlags |= ShaderFlags.Debug | ShaderFlags.SkipOptimization | ShaderFlags.PreferFlowControl;
 #endif
 
             currentShaderData.Bytecode = currentShaderData.ShaderType switch

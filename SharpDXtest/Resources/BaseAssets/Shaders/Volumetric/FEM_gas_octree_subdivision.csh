@@ -34,6 +34,18 @@ void main(uint3 groupID : SV_GroupID, uint groupIndex : SV_GroupIndex)
     if (curNode.tetrahedronsStart < 0 || curNode.subLeavesBottom.x >= 0) // ignore non-existing and non-leaf octree elements
         return;
     
+    if (curNode.parent != -1)
+    {
+        OctreeNode parent = octree[curNode.parent];
+        //if (index == parent.subLeavesBottom.x || // subdivide only non-left octants
+        //    index == parent.subLeavesBottom.z ||
+        //    index == parent.subLeavesTop.x ||
+        //    index == parent.subLeavesTop.z)
+        if (!(index == parent.subLeavesTop.y &&
+            index != 6 || index == 8))
+            return;
+    }
+    
     int newIndex;
     
     createAndSetNewLeaf(subLeavesBottom.x)

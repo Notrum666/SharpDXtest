@@ -2,6 +2,8 @@
 #define THREADS_Y 32
 #define THREADS_TOTAL THREADS_X * THREADS_Y
 
+#define UINT_MAX 4294967295U
+
 struct OctreeNode
 {
     // (-,-,-), (+,-,-), (-,+,-), (+,+,-)
@@ -19,6 +21,8 @@ struct MeshVertex
 {
     float3 position;
     float density;
+    float3 velocity;
+    float nextDensity;
 };
 
 cbuffer volumeData
@@ -33,7 +37,16 @@ MeshVertex createVertex(float3 position)
 {
     MeshVertex vertex = (MeshVertex) 0;
     vertex.position = position;
-    vertex.density = max(0.0f, 1.0f - length(position / volumeHalfSize));
+    //vertex.density = (float)((uint) (abs(position.x * position.y + position.x * position.z + position.y * position.z +
+    //                    position.x + position.y + position.z) * 100000.0f) * 196314165U + 907633515U) / UINT_MAX;
+    float3 homogenous = position / volumeHalfSize;
+    //float3 r = homogenous - float3(0.5f, 0.5f, 0.0f);
+    //vertex.density = dot(r, r) <= 0.25f ? 10.0f : 0.0f;
+    vertex.density = homogenous.x * 0.5f + 0.5f;
+    //vertex.density *= vertex.density;
+    //vertex.velocity = float3(position.y, -position.x, 0) / 5.0f;
+    //vertex.velocity = vertex.velocity / max(dot(vertex.velocity, vertex.velocity), 1.0f);
+    //vertex.density = max(0.0f, 1.0f - length(position / volumeHalfSize));
     return vertex;
 }
 

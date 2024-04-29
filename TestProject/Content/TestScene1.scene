@@ -494,3 +494,5 @@ SerializableObjects:
   lightDirection:
     z: -1
   scatteringCoef: 0.03
+  showOctree: true
+  Subdivisions: 3

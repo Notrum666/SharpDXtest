@@ -91,6 +91,24 @@ findNeighbourDeclaration(Top, ascend_top, descend_top)
 findNeighbourDeclaration(Right, ascend_right, descend_right)
 findNeighbourDeclaration(Forward, ascend_forward, descend_forward)
 
+#define descendCornerDeclaration(name, side, direction) \
+int descendCorner_##name(int origin) \
+{ \
+    OctreeNode cur = octree[origin]; \
+    while (cur.subLeaves##side.direction != -1) \
+        cur = octree[cur.subLeaves##side.direction]; \
+    return cur.vertices##side.direction; \
+}
+
+descendCornerDeclaration(bottomX, Bottom, x)
+descendCornerDeclaration(bottomY, Bottom, y)
+descendCornerDeclaration(bottomZ, Bottom, z)
+descendCornerDeclaration(bottomW, Bottom, w)
+descendCornerDeclaration(topX, Top, x)
+descendCornerDeclaration(topY, Top, y)
+descendCornerDeclaration(topZ, Top, z)
+descendCornerDeclaration(topW, Top, w)
+
 float3 ascendPoint(int index, float3 p)
 {
     int parentIndex = octree[index].parent;
@@ -148,13 +166,13 @@ void main(uint3 groupID : SV_GroupID, uint groupIndex : SV_GroupIndex)
     int right = findNeighbour_Right(index, depth_right);
     int forward = findNeighbour_Forward(index, depth_forward);
     
-    float3 topPoints[3];
-    if (top != -1 && depth_top > 0)
-    {
-        topPoints[0] = ascendPoint(top, float3(1.0f, 0.0f, 0.0f));
-        topPoints[1] = ascendPoint(top, float3(0.0f, 1.0f, 0.0f));
-        topPoints[2] = ascendPoint(top, float3(1.0f, 1.0f, 0.0f));
-    }
+    //float3 topPoints[3];
+    //if (top != -1 && depth_top > 0)
+    //{
+    //    topPoints[0] = ascendPoint(top, float3(1.0f, 0.0f, 0.0f));
+    //    topPoints[1] = ascendPoint(top, float3(0.0f, 1.0f, 0.0f));
+    //    topPoints[2] = ascendPoint(top, float3(1.0f, 1.0f, 0.0f));
+    //}
     float3 rightPoints[3];
     if (right != -1 && depth_right > 0)
     {
@@ -165,48 +183,48 @@ void main(uint3 groupID : SV_GroupID, uint groupIndex : SV_GroupIndex)
     float3 forwardPoints[3];
     if (forward != -1 && depth_forward > 0)
     {
-        forwardPoints[0] = ascendPoint(right, float3(1.0f, 0.0f, 0.0f));
-        forwardPoints[1] = ascendPoint(right, float3(0.0f, 0.0f, 1.0f));
-        forwardPoints[2] = ascendPoint(right, float3(1.0f, 0.0f, 1.0f));
+        forwardPoints[0] = ascendPoint(forward, float3(1.0f, 0.0f, 0.0f));
+        forwardPoints[1] = ascendPoint(forward, float3(0.0f, 0.0f, 1.0f));
+        forwardPoints[2] = ascendPoint(forward, float3(1.0f, 0.0f, 1.0f));
     }
     
     if (curNode.verticesBottom.y == -1)
-        curNode.verticesBottom.y = octree[right].verticesBottom.x;
+        curNode.verticesBottom.y = descendCorner_bottomX(right); //octree[right].verticesBottom.x;
     if (curNode.verticesBottom.z == -1)
-        curNode.verticesBottom.z = octree[forward].verticesBottom.x;
+        curNode.verticesBottom.z = descendCorner_bottomX(forward); //octree[forward].verticesBottom.x;
     if (curNode.verticesBottom.w == -1)
     {
         if (right != -1 && (depth_right == 0 || all(ownPoints[0] == rightPoints[0])))
-            curNode.verticesBottom.w = octree[right].verticesBottom.z;
+            curNode.verticesBottom.w = descendCorner_bottomZ(right); //octree[right].verticesBottom.z;
         else
-            curNode.verticesBottom.w = octree[forward].verticesBottom.y;
+            curNode.verticesBottom.w = descendCorner_bottomY(forward); //octree[forward].verticesBottom.y;
     }
     if (curNode.verticesTop.x == -1)
-        curNode.verticesTop.x = octree[top].verticesBottom.x;
+        curNode.verticesTop.x = descendCorner_bottomX(top); //octree[top].verticesBottom.x;
     if (curNode.verticesTop.y == -1)
     {
         if (right != -1 && (depth_right == 0 || all(ownPoints[1] == rightPoints[1])))
-            curNode.verticesTop.y = octree[right].verticesTop.x;
+            curNode.verticesTop.y = descendCorner_topX(right); //octree[right].verticesTop.x;
         else
-            curNode.verticesTop.y = octree[top].verticesBottom.y;
+            curNode.verticesTop.y = descendCorner_bottomY(top); //octree[top].verticesBottom.y;
     }
     if (curNode.verticesTop.z == -1)
     {
         if (forward != -1 && (depth_forward == 0 || all(ownPoints[2] == forwardPoints[1])))
-            curNode.verticesTop.z = octree[forward].verticesTop.x;
+            curNode.verticesTop.z = descendCorner_topX(forward); //octree[forward].verticesTop.x;
         else
-            curNode.verticesTop.z = octree[top].verticesBottom.z;
+            curNode.verticesTop.z = descendCorner_bottomZ(top); //octree[top].verticesBottom.z;
     }
     if (curNode.verticesTop.w == -1)
     {
         if (right != -1 && (depth_right == 0 || all(ownPoints[3] == rightPoints[2])))
-            curNode.verticesTop.w = octree[right].verticesTop.z;
+            curNode.verticesTop.w = descendCorner_topZ(right); //octree[right].verticesTop.z;
         else
         {
             if (forward != -1 && (depth_forward == 0 || all(ownPoints[3] == forwardPoints[2])))
-                curNode.verticesTop.w = octree[forward].verticesTop.y;
+                curNode.verticesTop.w = descendCorner_topY(forward); //octree[forward].verticesTop.y;
             else
-                curNode.verticesTop.w = octree[top].verticesBottom.w;
+                curNode.verticesTop.w = descendCorner_bottomW(top); //octree[top].verticesBottom.w;
         }
     }
     

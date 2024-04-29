@@ -33,11 +33,18 @@
 		<None Remove="Images\StepIcon.png" />
 		<None Remove="Images\StopIcon.png" />
 		<None Remove="Resources\BaseAssets\Shaders\DeferredRender\deferred_geometry_skinned.vsh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_flip_vertices_data.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_octree_initialization.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_octree_subdivision.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_simulation_step.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_tetrahedralization.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_vertices_fetching.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_vertices_generation.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_vertices_inheritance.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_vertices_initialization.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_volume_debug.fsh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_volume_octree.vsh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_volume_tetrahedrons.vsh" />
 		<None Remove="Tools\ContentBrowserControl\Icons\BoxIcon.png" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FileIcon.png" />
 		<None Remove="Tools\ContentBrowserControl\Icons\FolderIcon.png" />
@@ -101,5 +108,10 @@
 		<Compile Update="Tools\InspectorControl\InspectorControl.xaml.cs">
 			<SubType>Code</SubType>
 		</Compile>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Update="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_simulation_step.csh">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </Content>
 	</ItemGroup>
 </Project>

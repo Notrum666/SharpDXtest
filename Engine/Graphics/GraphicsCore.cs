@@ -211,6 +211,7 @@ namespace Engine
 
             GeometryPass(camera);
             LightingPass(camera);
+            DebugPass(camera);
             VolumetricPass(camera);
             PrePostProcessingPass(camera);
             GammaCorrectionPass(camera);
@@ -371,6 +372,57 @@ namespace Engine
             CurrentDevice.ImmediateContext.Draw(6, 0);
         }
 
+        private static void DebugPass(Camera camera)
+        {
+            CurrentDevice.ImmediateContext.Rasterizer.State = backCullingRasterizer;
+            CurrentDevice.ImmediateContext.OutputMerger.BlendState = null;
+
+            Viewport viewport = new Viewport(0, 0, camera.BackBuffer.Width, camera.BackBuffer.Height, 0.0f, 1.0f);
+            CurrentDevice.ImmediateContext.Rasterizer.SetViewport(viewport);
+            CurrentDevice.ImmediateContext.OutputMerger.SetTargets(camera.DepthBuffer.GetView<DepthStencilView>(), 
+                                                                   camera.ColorBuffer.GetView<RenderTargetView>());
+
+            if (!ShaderPipeline.TryGetPipeline("FEM_gas_volume_octree", out ShaderPipeline pipeline))
+                return;
+
+            pipeline.Use();
+
+            CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.LineList;
+
+            FEMGasVolume[] volumes = Scene.FindComponentsOfType<FEMGasVolume>();
+
+            foreach (FEMGasVolume volume in volumes)
+            {
+                if (!volume.LocalEnabled || !volume.ShowOctree)
+                    continue;
+
+                Transform transform = volume.GameObject.Transform;
+                pipeline.UpdateUniform("modelViewProj", (Matrix4x4f)(camera.Proj * camera.GameObject.Transform.View * transform.Model));
+
+                pipeline.UploadUpdatedUniforms();
+                volume.RenderOctree();
+            }
+
+            if (!ShaderPipeline.TryGetPipeline("FEM_gas_volume_tetrahedrons", out pipeline))
+                return;
+
+            pipeline.Use();
+
+            foreach (FEMGasVolume volume in volumes)
+            {
+                if (!volume.LocalEnabled || !volume.ShowTetrahedrons)
+                    continue;
+
+                Transform transform = volume.GameObject.Transform;
+                pipeline.UpdateUniform("modelViewProj", (Matrix4x4f)(camera.Proj * camera.GameObject.Transform.View * transform.Model));
+
+                pipeline.UploadUpdatedUniforms();
+                volume.RenderTetrahedrons();
+            }
+
+            CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
+        }
+
         private static void VolumetricPass(Camera camera)
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = frontCullingRasterizer;
@@ -425,11 +477,11 @@ namespace Engine
                 pipeline.UpdateUniform("invNegLightDir", -1.0f / lightDir);
                 pipeline.UpdateUniform("lightIntensity", new Vector3f(5.0f, 5.0f, 5.0f));
 
+                //pipeline.UpdateUniform("time", (float)Time.TotalTime);
+
                 pipeline.UploadUpdatedUniforms();
                 volume.Render();
             }
-
-            CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         }
 
         private static void PrePostProcessingPass(Camera camera)

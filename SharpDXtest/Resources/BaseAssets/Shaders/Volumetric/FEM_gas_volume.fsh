@@ -24,6 +24,8 @@ struct MeshVertex
 {
     float3 position;
     float density;
+    float3 velocity;
+    float nextDensity;
 };
 
 struct Tetrahedron
@@ -297,7 +299,7 @@ float4 Raymarch(float3 location, float3 direction, float distance)
         curStep += step;
         location += direction * step;
         location = clamp(location, -halfSize, halfSize);
-        
+        //float curDensity = SampleDensity(float3((location.x + time * 5.0f) % (halfSize.x * 2.0f) - halfSize.x, location.y, location.z));
         float curDensity = SampleDensity(location);
         
 #ifdef TRAPEZOIDAL_INTEGRATION
@@ -314,7 +316,10 @@ float4 Raymarch(float3 location, float3 direction, float distance)
             transmittanceApprox *= curTransmittance;
         
             float outT = GetOutT(location, invNegLightDir);
-            float3 inScattering = ambientLight; // + lightInScattering * RaymarchLight(location, negLightDir, outT, curDensity);
+            
+            float3 inScattering = ambientLight; // no light
+            //float3 inScattering = ambientLight + lightInScattering * RaymarchLight(location, negLightDir, outT, curDensity); // light
+            
             float outScattering = scatteringCoef * curDensity;
 
             float3 currentRadiance = inScattering * outScattering;
