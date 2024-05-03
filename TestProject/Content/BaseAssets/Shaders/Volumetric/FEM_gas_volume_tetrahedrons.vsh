@@ -37,12 +37,14 @@ static const int pairs[12] =
 
 vert_out main(uint id : SV_VertexID)
 {
-    int tetrahedron = id / 12;
+    int tetrahedronIndex = id / 12;
     int index = id % 12;
     
 	vert_out res = (vert_out) 0;
 	
-    res.sv_pos = mul(float4(meshVertices[tetrahedrons[tetrahedron].indices[pairs[index]]].position, 1.0f), modelViewProj);
+    Tetrahedron tetrahedron = tetrahedrons[tetrahedronIndex];
+    if (tetrahedron.indices.x >= 0)
+        res.sv_pos = mul(float4(meshVertices[tetrahedron.indices[pairs[index]]].position, 1.0f), modelViewProj);
 	
 	return res;
 }

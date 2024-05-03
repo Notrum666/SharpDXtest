@@ -39,6 +39,7 @@ cbuffer volumeData
 cbuffer simulationData
 {
     float deltaTime;
+    bool sourceEnabled;
 };
 
 RWStructuredBuffer<OctreeNode> octree : register(u0);
@@ -157,15 +158,7 @@ float SampleDensity(float3 location)
         }
     }
     
-    return 0.0f; // no tetrahedron containing current point was found, maybe as a result of floating point errors
-    
-    //float x = length(location);
-    //return max(0.0f, 1.0f - x * x) * octree[0].density;
-    
-    //return 1.0f;
-    //float plane = (sin(location.x * 0.4f) + sin(location.y * 0.4f)) * 2.0f;
-    //return min(1.0f, max(0.0f, (plane + 5.0f - location.z) * 0.5f));
-    //return 10.0f * (location.z + 5.0f <= plane);
+    return -1.0f; // no tetrahedron containing current point was found
 }
 
 [numthreads(THREADS_X, THREADS_Y, 1)]
@@ -178,7 +171,17 @@ void main(uint3 groupID : SV_GroupID, uint groupIndex : SV_GroupIndex)
     if (curVertex.density < 0.0f) // ignore non-existing vertices
         return;
     
+    float radius = 3.0f;
+    float3 origin = 1.0f / invHalfSize - float3(radius, radius, radius) * 0.5f;
+    float3 r = curVertex.position - origin;
+    float source = 5.0f * deltaTime * (dot(r, r) <= (radius * radius)) * sourceEnabled;
     curVertex.nextDensity = SampleDensity(curVertex.position - curVertex.velocity * deltaTime);
+    if (curVertex.nextDensity < 0)
+        curVertex.nextDensity = curVertex.density;
+    curVertex.nextDensity += source;
+    curVertex.nextDensity *= 0.99;
+    curVertex.nextDensity = max(curVertex.nextDensity, 0.0f);
+    //curVertex.nextDensity = all(abs(curVertex.position - curVertex.position.x) < 0.1) * 2.0f * sourceEnabled;
     
     meshVertices[index] = curVertex;
 }

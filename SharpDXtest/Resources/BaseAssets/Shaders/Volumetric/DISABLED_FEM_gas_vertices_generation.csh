@@ -248,6 +248,11 @@ void main(uint3 groupID : SV_GroupID, uint groupIndex : SV_GroupIndex)
         forwardPoints[2] = ascendPoint(right, float3(0.0f, 0.0f, 1.0f));
     }
     
+    // FUCK
+    // does not work in case of edge-touching octants with no octants of same size between them
+    // [] 
+    //   []
+    
     int vertIndex = meshVertices.IncrementCounter(); // (-, -, -) - always generate
     curNode.verticesBottom.x = vertIndex;
     meshVertices[vertIndex] = createVertex(transformNPointToLocalSpace(ownPoints[0]));

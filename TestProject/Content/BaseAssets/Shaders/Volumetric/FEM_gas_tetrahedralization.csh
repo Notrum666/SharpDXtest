@@ -147,7 +147,34 @@ findNeighbourDeclaration(Left, ascend_left, descend_left)
 findNeighbourDeclaration(Forward, ascend_forward, descend_forward)
 findNeighbourDeclaration(Back, ascend_back, descend_back)
 
-#define depthSearch(origin, childA, childB, childC, childD, vertexA, vertexB, vertexC, vertexD) \
+#define countingDepthSearch(origin, childA, childB, childC, childD, vertexA, vertexB, vertexC, vertexD) \
+{ \
+    stack[pos++] = origin; \
+    while (pos > 0) \
+    { \
+        pos--; \
+        OctreeNode stackNode = octree[stack[pos]]; \
+        if (stackNode.subLeavesBottom.x >= 0) \
+        { \
+            stack[pos++] = stackNode.childA; \
+            stack[pos++] = stackNode.childB; \
+            stack[pos++] = stackNode.childC; \
+            stack[pos++] = stackNode.childD; \
+        } \
+        else \
+            count += 2; \
+    } \
+}
+
+#define generateTetrahedron(A, B, C, D) \
+tetrahedrons[origin + count].indices = int4(A, B, C, D); \
+tetrahedrons[origin + count].alphaMatrix = invert(transpose(float4x4(float4(1.0f, vertices[A].position), \
+                                                                     float4(1.0f, vertices[B].position), \
+                                                                     float4(1.0f, vertices[C].position), \
+                                                                     float4(1.0f, vertices[D].position)))); \
+count++;
+
+#define generatingDepthSearch(origin, childA, childB, childC, childD, vertexA, vertexB, vertexC, vertexD) \
 { \
     stack[pos++] = origin; \
     while (pos > 0) \
@@ -163,33 +190,54 @@ findNeighbourDeclaration(Back, ascend_back, descend_back)
         } \
         else \
         { \
-            triangles[count++] = int3(stackNode.vertexA, stackNode.vertexB, stackNode.vertexD); \
-            triangles[count++] = int3(stackNode.vertexA, stackNode.vertexC, stackNode.vertexD); \
+            generateTetrahedron(middleVertexIndex, stackNode.vertexA, stackNode.vertexB, stackNode.vertexD); \
+            generateTetrahedron(middleVertexIndex, stackNode.vertexA, stackNode.vertexC, stackNode.vertexD); \
         } \
     } \
 }
 
-#define depthSearch_Top depthSearch(top, subLeavesBottom.x, subLeavesBottom.y, subLeavesBottom.z, subLeavesBottom.w, \
-                                         verticesBottom.x, verticesBottom.y, verticesBottom.z, verticesBottom.w)
-#define depthSearch_Bottom depthSearch(bottom, subLeavesTop.x, subLeavesTop.y, subLeavesTop.z, subLeavesTop.w, \
-                                               verticesTop.x, verticesTop.y, verticesTop.z, verticesTop.w)
-#define depthSearch_Right depthSearch(right, subLeavesBottom.x, subLeavesBottom.z, subLeavesTop.x, subLeavesTop.z, \
-                                             verticesBottom.x, verticesBottom.z, verticesTop.x, verticesTop.z)
-#define depthSearch_Left depthSearch(left, subLeavesBottom.y, subLeavesBottom.w, subLeavesTop.y, subLeavesTop.w, \
-                                           verticesBottom.y, verticesBottom.w, verticesTop.y, verticesTop.w)
-#define depthSearch_Forward depthSearch(forward, subLeavesBottom.x, subLeavesBottom.y, subLeavesTop.x, subLeavesTop.y, \
-                                                 verticesBottom.x, verticesBottom.y, verticesTop.x, verticesTop.y)
-#define depthSearch_Back depthSearch(back, subLeavesBottom.z, subLeavesBottom.w, subLeavesTop.z, subLeavesTop.w, \
-                                           verticesBottom.z, verticesBottom.w, verticesTop.z, verticesTop.w)
+#define countingDepthSearch_Top countingDepthSearch(top, subLeavesBottom.x, subLeavesBottom.y, subLeavesBottom.z, subLeavesBottom.w, \
+                                                    verticesBottom.x, verticesBottom.y, verticesBottom.z, verticesBottom.w)
+#define countingDepthSearch_Bottom countingDepthSearch(bottom, subLeavesTop.x, subLeavesTop.y, subLeavesTop.z, subLeavesTop.w, \
+                                                       verticesTop.x, verticesTop.y, verticesTop.z, verticesTop.w)
+#define countingDepthSearch_Right countingDepthSearch(right, subLeavesBottom.x, subLeavesBottom.z, subLeavesTop.x, subLeavesTop.z, \
+                                                      verticesBottom.x, verticesBottom.z, verticesTop.x, verticesTop.z)
+#define countingDepthSearch_Left countingDepthSearch(left, subLeavesBottom.y, subLeavesBottom.w, subLeavesTop.y, subLeavesTop.w, \
+                                                     verticesBottom.y, verticesBottom.w, verticesTop.y, verticesTop.w)
+#define countingDepthSearch_Forward countingDepthSearch(forward, subLeavesBottom.x, subLeavesBottom.y, subLeavesTop.x, subLeavesTop.y, \
+                                                        verticesBottom.x, verticesBottom.y, verticesTop.x, verticesTop.y)
+#define countingDepthSearch_Back countingDepthSearch(back, subLeavesBottom.z, subLeavesBottom.w, subLeavesTop.z, subLeavesTop.w, \
+                                                     verticesBottom.z, verticesBottom.w, verticesTop.z, verticesTop.w)
 
-#define collectTriangles(origin, vertexA, vertexB, vertexC, vertexD, depthSearchMacro) \
-if (origin == -1 || depth_##origin > 0 || (octree[origin].subLeavesBottom.x == -1)) \
+#define generatingDepthSearch_Top generatingDepthSearch(top, subLeavesBottom.x, subLeavesBottom.y, subLeavesBottom.z, subLeavesBottom.w, \
+                                                        verticesBottom.x, verticesBottom.y, verticesBottom.z, verticesBottom.w)
+#define generatingDepthSearch_Bottom generatingDepthSearch(bottom, subLeavesTop.x, subLeavesTop.y, subLeavesTop.z, subLeavesTop.w, \
+                                                           verticesTop.x, verticesTop.y, verticesTop.z, verticesTop.w)
+#define generatingDepthSearch_Right generatingDepthSearch(right, subLeavesBottom.x, subLeavesBottom.z, subLeavesTop.x, subLeavesTop.z, \
+                                                          verticesBottom.x, verticesBottom.z, verticesTop.x, verticesTop.z)
+#define generatingDepthSearch_Left generatingDepthSearch(left, subLeavesBottom.y, subLeavesBottom.w, subLeavesTop.y, subLeavesTop.w, \
+                                                         verticesBottom.y, verticesBottom.w, verticesTop.y, verticesTop.w)
+#define generatingDepthSearch_Forward generatingDepthSearch(forward, subLeavesBottom.x, subLeavesBottom.y, subLeavesTop.x, subLeavesTop.y, \
+                                                            verticesBottom.x, verticesBottom.y, verticesTop.x, verticesTop.y)
+#define generatingDepthSearch_Back generatingDepthSearch(back, subLeavesBottom.z, subLeavesBottom.w, subLeavesTop.z, subLeavesTop.w, \
+                                                         verticesBottom.z, verticesBottom.w, verticesTop.z, verticesTop.w)
+
+#define countTriangles(origin, vertexA, vertexB, vertexC, vertexD, countingDepthSearchMacro) \
+if (origin == -1 || origin##_depth > 0 || (octree[origin].subLeavesBottom.x == -1)) \
 { \
-    triangles[count++] = int3(curNode.vertexA, curNode.vertexB, curNode.vertexD); \
-    triangles[count++] = int3(curNode.vertexA, curNode.vertexC, curNode.vertexD); \
+    count += 2; \
 } \
 else \
-    depthSearchMacro
+    countingDepthSearchMacro
+
+#define generateTriangles(origin, vertexA, vertexB, vertexC, vertexD, generatingDepthSearchMacro) \
+if (origin == -1 || origin##_depth > 0 || (octree[origin].subLeavesBottom.x == -1)) \
+{ \
+    generateTetrahedron(middleVertexIndex, curOctant.vertexA, curOctant.vertexB, curOctant.vertexD); \
+    generateTetrahedron(middleVertexIndex, curOctant.vertexA, curOctant.vertexC, curOctant.vertexD); \
+} \
+else \
+    generatingDepthSearchMacro
 
 float4x4 invert(float4x4 mat)
 {
@@ -227,47 +275,46 @@ float4x4 invert(float4x4 mat)
 [numthreads(THREADS_X, THREADS_Y, 1)]
 void main(uint3 groupID : SV_GroupID, uint groupIndex : SV_GroupIndex)
 {	    
-    int index = groupID.x * THREADS_TOTAL + groupIndex;
+    int curOctantIndex = groupID.x * THREADS_TOTAL + groupIndex;
     
-    OctreeNode curNode = octree[index];
+    OctreeNode curOctant = octree[curOctantIndex];
     
-    if (curNode.tetrahedronsStart < 0 || curNode.subLeavesBottom.x >= 0) // ignore non-existing and non-leaf octree elements
+    if (curOctant.tetrahedronsStart < 0 || curOctant.subLeavesBottom.x >= 0) // ignore non-existing and non-leaf octree elements
         return;
     
-    int depth_top, depth_bottom, depth_right, depth_left, depth_forward, depth_back;
-    int top = findNeighbour_Top(index, depth_top);
-    int bottom = findNeighbour_Bottom(index, depth_bottom);
-    int right = findNeighbour_Right(index, depth_right);
-    int left = findNeighbour_Left(index, depth_left);
-    int forward = findNeighbour_Forward(index, depth_forward);
-    int back = findNeighbour_Back(index, depth_back);
+    int top_depth, bottom_depth, right_depth, left_depth, forward_depth, back_depth;
+    int top = findNeighbour_Top(curOctantIndex, top_depth);
+    int bottom = findNeighbour_Bottom(curOctantIndex, bottom_depth);
+    int right = findNeighbour_Right(curOctantIndex, right_depth);
+    int left = findNeighbour_Left(curOctantIndex, left_depth);
+    int forward = findNeighbour_Forward(curOctantIndex, forward_depth);
+    int back = findNeighbour_Back(curOctantIndex, back_depth);
     
     int count = 0;
-    int3 triangles[256];
     
-    int stack[64];
+    int stack[128];
     int pos = 0;
 
-    collectTriangles(top, verticesTop.x, verticesTop.y, verticesTop.z, verticesTop.w, depthSearch_Top)
-    collectTriangles(bottom, verticesBottom.x, verticesBottom.y, verticesBottom.z, verticesBottom.w, depthSearch_Bottom)
-    collectTriangles(right, verticesBottom.y, verticesBottom.w, verticesTop.y, verticesTop.w, depthSearch_Right)
-    collectTriangles(left, verticesBottom.x, verticesBottom.z, verticesTop.x, verticesTop.z, depthSearch_Left)
-    collectTriangles(forward, verticesBottom.z, verticesBottom.w, verticesTop.z, verticesTop.w, depthSearch_Forward)
-    collectTriangles(back, verticesBottom.x, verticesBottom.y, verticesTop.x, verticesTop.y, depthSearch_Back)
+    countTriangles(top, verticesTop.x, verticesTop.y, verticesTop.z, verticesTop.w, countingDepthSearch_Top)
+    countTriangles(bottom, verticesBottom.x, verticesBottom.y, verticesBottom.z, verticesBottom.w, countingDepthSearch_Bottom)
+    countTriangles(right, verticesBottom.y, verticesBottom.w, verticesTop.y, verticesTop.w, countingDepthSearch_Right)
+    countTriangles(left, verticesBottom.x, verticesBottom.z, verticesTop.x, verticesTop.z, countingDepthSearch_Left)
+    countTriangles(forward, verticesBottom.z, verticesBottom.w, verticesTop.z, verticesTop.w, countingDepthSearch_Forward)
+    countTriangles(back, verticesBottom.x, verticesBottom.y, verticesTop.x, verticesTop.y, countingDepthSearch_Back)
     
     int origin;
     InterlockedAdd(tetrahedronsCounter[0], count, origin);
-    octree[index].tetrahedronsStart = origin;
-    octree[index].tetrahedronsEnd = origin + count;
+    octree[curOctantIndex].tetrahedronsStart = origin;
+    octree[curOctantIndex].tetrahedronsEnd = origin + count;
     
-    int middleVertexIndex = curNode.middleVertex;
-    for (int i = 0; i < count; i++)
-    {
-        int4 indices = int4(middleVertexIndex, triangles[i]);
-        tetrahedrons[origin + i].indices = indices;
-        tetrahedrons[origin + i].alphaMatrix = invert(transpose(float4x4(float4(1.0f, vertices[indices.x].position),
-                                                                         float4(1.0f, vertices[indices.y].position),
-                                                                         float4(1.0f, vertices[indices.z].position),
-                                                                         float4(1.0f, vertices[indices.w].position))));
-    }
+    count = 0;
+    
+    int middleVertexIndex = curOctant.middleVertex;
+    
+    generateTriangles(top, verticesTop.x, verticesTop.y, verticesTop.z, verticesTop.w, generatingDepthSearch_Top)
+    generateTriangles(bottom, verticesBottom.x, verticesBottom.y, verticesBottom.z, verticesBottom.w, generatingDepthSearch_Bottom)
+    generateTriangles(right, verticesBottom.y, verticesBottom.w, verticesTop.y, verticesTop.w, generatingDepthSearch_Right)
+    generateTriangles(left, verticesBottom.x, verticesBottom.z, verticesTop.x, verticesTop.z, generatingDepthSearch_Left)
+    generateTriangles(forward, verticesBottom.z, verticesBottom.w, verticesTop.z, verticesTop.w, generatingDepthSearch_Forward)
+    generateTriangles(back, verticesBottom.x, verticesBottom.y, verticesTop.x, verticesTop.y, generatingDepthSearch_Back)
 }

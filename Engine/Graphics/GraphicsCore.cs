@@ -398,6 +398,7 @@ namespace Engine
 
                 Transform transform = volume.GameObject.Transform;
                 pipeline.UpdateUniform("modelViewProj", (Matrix4x4f)(camera.Proj * camera.GameObject.Transform.View * transform.Model));
+                pipeline.UpdateUniform("color", new Vector3f(0.5f, 0.5f, 1.0f));
 
                 pipeline.UploadUpdatedUniforms();
                 volume.RenderOctree();
@@ -415,6 +416,7 @@ namespace Engine
 
                 Transform transform = volume.GameObject.Transform;
                 pipeline.UpdateUniform("modelViewProj", (Matrix4x4f)(camera.Proj * camera.GameObject.Transform.View * transform.Model));
+                pipeline.UpdateUniform("color", new Vector3f(0.5f, 1.0f, 0.5f));
 
                 pipeline.UploadUpdatedUniforms();
                 volume.RenderTetrahedrons();
@@ -525,7 +527,7 @@ namespace Engine
             FlushAndSwapFrameBuffers(camera);
         }
 
-        private static void Flush()
+        public static void Flush()
         {
             CurrentDevice.ImmediateContext.Flush();
             CurrentDevice.ImmediateContext.End(synchQuery);

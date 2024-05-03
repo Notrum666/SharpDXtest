@@ -18,11 +18,11 @@ SerializableObjects:
   - dec4b28b0073421b89a63466ee06e19f
   - 5906581a3a934ada9a4ba011cb16f6f6
   Position:
-    y: -5
-    z: 3
+    y: -20
+    z: 55
   Rotation:
-    w: 0.984807753012208
-    x: -0.17364817766693033
+    w: 0.9396926207859084
+    x: -0.3420201433256687
   Scale:
     x: 1
     y: 1
@@ -476,7 +476,7 @@ SerializableObjects:
   instanceId: fb73d21bd4fa460f814142f3b3cdb6e8
   gameObject: b976b693c79646119acd05696ae44dac
   Position:
-    z: 10
+    z: 25
   Rotation:
     w: 1
   Scale:
@@ -490,9 +490,9 @@ SerializableObjects:
   size:
     x: 40
     y: 40
-    z: 20
+    z: 40
   lightDirection:
     z: -1
   scatteringCoef: 0.03
   showOctree: true
-  Subdivisions: 3
+  showTetrahedrons: true

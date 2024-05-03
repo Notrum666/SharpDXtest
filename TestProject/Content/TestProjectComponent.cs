@@ -29,10 +29,10 @@ namespace TestProject
         }
         public override void Update()
         {
-            if (Input.IsKeyPressed(System.Windows.Input.Key.R))
-            {
-                SceneManager.LoadSceneByPath(@"Scenes\TestScene.scene");
-            }
+            //if (Input.IsKeyPressed(System.Windows.Input.Key.R))
+            //{
+            //    SceneManager.LoadSceneByPath(@"Scenes\TestScene.scene");
+            //}
         }
     }
 }

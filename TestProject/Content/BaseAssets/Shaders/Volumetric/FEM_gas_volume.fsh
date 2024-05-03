@@ -85,6 +85,8 @@ float SampleDensity(float3 location)
     OctreeNode curLeaf = octree[0];
     while (true)
     {
+        if (curLeaf.tetrahedronsEnd - curLeaf.tetrahedronsStart > 0)
+            break;
         if (homogenous.z <= 0) // -z
         {
             homogenous.z = homogenous.z * 2.0f + 1.0f;
@@ -94,17 +96,13 @@ float SampleDensity(float3 location)
                 if (homogenous.x <= 0) // -x
                 {
                     homogenous.x = homogenous.x * 2.0f + 1.0f;
-                    if (curLeaf.subLeavesBottom.x < 0) // (-,-,-)
-                        break;
-                    curLeaf = octree[curLeaf.subLeavesBottom.x];
+                    curLeaf = octree[curLeaf.subLeavesBottom.x]; // (-,-,-)
                     continue;
                 }
                 else // +x
                 {
                     homogenous.x = homogenous.x * 2.0f - 1.0f;
-                    if (curLeaf.subLeavesBottom.y < 0)  // (+,-,-)
-                        break;
-                    curLeaf = octree[curLeaf.subLeavesBottom.y];
+                    curLeaf = octree[curLeaf.subLeavesBottom.y]; // (+,-,-)
                     continue;
                 }
             }
@@ -114,17 +112,13 @@ float SampleDensity(float3 location)
                 if (homogenous.x <= 0) // -x
                 {
                     homogenous.x = homogenous.x * 2.0f + 1.0f;
-                    if (curLeaf.subLeavesBottom.z < 0) // (-,+,-)
-                        break;
-                    curLeaf = octree[curLeaf.subLeavesBottom.z];
+                    curLeaf = octree[curLeaf.subLeavesBottom.z]; // (-,+,-)
                     continue;
                 }
                 else // +x
                 {
                     homogenous.x = homogenous.x * 2.0f - 1.0f;
-                    if (curLeaf.subLeavesBottom.w < 0)  // (+,+,-)
-                        break;
-                    curLeaf = octree[curLeaf.subLeavesBottom.w];
+                    curLeaf = octree[curLeaf.subLeavesBottom.w]; // (+,+,-)
                     continue;
                 }
             }
@@ -138,17 +132,13 @@ float SampleDensity(float3 location)
                 if (homogenous.x <= 0) // -x
                 {
                     homogenous.x = homogenous.x * 2.0f + 1.0f;
-                    if (curLeaf.subLeavesTop.x < 0) // (-,-,+)
-                        break;
-                    curLeaf = octree[curLeaf.subLeavesTop.x];
+                    curLeaf = octree[curLeaf.subLeavesTop.x]; // (-,-,+)
                     continue;
                 }
                 else // +x
                 {
                     homogenous.x = homogenous.x * 2.0f - 1.0f;
-                    if (curLeaf.subLeavesTop.y < 0)  // (+,-,+)
-                        break;
-                    curLeaf = octree[curLeaf.subLeavesTop.y];
+                    curLeaf = octree[curLeaf.subLeavesTop.y]; // (+,-,+)
                     continue;
                 }
             }
@@ -158,17 +148,13 @@ float SampleDensity(float3 location)
                 if (homogenous.x <= 0) // -x
                 {
                     homogenous.x = homogenous.x * 2.0f + 1.0f;
-                    if (curLeaf.subLeavesTop.z < 0) // (-,+,+)
-                        break;
-                    curLeaf = octree[curLeaf.subLeavesTop.z];
+                    curLeaf = octree[curLeaf.subLeavesTop.z]; // (-,+,+)
                     continue;
                 }
                 else // +x
                 {
                     homogenous.x = homogenous.x * 2.0f - 1.0f;
-                    if (curLeaf.subLeavesTop.w < 0)  // (+,+,+)
-                        break;
-                    curLeaf = octree[curLeaf.subLeavesTop.w];
+                    curLeaf = octree[curLeaf.subLeavesTop.w]; // (+,+,+)
                     continue;
                 }
             }

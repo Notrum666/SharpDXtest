@@ -53,22 +53,29 @@ vert_out main(uint id : SV_VertexID)
     int octant = id / 24;
     int index = id % 24;
     
-    int meshVertexIndex;
-    switch (pairs[index])
+    float3 pos = float3(0.0f, 0.0f, 0.0f);
+    
+    OctreeNode curNode = octree[octant];
+    if (curNode.tetrahedronsEnd - curNode.tetrahedronsStart > 0)
     {
-        case 0: meshVertexIndex = octree[octant].verticesBottom.x; break;
-        case 1: meshVertexIndex = octree[octant].verticesBottom.y; break;
-        case 2: meshVertexIndex = octree[octant].verticesBottom.z; break;
-        case 3: meshVertexIndex = octree[octant].verticesBottom.w; break;
-        case 4: meshVertexIndex = octree[octant].verticesTop.x; break;
-        case 5: meshVertexIndex = octree[octant].verticesTop.y; break;
-        case 6: meshVertexIndex = octree[octant].verticesTop.z; break;
-        case 7: meshVertexIndex = octree[octant].verticesTop.w; break;
-    };
+        int meshVertexIndex;
+        switch (pairs[index])
+        {
+            case 0: meshVertexIndex = octree[octant].verticesBottom.x; break;
+            case 1: meshVertexIndex = octree[octant].verticesBottom.y; break;
+            case 2: meshVertexIndex = octree[octant].verticesBottom.z; break;
+            case 3: meshVertexIndex = octree[octant].verticesBottom.w; break;
+            case 4: meshVertexIndex = octree[octant].verticesTop.x; break;
+            case 5: meshVertexIndex = octree[octant].verticesTop.y; break;
+            case 6: meshVertexIndex = octree[octant].verticesTop.z; break;
+            case 7: meshVertexIndex = octree[octant].verticesTop.w; break;
+        };
+        pos = meshVertices[meshVertexIndex].position;
+    }
     
 	vert_out res = (vert_out) 0;
 	
-    res.sv_pos = mul(float4(meshVertices[meshVertexIndex].position, 1.0f), modelViewProj);
+    res.sv_pos = mul(float4(pos, 1.0f), modelViewProj);
 	
 	return res;
 }
