@@ -1,5 +1,7 @@
 ﻿#define DENSITY_THRESHOLD 4.60517f
 #define TRANSMITTANCE_THRESHOLD 0.01f
+#define BASE_STEP 1.0f
+#define MAX_STEP 10.0f
 //#define TRAPEZOIDAL_INTEGRATION
 
 struct vert_in
@@ -295,13 +297,14 @@ float4 Raymarch(float3 location, float3 direction, float distance)
         float curOpticalDensity = curDensity * extinctionCoef;
 #endif
         
-        if (curOpticalDensity <= DENSITY_THRESHOLD)
+        //if (curOpticalDensity <= DENSITY_THRESHOLD)
+        if (curOpticalDensity > 0.0f)
         {
             float curTransmittance = exp(-curOpticalDensity * step);
             
             transmittanceApprox *= curTransmittance;
         
-            float outT = GetOutT(location, invNegLightDir);
+            //float outT = GetOutT(location, invNegLightDir);
             
             float3 inScattering = ambientLight; // no light
             //float3 inScattering = ambientLight + lightInScattering * RaymarchLight(location, negLightDir, outT, curDensity); // light
@@ -312,6 +315,8 @@ float4 Raymarch(float3 location, float3 direction, float distance)
         
             radianceApprox += transmittanceApprox * currentRadiance * step;
         }
+        
+        //step = curDensity > 0.01f ? BASE_STEP : min(MAX_STEP, step * 2.0f);
     } while (curStep < distance && transmittanceApprox >= TRANSMITTANCE_THRESHOLD);
     
     return float4(radianceApprox, 1.0f - transmittanceApprox);

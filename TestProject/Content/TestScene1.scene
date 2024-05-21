@@ -18,11 +18,11 @@ SerializableObjects:
   - dec4b28b0073421b89a63466ee06e19f
   - 5906581a3a934ada9a4ba011cb16f6f6
   Position:
-    y: -20
-    z: 55
+    y: -75
+    z: 20
   Rotation:
-    w: 0.9396926207859084
-    x: -0.3420201433256687
+    w: 0.9659258262890683
+    x: 0.25881904510252074
   Scale:
     x: 1
     y: 1
@@ -38,8 +38,8 @@ SerializableObjects:
   makeCurrentOnStart: true
   fov: 1.5707963267948966
   aspect: 1.8271028037383177
-  near: 0.001
-  far: 500
+  near: 0.02
+  far: 1000
 - !EditorCameraController
   instanceId: cbdc012266f74dbaaefe736dbca0e57a
   gameObject: 64188becf7b044f0b30c6552b6b29fef
@@ -476,7 +476,7 @@ SerializableObjects:
   instanceId: fb73d21bd4fa460f814142f3b3cdb6e8
   gameObject: b976b693c79646119acd05696ae44dac
   Position:
-    z: 25
+    z: 50
   Rotation:
     w: 1
   Scale:
@@ -488,11 +488,11 @@ SerializableObjects:
   gameObject: b976b693c79646119acd05696ae44dac
   localEnabled: true
   size:
-    x: 40
-    y: 40
-    z: 40
+    x: 100
+    y: 100
+    z: 100
   lightDirection:
     z: -1
   scatteringCoef: 0.03
-  showOctree: true
-  showTetrahedrons: true
+  render: true
+  projectilePrefab: e571a139e1aa4a45bd98c42e38df49c8

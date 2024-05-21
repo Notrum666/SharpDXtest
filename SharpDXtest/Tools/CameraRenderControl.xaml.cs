@@ -148,8 +148,8 @@ namespace Editor
             editorCamera.AddComponent<EditorCameraController>();
 
             Camera camera = editorCamera.AddComponent<Camera>();
-            camera.Near = 0.001;
-            camera.Far = 500;
+            camera.Near = 0.05;
+            camera.Far = 1000;
 
             return camera;
         }

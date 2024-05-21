@@ -1,0 +1,14 @@
+ImporterVersion: 3
+Guid: 6e229453af85438a88d6c0b74da90aa2
+SubAssets:
+  ? Item1: Engine.AssetsData.MaterialData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: DefaultMaterial
+  : d2446f1affda4b0d81a86874423c7cf9
+ExportedAssets:
+  ? Item1: Engine.AssetsData.SkeletonData, Engine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    Item2: skeleton
+  : cfc33c80d7b0449c9d85a8d499a1b2b8
+ImportSettings: !ModelImportSettings
+  SkeletonOverride: cfc33c80d7b0449c9d85a8d499a1b2b8
+  MeshMaterialsOverride:
+    Icosphere_Icosphere_0: d2446f1affda4b0d81a86874423c7cf9

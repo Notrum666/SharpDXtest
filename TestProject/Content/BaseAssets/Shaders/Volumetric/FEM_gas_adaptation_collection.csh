@@ -1,6 +1,7 @@
 ﻿#define THREADS_X 32
 #define THREADS_Y 32
 #define THREADS_TOTAL THREADS_X * THREADS_Y
+#define MAX_SUBDIVISIONS 7
 
 struct OctreeNode
 {
@@ -37,7 +38,9 @@ RWStructuredBuffer<int> octreeUnsubdivisionList : register(u4);
 
 float breakpointFunc(float x)
 {
-    return 4.0f / (5.99f - x) - 0.5f;
+    //return 4.0f / (5.99f - x) - 0.5f;
+    float res = sqrt(0.5f * MAX_SUBDIVISIONS / (MAX_SUBDIVISIONS - x + 0.001f) - 0.45f);
+    return res > 0.0f ? res : 1.#INF;
 }
 
 #define checkMinMaxForOctant(octant) \
@@ -80,8 +83,8 @@ void main(uint3 groupID : SV_GroupID, uint groupIndex : SV_GroupIndex)
         parent = octree[parent].parent;
     }
     
-    if (depth >= 6)
-        return;
+    //if (depth >= 6)
+    //    return;
     
     float breakpoint = breakpointFunc(depth);
     

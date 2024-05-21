@@ -37,12 +37,14 @@ MeshVertex createVertex(float3 position)
 {
     MeshVertex vertex = (MeshVertex) 0;
     vertex.position = position;
-    float3 homogenous = position / volumeHalfSize;
+    //float3 homogenous = position / volumeHalfSize;
     //float3 r = homogenous - float3(1.0f, 1.0f, 1.0f);
     //vertex.density = dot(r, r) <= 1.0f ? 2.0f : 0.0f; //pow(homogenous.x * 0.5f + 0.5f, 4.0f);
     vertex.density = 0.0f;
-    vertex.velocity = float3(-1.0f, -1.0f, -1.0f) * 5.0f + float3(0.0f, 10.0f, 4.0f) * (-homogenous.x * 0.5f + 0.5f);
-    vertex.velocity *= 4.0f;
+    vertex.nextDensity = 0.0f;
+    vertex.velocity = float3(0.0f, 0.0f, 0.0f);
+    //vertex.velocity = float3(-1.0f, -1.0f, -1.0f) * 5.0f + float3(0.0f, 10.0f, 4.0f) * (-homogenous.x * 0.5f + 0.5f);
+    //vertex.velocity *= 4.0f;
     return vertex;
 }
 

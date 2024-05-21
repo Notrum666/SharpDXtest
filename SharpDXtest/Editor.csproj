@@ -38,7 +38,9 @@
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\DISABLED_FEM_gas_vertices_generation.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\DISABLED_FEM_gas_vertices_inheritance.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_adaptation_collection.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_adaptation_subdivide_all.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_allocation_array_initialization.csh" />
+		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_fields_initialization.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_find_tetrahedrons_shift_location.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_flip_vertices_data.csh" />
 		<None Remove="Resources\BaseAssets\Shaders\Volumetric\FEM_gas_listed_retetrahedralization.csh" />
@@ -77,7 +79,7 @@
 		<ProjectReference Include="..\LinearAlgebra\LinearAlgebra.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Lib.Harmony" Version="2.2.2" />
+		<PackageReference Include="Lib.Harmony" Version="2.3.3" />
 		<PackageReference Include="Microsoft.Build.Locator" Version="1.6.10" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.9.0-2.final" />
 		<PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="4.9.0-2.final" />

@@ -1,9 +1,13 @@
-﻿using System.IO;
+﻿using System.Collections;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Windows.Documents;
 
 using Assimp;
+
+using Engine.Assets;
 
 using LinearAlgebra;
 
@@ -16,6 +20,8 @@ namespace Engine.BaseAssets.Components
 {
     public class FEMGasVolume : GasVolume
     {
+        [SerializedField]
+        private bool render = false;
         [SerializedField]
         private bool showOctree = false;
         [SerializedField]
@@ -92,7 +98,15 @@ namespace Engine.BaseAssets.Components
         private Shader shiftTetrahedronsShader;
         private Shader shiftOctantsTetrahedronsShader;
 
+        private Shader subdivideAllShader;
+
         private Shader scaleVerticesShader;
+
+        private Shader fieldsInitializationShader;
+
+        [SerializedField]
+        private Prefab projectilePrefab;
+        private System.Collections.Generic.List<GameObject> projectiles = new System.Collections.Generic.List<GameObject>();
 
         protected override void OnInitialized()
         {
@@ -127,7 +141,11 @@ namespace Engine.BaseAssets.Components
             shiftTetrahedronsShader = AssetsManager.LoadAssetAtPath<Shader>(@"BaseAssets\Shaders\Volumetric\FEM_gas_shift_tetrahedrons.csh");
             shiftOctantsTetrahedronsShader = AssetsManager.LoadAssetAtPath<Shader>(@"BaseAssets\Shaders\Volumetric\FEM_gas_shift_octants_tetrahedrons.csh");
 
+            subdivideAllShader = AssetsManager.LoadAssetAtPath<Shader>(@"BaseAssets\Shaders\Volumetric\FEM_gas_adaptation_subdivide_all.csh");
+
             scaleVerticesShader = AssetsManager.LoadAssetAtPath<Shader>(@"BaseAssets\Shaders\Volumetric\FEM_gas_scale_vertices.csh");
+
+            fieldsInitializationShader = AssetsManager.LoadAssetAtPath<Shader>(@"BaseAssets\Shaders\Volumetric\FEM_gas_fields_initialization.csh");
 
             #endregion
 
@@ -182,7 +200,7 @@ namespace Engine.BaseAssets.Components
             #endregion
             #region mesh vertices
 
-            meshVerticesPoolSize = 1 << 20; // 20
+            meshVerticesPoolSize = 1 << 22; // 20
 
             int meshVertexSize = Marshal.SizeOf(typeof(MeshVertex));
             meshVerticesPool = new Buffer(GraphicsCore.CurrentDevice, meshVertexSize * meshVerticesPoolSize,
@@ -283,7 +301,7 @@ namespace Engine.BaseAssets.Components
 
             counterRetrieveBuffer = new Buffer(GraphicsCore.CurrentDevice, sizeof(uint), ResourceUsage.Staging, BindFlags.None, CpuAccessFlags.Read, ResourceOptionFlags.None, 0);
 
-            operationListsSize = octreePoolSize >> 2;
+            operationListsSize = octreePoolSize;
 
             octreeSubdivisionList = new Buffer(GraphicsCore.CurrentDevice, operationListsSize * sizeof(int),
                 ResourceUsage.Default, BindFlags.UnorderedAccess,
@@ -355,7 +373,68 @@ namespace Engine.BaseAssets.Components
 
             InitVolume();
 
+            SubdivideAll();
+            SubdivideAll();
+            SubdivideAll();
+            //SubdivideAll();
+
+            InitFields();
+
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0, null, null, null, null, null);
+        }
+
+        public override void Start()
+        {
+            if (projectilePrefab is null)
+                return;
+            Coroutine.Start(ObjSpawner);
+        }
+
+        private IEnumerator ObjSpawner()
+        {
+            System.Random rand = new System.Random();
+            for (int i = 0; i < 4; i++)
+            {
+                yield return new WaitForSeconds(2.0f);
+
+                GameObject obj = projectilePrefab.Instantiate();
+                obj.Transform.LocalScale = new LinearAlgebra.Vector3(4.0, 4.0, 4.0);
+                obj.Transform.Position = GameObject.Transform.Position + new LinearAlgebra.Vector3((rand.NextDouble() * 0.6 - 0.3) * size.x,
+                                                                                                   (rand.NextDouble() * 0.6 - 0.3) * size.y,
+                                                                                                   size.z * 0.7);
+                double theta = rand.NextDouble() * System.Math.PI * 2.0;
+                double psi = rand.NextDouble() * System.Math.PI / 180.0 * 20.0;
+                obj.GetComponent<Rigidbody>().Velocity = new LinearAlgebra.Vector3(System.Math.Sin(theta) * System.Math.Sin(psi),
+                                                                                   System.Math.Cos(theta) * System.Math.Sin(psi),
+                                                                                   -System.Math.Cos(psi)) * 25.0;
+
+                projectiles.Add(obj);
+            }
+        }
+
+        private void CollectAllOctantsForSubdivision()
+        {
+            subdivideAllShader.Use();
+            GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0,
+                octreePoolUAV, octreeSubdivisionListUAV);
+            GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(octreePoolSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
+        }
+
+        private void SubdivideAll()
+        {
+            ResetOperationLists();
+            CollectAllOctantsForSubdivision();
+
+            SubdivideCollectedOctants();
+            GenerateVerticesForSubdividedOctants();
+            CollectSubdividedOctantsForRetetrahedralization();
+            RetetrahedralizeListedOctants();
+
+            //ResetTetrahedronsShiftLocation();
+            //FindTetrahedronsShiftLocation();
+            //ShiftTetrahedrons();
+            //ShiftOctantsTetrahedrons();
         }
 
         private void InitVertices()
@@ -381,6 +460,18 @@ namespace Engine.BaseAssets.Components
             octreeInitShader.UploadUpdatedUniforms();
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(octreePoolSize / 1024, 1, 1);
             curSize = size;
+        }
+
+        private void InitFields()
+        {
+            fieldsInitializationShader.Use();
+            GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, meshVerticesPoolUAV);
+
+            Vector3f halfSize = Size * 0.5f;
+            fieldsInitializationShader.UpdateUniform("invHalfSize", (Vector3f)(1.0f / halfSize));
+            fieldsInitializationShader.UploadUpdatedUniforms();
+
+            GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(meshVerticesPoolSize / 1024, 1, 1);
         }
 
         private void InitAllocationArray(UnorderedAccessView array, int size)
@@ -444,6 +535,7 @@ namespace Engine.BaseAssets.Components
             Tetrahedralize();
         }
 
+        //[ProfileMe]
         private void ResetOperationLists()
         {
             operationListInitializationShader.Use();
@@ -453,8 +545,10 @@ namespace Engine.BaseAssets.Components
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(operationListsSize / 1024, 1, 1);
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessView(0, toRetetrahedralizeListUAV, 0);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(octreePoolSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void ResetTetrahedronsShiftLocation()
         {
             DataStream stream;
@@ -462,24 +556,30 @@ namespace Engine.BaseAssets.Components
             stream.Write<int>(0);
             stream.Write<int>(0);
             GraphicsCore.CurrentDevice.ImmediateContext.UnmapSubresource(tetrahedronsShiftLocation, 0);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void CollectAdaptationLists()
         {
             adaptationCollectionShader.Use();
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0,
                 octreePoolUAV, tetrahedronsPoolUAV, meshVerticesPoolUAV, octreeSubdivisionListUAV, octreeUnsubdivisionListUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(octreePoolSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void SubdivideCollectedOctants()
         {
             subdivisionOctantsShader.Use();
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0,
                 octreePoolUAV, freeOctantsListUAV, octreeSubdivisionListUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(operationListsSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void GenerateVerticesForSubdividedOctants()
         {
             subdivisionVerticesShader.Use();
@@ -489,40 +589,50 @@ namespace Engine.BaseAssets.Components
                 octreePoolUAV, tetrahedronsPoolUAV, meshVerticesPoolUAV, freeMeshVerticesListUAV, octreeSubdivisionListUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(operationListsSize / 1024, 1, 1);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(operationListsSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void CollectSubdividedOctantsForRetetrahedralization()
         {
             subdivisionRetetrahedralizationCollectionShader.Use();
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0,
                 octreePoolUAV, tetrahedronsPoolUAV, octreeSubdivisionListUAV, toRetetrahedralizeListUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(operationListsSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void CollectUnsubdividedOctantsForRetetrahedralization()
         {
             unsubdivisionRetetrahedralizationCollectionShader.Use();
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0,
                 octreePoolUAV, octreeUnsubdivisionListUAV, toRetetrahedralizeListUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(operationListsSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void RetetrahedralizeListedOctants()
         {
             listedRetetrahedralizationShader.Use();
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0,
                 octreePoolUAV, tetrahedronsPoolUAV, tetrahedronsCounterUAV, meshVerticesPoolUAV, toRetetrahedralizeListUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(octreePoolSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void UnsubdivideCollectedOctants()
         {
             unsubdivisionOctantsShader.Use();
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0,
                 octreePoolUAV, freeOctantsListUAV, tetrahedronsPoolUAV, meshVerticesPoolUAV, freeMeshVerticesListUAV, octreeUnsubdivisionListUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(operationListsSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void FindTetrahedronsShiftLocation()
         {
             findTetrahedronsShiftLocationShader.Use();
@@ -530,8 +640,10 @@ namespace Engine.BaseAssets.Components
                 tetrahedronsPoolUAV, tetrahedronsCounterUAV, tetrahedronsShiftLocationUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(tetrahedronsPoolSize / 1024, 1, 1);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(tetrahedronsPoolSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void ShiftTetrahedrons()
         {
             int tetrahedronsCount = RetrieveCounterBufferValue(tetrahedronsCounter);
@@ -554,16 +666,20 @@ namespace Engine.BaseAssets.Components
                 shiftTetrahedronsShader.UploadUpdatedUniforms();
                 GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(1, 1, 1);
             }
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void ShiftOctantsTetrahedrons()
         {
             shiftOctantsTetrahedronsShader.Use();
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0,
                 octreePoolUAV, tetrahedronsCounterUAV, tetrahedronsShiftLocationUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(octreePoolSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void Adapt(bool subdivision)
         {
             ResetOperationLists();
@@ -586,15 +702,17 @@ namespace Engine.BaseAssets.Components
             FindTetrahedronsShiftLocation();
             ShiftTetrahedrons();
             ShiftOctantsTetrahedrons();
+            //GraphicsCore.Flush();
 
-            int freeOctantsLeft = RetrieveCounter(freeOctantsListUAV);
-            if (freeOctantsLeft < octreePoolSize * 0.2)
-                Logger.Log(LogType.Info, "Number of octants is dangerously high!");
-            int freeVerticesLeft = RetrieveCounter(freeMeshVerticesListUAV);
-            if (freeVerticesLeft < meshVerticesPoolSize * 0.2)
-                Logger.Log(LogType.Info, "Number of vertices is dangerously high!");
+            //float octantsCount = octreePoolSize - RetrieveCounter(freeOctantsListUAV);
+            //float verticesCount = meshVerticesPoolSize - RetrieveCounter(freeMeshVerticesListUAV);
+            //float tetrahedronsCount = RetrieveCounterBufferValue(tetrahedronsCounter);
+            //Logger.Log(LogType.Info, $"octants: {(int)(100.0 * octantsCount / (float)octreePoolSize)}%; " +
+            //                         $"vertices: {(int)(100.0 * verticesCount/ (float)meshVerticesPoolSize)}%; " +
+            //                         $"tetrahedrons: {(int)(100.0 * tetrahedronsCount / (float)tetrahedronsPoolSize)}%");
         }
 
+        //[ProfileMe]
         private void CalculateNextDensities()
         {
             simulationStepShader.Use();
@@ -604,34 +722,70 @@ namespace Engine.BaseAssets.Components
             Vector3f halfSize = Size * 0.5f;
             simulationStepShader.UpdateUniform("invHalfSize", (Vector3f)(1.0f / halfSize));
             simulationStepShader.UpdateUniform("deltaTime", (float)Time.FixedDeltaTime);
-            simulationStepShader.UpdateUniform("sourceEnabled", Input.IsKeyDown(System.Windows.Input.Key.F));
+            int i = 0;
+            foreach (GameObject obj in projectiles.Skip(System.Math.Max(0, projectiles.Count() - 4)))
+            {
+                simulationStepShader.UpdateUniform($"sources[{i}].pos", (Vector3f)GameObject.Transform.View.TransformPoint(obj.Transform.Position));
+                simulationStepShader.UpdateUniform($"sources[{i}].radius", 6.5f);
+                simulationStepShader.UpdateUniform($"sources[{i}].velocity", (Vector3f)obj.GetComponent<Rigidbody>().Velocity);
+                i++;
+            }
+            //simulationStepShader.UpdateUniform("sourceEnabled", Input.IsKeyDown(System.Windows.Input.Key.F));
             simulationStepShader.UploadUpdatedUniforms();
 
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(meshVerticesPoolSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void SetNextDensities()
         {
             flipVerticesDataShader.Use();
             GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0, meshVerticesPoolUAV);
             GraphicsCore.CurrentDevice.ImmediateContext.Dispatch(meshVerticesPoolSize / 1024, 1, 1);
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
         private void SimulateStep()
         {
             CalculateNextDensities();
             SetNextDensities();
+            //GraphicsCore.Flush();
         }
 
+        //[ProfileMe]
+        private void fixedUpdate()
+        {
+            SimulateStep();
+            Adapt(subdivide);
+            subdivide = !subdivide;
+            GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0, null, null, null, null, null);
+            //GraphicsCore.Flush();
+        }
+
+        //private double startTime = 0.0f;
         private bool subdivide = true;
         public override void FixedUpdate()
         {
             try
             {
-                SimulateStep();
-                Adapt(subdivide);
-                subdivide = !subdivide;
-                GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0, null, null, null, null, null);
+                //GraphicsCore.Flush();
+                //SimulateStep();
+                //Adapt(subdivide);
+                //subdivide = !subdivide;
+                //GraphicsCore.CurrentDevice.ImmediateContext.ComputeShader.SetUnorderedAccessViews(0, null, null, null, null, null);
+                fixedUpdate();
+
+                //if (Input.IsKeyPressed(System.Windows.Input.Key.G))
+                //if (startTime == 0.0f)
+                //    startTime = Time.TotalTime;
+                //if (Time.TotalTime - startTime >= 5.0f)
+                //{
+                //    ProfilerCore.DumpProfiler(@"C:\ProfilingResults", @"Results.json");
+                //    Logger.Log(LogType.Info, "Profiling results saved!");
+                //    startTime = double.PositiveInfinity;
+                //}
             }
             catch (System.Exception e)
             {
@@ -642,6 +796,9 @@ namespace Engine.BaseAssets.Components
         public override void Render()
         {
             RescaleVolume();
+
+            if (!render)
+                return;
 
             GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(0, octreePoolSRV);
             GraphicsCore.CurrentDevice.ImmediateContext.PixelShader.SetShaderResource(1, meshVerticesPoolSRV);
@@ -656,7 +813,7 @@ namespace Engine.BaseAssets.Components
             GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(0, octreePoolSRV);
             GraphicsCore.CurrentDevice.ImmediateContext.VertexShader.SetShaderResource(1, meshVerticesPoolSRV);
 
-            GraphicsCore.CurrentDevice.ImmediateContext.Draw((octreePoolSize >> 5) * 24, 0);
+            GraphicsCore.CurrentDevice.ImmediateContext.Draw((octreePoolSize >> 3) * 24, 0);
         }
 
         internal void RenderTetrahedrons()

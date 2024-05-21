@@ -2,8 +2,6 @@
 #define THREADS_Y 32
 #define THREADS_TOTAL THREADS_X * THREADS_Y
 
-#define UINT_MAX 4294967295U
-
 struct OctreeNode
 {
     // (-,-,-), (+,-,-), (-,+,-), (+,+,-)
@@ -31,6 +29,13 @@ struct Tetrahedron
     float4x4 alphaMatrix;
 };
 
+struct Source
+{
+    float3 pos;
+    float radius;
+    float3 velocity;
+};
+
 cbuffer volumeData
 {
     float3 invHalfSize;
@@ -39,7 +44,8 @@ cbuffer volumeData
 cbuffer simulationData
 {
     float deltaTime;
-    bool sourceEnabled;
+    //bool sourceEnabled;
+    Source sources[4];
 };
 
 RWStructuredBuffer<OctreeNode> octree : register(u0);
@@ -171,16 +177,35 @@ void main(uint3 groupID : SV_GroupID, uint groupIndex : SV_GroupIndex)
     if (curVertex.density < 0.0f) // ignore non-existing vertices
         return;
     
-    float radius = 3.0f;
-    float3 origin = 1.0f / invHalfSize - float3(radius, radius, radius) * 0.5f;
-    float3 r = curVertex.position - origin;
-    float source = 5.0f * deltaTime * (dot(r, r) <= (radius * radius)) * sourceEnabled;
-    curVertex.nextDensity = SampleDensity(curVertex.position - curVertex.velocity * deltaTime);
-    if (curVertex.nextDensity < 0)
-        curVertex.nextDensity = curVertex.density;
-    curVertex.nextDensity += source;
-    curVertex.nextDensity *= 0.99;
+    curVertex.velocity *= 0.96f;
+    for (int i = 0; i < 4; i++)
+        if (any(sources[i].velocity > 0.0f) && distance(curVertex.position, sources[i].pos) <= sources[i].radius)
+            curVertex.velocity = sources[i].velocity;
+    
+    //float radius = 3.0f;
+    //float3 origin = 1.0f / invHalfSize - float3(radius, radius, radius) * 0.5f;
+    //float3 r = curVertex.position - origin;
+    curVertex.nextDensity = curVertex.density;
+    if (any(abs(curVertex.velocity) >= 1e-3f))
+    {
+        curVertex.nextDensity = SampleDensity(curVertex.position - curVertex.velocity * deltaTime);
+        if (curVertex.nextDensity < 0.0f)
+            curVertex.nextDensity = curVertex.density * 0.95f;
+    }
+    //curVertex.nextDensity += deltaTime * sourceEnabled * (curVertex.position.z * invHalfSize.z >= 0.75f) * 5.0f;
+    //curVertex.nextDensity *= 0.99f;
     curVertex.nextDensity = max(curVertex.nextDensity, 0.0f);
+    
+    //curVertex.nextDensity = (length(curVertex.position.xy) <= 10.0f) * 5.0f;
+    
+    //float3 densities = sqrt(max(0.0f, cos(2.0f * curVertex.position / 1000.0f)));
+    //curVertex.nextDensity = densities.x * densities.y * densities.z * (abs(curVertex.position.z) <= 1000.0f);
+    //float3 pos = float3((curVertex.position.xy + 5000.0f) % 5000.0f, curVertex.position.z) / 1000.0f;
+    //curVertex.nextDensity = 0.005f * (length(pos - float3(2.5f, 2.5f, 0.0f)) <= 1.8f);
+    
+    //float3 pos = float3(curVertex.position.xy, curVertex.position.z * 3.0f);
+    //curVertex.nextDensity = 0.05f * (length(pos) <= 200.0f);
+    
     //curVertex.nextDensity = all(abs(curVertex.position - curVertex.position.x) < 0.1) * 2.0f * sourceEnabled;
     
     meshVertices[index] = curVertex;

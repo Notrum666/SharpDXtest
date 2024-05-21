@@ -1,0 +1,39 @@
+﻿!PrefabData
+SerializableObjects:
+- !GameObject
+  instanceId: 68f90e333dcd4eaa948a3d9c5c3308e6
+  name: Proj
+  localEnabled: true
+  transform: c67a6c07e28847628670db2a8a1ffa19
+  components:
+  - c67a6c07e28847628670db2a8a1ffa19
+  - d5b1a1352d0845d7adaa8571c168fd3b
+  - ef8e1bced8b24713b13f2f02c1362032
+- !Transform
+  instanceId: c67a6c07e28847628670db2a8a1ffa19
+  gameObject: 68f90e333dcd4eaa948a3d9c5c3308e6
+  Rotation:
+    w: 1
+  Scale:
+    x: 1
+    y: 1
+    z: 1
+- !MeshComponent
+  instanceId: d5b1a1352d0845d7adaa8571c168fd3b
+  gameObject: 68f90e333dcd4eaa948a3d9c5c3308e6
+  localEnabled: true
+  model: 6e229453af85438a88d6c0b74da90aa2
+  materials:
+  - d2446f1affda4b0d81a86874423c7cf9
+- !Rigidbody
+  instanceId: ef8e1bced8b24713b13f2f02c1362032
+  gameObject: 68f90e333dcd4eaa948a3d9c5c3308e6
+  localEnabled: true
+  mass: 1
+  inertiaTensor:
+    x: 1
+    y: 1
+    z: 1
+  angularDrag: 0.05
+  ignoreGravity: true
+rootTransformIndex: 1

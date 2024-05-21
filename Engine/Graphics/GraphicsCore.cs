@@ -70,8 +70,12 @@ namespace Engine
         {
             nint HWND = new WindowInteropHelper(Application.Current.MainWindow!).Handle;
 
+            DeviceCreationFlags flags = DeviceCreationFlags.BgraSupport;
+#if DEBUG
+            flags |= DeviceCreationFlags.Debug;
+#endif
 #if !GraphicsDebugging
-            CurrentDevice = new Device(DriverType.Hardware, DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport, FeatureLevel.Level_11_0);
+            CurrentDevice = new Device(DriverType.Hardware, flags, FeatureLevel.Level_11_0);
 #else
             Device device;
             Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.Debug | DeviceCreationFlags.BgraSupport,
@@ -212,6 +216,7 @@ namespace Engine
             GeometryPass(camera);
             LightingPass(camera);
             DebugPass(camera);
+            Flush();
             VolumetricPass(camera);
             PrePostProcessingPass(camera);
             GammaCorrectionPass(camera);
@@ -425,6 +430,7 @@ namespace Engine
             CurrentDevice.ImmediateContext.InputAssembler.PrimitiveTopology = PrimitiveTopology.TriangleList;
         }
 
+        [ProfileMe]
         private static void VolumetricPass(Camera camera)
         {
             CurrentDevice.ImmediateContext.Rasterizer.State = frontCullingRasterizer;
@@ -484,6 +490,8 @@ namespace Engine
                 pipeline.UploadUpdatedUniforms();
                 volume.Render();
             }
+
+            Flush();
         }
 
         private static void PrePostProcessingPass(Camera camera)
