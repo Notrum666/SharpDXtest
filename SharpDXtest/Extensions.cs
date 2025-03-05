@@ -60,31 +60,44 @@ namespace Editor
             return null;
         }
 
-        public static IEnumerable<Type> GetInheritancHierarchy(this Type type)
+        /// <summary>
+        /// builds full sequence of ancestor types (not including interfaces) for specified type, including the specified type
+        /// </summary>
+        public static IEnumerable<Type> GetInheritanceHierarchy(this Type type)
         {
             for (Type current = type; current != null; current = current.BaseType)
                 yield return current;
         }
 
+        /// <summary>
+        /// Calculates distance in hierarchy from this type to specified type, for example: object->class A->class B, distance(B,A)=2, distance(B,object)=3.
+        /// Returns -1 if specified ancestor not found in hierarchy
+        /// </summary>
         public static int GetInheritanceDistance<TOther>(this Type type)
         {
-            IEnumerable<Type> hierarchy = type.GetInheritancHierarchy().TakeWhile(t => t != typeof(TOther));
-            if (hierarchy.Last() != type)
-                return -1;
-            return hierarchy.Count();
+            return GetInheritanceDistance(type, typeof(TOther));
         }
 
+        /// <summary>
+        /// Calculates distance in hierarchy from this type to specified type, for example: object->class A->class B, distance(B,A)=2, distance(B,object)=3.
+        /// Returns -1 if specified ancestor not found in hierarchy
+        /// </summary>
         public static int GetInheritanceDistance(this Type type, Type other)
         {
-            IEnumerable<Type> hierarchy = type.GetInheritancHierarchy().TakeWhile(t => t != other).ToList();
-            if (hierarchy.Any() && hierarchy.Last().BaseType != other)
+            List<Type> hierarchy = type.GetInheritanceHierarchy().TakeWhile(t => StripGeneric(t) != other).ToList();
+            if (hierarchy.Count > 0 && hierarchy.Last().BaseType is null)
                 return -1;
-            return hierarchy.Count();
+            return hierarchy.Count;
         }
 
         public static bool IsSameOrSubclassOf(this Type type, Type baseType)
         {
             return type.IsSubclassOf(baseType) || type == baseType;
+        }
+
+        private static Type StripGeneric(Type t)
+        {
+            return t.IsGenericType ? t.GetGenericTypeDefinition() : t;
         }
     }
 }
